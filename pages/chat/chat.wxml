@@ -1,40 +1,84 @@
-<!-- chat.wxml -->
-<view class="container">
-  <view class="chat-container">
-    <!-- 聊天消息列表 -->
-    <scroll-view class="message-list" scroll-y>
-      <!-- 系统消息 -->
-      <view class="message system-message">
-        <text>你好!我是你的AI智能体,你可以问我关于最近训练情况和后续怎么改正的建议。</text>
+<!-- chat.wxml - 现代化UI设计 -->
+<view class="page-wrapper">
+  <view class="page-header-gradient"></view>
+  
+  <view class="container">
+    <!-- 页面标题 -->
+    <view class="chat-header">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">←</text>
+      </view>
+      <view class="header-info">
+        <view class="header-title">AI智能体</view>
+        <view class="header-subtitle">你的篮球训练助手</view>
+      </view>
+      <view class="ai-status">
+        <view class="status-dot"></view>
+        <text class="status-text">在线</text>
+      </view>
+    </view>
+
+    <view class="chat-container">
+      <!-- 聊天消息列表 -->
+      <scroll-view class="message-list" scroll-y scroll-into-view="{{ scrollToView }}" scroll-with-animation>
+        <!-- AI欢迎消息 -->
+        <view class="message system-message" id="msg-0">
+          <text>你好!我是你的AI智能体,你可以问我关于最近训练情况和后续怎么改正的建议。</text>
+        </view>
+        
+        <!-- AI消息 -->
+        <view class="message ai-message" wx:for="{{ messages }}" wx:key="index" id="msg-{{index + 1}}">
+          <view wx:if="{{ item.role === 'assistant' }}" class="message-content ai-content">
+            <view class="ai-avatar-small">🤖</view>
+            <text>{{ item.content }}</text>
+          </view>
+          <!-- 用户消息 -->
+          <view wx:if="{{ item.role === 'user' }}" class="message-content user-content">
+            <text>{{ item.content }}</text>
+            <view class="user-avatar-small">👤</view>
+          </view>
+        </view>
+        
+        <!-- 加载中状态 -->
+        <view class="loading" wx:if="{{ isLoading }}" id="msg-loading">
+          <view class="loading-dots">
+            <view class="dot"></view>
+            <view class="dot"></view>
+            <view class="dot"></view>
+          </view>
+          <text>AI正在思考</text>
+        </view>
+      </scroll-view>
+      
+      <!-- 快捷问题建议 -->
+      <view class="quick-suggestions" wx:if="{{!isLoading && messages.length === 0}}">
+        <view class="suggestion-title">试试问我：</view>
+        <view class="suggestion-item" bindtap="sendQuickQuestion" data-question="我的投篮需要怎么改进？">
+          我的投篮需要怎么改进？
+        </view>
+        <view class="suggestion-item" bindtap="sendQuickQuestion" data-question="如何提高体能？">
+          如何提高体能？
+        </view>
+        <view class="suggestion-item" bindtap="sendQuickQuestion" data-question="今天的训练表现怎么样？">
+          今天的训练表现怎么样？
+        </view>
       </view>
       
-      <!-- AI消息 -->
-      <view class="message ai-message" wx:for="{{ messages }}" wx:key="index">
-        <view wx:if="{{ item.role === 'assistant' }}" class="message-content ai-content">
-          <text>{{ item.content }}</text>
-        </view>
-        <!-- 用户消息 -->
-        <view wx:if="{{ item.role === 'user' }}" class="message-content user-content">
-          <text>{{ item.content }}</text>
-        </view>
+      <!-- 输入区域 -->
+      <view class="input-area">
+        <input 
+          placeholder="输入你的问题..." 
+          class="input" 
+          bindinput="onInputChange" 
+          value="{{ userInput }}" 
+          bindconfirm="sendMessage"
+          placeholder-class="input-placeholder"
+        ></input>
+        <button class="send-button {{userInput ? 'active' : ''}}" bindtap="sendMessage">
+          <text wx:if="{{!userInput}}">💬</text>
+          <text wx:else>发送</text>
+        </button>
       </view>
-      
-      <!-- 加载中状态 -->
-      <view class="loading" wx:if="{{ isLoading }}">
-        <text>AI正在思考...</text>
-      </view>
-    </scroll-view>
-    
-    <!-- 输入区域 -->
-    <view class="input-area">
-      <input 
-        placeholder="输入你的问题..." 
-        class="input" 
-        bindinput="onInputChange" 
-        value="{{ userInput }}" 
-        bindconfirm="sendMessage"
-      ></input>
-      <button class="send-button" bindtap="sendMessage">发送</button>
     </view>
   </view>
 </view>

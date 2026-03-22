@@ -1,6 +1,6 @@
 /* profile-edit.wxss */
 .container {
-  background-color: #121212;
+  background-color: #f5f5f5;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -11,11 +11,12 @@
   align-items: center;
   justify-content: space-between;
   padding: 20rpx;
-  background-color: #1E1E1E;
-  border-bottom: 1rpx solid #333;
+  background-color: #ffffff;
+  border-bottom: 1rpx solid #e0e0e0;
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 
 .back-button {
@@ -25,34 +26,36 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background-color: #2A2A2A;
+  background-color: #f0f0f0;
 }
 
 .back-button text {
   font-size: 32rpx;
-  color: #fff;
+  color: #333;
   font-weight: bold;
 }
 
 .title {
   font-size: 32rpx;
   font-weight: 500;
-  color: #fff;
+  color: #333;
 }
 
 .save-button {
   padding: 12rpx 30rpx;
-  background-color: #7A41FF;
+  background-color: #44ceff;
   border-radius: 12rpx;
   color: white;
   font-size: 28rpx;
   font-weight: 500;
   transition: all 0.3s ease;
+  box-shadow: 0 4rpx 12rpx rgba(68, 206, 255, 0.4);
 }
 
 .save-button:hover {
-  background-color: #6A31EF;
+  background-color: #34bfff;
   transform: translateY(-2rpx);
+  box-shadow: 0 6rpx 16rpx rgba(68, 206, 255, 0.5);
 }
 
 .form-container {
@@ -68,43 +71,45 @@
 
 .label {
   font-size: 28rpx;
-  color: #fff;
+  color: #333;
   margin-bottom: 15rpx;
   font-weight: 500;
 }
 
 .input {
   padding: 20rpx;
-  border: 1rpx solid #333;
+  border: 1rpx solid #e0e0e0;
   border-radius: 12rpx;
   font-size: 28rpx;
-  background-color: #2A2A2A;
-  color: #fff;
+  background-color: #ffffff;
+  color: #333;
   transition: all 0.3s ease;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 
 .input:focus {
-  border-color: #7A41FF;
-  box-shadow: 0 0 0 2rpx rgba(122, 65, 255, 0.2);
+  border-color: #44ceff;
+  box-shadow: 0 0 0 2rpx rgba(68, 206, 255, 0.2);
 }
 
 .picker {
   padding: 20rpx;
-  border: 1rpx solid #333;
+  border: 1rpx solid #e0e0e0;
   border-radius: 12rpx;
-  background-color: #2A2A2A;
-  color: #fff;
+  background-color: #ffffff;
+  color: #333;
   font-size: 28rpx;
   transition: all 0.3s ease;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 
 .picker:hover {
-  border-color: #7A41FF;
-  box-shadow: 0 0 0 2rpx rgba(122, 65, 255, 0.2);
+  border-color: #44ceff;
+  box-shadow: 0 0 0 2rpx rgba(68, 206, 255, 0.2);
 }
 
 .picker-content {
-  color: #fff;
+  color: #333;
 }
 
 .avatar-upload {
@@ -118,20 +123,21 @@
   width: 160rpx;
   height: 160rpx;
   border-radius: 50%;
-  background-color: #2A2A2A;
-  border: 2rpx solid #333;
+  background-color: #f0f0f0;
+  border: 2rpx solid #e0e0e0;
   transition: all 0.3s ease;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 
 .avatar:hover {
-  border-color: #7A41FF;
-  box-shadow: 0 0 0 2rpx rgba(122, 65, 255, 0.2);
+  border-color: #44ceff;
+  box-shadow: 0 0 0 2rpx rgba(68, 206, 255, 0.2);
   transform: scale(1.05);
 }
 
 .upload-text {
   font-size: 24rpx;
-  color: #7A41FF;
+  color: #44ceff;
   cursor: pointer;
   transition: all 0.3s ease;
 }

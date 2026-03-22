@@ -44,5 +44,11 @@ Page({
     })
   },
 
+  // 跳转到AI助手
+  goToChat() {
+    wx.navigateTo({
+      url: '/pages/chat/chat'
+    })
+  }
 
 })

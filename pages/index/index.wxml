@@ -1,61 +1,76 @@
-<!-- index.wxml -->
-<view class="container">
-  <!-- 顶部导航区 -->
-  <view class="top-nav">
-    <view class="title">篮球数据</view>
-  </view>
+<!-- index.wxml - 现代化UI设计 -->
+<view class="page-wrapper">
+  <!-- 页面顶部渐变装饰 -->
+  <view class="page-header-gradient"></view>
 
-  <!-- 创作入口区 -->
-  <view class="create-entry">
-    <view class="camera-icon">📷</view>
-    <view class="create-info">
-      <view class="create-title">开始创作</view>
-      <view class="create-subtitle">自动记录你的精彩瞬间</view>
+  <view class="container slide-up">
+    <!-- 顶部导航区 -->
+    <view class="top-nav">
+      <view class="user-greeting">
+        <view class="greeting-text">你好！👋</view>
+        <view class="date-text">{{ currentDate }}</view>
+      </view>
+      <view class="app-title">
+        <text class="title-main">昇梦</text>
+        <text class="title-highlight">AI</text>
+      </view>
+    </view>
+
+    <!-- 创作入口区 -->
+    <view class="create-entry card" bindtap="goToCreate">
+      <view class="camera-icon pulse-animation">🏀</view>
+      <view class="create-info">
+        <view class="create-title">AI创作</view>
+        <view class="create-subtitle">自动记录你的精彩瞬间</view>
+      </view>
+      <view class="create-arrow">→</view>
+    </view>
+
+    <!-- 生涯数据区 -->
+    <view class="section">
+      <view class="section-title">生涯数据</view>
+      <view class="stats-grid">
+        <view class="stat-item card-gradient" wx:for="{{ statsData }}" wx:key="id">
+          <view class="stat-icon">{{ item.icon }}</view>
+          <view class="stat-value gradient-text">{{ item.value }}</view>
+          <view class="stat-label">{{ item.label }}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 创作集锦区 -->
+    <view class="section">
+      <view class="video-tabs tab-bar">
+        <view class="tab-item {{ activeVideoTab === 'collection' ? 'active' : '' }}" bindtap="switchVideoTab" data-tab="collection">
+          创作集锦
+        </view>
+        <view class="tab-item {{ activeVideoTab === 'featured' ? 'active' : '' }}" bindtap="switchVideoTab" data-tab="featured">
+          精选视频
+        </view>
+      </view>
+      <view wx:if="{{ activeVideoTab === 'collection' }}" class="no-videos card {{ contentAnimClass }}">
+        <view class="film-icon float-animation">🎬</view>
+        <view class="no-data-text">暂无创作集锦</view>
+        <view class="hint-text">点击上方"开始创作"录制你的第一个精彩瞬间</view>
+      </view>
+      <view wx:else class="no-videos card {{ contentAnimClass }}">
+        <view class="film-icon float-animation">🎬</view>
+        <view class="no-data-text">暂无精选视频</view>
+        <view class="hint-text">敬请期待精彩内容</view>
+      </view>
+    </view>
+
+    <!-- 快捷功能区 -->
+    <view class="section">
+      <view class="section-title">快捷功能</view>
+      <view class="quick-actions">
+        <view class="action-item card" wx:for="{{ quickActions }}" wx:key="id" bindtap="handleAction" data-action="{{ item.action }}">
+          <view class="action-icon" style="background: {{ item.bgColor }}">
+            {{ item.icon }}
+          </view>
+          <view class="action-label">{{ item.label }}</view>
+        </view>
+      </view>
     </view>
   </view>
-
-  <!-- 生涯数据区 -->
-  <view class="section">
-    <view class="section-title">生涯数据</view>
-    <view class="stats-grid">
-      <view class="stat-item">
-        <view class="stat-value purple">{{ careerStats.points }}</view>
-        <view class="stat-label">得分</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value">{{ careerStats.rebounds }}</view>
-        <view class="stat-label">篮板</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value">{{ careerStats.assists }}</view>
-        <view class="stat-label">助攻</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value">{{ careerStats.shootingPercentage }}%</view>
-        <view class="stat-label">命中率</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value">{{ careerStats.totalGames }}</view>
-        <view class="stat-label">总场次</view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 创作集锦区 -->
-  <view class="section">
-    <view class="video-tabs">
-      <view class="tab-item {{ activeVideoTab === 'collection' ? 'active' : '' }}" bindtap="switchVideoTab" data-tab="collection">创作集锦</view>
-      <view class="tab-item {{ activeVideoTab === 'featured' ? 'active' : '' }}" bindtap="switchVideoTab" data-tab="featured">精选视频</view>
-    </view>
-    <view wx:if="{{ activeVideoTab === 'collection' }}" class="no-videos {{ contentAnimClass }}">
-      <view class="film-icon">🎬</view>
-      <view class="no-data-text">暂无创作集锦</view>
-    </view>
-    <view wx:else class="no-videos {{ contentAnimClass }}">
-      <view class="film-icon">🎬</view>
-      <view class="no-data-text">暂无精选视频</view>
-    </view>
-  </view>
-
-
 </view>

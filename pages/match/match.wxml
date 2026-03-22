@@ -1,64 +1,116 @@
-<!-- match.wxml -->
-<view class="container">
-  <!-- 搜索区 -->
-  <view class="search-box">
-    <input placeholder="请输入球队名称" class="search-input"></input>
-  </view>
+<!-- match.wxml - 现代化UI设计 -->
+<view class="page-wrapper">
+  <view class="page-header-gradient"></view>
+  
+  <view class="container slide-up">
+    <!-- 页面标题 -->
+    <view class="page-header">
+      <view class="page-title">赛事中心</view>
+      <view class="page-subtitle">查看和管理你的比赛</view>
+    </view>
 
-  <!-- 日期选择区 -->
-  <view class="date-section">
-    <view class="current-date">当前选择: {{ selectedDate }}</view>
-    <view class="date-list">
-      <view wx:for="{{ dateList }}" wx:key="index" class="date-item {{ item.isToday ? 'today' : '' }} {{ item.isSelected ? 'selected' : '' }}" bindtap="selectDate" data-date="{{ item.date }}">
-        <view class="date-week">{{ item.week }}</view>
-        <view class="date-day">{{ item.day }}</view>
-        <view class="date-month">{{ item.month }}</view>
+    <!-- 搜索区 -->
+    <view class="search-section">
+      <view class="search-box card">
+        <view class="search-icon">🔍</view>
+        <input placeholder="搜索球队名称..." class="search-input" placeholder-class="search-placeholder"></input>
       </view>
     </view>
-  </view>
 
-  <!-- 比赛列表区 -->
-  <view class="match-list">
-    <!-- 比赛卡片1 -->
-    <view class="match-card" bindtap="goToMatchDetail">
-      <view class="match-header">
-        <view class="match-time">16:30</view>
-        <view class="match-venue">场地1</view>
+    <!-- 日期选择区 -->
+    <view class="date-section">
+      <view class="section-header">
+        <view class="section-title">选择日期</view>
+        <view class="current-date">{{ selectedDate }}</view>
       </view>
-      <view class="match-status playing">比赛中</view>
-      <view class="match-teams">
-        <view class="team">
-          <view class="shield-icon">🛡️</view>
-          <view class="team-name">红队</view>
-        </view>
-        <view class="score">0:0</view>
-        <view class="team">
-          <view class="team-name">蓝队</view>
-          <view class="shield-icon">🛡️</view>
+      <view class="date-list">
+        <view wx:for="{{ dateList }}" wx:key="date" 
+              class="date-item card {{ item.isToday ? 'today' : '' }} {{ item.isSelected ? 'selected' : '' }}" 
+              bindtap="selectDate" data-date="{{ item.date }}">
+          <view class="date-week">{{ item.week }}</view>
+          <view class="date-day">{{ item.day }}</view>
+          <view class="date-month">{{ item.month }}</view>
         </view>
       </view>
     </view>
 
-    <!-- 比赛卡片2 -->
-    <view class="match-card" bindtap="goToMatchDetail">
-      <view class="match-header">
-        <view class="match-time">18:30</view>
-        <view class="match-venue">场地2</view>
+    <!-- 比赛列表区 -->
+    <view class="match-section">
+      <view class="section-header">
+        <view class="section-title">今日比赛</view>
+        <view class="match-count">2 场</view>
       </view>
-      <view class="match-status">未开始</view>
-      <view class="match-teams">
-        <view class="team">
-          <view class="shield-icon">🛡️</view>
-          <view class="team-name">A队</view>
+      
+      <view class="match-list">
+        <!-- 比赛卡片1 -->
+        <view class="match-card card" bindtap="goToMatchDetail">
+          <view class="match-status-badge playing">
+            <view class="status-dot"></view>
+            比赛中
+          </view>
+          
+          <view class="match-header">
+            <view class="match-time">
+              <text class="time-icon">⏰</text>
+              16:30
+            </view>
+            <view class="match-venue">
+              <text class="venue-icon">📍</text>
+              场地1
+            </view>
+          </view>
+          
+          <view class="match-teams">
+            <view class="team">
+              <view class="team-shield red">🛡️</view>
+              <view class="team-name">红队</view>
+            </view>
+            
+            <view class="score-box">
+              <view class="score">0 : 0</view>
+            </view>
+            
+            <view class="team">
+              <view class="team-name">蓝队</view>
+              <view class="team-shield blue">🛡️</view>
+            </view>
+          </view>
         </view>
-        <view class="score">0:0</view>
-        <view class="team">
-          <view class="team-name">B队</view>
-          <view class="shield-icon">🛡️</view>
+
+        <!-- 比赛卡片2 -->
+        <view class="match-card card" bindtap="goToMatchDetail">
+          <view class="match-status-badge upcoming">
+            未开始
+          </view>
+          
+          <view class="match-header">
+            <view class="match-time">
+              <text class="time-icon">⏰</text>
+              18:30
+            </view>
+            <view class="match-venue">
+              <text class="venue-icon">📍</text>
+              场地2
+            </view>
+          </view>
+          
+          <view class="match-teams">
+            <view class="team">
+              <view class="team-shield green">🛡️</view>
+              <view class="team-name">A队</view>
+            </view>
+            
+            <view class="score-box">
+              <view class="score">0 : 0</view>
+            </view>
+            
+            <view class="team">
+              <view class="team-name">B队</view>
+              <view class="team-shield orange">🛡️</view>
+            </view>
+          </view>
         </view>
       </view>
     </view>
   </view>
-
-
 </view>

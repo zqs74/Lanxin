@@ -1,44 +1,82 @@
-<!-- create.wxml -->
-<view class="container">
-  <!-- 视频预览区域 -->
-  <view class="video-preview">
-    <view class="preview-placeholder">视频预览</view>
-  </view>
+<!-- create.wxml - 现代化UI设计 -->
+<view class="page-wrapper">
+  <view class="page-header-gradient"></view>
+  
+  <view class="container slide-up">
+    <!-- 页面标题 -->
+    <view class="page-header">
+      <view class="page-title">AI创作</view>
+      <view class="page-subtitle">智能剪辑你的精彩瞬间</view>
+    </view>
 
-  <!-- 功能按钮 -->
-  <view class="action-buttons">
-    <button class="btn" bindtap="uploadLocalVideo">上传本地视频</button>
-    <button class="btn" bindtap="useCloudVideo">使用云端视频</button>
-  </view>
-
-  <!-- 精彩片段选择 -->
-  <view class="section">
-    <view class="section-title">精彩片段选择</view>
-    <view class="selected-tag">已选择</view>
-    <view class="clip-list">
-      <view wx:for="{{ clips }}" wx:key="index" class="clip-item" data-index="{{ index }}">
-        <checkbox value="{{ item.id }}" checked="{{ item.selected }}" bindchange="toggleClip"></checkbox>
-        <view class="clip-info">{{ item.description }}</view>
+    <!-- 视频预览区域 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">视频预览</view>
+        <view class="video-info-badge">
+          <text class="video-icon">📹</text>
+          选择视频
+        </view>
+      </view>
+      
+      <view class="video-preview card">
+        <view class="preview-placeholder">
+          <view class="preview-icon">🎬</view>
+          <view class="preview-text">点击上传或选择视频</view>
+          <view class="preview-hint">支持本地视频和云端视频</view>
+        </view>
       </view>
     </view>
-  </view>
 
-  <!-- 悬浮胶囊标签栏 -->
-  <t-tab-bar 
-    t-class="t-tab-bar" 
-    value="{{tabValue}}" 
-    shape="round" 
-    theme="tag" 
-    split="{{false}}" 
-    bindchange="onTabChange" 
-  > 
-    <t-tab-bar-item 
-      wx:for="{{tabList}}" 
-      wx:key="value" 
-      value="{{item.value}}" 
-      icon="{{item.icon}}" 
-      ariaLabel="{{item.ariaLabel}}" 
-    > 
-    </t-tab-bar-item> 
-  </t-tab-bar>
+    <!-- 功能按钮 -->
+    <view class="action-buttons">
+      <button class="btn btn-primary" bindtap="uploadLocalVideo">
+        <text class="btn-icon">💾</text>
+        上传本地视频
+      </button>
+      <button class="btn btn-success" bindtap="useCloudVideo">
+        <text class="btn-icon">☁️</text>
+        使用云端视频
+      </button>
+    </view>
+
+    <!-- 精彩片段选择 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">精彩片段选择</view>
+        <view class="selected-tag">
+          <text class="selected-icon">✓</text>
+          已选择 {{ selectedCount }} 个
+        </view>
+      </view>
+      
+      <view class="clip-list card">
+        <view wx:for="{{ clips }}" wx:key="id" 
+              class="clip-item {{ item.selected ? 'selected' : '' }}" 
+              bindtap="toggleClip" data-index="{{ index }}">
+          <view class="clip-checkbox">
+            <view class="checkbox-inner {{ item.selected ? 'checked' : '' }}">
+              <text wx:if="{{ item.selected }}" class="check-mark">✓</text>
+            </view>
+          </view>
+          <view class="clip-content">
+            <view class="clip-time">{{ item.time }}</view>
+            <view class="clip-description">{{ item.description }}</view>
+          </view>
+          <view class="clip-type-badge">
+            {{ item.type }}
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- AI生成按钮 -->
+    <view class="create-action-section">
+      <button class="btn btn-primary btn-large create-btn" bindtap="generateWithAI">
+        <text class="create-icon">✨</text>
+        AI智能生成集锦
+      </button>
+      <view class="create-hint">AI将自动剪辑最精彩的瞬间</view>
+    </view>
+  </view>
 </view>

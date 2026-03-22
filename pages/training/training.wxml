@@ -1,28 +1,66 @@
-<!-- training.wxml -->
-<view class="container">
-  <!-- AI智能体 -->
-  <view class="section">
-    <view class="section-title">AI智能体</view>
-    <view class="ai-container" bindtap="navigateToChat">
-      <view class="ai-greeting">你好!我是你的AI智能体,你可以问我关于最近训练情况和后续怎么改正的建议。</view>
-      <view class="ai-suggestions">
-        <view class="suggestion-item">加强投篮练习</view>
-        <view class="suggestion-item">增加体能训练</view>
-        <view class="suggestion-item">多看比赛录像</view>
+<!-- training.wxml - 现代化UI设计 -->
+<view class="page-wrapper">
+  <view class="page-header-gradient"></view>
+  
+  <view class="container slide-up">
+    <!-- 页面标题 -->
+    <view class="page-header">
+      <view class="page-title">训练中心</view>
+      <view class="page-subtitle">AI智能分析与技能提升</view>
+    </view>
+
+    <!-- AI智能体 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">AI智能体</view>
+        <view class="ai-badge">在线</view>
       </view>
-      <view class="enter-chat">
-        <text>点击进入聊天 →</text>
+      <view class="ai-container card" bindtap="navigateToChat">
+        <view class="ai-header">
+          <view class="ai-avatar pulse-animation">🤖</view>
+          <view class="ai-info">
+            <view class="ai-name">篮球训练助手</view>
+            <view class="ai-status">随时为你服务</view>
+          </view>
+        </view>
+        
+        <view class="ai-greeting">
+          你好!我是你的AI智能体,你可以问我关于最近训练情况和后续怎么改正的建议。
+        </view>
+        
+        <view class="ai-suggestions">
+          <view class="suggestion-item">
+            <view class="suggestion-icon">🎯</view>
+            加强投篮练习
+          </view>
+          <view class="suggestion-item">
+            <view class="suggestion-icon">💪</view>
+            增加体能训练
+          </view>
+          <view class="suggestion-item">
+            <view class="suggestion-icon">📺</view>
+            多看比赛录像
+          </view>
+        </view>
+        
+        <view class="enter-chat">
+          <view class="enter-btn btn-primary btn-small">
+            点击进入聊天
+            <text class="arrow">→</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 技能雷达图 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">技能雷达图</view>
+        <view class="radar-info">综合评分</view>
+      </view>
+      <view class="radar-container card" style="height: 714rpx; display: block; box-sizing: border-box">
+        <canvas canvas-id="radarChart" class="radar-chart" style="height: 721rpx; display: block; box-sizing: border-box; left: -30rpx; top: -30rpx; width: 703rpx; position: relative"></canvas>
       </view>
     </view>
   </view>
-
-  <!-- 技能雷达图 -->
-  <view class="section">
-    <view class="section-title">技能雷达图</view>
-    <view class="radar-container" style="height: 714rpx; display: block; box-sizing: border-box">
-      <canvas canvas-id="radarChart" class="radar-chart" style="height: 721rpx; display: block; box-sizing: border-box; left: -30rpx; top: -30rpx; width: 703rpx; position: relative"></canvas>
-    </view>
-  </view>
-
-
 </view>

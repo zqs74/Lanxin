@@ -1,8 +1,8 @@
 {
   "usingComponents": {},
   "navigationBarTitleText": "完善个人资料",
-  "navigationBarTextStyle": "white",
-  "navigationBarBackgroundColor": "#121212",
-  "backgroundColor": "#121212",
-  "backgroundTextStyle": "light"
+  "navigationBarTextStyle": "black",
+  "navigationBarBackgroundColor": "#f5f5f5",
+  "backgroundColor": "#f5f5f5",
+  "backgroundTextStyle": "dark"
 }

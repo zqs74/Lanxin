@@ -49,7 +49,6 @@ Page({
     // 调用OpenAI API
     this.callOpenAIAPI(message)
   },
-
   // 调用OpenAI API
   callOpenAIAPI(message) {
     const apiKey = '12ce65e7-4cfd-4385-bf8b-bb47898e0a61'

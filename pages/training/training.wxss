@@ -1,128 +1,222 @@
-/* training.wxss */
+/* training.wxss - 现代化UI设计 */
+.page-wrapper {
+  position: relative;
+  min-height: 100vh;
+}
+
 .container {
-  padding: 20rpx;
-  background-color: #121212;
+  padding: 20rpx 30rpx;
   min-height: 100vh;
   position: relative;
   z-index: 1;
 }
 
-.radar-container {
-  background-color: #1E1E1E;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
-  margin-bottom: 30rpx;
-  transition: all 0.3s ease;
+/* 页面标题 */
+.page-header {
+  margin-bottom: 40rpx;
+  padding-top: 20rpx;
 }
 
-.radar-container:hover {
-  transform: translateY(-2rpx);
-  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.4);
+.page-title {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: #1a1a1a;
+  margin-bottom: 8rpx;
 }
 
-.radar-chart {
-  width: 100%;
-  height: 400rpx;
+.page-subtitle {
+  font-size: 26rpx;
+  color: #666;
 }
 
+/* 通用section样式 */
+.section {
+  margin-bottom: 40rpx;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  position: relative;
+}
+
+.section-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -8rpx;
+  width: 48rpx;
+  height: 6rpx;
+  background: linear-gradient(90deg, #44ceff 0%, #59a8ff 100%);
+  border-radius: 3rpx;
+}
+
+.ai-badge {
+  padding: 8rpx 20rpx;
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  border-radius: 30rpx;
+  font-size: 20rpx;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(82, 196, 26, 0.3);
+}
+
+.radar-info {
+  font-size: 24rpx;
+  color: #666;
+  font-weight: 500;
+}
+
+/* AI容器 */
 .ai-container {
-  background-color: #1E1E1E;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
+  padding: 32rpx;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 
-.ai-container:hover {
-  transform: translateY(-2rpx);
-  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.4);
+.ai-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(68, 206, 255, 0.05) 0%, rgba(89, 168, 255, 0.03) 100%);
+  pointer-events: none;
+}
+
+.ai-header {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-bottom: 24rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.ai-avatar {
+  width: 88rpx;
+  height: 88rpx;
+  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
+  border-radius: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  box-shadow: 0 8rpx 24rpx rgba(68, 206, 255, 0.4);
+}
+
+.ai-info {
+  flex: 1;
+}
+
+.ai-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 4rpx;
+}
+
+.ai-status {
+  font-size: 24rpx;
+  color: #52c41a;
+  font-weight: 500;
 }
 
 .ai-greeting {
   font-size: 28rpx;
-  color: #fff;
-  line-height: 1.5;
-  margin-bottom: 20rpx;
+  color: #333;
+  line-height: 1.6;
+  margin-bottom: 24rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .ai-suggestions {
-  margin-bottom: 30rpx;
+  margin-bottom: 24rpx;
+  position: relative;
+  z-index: 1;
 }
 
 .suggestion-item {
-  background-color: rgba(122, 65, 255, 0.1);
-  padding: 20rpx;
-  border-radius: 12rpx;
-  margin-bottom: 15rpx;
-  font-size: 24rpx;
-  color: #7A41FF;
-  border: 1rpx solid rgba(122, 65, 255, 0.3);
-  transition: all 0.3s ease;
+  background: linear-gradient(135deg, rgba(68, 206, 255, 0.1) 0%, rgba(89, 168, 255, 0.08) 100%);
+  padding: 20rpx 24rpx;
+  border-radius: 16rpx;
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+  color: #44ceff;
+  font-weight: 500;
+  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .suggestion-item:hover {
-  background-color: rgba(122, 65, 255, 0.2);
-  transform: translateX(10rpx);
+  background: linear-gradient(135deg, rgba(68, 206, 255, 0.15) 0%, rgba(89, 168, 255, 0.12) 100%);
+  transform: translateX(8rpx);
+  border-color: rgba(68, 206, 255, 0.4);
 }
 
-.ai-input-area {
-  display: flex;
-  gap: 15rpx;
-}
-
-.ai-input {
-  flex: 1;
-  padding: 20rpx;
-  border: 1rpx solid #333;
-  border-radius: 12rpx;
+.suggestion-icon {
   font-size: 28rpx;
-  background-color: #2A2A2A;
-  color: #fff;
-  transition: all 0.3s ease;
-}
-
-.ai-input:focus {
-  border-color: #7A41FF;
-  box-shadow: 0 0 0 2rpx rgba(122, 65, 255, 0.2);
-}
-
-.ai-submit {
-  padding: 0 40rpx;
-  background-color: #7A41FF;
-  color: white;
-  border-radius: 12rpx;
-  font-size: 28rpx;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  box-shadow: 0 4rpx 12rpx rgba(122, 65, 255, 0.4);
-}
-
-.ai-container {
-  background-color: #1E1E1E;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.ai-container:hover {
-  transform: translateY(-2rpx);
-  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.4);
 }
 
 .enter-chat {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  margin-top: 20rpx;
-  color: #7A41FF;
-  font-size: 24rpx;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
 }
 
-.enter-chat:hover {
-  transform: translateX(10rpx);
+.enter-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.arrow {
+  font-size: 24rpx;
+  font-weight: bold;
+  transition: transform 0.3s ease;
+}
+
+.enter-btn:hover .arrow {
+  transform: translateX(4rpx);
+}
+
+/* 雷达图容器 */
+.radar-container {
+  padding: 32rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.radar-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(68, 206, 255, 0.03) 0%, rgba(89, 168, 255, 0.02) 100%);
+  pointer-events: none;
+}
+
+.radar-chart {
+  width: 100%;
+  height: 400rpx;
+  position: relative;
+  z-index: 1;
 }

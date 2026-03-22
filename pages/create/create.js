@@ -1,12 +1,13 @@
-// create.js
+// create.js - 现代化UI
 Page({
   data: {
     clips: [
-      { id: 1, description: '第一节08:24 两分跳投命中', selected: false },
-      { id: 2, description: '第二节12:35 三分远投命中', selected: false },
-      { id: 3, description: '第三节05:42 抢断后快攻', selected: false },
-      { id: 4, description: '第四节01:18 压哨三分', selected: false }
+      { id: 1, time: '第一节 08:24', description: '两分跳投命中', type: '跳投', selected: false },
+      { id: 2, time: '第二节 12:35', description: '三分远投命中', type: '三分', selected: false },
+      { id: 3, time: '第三节 05:42', description: '抢断后快攻', type: '快攻', selected: false },
+      { id: 4, time: '第四节 01:18', description: '压哨三分', type: '关键球', selected: false }
     ],
+    selectedCount: 0,
     tabValue: 'create',
     tabList: [
       { value: 'home', icon: 'home', ariaLabel: '首页' },
@@ -24,7 +25,10 @@ Page({
       camera: 'back',
       success: (res) => {
         console.log('选择视频成功', res)
-        // 后续可调用wx.uploadFile上传视频到服务器
+        wx.showToast({
+          title: '视频已选择',
+          icon: 'success'
+        })
       },
       fail: (err) => {
         console.log('选择视频失败', err)
@@ -34,8 +38,11 @@ Page({
 
   // 使用云端视频
   useCloudVideo() {
-    // 这里可以实现从云端选择视频的逻辑
     console.log('使用云端视频')
+    wx.showToast({
+      title: '功能开发中',
+      icon: 'none'
+    })
   },
 
   // 切换片段选择状态
@@ -43,7 +50,28 @@ Page({
     const index = e.currentTarget.dataset.index
     const clips = [...this.data.clips]
     clips[index].selected = !clips[index].selected
-    this.setData({ clips })
+    
+    const selectedCount = clips.filter(clip => clip.selected).length
+    
+    this.setData({ 
+      clips, 
+      selectedCount 
+    })
+  },
+
+  // AI智能生成
+  generateWithAI() {
+    wx.showLoading({
+      title: 'AI生成中...'
+    })
+    
+    setTimeout(() => {
+      wx.hideLoading()
+      wx.showToast({
+        title: '生成成功！',
+        icon: 'success'
+      })
+    }, 2000)
   },
 
   // 标签切换事件
@@ -51,7 +79,6 @@ Page({
     const value = e.detail.value
     this.setData({ tabValue: value })
     
-    // 根据选择的标签跳转到对应页面
     switch (value) {
       case 'home':
         wx.switchTab({ url: '/pages/index/index' })

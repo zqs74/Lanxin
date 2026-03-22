@@ -1,193 +1,221 @@
-<!-- match-detail.wxml -->
-<view class="container" style="width: 712rpx; height: 236rpx; display: block; box-sizing: content-box">
-  <!-- 顶部导航栏 -->
-  <view class="top-nav" style="width: 712rpx; display: block; box-sizing: border-box; left: 0rpx; top: 0rpx">
-    <view class="nav-header" style="width: 712rpx; height: 135rpx; display: flex; box-sizing: border-box">
-      <view class="back-btn" bindtap="goBack">
-        <view class="back-arrow"></view>
-      </view>
-      <view class="nav-title" style="position: relative; left: 0rpx; top: 21rpx">比赛概况</view>
-      <view class="nav-placeholder"></view>
-    </view>
-    <view class="score-container">
-      <view class="team-info">
-        <view class="shield-icon"></view>
-        <view class="team-name">红队</view>
-      </view>
-      <view class="score-info">
-        <view class="score">{{score.redTeam}} - {{score.blueTeam}}</view>
-        <view class="game-time">{{score.time}}</view>
-      </view>
-      <view class="team-info right">
-        <view class="team-name">蓝队</view>
-        <view class="shield-icon"></view>
-      </view>
-    </view>
-  </view>
-
-  <!-- 视频预览区 -->
-  <view class="video-preview" bindtap="playVideo">
-    <view class="video-bg" style="position: absolute; left: 0rpx; top: 2rpx; height: 213rpx; display: block; box-sizing: border-box"></view>
-    <view class="play-btn" style="width: 58rpx; height: 67rpx; display: block; box-sizing: border-box"></view>
-    <view class="video-title">比赛集锦视频</view>
-  </view>
-
-  <!-- 标签切换栏 -->
-  <view class="tab-bar">
-    <view 
-      class="tab-item {{activeTab === 0 ? 'active' : ''}}" 
-      data-index="0" 
-      bindtap="switchTab"
-    >
-      <view class="tab-text">比赛数据</view>
-      <view class="tab-indicator"></view>
-    </view>
-    <view 
-      class="tab-item {{activeTab === 1 ? 'active' : ''}}" 
-      data-index="1" 
-      bindtap="switchTab"
-    >
-      <view class="tab-text">个人集锦</view>
-      <view class="tab-indicator"></view>
-    </view>
-    <view 
-      class="tab-item {{activeTab === 2 ? 'active' : ''}}" 
-      data-index="2" 
-      bindtap="switchTab"
-    >
-      <view class="tab-text">个人分析</view>
-      <view class="tab-indicator"></view>
-    </view>
-  </view>
-
-  <!-- 标签内容区 -->
-  <view class="tab-content">
-    <!-- 比赛数据标签 -->
-    <view wx:if="{{activeTab === 0}}" class="tab-panel">
-      <!-- 比分走势 -->
-      <view class="section">
-        <view class="section-title">比分走势</view>
-        <view class="chart-container">
-          <canvas canvas-id="scoreTrendCanvas" class="chart" style="height: 194rpx; display: block; box-sizing: border-box; left: 0rpx; top: 0rpx"></canvas>
+<!-- match-detail.wxml - 现代化UI设计 -->
+<view class="page-wrapper">
+  <view class="page-header-gradient"></view>
+  
+  <view class="container slide-up">
+    <!-- 顶部导航栏 -->
+    <view class="top-nav">
+      <view class="nav-header">
+        <view class="back-btn" bindtap="goBack">
+          <text class="back-icon">←</text>
         </view>
-        <view class="legend">
-          <view class="legend-item">
-            <view class="legend-color red"></view>
-            <view class="legend-text">红队</view>
-          </view>
-          <view class="legend-item">
-            <view class="legend-color blue"></view>
-            <view class="legend-text">蓝队</view>
-          </view>
-        </view>
+        <view class="nav-title">比赛概况</view>
+        <view class="nav-placeholder"></view>
       </view>
-
-      <!-- 比赛表现 -->
-      <view class="section">
-        <view class="section-title">比赛表现</view>
-        <view class="performance-table">
-          <view wx:for="{{performance}}" wx:key="index" class="performance-row">
-            <view class="performance-data red">{{item.redTeam}}</view>
-            <view class="performance-label">{{item.name}}</view>
-            <view class="performance-data blue">{{item.blueTeam}}</view>
-          </view>
+      
+      <!-- 比分显示 -->
+      <view class="score-container glass-effect">
+        <view class="team-info">
+          <view class="team-logo red">🔴</view>
+          <view class="team-name">红队</view>
         </view>
-      </view>
-
-      <!-- 最佳球员 -->
-      <view class="section">
-        <view class="section-title">最佳球员</view>
-        <view class="player-card">
-          <view class="player-avatar">
-            <view class="avatar-icon"></view>
-          </view>
-          <view class="player-info">
-            <view class="player-name">最佳球员</view>
-            <view class="player-team">红队</view>
-          </view>
-          <view class="player-stats">
-            <view class="stats-main">28分 8篮板 4助攻</view>
-            <view class="stats-sub">全场效率值最高</view>
-          </view>
+        <view class="score-info">
+          <view class="score">{{score.redTeam}} - {{score.blueTeam}}</view>
+          <view class="game-time">{{score.time}}</view>
+        </view>
+        <view class="team-info right">
+          <view class="team-name">蓝队</view>
+          <view class="team-logo blue">🔵</view>
         </view>
       </view>
     </view>
 
-    <!-- 个人集锦标签 -->
-    <view wx:if="{{activeTab === 1}}" class="tab-panel">
-      <view class="section">
-        <view class="hint-text">可以选择多个投篮的片段来剪辑</view>
-        <view class="clip-stats">
-          <view class="stats-left">
-            <text class="stats-text">已选择</text>
-            <text class="stats-number">{{selectedCount}}</text>
-            <text class="stats-text">个片段</text>
-          </view>
-          <view 
-            class="edit-btn {{selectedCount > 0 ? 'active' : ''}}" 
-            bindtap="startEdit"
-          >
-            开始剪辑
-          </view>
+    <!-- 视频预览区 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">比赛集锦</view>
+        <view class="video-badge">
+          <text class="video-icon">🎬</text>
+          精彩瞬间
         </view>
-        <view class="clip-list">
-          <view 
-            wx:for="{{clips}}" 
-            wx:key="item.id" 
-            class="clip-item"
-            data-index="{{index}}"
-          >
-            <view 
-              class="checkbox {{item.selected ? 'checked' : ''}}" 
-              bindtap="selectClip"
-            >
-              <view wx:if="{{item.selected}}" class="check-icon"></view>
+      </view>
+      <view class="video-preview card" bindtap="playVideo">
+        <view class="video-bg-gradient"></view>
+        <view class="play-btn-wrapper">
+          <view class="play-btn"></view>
+        </view>
+        <view class="video-title-overlay">
+          <text class="video-title-text">点击播放比赛集锦</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 标签切换栏 -->
+    <view class="tab-bar glass-effect">
+      <view 
+        class="tab-item {{activeTab === 0 ? 'active' : ''}}" 
+        data-index="0" 
+        bindtap="switchTab"
+      >
+        <text class="tab-text">比赛数据</text>
+        <view class="tab-indicator"></view>
+      </view>
+      <view 
+        class="tab-item {{activeTab === 1 ? 'active' : ''}}" 
+        data-index="1" 
+        bindtap="switchTab"
+      >
+        <text class="tab-text">个人集锦</text>
+        <view class="tab-indicator"></view>
+      </view>
+      <view 
+        class="tab-item {{activeTab === 2 ? 'active' : ''}}" 
+        data-index="2" 
+        bindtap="switchTab"
+      >
+        <text class="tab-text">个人分析</text>
+        <view class="tab-indicator"></view>
+      </view>
+    </view>
+
+    <!-- 标签内容区 -->
+    <view class="tab-content">
+      <!-- 比赛数据标签 -->
+      <view wx:if="{{activeTab === 0}}" class="tab-panel fade-in">
+        <!-- 比分走势 -->
+        <view class="section">
+          <view class="section-title">比分走势</view>
+          <view class="chart-container card">
+            <canvas canvas-id="scoreTrendCanvas" class="chart"></canvas>
+          </view>
+          <view class="legend">
+            <view class="legend-item">
+              <view class="legend-color red"></view>
+              <text class="legend-text">红队</text>
             </view>
-            <view class="clip-info">
-              <view class="film-icon"></view>
-              <view class="clip-details">
-                <view class="clip-time">{{item.time}}</view>
-                <view class="clip-type">{{item.type}} {{item.result}}</view>
+            <view class="legend-item">
+              <view class="legend-color blue"></view>
+              <text class="legend-text">蓝队</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 比赛表现 -->
+        <view class="section">
+          <view class="section-title">比赛表现</view>
+          <view class="performance-table card">
+            <view wx:for="{{performance}}" wx:key="index" class="performance-row">
+              <view class="performance-data red">{{item.redTeam}}</view>
+              <view class="performance-label">{{item.name}}</view>
+              <view class="performance-data blue">{{item.blueTeam}}</view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 最佳球员 -->
+        <view class="section">
+          <view class="section-title">最佳球员</view>
+          <view class="player-card card">
+            <view class="player-avatar">
+              <text class="avatar-emoji">⭐</text>
+            </view>
+            <view class="player-info">
+              <view class="player-name">最佳球员</view>
+              <view class="player-team">红队</view>
+            </view>
+            <view class="player-stats">
+              <view class="stats-main">28分 8篮板 4助攻</view>
+              <view class="stats-sub">全场效率值最高</view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 个人集锦标签 -->
+      <view wx:if="{{activeTab === 1}}" class="tab-panel fade-in">
+        <view class="section">
+          <view class="hint-card glass-effect">
+            <text class="hint-icon">💡</text>
+            <text class="hint-text">可以选择多个投篮的片段来剪辑</text>
+          </view>
+          <view class="clip-stats">
+            <view class="stats-left">
+              <text class="stats-text">已选择</text>
+              <text class="stats-number">{{selectedCount}}</text>
+              <text class="stats-text">个片段</text>
+            </view>
+            <button 
+              class="btn {{selectedCount > 0 ? 'btn-primary' : 'btn-ghost'}}" 
+              bindtap="startEdit"
+            >
+              <text class="btn-icon">✂️</text>
+              开始剪辑
+            </button>
+          </view>
+          <view class="clip-list">
+            <view 
+              wx:for="{{clips}}" 
+              wx:key="item.id" 
+              class="clip-item card {{item.selected ? 'selected' : ''}}"
+              data-index="{{index}}"
+            >
+              <view 
+                class="checkbox {{item.selected ? 'checked' : ''}}" 
+                bindtap="selectClip"
+              >
+                <text wx:if="{{item.selected}}" class="check-mark">✓</text>
+              </view>
+              <view class="clip-info">
+                <view class="film-icon">🎞️</view>
+                <view class="clip-details">
+                  <view class="clip-time">{{item.time}}</view>
+                  <view class="clip-type">{{item.type}} {{item.result}}</view>
+                </view>
+              </view>
+              <view class="play-icon-wrapper" bindtap="playClip">
+                <view class="play-icon-small"></view>
               </view>
             </view>
-            <view class="play-icon"></view>
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 个人分析标签 -->
-    <view wx:if="{{activeTab === 2}}" class="tab-panel">
-      <!-- 单场表现总结 -->
-      <view class="section">
-        <view class="section-title">单场表现总结</view>
-        <view class="summary-card">
-          <view class="summary-text">
-            本场比赛你共出场XX分钟，取得XX分XX篮板XX助攻的数据。
-          </view>
-          <view class="summary-text">
-            优势点：本场比赛在篮下终结效率较高，前场篮板拼抢积极。
-          </view>
-          <view class="summary-text">
-            提升点：外线三分投射稳定性不足，防守端的协防意识有待加强。
           </view>
         </view>
       </view>
 
-      <!-- 整场进球投篮数直方图 -->
-      <view class="section">
-        <view class="section-title">整场进球投篮数直方图</view>
-        <view class="chart-container">
-          <canvas canvas-id="shootingChartCanvas" class="chart"></canvas>
-        </view>
-        <view class="legend">
-          <view class="legend-item">
-            <view class="legend-color made"></view>
-            <view class="legend-text">进球数</view>
+      <!-- 个人分析标签 -->
+      <view wx:if="{{activeTab === 2}}" class="tab-panel fade-in">
+        <!-- 单场表现总结 -->
+        <view class="section">
+          <view class="section-title">单场表现总结</view>
+          <view class="summary-card card">
+            <view class="summary-item">
+              <text class="summary-icon">📊</text>
+              <text class="summary-text">本场比赛你共出场XX分钟，取得XX分XX篮板XX助攻的数据。</text>
+            </view>
+            <view class="summary-item">
+              <text class="summary-icon">✅</text>
+              <text class="summary-text">优势点：本场比赛在篮下终结效率较高，前场篮板拼抢积极。</text>
+            </view>
+            <view class="summary-item">
+              <text class="summary-icon">📈</text>
+              <text class="summary-text">提升点：外线三分投射稳定性不足，防守端的协防意识有待加强。</text>
+            </view>
           </view>
-          <view class="legend-item">
-            <view class="legend-color attempted"></view>
-            <view class="legend-text">出手数</view>
+        </view>
+
+        <!-- 整场进球投篮数直方图 -->
+        <view class="section">
+          <view class="section-title">投篮分布</view>
+          <view class="chart-container card">
+            <canvas canvas-id="shootingChartCanvas" class="chart"></canvas>
+          </view>
+          <view class="legend">
+            <view class="legend-item">
+              <view class="legend-color made"></view>
+              <text class="legend-text">进球数</text>
+            </view>
+            <view class="legend-item">
+              <view class="legend-color attempted"></view>
+              <text class="legend-text">出手数</text>
+            </view>
           </view>
         </view>
       </view>

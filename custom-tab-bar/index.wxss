@@ -19,17 +19,17 @@
   --td-tab-bar-text-font-size: 24rpx;
 
   /* 颜色配置 */
-  --td-tab-bar-color: #e0e0e0;
-  --td-tab-bar-active-color: #9B6CFF;
-  --td-tab-bar-hover-bg-color: rgba(122, 65, 255, 0.3);
+  --td-tab-bar-color: #666666;
+  --td-tab-bar-active-color: #44ceff;
+  --td-tab-bar-hover-bg-color: rgba(68, 206, 255, 0.3);
 
   /* 背景和毛玻璃效果 */
-  --td-tab-bar-bg-color: rgba(35, 35, 35, 0.7); 
+  --td-tab-bar-bg-color: rgba(255, 255, 255, 0.7); 
   --td-tab-bar-border-color: transparent;
   -webkit-backdrop-filter: blur(35rpx);
   backdrop-filter: blur(35rpx);
-  box-shadow: 0 4rpx 30rpx rgba(0, 0, 0, 0.8);
-  border: 1rpx solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4rpx 30rpx rgba(0, 0, 0, 0.1);
+  border: 1rpx solid rgba(0, 0, 0, 0.12);
 
   /* 定位和布局（写死，不允许改变） */
   position: fixed !important;

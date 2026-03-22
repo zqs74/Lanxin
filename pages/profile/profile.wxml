@@ -1,45 +1,106 @@
-<!-- profile.wxml -->
-<view class="container">
-  <!-- 个人资料 -->
-  <view class="section">
-    <view class="profile-header">
-      <view class="name">{{ profile.name }}</view>
-      <button class="edit-btn" bindtap="editProfile" style="position: relative; left: 98rpx; top: -3rpx">点击完善个人资料</button>
+<!-- profile.wxml - 现代化UI设计 -->
+<view class="page-wrapper">
+  <view class="page-header-gradient"></view>
+  
+  <view class="container slide-up">
+    <!-- 页面标题 -->
+    <view class="page-header">
+      <view class="page-title">个人中心</view>
+      <view class="page-subtitle">管理你的个人信息</view>
     </view>
-    <view class="profile-info">
-      <view class="info-item">
-        <view class="info-label">位置</view>
-        <view class="info-value">{{ profile.position }}</view>
+
+    <!-- 个人资料卡片 -->
+    <view class="section">
+      <view class="profile-card card">
+        <view class="profile-header">
+          <view class="avatar-section">
+            <view class="avatar gradient-bg">🏀</view>
+            <view class="profile-basic">
+              <view class="name">{{ profile.name || '篮球爱好者' }}</view>
+              <view class="profile-tag">篮球运动员</view>
+            </view>
+          </view>
+          <view class="edit-btn btn-primary btn-small" bindtap="editProfile">
+            编辑资料
+          </view>
+        </view>
+        
+        <view class="profile-stats">
+          <view class="stat-card">
+            <view class="stat-icon">⚡</view>
+            <view class="stat-number">{{ profile.position || '未设置' }}</view>
+            <view class="stat-desc">场上位置</view>
+          </view>
+          <view class="stat-card">
+            <view class="stat-icon">📏</view>
+            <view class="stat-number">{{ profile.height || '未设置' }}</view>
+            <view class="stat-desc">身高</view>
+          </view>
+          <view class="stat-card">
+            <view class="stat-icon">⚖️</view>
+            <view class="stat-number">{{ profile.weight || '未设置' }}</view>
+            <view class="stat-desc">体重</view>
+          </view>
+        </view>
       </view>
-      <view class="info-item">
-        <view class="info-label">身高</view>
-        <view class="info-value">{{ profile.height }}</view>
+    </view>
+
+    <!-- 个人数据 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">个人数据</view>
+        <view class="data-badge">场均</view>
       </view>
-      <view class="info-item">
-        <view class="info-label">体重</view>
-        <view class="info-value">{{ profile.weight }}</view>
+      
+      <view class="stats-section card">
+        <view class="stats-grid">
+          <view class="stat-item">
+            <view class="stat-value gradient-text">{{ stats.points }}</view>
+            <view class="stat-label">场均得分</view>
+          </view>
+          <view class="stat-item">
+            <view class="stat-value gradient-text">{{ stats.fieldGoals }}</view>
+            <view class="stat-label">场均投篮</view>
+          </view>
+          <view class="stat-item">
+            <view class="stat-value gradient-text">{{ stats.shootingPercentage }}%</view>
+            <view class="stat-label">命中率</view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快捷设置 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">快捷设置</view>
+      </view>
+      
+      <view class="settings-list card">
+        <view class="setting-item" bindtap="editProfile">
+          <view class="setting-left">
+            <view class="setting-icon" style="background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%)">👤</view>
+            <view class="setting-text">个人资料</view>
+          </view>
+          <view class="setting-arrow">→</view>
+        </view>
+        
+        <view class="setting-item" bindtap="goToChat">
+          <view class="setting-left">
+            <view class="setting-icon" style="background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%)">💬</view>
+            <view class="setting-text">AI助手</view>
+          </view>
+          <view class="setting-arrow">→</view>
+        </view>
+        
+        <view class="setting-item">
+          <view class="setting-left">
+            <view class="setting-icon" style="background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%)">⚙️</view>
+            <view class="setting-text">系统设置</view>
+          </view>
+          <view class="setting-arrow">→</view>
+        </view>
       </view>
     </view>
   </view>
-
-  <!-- 个人数据 -->
-  <view class="section">
-    <view class="section-title">个人数据</view>
-    <view class="stats-grid">
-      <view class="stat-item">
-        <view class="stat-value">{{ stats.points }}</view>
-        <view class="stat-label">场均得分</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value">{{ stats.fieldGoals }}</view>
-        <view class="stat-label">场均投篮</view>
-      </view>
-      <view class="stat-item">
-        <view class="stat-value">{{ stats.shootingPercentage }}%</view>
-        <view class="stat-label">命中率</view>
-      </view>
-    </view>
-  </view>
-
-
 </view>
