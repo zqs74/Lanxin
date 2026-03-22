@@ -1,0 +1,141 @@
+/* profile-edit.wxss */
+.container {
+  background-color: #121212;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx;
+  background-color: #1E1E1E;
+  border-bottom: 1rpx solid #333;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back-button {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #2A2A2A;
+}
+
+.back-button text {
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #fff;
+}
+
+.save-button {
+  padding: 12rpx 30rpx;
+  background-color: #7A41FF;
+  border-radius: 12rpx;
+  color: white;
+  font-size: 28rpx;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.save-button:hover {
+  background-color: #6A31EF;
+  transform: translateY(-2rpx);
+}
+
+.form-container {
+  flex: 1;
+  padding: 30rpx 20rpx;
+}
+
+.form-item {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 40rpx;
+}
+
+.label {
+  font-size: 28rpx;
+  color: #fff;
+  margin-bottom: 15rpx;
+  font-weight: 500;
+}
+
+.input {
+  padding: 20rpx;
+  border: 1rpx solid #333;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  background-color: #2A2A2A;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  border-color: #7A41FF;
+  box-shadow: 0 0 0 2rpx rgba(122, 65, 255, 0.2);
+}
+
+.picker {
+  padding: 20rpx;
+  border: 1rpx solid #333;
+  border-radius: 12rpx;
+  background-color: #2A2A2A;
+  color: #fff;
+  font-size: 28rpx;
+  transition: all 0.3s ease;
+}
+
+.picker:hover {
+  border-color: #7A41FF;
+  box-shadow: 0 0 0 2rpx rgba(122, 65, 255, 0.2);
+}
+
+.picker-content {
+  color: #fff;
+}
+
+.avatar-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.avatar {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background-color: #2A2A2A;
+  border: 2rpx solid #333;
+  transition: all 0.3s ease;
+}
+
+.avatar:hover {
+  border-color: #7A41FF;
+  box-shadow: 0 0 0 2rpx rgba(122, 65, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.upload-text {
+  font-size: 24rpx;
+  color: #7A41FF;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-text:hover {
+  transform: translateY(-2rpx);
+}

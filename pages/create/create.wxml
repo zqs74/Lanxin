@@ -1,0 +1,44 @@
+<!-- create.wxml -->
+<view class="container">
+  <!-- 视频预览区域 -->
+  <view class="video-preview">
+    <view class="preview-placeholder">视频预览</view>
+  </view>
+
+  <!-- 功能按钮 -->
+  <view class="action-buttons">
+    <button class="btn" bindtap="uploadLocalVideo">上传本地视频</button>
+    <button class="btn" bindtap="useCloudVideo">使用云端视频</button>
+  </view>
+
+  <!-- 精彩片段选择 -->
+  <view class="section">
+    <view class="section-title">精彩片段选择</view>
+    <view class="selected-tag">已选择</view>
+    <view class="clip-list">
+      <view wx:for="{{ clips }}" wx:key="index" class="clip-item" data-index="{{ index }}">
+        <checkbox value="{{ item.id }}" checked="{{ item.selected }}" bindchange="toggleClip"></checkbox>
+        <view class="clip-info">{{ item.description }}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 悬浮胶囊标签栏 -->
+  <t-tab-bar 
+    t-class="t-tab-bar" 
+    value="{{tabValue}}" 
+    shape="round" 
+    theme="tag" 
+    split="{{false}}" 
+    bindchange="onTabChange" 
+  > 
+    <t-tab-bar-item 
+      wx:for="{{tabList}}" 
+      wx:key="value" 
+      value="{{item.value}}" 
+      icon="{{item.icon}}" 
+      ariaLabel="{{item.ariaLabel}}" 
+    > 
+    </t-tab-bar-item> 
+  </t-tab-bar>
+</view>

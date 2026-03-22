@@ -1,0 +1,102 @@
+<!-- profile-edit.wxml -->
+<view class="container">
+
+  <view class="form-container">
+    <!-- 头像上传 -->
+    <view class="form-item">
+      <view class="label">头像</view>
+      <view class="avatar-upload">
+        <image class="avatar" src="{{ profile.avatar || '../../images/avatar-default.png' }}" bindtap="uploadAvatar"></image>
+        <text class="upload-text">点击更换</text>
+      </view>
+    </view>
+    
+    <!-- 姓名 -->
+    <view class="form-item">
+      <view class="label">姓名</view>
+      <input 
+        placeholder="请输入姓名" 
+        class="input" 
+        value="{{ profile.name }}" 
+        bindinput="onNameChange"
+      ></input>
+    </view>
+    
+    <!-- 位置 -->
+    <view class="form-item">
+      <view class="label">位置</view>
+      <picker 
+        bindchange="onPositionChange" 
+        value="{{ positionIndex }}" 
+        range="{{ positions }}"
+        class="picker"
+      >
+        <view class="picker-content">
+          {{ profile.position || '请选择位置' }}
+        </view>
+      </picker>
+    </view>
+    
+    <!-- 身高 -->
+    <view class="form-item">
+      <view class="label">身高 (cm)</view>
+      <input 
+        placeholder="请输入身高" 
+        class="input" 
+        value="{{ profile.height }}" 
+        bindinput="onHeightChange"
+        type="number"
+      ></input>
+    </view>
+    
+    <!-- 体重 -->
+    <view class="form-item">
+      <view class="label">体重 (kg)</view>
+      <input 
+        placeholder="请输入体重" 
+        class="input" 
+        value="{{ profile.weight }}" 
+        bindinput="onWeightChange"
+        type="number"
+      ></input>
+    </view>
+    
+    <!-- 年龄 -->
+    <view class="form-item">
+      <view class="label">年龄</view>
+      <input 
+        placeholder="请输入年龄" 
+        class="input" 
+        value="{{ profile.age }}" 
+        bindinput="onAgeChange"
+        type="number"
+      ></input>
+    </view>
+    
+    <!-- 球龄 -->
+    <view class="form-item">
+      <view class="label">球龄 (年)</view>
+      <input 
+        placeholder="请输入球龄" 
+        class="input" 
+        value="{{ profile.yearsOfPlay }}" 
+        bindinput="onYearsOfPlayChange"
+        type="number"
+      ></input>
+    </view>
+    
+    <!-- 技术特点 -->
+    <view class="form-item">
+      <view class="label">技术特点</view>
+      <input 
+        placeholder="请输入技术特点" 
+        class="input" 
+        value="{{ profile.skillFeature }}" 
+        bindinput="onSkillFeatureChange"
+      ></input>
+    </view>
+    <view class="save-button" bindtap="saveProfile" style="height: 77rpx; display: block; box-sizing: border-box; position: relative; left: -3rpx; top: 28rpx">
+      <text style="position: relative; left: 280rpx; top: 10rpx">保存</text>
+    </view>
+  </view>
+</view>

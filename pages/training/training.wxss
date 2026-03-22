@@ -1,0 +1,128 @@
+/* training.wxss */
+.container {
+  padding: 20rpx;
+  background-color: #121212;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.radar-container {
+  background-color: #1E1E1E;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+  margin-bottom: 30rpx;
+  transition: all 0.3s ease;
+}
+
+.radar-container:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.4);
+}
+
+.radar-chart {
+  width: 100%;
+  height: 400rpx;
+}
+
+.ai-container {
+  background-color: #1E1E1E;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.ai-container:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.4);
+}
+
+.ai-greeting {
+  font-size: 28rpx;
+  color: #fff;
+  line-height: 1.5;
+  margin-bottom: 20rpx;
+}
+
+.ai-suggestions {
+  margin-bottom: 30rpx;
+}
+
+.suggestion-item {
+  background-color: rgba(122, 65, 255, 0.1);
+  padding: 20rpx;
+  border-radius: 12rpx;
+  margin-bottom: 15rpx;
+  font-size: 24rpx;
+  color: #7A41FF;
+  border: 1rpx solid rgba(122, 65, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.suggestion-item:hover {
+  background-color: rgba(122, 65, 255, 0.2);
+  transform: translateX(10rpx);
+}
+
+.ai-input-area {
+  display: flex;
+  gap: 15rpx;
+}
+
+.ai-input {
+  flex: 1;
+  padding: 20rpx;
+  border: 1rpx solid #333;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  background-color: #2A2A2A;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.ai-input:focus {
+  border-color: #7A41FF;
+  box-shadow: 0 0 0 2rpx rgba(122, 65, 255, 0.2);
+}
+
+.ai-submit {
+  padding: 0 40rpx;
+  background-color: #7A41FF;
+  color: white;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 12rpx rgba(122, 65, 255, 0.4);
+}
+
+.ai-container {
+  background-color: #1E1E1E;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.ai-container:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 6rpx 16rpx rgba(0, 0, 0, 0.4);
+}
+
+.enter-chat {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 20rpx;
+  color: #7A41FF;
+  font-size: 24rpx;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.enter-chat:hover {
+  transform: translateX(10rpx);
+}

@@ -1,0 +1,45 @@
+<!-- profile.wxml -->
+<view class="container">
+  <!-- 个人资料 -->
+  <view class="section">
+    <view class="profile-header">
+      <view class="name">{{ profile.name }}</view>
+      <button class="edit-btn" bindtap="editProfile" style="position: relative; left: 98rpx; top: -3rpx">点击完善个人资料</button>
+    </view>
+    <view class="profile-info">
+      <view class="info-item">
+        <view class="info-label">位置</view>
+        <view class="info-value">{{ profile.position }}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">身高</view>
+        <view class="info-value">{{ profile.height }}</view>
+      </view>
+      <view class="info-item">
+        <view class="info-label">体重</view>
+        <view class="info-value">{{ profile.weight }}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 个人数据 -->
+  <view class="section">
+    <view class="section-title">个人数据</view>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <view class="stat-value">{{ stats.points }}</view>
+        <view class="stat-label">场均得分</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{ stats.fieldGoals }}</view>
+        <view class="stat-label">场均投篮</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{ stats.shootingPercentage }}%</view>
+        <view class="stat-label">命中率</view>
+      </view>
+    </view>
+  </view>
+
+
+</view>

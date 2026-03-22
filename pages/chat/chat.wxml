@@ -1,0 +1,40 @@
+<!-- chat.wxml -->
+<view class="container">
+  <view class="chat-container">
+    <!-- 聊天消息列表 -->
+    <scroll-view class="message-list" scroll-y>
+      <!-- 系统消息 -->
+      <view class="message system-message">
+        <text>你好!我是你的AI智能体,你可以问我关于最近训练情况和后续怎么改正的建议。</text>
+      </view>
+      
+      <!-- AI消息 -->
+      <view class="message ai-message" wx:for="{{ messages }}" wx:key="index">
+        <view wx:if="{{ item.role === 'assistant' }}" class="message-content ai-content">
+          <text>{{ item.content }}</text>
+        </view>
+        <!-- 用户消息 -->
+        <view wx:if="{{ item.role === 'user' }}" class="message-content user-content">
+          <text>{{ item.content }}</text>
+        </view>
+      </view>
+      
+      <!-- 加载中状态 -->
+      <view class="loading" wx:if="{{ isLoading }}">
+        <text>AI正在思考...</text>
+      </view>
+    </scroll-view>
+    
+    <!-- 输入区域 -->
+    <view class="input-area">
+      <input 
+        placeholder="输入你的问题..." 
+        class="input" 
+        bindinput="onInputChange" 
+        value="{{ userInput }}" 
+        bindconfirm="sendMessage"
+      ></input>
+      <button class="send-button" bindtap="sendMessage">发送</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,75 @@
+.tab-bar-container {
+  width: 100%;
+  position: fixed;
+  bottom: 40rpx;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+}
+
+/* ========== TDesign TabBar 配置 ========== */
+.t-tab-bar {
+  /* 基础尺寸配置 */
+  --td-tab-bar-height: 100rpx;
+  --td-tab-bar-tag-border-radius: 40rpx;
+  --td-tab-bar-tag-height: 64rpx;
+  --td-tab-bar-tag-margin: 16rpx 0;
+  --td-tab-bar-tag-padding: 0 32rpx;
+  --td-tab-bar-icon-size: 32rpx;
+  --td-tab-bar-text-font-size: 24rpx;
+
+  /* 颜色配置 */
+  --td-tab-bar-color: #e0e0e0;
+  --td-tab-bar-active-color: #9B6CFF;
+  --td-tab-bar-hover-bg-color: rgba(122, 65, 255, 0.3);
+
+  /* 背景和毛玻璃效果 */
+  --td-tab-bar-bg-color: rgba(35, 35, 35, 0.7); 
+  --td-tab-bar-border-color: transparent;
+  -webkit-backdrop-filter: blur(35rpx);
+  backdrop-filter: blur(35rpx);
+  box-shadow: 0 4rpx 30rpx rgba(0, 0, 0, 0.8);
+  border: 1rpx solid rgba(255, 255, 255, 0.12);
+
+  /* 定位和布局（写死，不允许改变） */
+  position: fixed !important;
+  /* 1. 固定左右基准为屏幕的左右边缘 */
+  left: 0 !important;
+  right: 0 !important;
+  /* 2. 配合宽度，用margin:0 auto实现水平居中 */
+  width: 90% !important;
+  margin: 0 auto !important;
+  /* 3. 底部距离 */
+  bottom: 60rpx !important;
+  z-index: 9999 !important;
+
+  /* 胶囊造型 */
+  border-radius: 50rpx; 
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* ========== TabBar 项动画 ========== */
+.t-tab-bar__item {
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.t-tab-bar__item--active {
+  transform: translateY(-3rpx);
+  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ========== TDesign Tag模式增强动画 ========== */
+/* 这是TDesign Tag模式下选中指示器的关键动画 */
+.t-tab-bar--tag .t-tab-bar__track {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+.t-tab-bar--tag .t-tab-bar__indicator {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+}
+
+/* 确保TDesign组件内部元素也有平滑过渡 */
+.t-tab-bar__content {
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}

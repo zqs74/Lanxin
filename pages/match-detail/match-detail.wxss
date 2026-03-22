@@ -1,0 +1,539 @@
+/* match-detail.wxss */
+.container {
+  background-color: #121212;
+  min-height: 100vh;
+  font-family: 'PingFang SC', sans-serif;
+}
+
+/* 顶部导航栏 */
+.top-nav {
+  background-color: #7A41FF;
+  padding-bottom: 20rpx;
+}
+
+.nav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx;
+  height: 80rpx;
+}
+
+.back-btn {
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-arrow {
+  width: 20rpx;
+  height: 20rpx;
+  border-left: 3rpx solid #fff;
+  border-top: 3rpx solid #fff;
+  transform: rotate(-45deg);
+}
+
+.nav-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.nav-placeholder {
+  width: 40rpx;
+}
+
+.score-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40rpx;
+  margin-top: 10rpx;
+}
+
+.team-info {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.team-info.right {
+  flex-direction: row-reverse;
+}
+
+.shield-icon {
+  width: 30rpx;
+  height: 30rpx;
+  border: 2rpx solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.team-name {
+  font-size: 28rpx;
+  color: #fff;
+}
+
+.score-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5rpx;
+}
+
+.score {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.game-time {
+  font-size: 20rpx;
+  color: #fff;
+  opacity: 0.8;
+}
+
+/* 视频预览区 */
+.video-preview {
+  position: relative;
+  width: 100%;
+  height: 200rpx;
+  margin: 20rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #000;
+}
+
+.play-btn {
+  width: 60rpx;
+  height: 60rpx;
+  border-left: 20rpx solid #fff;
+  border-top: 15rpx solid transparent;
+  border-bottom: 15rpx solid transparent;
+  margin-left: 10rpx;
+  z-index: 1;
+}
+
+.video-title {
+  position: absolute;
+  bottom: 20rpx;
+  color: #fff;
+  font-size: 24rpx;
+  z-index: 1;
+}
+
+/* 标签切换栏 */
+.tab-bar {
+  display: flex;
+  background-color: #1E1E1E;
+  border-bottom: 1rpx solid #333;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 0;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  width: 100%;
+  height: 80rpx;
+  justify-content: center;
+}
+
+.tab-text {
+  font-size: 24rpx;
+  color: #999;
+  transition: color 0.3s;
+}
+
+.tab-item.active .tab-text {
+  color: #7A41FF;
+  font-weight: 500;
+}
+
+.tab-indicator {
+  position: absolute;
+  bottom: 0;
+  width: 40rpx;
+  height: 3rpx;
+  background-color: #7A41FF;
+  border-radius: 2rpx;
+  transform: scaleX(0);
+  transition: transform 0.3s;
+}
+
+.tab-item.active .tab-indicator {
+  transform: scaleX(1);
+}
+
+/* 标签内容区 */
+.tab-content {
+  padding: 20rpx;
+}
+
+.tab-panel {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 通用 section 样式 */
+.section {
+  margin-bottom: 30rpx;
+}
+
+.section-title {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 20rpx;
+}
+
+/* 图表容器 */
+.chart-container {
+  width: 100%;
+  height: 200rpx;
+  margin-bottom: 15rpx;
+}
+
+.chart {
+  width: 100%;
+  height: 100%;
+}
+
+/* 图例 */
+.legend {
+  display: flex;
+  gap: 30rpx;
+  padding: 0 10rpx;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.legend-color {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 2rpx;
+}
+
+.legend-color.red {
+  background-color: #7A41FF;
+}
+
+.legend-color.blue {
+  background-color: #5A21CF;
+}
+
+.legend-color.made {
+  background-color: #7A41FF;
+}
+
+.legend-color.attempted {
+  background-color: #5A21CF;
+}
+
+.legend-text {
+  font-size: 20rpx;
+  color: #999;
+}
+
+/* 比赛表现表格 */
+.performance-table {
+  background-color: #1E1E1E;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.performance-row {
+  display: flex;
+  align-items: center;
+  padding: 15rpx 20rpx;
+  border-bottom: 1rpx solid #333;
+}
+
+.performance-row:last-child {
+  border-bottom: none;
+}
+
+.performance-data {
+  flex: 1;
+  font-size: 24rpx;
+  color: #fff;
+  text-align: center;
+}
+
+.performance-data.red {
+  text-align: right;
+  padding-right: 20rpx;
+}
+
+.performance-data.blue {
+  text-align: left;
+  padding-left: 20rpx;
+}
+
+.performance-label {
+  flex: 1;
+  font-size: 24rpx;
+  color: #999;
+  text-align: center;
+}
+
+/* 最佳球员卡片 */
+.player-card {
+  display: flex;
+  align-items: center;
+  background-color: #2A2A2A;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  gap: 20rpx;
+}
+
+.player-avatar {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background-color: #7A41FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-icon {
+  width: 40rpx;
+  height: 40rpx;
+  border: 2rpx solid #fff;
+  border-radius: 50%;
+  position: relative;
+}
+
+.avatar-icon::after {
+  content: '';
+  position: absolute;
+  top: -10rpx;
+  left: 10rpx;
+  width: 20rpx;
+  height: 20rpx;
+  border: 2rpx solid #fff;
+  border-radius: 50%;
+  background-color: #7A41FF;
+}
+
+.player-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5rpx;
+}
+
+.player-name {
+  font-size: 24rpx;
+  font-weight: 500;
+  color: #fff;
+}
+
+.player-team {
+  font-size: 20rpx;
+  color: #999;
+}
+
+.player-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5rpx;
+}
+
+.stats-main {
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #7A41FF;
+}
+
+.stats-sub {
+  font-size: 18rpx;
+  color: #999;
+}
+
+/* 个人集锦样式 */
+.hint-text {
+  font-size: 20rpx;
+  color: #999;
+  margin-bottom: 20rpx;
+}
+
+.clip-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.stats-left {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.stats-text {
+  font-size: 20rpx;
+  color: #fff;
+}
+
+.stats-number {
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #7A41FF;
+}
+
+.edit-btn {
+  padding: 12rpx 30rpx;
+  border-radius: 20rpx;
+  font-size: 20rpx;
+  color: #999;
+  background-color: #333;
+  transition: all 0.3s;
+}
+
+.edit-btn.active {
+  color: #fff;
+  background-color: #7A41FF;
+}
+
+.clip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15rpx;
+}
+
+.clip-item {
+  display: flex;
+  align-items: center;
+  background-color: #2A2A2A;
+  border-radius: 12rpx;
+  padding: 20rpx;
+  gap: 15rpx;
+}
+
+.checkbox {
+  width: 30rpx;
+  height: 30rpx;
+  border: 2rpx solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.checkbox.checked {
+  background-color: #7A41FF;
+  border-color: #7A41FF;
+}
+
+.check-icon {
+  width: 16rpx;
+  height: 16rpx;
+  border-right: 2rpx solid #fff;
+  border-bottom: 2rpx solid #fff;
+  transform: rotate(45deg);
+  margin-top: -4rpx;
+}
+
+.clip-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 15rpx;
+}
+
+.film-icon {
+  width: 40rpx;
+  height: 40rpx;
+  border: 2rpx solid #999;
+  border-radius: 4rpx;
+  position: relative;
+}
+
+.film-icon::before {
+  content: '';
+  position: absolute;
+  top: 8rpx;
+  left: 8rpx;
+  right: 8rpx;
+  bottom: 8rpx;
+  border: 2rpx solid #999;
+  border-radius: 2rpx;
+}
+
+.clip-details {
+  display: flex;
+  flex-direction: column;
+  gap: 5rpx;
+}
+
+.clip-time {
+  font-size: 22rpx;
+  color: #fff;
+}
+
+.clip-type {
+  font-size: 18rpx;
+  color: #999;
+}
+
+.play-icon {
+  width: 30rpx;
+  height: 30rpx;
+  border-left: 12rpx solid #fff;
+  border-top: 8rpx solid transparent;
+  border-bottom: 8rpx solid transparent;
+  margin-left: 10rpx;
+}
+
+/* 个人分析样式 */
+.summary-card {
+  background-color: #2A2A2A;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  line-height: 1.5;
+}
+
+.summary-text {
+  font-size: 20rpx;
+  color: #999;
+  margin-bottom: 15rpx;
+}
+
+.summary-text:last-child {
+  margin-bottom: 0;
+}

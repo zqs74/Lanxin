@@ -1,0 +1,61 @@
+<!-- index.wxml -->
+<view class="container">
+  <!-- 顶部导航区 -->
+  <view class="top-nav">
+    <view class="title">篮球数据</view>
+  </view>
+
+  <!-- 创作入口区 -->
+  <view class="create-entry">
+    <view class="camera-icon">📷</view>
+    <view class="create-info">
+      <view class="create-title">开始创作</view>
+      <view class="create-subtitle">自动记录你的精彩瞬间</view>
+    </view>
+  </view>
+
+  <!-- 生涯数据区 -->
+  <view class="section">
+    <view class="section-title">生涯数据</view>
+    <view class="stats-grid">
+      <view class="stat-item">
+        <view class="stat-value purple">{{ careerStats.points }}</view>
+        <view class="stat-label">得分</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{ careerStats.rebounds }}</view>
+        <view class="stat-label">篮板</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{ careerStats.assists }}</view>
+        <view class="stat-label">助攻</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{ careerStats.shootingPercentage }}%</view>
+        <view class="stat-label">命中率</view>
+      </view>
+      <view class="stat-item">
+        <view class="stat-value">{{ careerStats.totalGames }}</view>
+        <view class="stat-label">总场次</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 创作集锦区 -->
+  <view class="section">
+    <view class="video-tabs">
+      <view class="tab-item {{ activeVideoTab === 'collection' ? 'active' : '' }}" bindtap="switchVideoTab" data-tab="collection">创作集锦</view>
+      <view class="tab-item {{ activeVideoTab === 'featured' ? 'active' : '' }}" bindtap="switchVideoTab" data-tab="featured">精选视频</view>
+    </view>
+    <view wx:if="{{ activeVideoTab === 'collection' }}" class="no-videos {{ contentAnimClass }}">
+      <view class="film-icon">🎬</view>
+      <view class="no-data-text">暂无创作集锦</view>
+    </view>
+    <view wx:else class="no-videos {{ contentAnimClass }}">
+      <view class="film-icon">🎬</view>
+      <view class="no-data-text">暂无精选视频</view>
+    </view>
+  </view>
+
+
+</view>

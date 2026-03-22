@@ -1,0 +1,186 @@
+/* match.wxss */
+.container {
+  min-height: 100vh;
+  padding: 20rpx;
+  background-color: #121212;
+}
+
+.search-box {
+  margin-bottom: 20rpx;
+}
+
+
+
+.search-input {
+  background-color: #1E1E1E;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  color: #fff;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+}
+
+.date-section {
+  margin-bottom: 30rpx;
+}
+
+.current-date {
+  font-size: 24rpx;
+  color: #7A41FF;
+  margin-bottom: 12rpx;
+  font-weight: 500;
+}
+
+.date-list {
+  display: flex;
+  gap: 12rpx;
+  overflow-x: auto;
+  padding-bottom: 10rpx;
+}
+
+.date-item {
+  flex: 0 0 80rpx;
+  background-color: #1E1E1E;
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx;
+  font-size: 20rpx;
+  color: #888;
+  transition: all 0.3s ease;
+  border: 2rpx solid transparent;
+}
+
+.date-item:hover {
+  background-color: #2A2A2A;
+  transform: translateY(-2rpx);
+}
+
+.date-item.today {
+  background-color: #2A2A2A;
+  border-color: #7A41FF;
+}
+
+.date-item.selected {
+  border-color: #7A41FF;
+  background-color: rgba(122, 65, 255, 0.1);
+  color: #7A41FF;
+}
+
+.date-week {
+  margin-bottom: 4rpx;
+}
+
+.date-day {
+  font-size: 24rpx;
+  font-weight: bold;
+  margin-bottom: 4rpx;
+}
+
+.date-month {
+  font-size: 18rpx;
+}
+
+.match-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.match-card {
+  background-color: #1E1E1E;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.match-card:hover {
+  transform: translateY(-2rpx);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
+}
+
+.match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.match-time {
+  font-size: 24rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.match-venue {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.match-status {
+  font-size: 20rpx;
+  color: #888;
+  margin-bottom: 20rpx;
+}
+
+.match-status.playing {
+  display: inline-block;
+  background-color: #7A41FF;
+  color: #fff;
+  padding: 6rpx 16rpx;
+  border-radius: 16rpx;
+  font-weight: bold;
+}
+
+.match-teams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.shield-icon {
+  font-size: 28rpx;
+}
+
+.team-name {
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.score {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #7A41FF;
+  margin: 0 30rpx;
+  min-width: 80rpx;
+  text-align: center;
+}
+
+/* 滚动条样式 */
+.date-list::-webkit-scrollbar {
+  height: 6rpx;
+}
+
+.date-list::-webkit-scrollbar-track {
+  background: #1E1E1E;
+  border-radius: 3rpx;
+}
+
+.date-list::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3rpx;
+}
+
+.date-list::-webkit-scrollbar-thumb:hover {
+  background: #444;
+}

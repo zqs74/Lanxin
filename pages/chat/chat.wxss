@@ -1,0 +1,157 @@
+/* chat.wxss */
+.container {
+  background-color: #121212;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+  background-color: #1E1E1E;
+  border-bottom: 1rpx solid #333;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.back-button {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #2A2A2A;
+  margin-right: 20rpx;
+}
+
+.back-button text {
+  font-size: 32rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.title {
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #fff;
+}
+
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20rpx;
+}
+
+.message-list {
+  flex: 1;
+  margin-bottom: 20rpx;
+  overflow-y: auto;
+}
+
+.message {
+  margin-bottom: 20rpx;
+}
+
+.system-message {
+  text-align: center;
+  padding: 10rpx 20rpx;
+  background-color: rgba(122, 65, 255, 0.1);
+  border-radius: 12rpx;
+  margin: 0 auto 20rpx;
+  max-width: 80%;
+}
+
+.system-message text {
+  font-size: 20rpx;
+  color: #7A41FF;
+}
+
+.message-content {
+  max-width: 70%;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.ai-content {
+  background-color: rgba(26, 115, 232, 0.1);
+  border: 1rpx solid rgba(26, 115, 232, 0.3);
+  color: #fff;
+  font-size: 24rpx;
+  align-self: flex-start;
+}
+
+.user-content {
+  background-color: rgba(122, 65, 255, 0.1);
+  border: 1rpx solid rgba(122, 65, 255, 0.3);
+  color: #fff;
+  font-size: 24rpx;
+  align-self: flex-end;
+  margin-left: auto;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx;
+  margin-bottom: 20rpx;
+}
+
+.loading text {
+  font-size: 20rpx;
+  color: #7A41FF;
+  animation: pulse 1.5s infinite;
+}
+
+.input-area {
+  display: flex;
+  gap: 15rpx;
+  padding: 10rpx 0;
+  border-top: 1rpx solid #333;
+}
+
+.input {
+  flex: 1;
+  padding: 20rpx;
+  border: 1rpx solid #333;
+  border-radius: 24rpx;
+  font-size: 28rpx;
+  background-color: #2A2A2A;
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.input:focus {
+  border-color: #7A41FF;
+  box-shadow: 0 0 0 2rpx rgba(122, 65, 255, 0.2);
+}
+
+.send-button {
+  padding: 0 40rpx;
+  background-color: #7A41FF;
+  color: white;
+  border-radius: 24rpx;
+  font-size: 28rpx;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4rpx 12rpx rgba(122, 65, 255, 0.4);
+}
+
+.send-button:hover {
+  background-color: #6A31EF;
+  transform: translateY(-2rpx);
+  box-shadow: 0 6rpx 16rpx rgba(122, 65, 255, 0.5);
+}
+
+@keyframes pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}

@@ -1,0 +1,28 @@
+<!-- training.wxml -->
+<view class="container">
+  <!-- AI智能体 -->
+  <view class="section">
+    <view class="section-title">AI智能体</view>
+    <view class="ai-container" bindtap="navigateToChat">
+      <view class="ai-greeting">你好!我是你的AI智能体,你可以问我关于最近训练情况和后续怎么改正的建议。</view>
+      <view class="ai-suggestions">
+        <view class="suggestion-item">加强投篮练习</view>
+        <view class="suggestion-item">增加体能训练</view>
+        <view class="suggestion-item">多看比赛录像</view>
+      </view>
+      <view class="enter-chat">
+        <text>点击进入聊天 →</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 技能雷达图 -->
+  <view class="section">
+    <view class="section-title">技能雷达图</view>
+    <view class="radar-container" style="height: 714rpx; display: block; box-sizing: border-box">
+      <canvas canvas-id="radarChart" class="radar-chart" style="height: 721rpx; display: block; box-sizing: border-box; left: -30rpx; top: -30rpx; width: 703rpx; position: relative"></canvas>
+    </view>
+  </view>
+
+
+</view>
