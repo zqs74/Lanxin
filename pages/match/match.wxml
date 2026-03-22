@@ -21,17 +21,20 @@
     <view class="date-section">
       <view class="section-header">
         <view class="section-title">选择日期</view>
-        <view class="current-date">{{ selectedDate }}</view>
       </view>
-      <view class="date-list">
-        <view wx:for="{{ dateList }}" wx:key="date" 
-              class="date-item card {{ item.isToday ? 'today' : '' }} {{ item.isSelected ? 'selected' : '' }}" 
-              bindtap="selectDate" data-date="{{ item.date }}">
-          <view class="date-week">{{ item.week }}</view>
-          <view class="date-day">{{ item.day }}</view>
-          <view class="date-month">{{ item.month }}</view>
+      <picker 
+        mode="date" 
+        value="{{ selectedDate }}" 
+        start="2020-01-01" 
+        end="2030-12-31" 
+        bindchange="onDateChange"
+      >
+        <view class="date-picker card">
+          <text class="date-picker-icon">📅</text>
+          <text class="date-picker-text">{{ selectedDate }}</text>
+          <text class="date-picker-arrow">›</text>
         </view>
-      </view>
+      </picker>
     </view>
 
     <!-- 比赛列表区 -->
@@ -54,10 +57,6 @@
               <text class="time-icon">⏰</text>
               16:30
             </view>
-            <view class="match-venue">
-              <text class="venue-icon">📍</text>
-              场地1
-            </view>
           </view>
           
           <view class="match-teams">
@@ -75,6 +74,11 @@
               <view class="team-shield blue">🛡️</view>
             </view>
           </view>
+          
+          <view class="match-venue-bottom">
+            <text class="venue-icon">📍</text>
+            场地1
+          </view>
         </view>
 
         <!-- 比赛卡片2 -->
@@ -87,10 +91,6 @@
             <view class="match-time">
               <text class="time-icon">⏰</text>
               18:30
-            </view>
-            <view class="match-venue">
-              <text class="venue-icon">📍</text>
-              场地2
             </view>
           </view>
           
@@ -108,6 +108,11 @@
               <view class="team-name">B队</view>
               <view class="team-shield orange">🛡️</view>
             </view>
+          </view>
+          
+          <view class="match-venue-bottom">
+            <text class="venue-icon">📍</text>
+            场地2
           </view>
         </view>
       </view>

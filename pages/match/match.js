@@ -1,13 +1,16 @@
 // match.js
 Page({
   data: {
-    dateList: [],
-    selectedDate: '',
+    selectedDate: ''
   },
 
   onLoad() {
-    // 生成两周的日期列表
-    this.generateDateList()
+    // 设置今天为默认日期
+    const today = new Date()
+    const todayStr = this.formatDate(today)
+    this.setData({
+      selectedDate: todayStr
+    })
   },
 
   onShow() {
@@ -15,34 +18,6 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().updateSelected(1)
     }
-  },
-
-  // 生成日期列表
-  generateDateList() {
-    const dateList = []
-    const today = new Date()
-    const todayStr = this.formatDate(today)
-    
-    // 生成过去两周的日期
-    for (let i = 13; i >= 0; i--) {
-      const date = new Date()
-      date.setDate(today.getDate() - i)
-      const dateStr = this.formatDate(date)
-      
-      dateList.push({
-        date: dateStr,
-        week: this.getWeekDay(date),
-        day: date.getDate(),
-        month: date.getMonth() + 1 + '月',
-        isToday: dateStr === todayStr,
-        isSelected: dateStr === todayStr
-      })
-    }
-    
-    this.setData({
-      dateList: dateList,
-      selectedDate: todayStr
-    })
   },
 
   // 格式化日期
@@ -53,23 +28,10 @@ Page({
     return `${year}-${month}-${day}`
   },
 
-  // 获取星期
-  getWeekDay(date) {
-    const weekdays = ['日', '一', '二', '三', '四', '五', '六']
-    return weekdays[date.getDay()]
-  },
-
-  // 选择日期
-  selectDate(e) {
-    const selectedDate = e.currentTarget.dataset.date
-    const dateList = this.data.dateList.map(item => ({
-      ...item,
-      isSelected: item.date === selectedDate
-    }))
-    
+  // 日期选择器变化
+  onDateChange(e) {
     this.setData({
-      dateList: dateList,
-      selectedDate: selectedDate
+      selectedDate: e.detail.value
     })
   },
 

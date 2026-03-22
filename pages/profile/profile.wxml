@@ -69,38 +69,5 @@
         </view>
       </view>
     </view>
-
-    <!-- 快捷设置 -->
-    <view class="section">
-      <view class="section-header">
-        <view class="section-title">快捷设置</view>
-      </view>
-      
-      <view class="settings-list card">
-        <view class="setting-item" bindtap="editProfile">
-          <view class="setting-left">
-            <view class="setting-icon" style="background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%)">👤</view>
-            <view class="setting-text">个人资料</view>
-          </view>
-          <view class="setting-arrow">→</view>
-        </view>
-        
-        <view class="setting-item" bindtap="goToChat">
-          <view class="setting-left">
-            <view class="setting-icon" style="background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%)">💬</view>
-            <view class="setting-text">AI助手</view>
-          </view>
-          <view class="setting-arrow">→</view>
-        </view>
-        
-        <view class="setting-item">
-          <view class="setting-left">
-            <view class="setting-icon" style="background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%)">⚙️</view>
-            <view class="setting-text">系统设置</view>
-          </view>
-          <view class="setting-arrow">→</view>
-        </view>
-      </view>
-    </view>
   </view>
 </view>

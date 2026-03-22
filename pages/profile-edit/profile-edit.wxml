@@ -1,102 +1,181 @@
-<!-- profile-edit.wxml -->
-<view class="container">
-
-  <view class="form-container">
-    <!-- 头像上传 -->
-    <view class="form-item">
-      <view class="label">头像</view>
-      <view class="avatar-upload">
-        <image class="avatar" src="{{ profile.avatar || '../../images/avatar-default.png' }}" bindtap="uploadAvatar"></image>
-        <text class="upload-text">点击更换</text>
+<!-- profile-edit.wxml - 现代化UI设计 -->
+<view class="page-wrapper">
+  <view class="page-header-gradient"></view>
+  
+  <view class="container slide-up">
+    <!-- 页面标题 -->
+    <view class="top-nav">
+      <view class="back-btn" bindtap="goBack">
+        <text class="back-icon">←</text>
       </view>
+      <view class="nav-title">完善个人资料</view>
+      <view class="nav-placeholder"></view>
     </view>
-    
-    <!-- 姓名 -->
-    <view class="form-item">
-      <view class="label">姓名</view>
-      <input 
-        placeholder="请输入姓名" 
-        class="input" 
-        value="{{ profile.name }}" 
-        bindinput="onNameChange"
-      ></input>
-    </view>
-    
-    <!-- 位置 -->
-    <view class="form-item">
-      <view class="label">位置</view>
-      <picker 
-        bindchange="onPositionChange" 
-        value="{{ positionIndex }}" 
-        range="{{ positions }}"
-        class="picker"
-      >
-        <view class="picker-content">
-          {{ profile.position || '请选择位置' }}
+
+    <view class="form-container">
+      <!-- 头像上传 -->
+      <view class="section">
+        <view class="section-header">
+          <view class="section-title">个人头像</view>
         </view>
-      </picker>
-    </view>
-    
-    <!-- 身高 -->
-    <view class="form-item">
-      <view class="label">身高 (cm)</view>
-      <input 
-        placeholder="请输入身高" 
-        class="input" 
-        value="{{ profile.height }}" 
-        bindinput="onHeightChange"
-        type="number"
-      ></input>
-    </view>
-    
-    <!-- 体重 -->
-    <view class="form-item">
-      <view class="label">体重 (kg)</view>
-      <input 
-        placeholder="请输入体重" 
-        class="input" 
-        value="{{ profile.weight }}" 
-        bindinput="onWeightChange"
-        type="number"
-      ></input>
-    </view>
-    
-    <!-- 年龄 -->
-    <view class="form-item">
-      <view class="label">年龄</view>
-      <input 
-        placeholder="请输入年龄" 
-        class="input" 
-        value="{{ profile.age }}" 
-        bindinput="onAgeChange"
-        type="number"
-      ></input>
-    </view>
-    
-    <!-- 球龄 -->
-    <view class="form-item">
-      <view class="label">球龄 (年)</view>
-      <input 
-        placeholder="请输入球龄" 
-        class="input" 
-        value="{{ profile.yearsOfPlay }}" 
-        bindinput="onYearsOfPlayChange"
-        type="number"
-      ></input>
-    </view>
-    
-    <!-- 技术特点 -->
-    <view class="form-item">
-      <view class="label">技术特点</view>
-      <input 
-        placeholder="请输入技术特点" 
-        class="input" 
-        value="{{ profile.skillFeature }}" 
-        bindinput="onSkillFeatureChange"
-      ></input>
-    </view>
-    <view class="save-button" bindtap="saveProfile" style="height: 77rpx; display: block; box-sizing: border-box; position: relative; left: -3rpx; top: 28rpx">
-      <text style="position: relative; left: 280rpx; top: 10rpx">保存</text>
+        <view class="avatar-section card">
+          <view class="avatar-upload" bindtap="uploadAvatar">
+            <view class="avatar gradient-bg">
+              <text class="avatar-emoji">🏀</text>
+            </view>
+            <view class="upload-hint">
+              <text class="upload-icon">📷</text>
+              <text class="upload-text">点击更换头像</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 基本信息 -->
+      <view class="section">
+        <view class="section-header">
+          <view class="section-title">基本信息</view>
+        </view>
+        <view class="form-card card">
+          <!-- 姓名 -->
+          <view class="form-item">
+            <view class="label">
+              <text class="label-icon">👤</text>
+              姓名
+            </view>
+            <input 
+              placeholder="请输入姓名" 
+              class="input" 
+              value="{{ profile.name }}" 
+              bindinput="onNameChange"
+              placeholder-class="input-placeholder"
+            ></input>
+          </view>
+          
+          <!-- 位置 -->
+          <view class="form-item">
+            <view class="label">
+              <text class="label-icon">🏆</text>
+              场上位置
+            </view>
+            <picker 
+              bindchange="onPositionChange" 
+              value="{{ positionIndex }}" 
+              range="{{ positions }}"
+              class="picker-wrapper"
+            >
+              <view class="picker-content">
+                <text class="picker-text">{{ profile.position || '请选择位置' }}</text>
+                <text class="picker-arrow">›</text>
+              </view>
+            </picker>
+          </view>
+          
+          <!-- 年龄 -->
+          <view class="form-item">
+            <view class="label">
+              <text class="label-icon">🎂</text>
+              年龄
+            </view>
+            <input 
+              placeholder="请输入年龄" 
+              class="input" 
+              value="{{ profile.age }}" 
+              bindinput="onAgeChange"
+              type="number"
+              placeholder-class="input-placeholder"
+            ></input>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 身体数据 -->
+      <view class="section">
+        <view class="section-header">
+          <view class="section-title">身体数据</view>
+        </view>
+        <view class="form-card card">
+          <!-- 身高 -->
+          <view class="form-item">
+            <view class="label">
+              <text class="label-icon">📏</text>
+              身高 (cm)
+            </view>
+            <input 
+              placeholder="请输入身高" 
+              class="input" 
+              value="{{ profile.height }}" 
+              bindinput="onHeightChange"
+              type="number"
+              placeholder-class="input-placeholder"
+            ></input>
+          </view>
+          
+          <!-- 体重 -->
+          <view class="form-item">
+            <view class="label">
+              <text class="label-icon">⚖️</text>
+              体重 (kg)
+            </view>
+            <input 
+              placeholder="请输入体重" 
+              class="input" 
+              value="{{ profile.weight }}" 
+              bindinput="onWeightChange"
+              type="number"
+              placeholder-class="input-placeholder"
+            ></input>
+          </view>
+          
+          <!-- 球龄 -->
+          <view class="form-item">
+            <view class="label">
+              <text class="label-icon">⏱️</text>
+              球龄 (年)
+            </view>
+            <input 
+              placeholder="请输入球龄" 
+              class="input" 
+              value="{{ profile.yearsOfPlay }}" 
+              bindinput="onYearsOfPlayChange"
+              type="number"
+              placeholder-class="input-placeholder"
+            ></input>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 技术特点 -->
+      <view class="section">
+        <view class="section-header">
+          <view class="section-title">技术特点</view>
+        </view>
+        <view class="form-card card">
+          <view class="form-item">
+            <view class="label">
+              <text class="label-icon">⭐</text>
+              技术特点
+            </view>
+            <textarea 
+              placeholder="描述你的技术特点，例如：三分球准确、突破速度快、防守积极等..." 
+              class="textarea" 
+              value="{{ profile.skillFeature }}" 
+              bindinput="onSkillFeatureChange"
+              placeholder-class="textarea-placeholder"
+              maxlength="200"
+            ></textarea>
+            <view class="char-count">{{profile.skillFeature ? profile.skillFeature.length : 0}}/200</view>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 保存按钮 -->
+      <view class="save-section">
+        <button class="btn btn-primary btn-large save-btn" bindtap="saveProfile">
+          <text class="btn-icon">💾</text>
+          保存资料
+        </button>
+      </view>
     </view>
   </view>
 </view>
