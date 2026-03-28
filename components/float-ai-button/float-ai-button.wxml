@@ -1,0 +1,13 @@
+<view class="float-button" 
+      style="left: {{x}}px; top: {{y}}px;"
+      bindtouchstart="onTouchStart"
+      bindtouchmove="onTouchMove"
+      bindtouchend="onTouchEnd">
+  <view class="button-inner">
+    <view class="glow-effect"></view>
+    <view class="icon-container">
+      <text class="ai-icon">🤖</text>
+    </view>
+    <view class="ripple"></view>
+  </view>
+</view>

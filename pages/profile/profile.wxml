@@ -70,4 +70,7 @@
       </view>
     </view>
   </view>
+  
+  <!-- 悬浮AI按钮 -->
+  <float-ai-button></float-ai-button>
 </view>

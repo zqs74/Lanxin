@@ -1,33 +1,35 @@
-// chat.js
+// chat.js - 优化版AI对话
 Page({
   data: {
     userInput: '',
     messages: [],
-    isLoading: false
+    isLoading: false,
+    scrollToView: ''
   },
 
   onLoad() {
-    // 初始化页面
   },
 
   onShow() {
-    // 更新自定义TabBar的选中状态
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().updateSelected(2)
     }
   },
 
-  // 返回按钮点击事件
   goBack() {
     wx.navigateBack()
   },
 
-  // 输入框内容变化
   onInputChange(e) {
     this.setData({ userInput: e.detail.value })
   },
 
-  // 发送消息
+  sendQuickQuestion(e) {
+    const question = e.currentTarget.dataset.question
+    this.setData({ userInput: question })
+    this.sendMessage()
+  },
+
   sendMessage() {
     const message = this.data.userInput.trim()
     if (!message) {
@@ -38,25 +40,33 @@ Page({
       return
     }
     
-    // 添加用户消息到列表
-    const newMessages = [...this.data.messages, { role: 'user', content: message }]
+    const now = new Date()
+    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+    
+    const newMessages = [...this.data.messages, { role: 'user', content: message, time }]
     this.setData({ 
       messages: newMessages,
       userInput: '',
-      isLoading: true 
+      isLoading: true,
+      scrollToView: 'msg-loading'
     })
     
-    // 调用OpenAI API
+    setTimeout(() => {
+      this.setData({ scrollToView: `msg-${newMessages.length}` })
+    }, 100)
+    
     this.callOpenAIAPI(message)
   },
-  // 调用OpenAI API
+
   callOpenAIAPI(message) {
     const apiKey = '12ce65e7-4cfd-4385-bf8b-bb47898e0a61'
     const apiUrl = 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'
     
-    // 构建消息历史
+    const now = new Date()
+    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+    
     const messages = [
-      { "role": "system", "content": "你是人工智能助手" },
+      { "role": "system", "content": "你是昇梦AI助手，一位专业的篮球训练顾问。你深度了解用户的训练数据、比赛记录和技能雷达图，能够提供个性化的篮球训练建议。你的回答应该专业、实用、有针对性，并且要体现出你了解用户的具体情况。" },
       ...this.data.messages.map(msg => ({
         role: msg.role,
         content: msg.content
@@ -79,11 +89,14 @@ Page({
         console.log('API调用成功:', res)
         if (res.data && res.data.choices && res.data.choices[0]) {
           const aiResponse = res.data.choices[0].message.content
-          const newMessages = [...this.data.messages, { role: 'assistant', content: aiResponse }]
+          const newMessages = [...this.data.messages, { role: 'assistant', content: aiResponse, time }]
           this.setData({ 
             messages: newMessages,
             isLoading: false 
           })
+          setTimeout(() => {
+            this.setData({ scrollToView: `msg-${newMessages.length}` })
+          }, 100)
         } else {
           this.setData({ isLoading: false })
           wx.showToast({
@@ -101,7 +114,5 @@ Page({
         })
       }
     })
-  },
-
-
+  }
 })

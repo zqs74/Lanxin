@@ -1,4 +1,4 @@
-<!-- training.wxml - 现代化UI设计 -->
+<!-- training.wxml - 优化版训练中心 -->
 <view class="page-wrapper">
   <view class="page-header-gradient"></view>
   
@@ -6,48 +6,32 @@
     <!-- 页面标题 -->
     <view class="page-header">
       <view class="page-title">训练中心</view>
-      <view class="page-subtitle">AI智能分析与技能提升</view>
+      <view class="page-subtitle">科学训练，持续进步</view>
     </view>
 
-    <!-- AI智能体 -->
+    <!-- 今日训练概览 -->
     <view class="section">
       <view class="section-header">
-        <view class="section-title">AI智能体</view>
-        <view class="ai-badge">在线</view>
+        <view class="section-title">今日训练</view>
+        <view class="today-badge">{{ todayDate }}</view>
       </view>
-      <view class="ai-container card" bindtap="navigateToChat">
-        <view class="ai-header">
-          <view class="ai-avatar pulse-animation">🤖</view>
-          <view class="ai-info">
-            <view class="ai-name">篮球训练助手</view>
-            <view class="ai-status">随时为你服务</view>
-          </view>
+      <view class="today-summary card">
+        <view class="summary-item">
+          <view class="summary-icon">⏱️</view>
+          <view class="summary-value">60</view>
+          <view class="summary-label">分钟</view>
         </view>
-        
-        <view class="ai-greeting">
-          你好!我是你的AI智能体,你可以问我关于最近训练情况和后续怎么改正的建议。
+        <view class="summary-divider"></view>
+        <view class="summary-item">
+          <view class="summary-icon">🔥</view>
+          <view class="summary-value">4</view>
+          <view class="summary-label">项目</view>
         </view>
-        
-        <view class="ai-suggestions">
-          <view class="suggestion-item">
-            <view class="suggestion-icon">🎯</view>
-            加强投篮练习
-          </view>
-          <view class="suggestion-item">
-            <view class="suggestion-icon">💪</view>
-            增加体能训练
-          </view>
-          <view class="suggestion-item">
-            <view class="suggestion-icon">📺</view>
-            多看比赛录像
-          </view>
-        </view>
-        
-        <view class="enter-chat">
-          <view class="enter-btn btn-primary btn-small">
-            点击进入聊天
-            <text class="arrow">→</text>
-          </view>
+        <view class="summary-divider"></view>
+        <view class="summary-item">
+          <view class="summary-icon">💪</view>
+          <view class="summary-value">高强度</view>
+          <view class="summary-label">强度</view>
         </view>
       </view>
     </view>
@@ -56,10 +40,126 @@
     <view class="section">
       <view class="section-header">
         <view class="section-title">技能雷达图</view>
-        <view class="radar-info">综合评分</view>
+        <view class="radar-score">综合评分 {{ overallScore }}</view>
       </view>
-      <view class="radar-container card" style="height: 714rpx; display: block; box-sizing: border-box">
-        <canvas canvas-id="radarChart" class="radar-chart" style="height: 721rpx; display: block; box-sizing: border-box; left: -30rpx; top: -30rpx; width: 703rpx; position: relative"></canvas>
+      <view class="radar-container card" style="position: relative; left: 0rpx; top: 3rpx">
+        <canvas canvas-id="radarChart" class="radar-chart" style="position: relative; left: 0rpx; top: -93rpx; width: 642rpx; height: 663rpx; display: block; box-sizing: border-box"></canvas>
+        <view class="radar-legend">
+          <view class="legend-item" wx:for="{{ radarData.dimensions }}" wx:key="index">
+            <view class="legend-dot" style="background: {{ radarData.colors[index] }}"></view>
+            <text class="legend-text">{{ item }}</text>
+            <text class="legend-value">{{ radarData.values[index] }}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 训练计划 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">本周训练计划</view>
+      </view>
+      <view class="plan-list">
+        <view class="plan-item card" wx:for="{{ weeklyPlans }}" wx:key="id" bindtap="selectPlan" data-id="{{ item.id }}">
+          <view class="plan-left">
+            <view class="plan-day">{{ item.day }}</view>
+            <view class="plan-date">{{ item.date }}</view>
+          </view>
+          <view class="plan-center">
+            <view class="plan-title">{{ item.title }}</view>
+            <view class="plan-desc">{{ item.description }}</view>
+          </view>
+          <view class="plan-right">
+            <view class="plan-status {{ item.status }}">
+              {{ item.statusText }}
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 训练记录 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">最近训练记录</view>
+        <view class="add-record-btn btn-primary btn-small" bindtap="addRecord">
+          + 添加记录
+        </view>
+      </view>
+      <view class="record-list">
+        <view class="record-item card" wx:for="{{ recentRecords }}" wx:key="id">
+          <view class="record-date">
+            <view class="record-day">{{ item.day }}</view>
+            <view class="record-month">{{ item.month }}</view>
+          </view>
+          <view class="record-content">
+            <view class="record-title">{{ item.title }}</view>
+            <view class="record-meta">
+              <text class="meta-item">⏱️ {{ item.duration }}分钟</text>
+              <text class="meta-item">🔥 {{ item.intensity }}</text>
+            </view>
+            <view class="record-highlights">
+              <text class="highlight-tag" wx:for="{{ item.highlights }}" wx:key="index" wx:for-item="highlight">
+                {{ highlight }}
+              </text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快速开始训练 -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">快速训练</view>
+      </view>
+      <view class="quick-train-grid">
+        <view class="quick-train-item card" wx:for="{{ quickTrain }}" wx:key="id" bindtap="startQuickTrain" data-id="{{ item.id }}">
+          <view class="quick-train-icon" style="background: {{ item.bgColor }}">
+            {{ item.icon }}
+          </view>
+          <view class="quick-train-title">{{ item.title }}</view>
+          <view class="quick-train-time">{{ item.duration }}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 悬浮AI按钮 -->
+  <float-ai-button></float-ai-button>
+  
+  <!-- 添加训练记录弹窗 -->
+  <view class="modal-overlay" wx:if="{{ showAddModal }}" bindtap="closeAddModal">
+    <view class="modal-content" catchtap="stopPropagation">
+      <view class="modal-header">
+        <view class="modal-title">添加训练记录</view>
+        <view class="modal-close" bindtap="closeAddModal">×</view>
+      </view>
+      <view class="modal-body">
+        <view class="form-item">
+          <view class="form-label">训练标题</view>
+          <input class="form-input" placeholder="例如：投篮专项训练" value="{{ newRecord.title }}" bindinput="onRecordTitleInput"></input>
+        </view>
+        <view class="form-item">
+          <view class="form-label">训练时长（分钟）</view>
+          <input class="form-input" type="number" placeholder="60" value="{{ newRecord.duration }}" bindinput="onRecordDurationInput"></input>
+        </view>
+        <view class="form-item">
+          <view class="form-label">训练强度</view>
+          <view class="intensity-selector">
+            <view class="intensity-item {{ newRecord.intensity === '低强度' ? 'active' : '' }}" bindtap="selectIntensity" data-intensity="低强度">低强度</view>
+            <view class="intensity-item {{ newRecord.intensity === '中等强度' ? 'active' : '' }}" bindtap="selectIntensity" data-intensity="中等强度">中等强度</view>
+            <view class="intensity-item {{ newRecord.intensity === '高强度' ? 'active' : '' }}" bindtap="selectIntensity" data-intensity="高强度">高强度</view>
+          </view>
+        </view>
+        <view class="form-item">
+          <view class="form-label">训练亮点（用逗号分隔）</view>
+          <input class="form-input" placeholder="例如：三分精准,防守积极" value="{{ newRecord.highlightsText }}" bindinput="onRecordHighlightsInput"></input>
+        </view>
+      </view>
+      <view class="modal-footer">
+        <view class="modal-btn cancel" bindtap="closeAddModal">取消</view>
+        <view class="modal-btn confirm" bindtap="saveRecord">保存</view>
       </view>
     </view>
   </view>
