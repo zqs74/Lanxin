@@ -85,3 +85,15 @@
     opacity: 0;
   }
 }
+
+.ai-label {
+  position: absolute;
+  bottom: -36rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 22rpx;
+  color: #44ceff;
+  font-weight: 600;
+  white-space: nowrap;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.3);
+}

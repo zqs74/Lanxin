@@ -10,4 +10,5 @@
     </view>
     <view class="ripple"></view>
   </view>
+  <text class="ai-label">赛事AI</text>
 </view>

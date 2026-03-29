@@ -9,7 +9,7 @@
         <text class="back-icon">←</text>
       </view>
       <view class="header-info">
-        <view class="header-title">昇梦AI助手</view>
+        <view class="header-title">昇梦赛事AI助手</view>
         <view class="header-subtitle">你的专属篮球训练顾问</view>
       </view>
       <view class="ai-status">
@@ -24,7 +24,7 @@
         <!-- AI欢迎消息 -->
         <view class="welcome-section" id="msg-welcome">
           <view class="welcome-avatar">🤖</view>
-          <view class="welcome-title">你好！我是昇梦AI</view>
+          <view class="welcome-title">你好！我是昇梦赛事AI</view>
           <view class="welcome-desc">基于你的训练数据和比赛记录，为你提供专业的篮球训练建议。</view>
         </view>
         

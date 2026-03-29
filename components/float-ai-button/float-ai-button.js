@@ -38,7 +38,7 @@ Component({
       
       const touch = e.touches[0]
       const systemInfo = wx.getSystemInfoSync()
-      const tabBarHeight = 60
+      const tabBarHeight = 120
       
       let x = touch.clientX - 60
       let y = touch.clientY - 60
