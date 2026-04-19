@@ -1,0 +1,242 @@
+<!-- custom-match-result.wxml -->
+<view class="page-wrapper">
+  <view class="page-header-gradient"></view>
+  
+  <view class="container slide-up">
+    <!-- 顶部导航 -->
+    <view class="top-nav">
+      <view class="nav-header">
+        <view class="back-btn" bindtap="goBack">
+          <text class="back-icon">←</text>
+        </view>
+        <view class="nav-title">赛果报告</view>
+        <view class="nav-placeholder"></view>
+      </view>
+    </view>
+
+    <!-- 最终比分卡片 -->
+    <view class="final-score-card card glass-effect">
+      <view class="score-header">
+        <text class="match-label">自定义比赛</text>
+        <view class="status-badge completed">
+          <text class="status-dot"></text>
+          <text class="status-text">已完赛</text>
+        </view>
+      </view>
+      
+      <view class="final-score-display">
+        <text class="final-total">{{finalTotalScore}}</text>
+        <text class="score-unit">总分</text>
+      </view>
+
+      <view class="match-meta">
+        <view class="meta-item">
+          <text class="meta-label">参赛人数</text>
+          <text class="meta-value">{{players.length}}人</text>
+        </view>
+        <view class="meta-divider"></view>
+        <view class="meta-item">
+          <text class="meta-label">比赛时长</text>
+          <text class="meta-value">{{matchDuration}}</text>
+        </view>
+        <view class="meta-divider"></view>
+        <view class="meta-item">
+          <text class="meta-label">操作次数</text>
+          <text class="meta-value">{{actionLog.length}}次</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 球员得分排行 -->
+    <view class="section">
+      <view class="section-title">球员得分排行</view>
+      <view class="ranking-list">
+        <view 
+          wx:for="{{playerRanking}}" 
+          wx:key="id"
+          class="ranking-item card {{index === 0 ? 'top-rank' : ''}}"
+        >
+          <view class="rank-badge {{index < 3 ? 'top' + (index + 1) : ''}}">
+            <text class="rank-number">{{index + 1}}</text>
+          </view>
+
+          <view class="rank-avatar">
+            <image 
+              wx:if="{{item.avatar}}" 
+              src="{{item.avatar}}" 
+              class="rank-avatar-img"
+              mode="aspectFill"
+            />
+            <view wx:else class="rank-avatar-placeholder">
+              <text>{{item.number}}</text>
+            </view>
+          </view>
+
+          <view class="rank-info">
+            <text class="rank-name">{{item.name}}</text>
+            <text class="rank-number">#{{item.number}}</text>
+          </view>
+
+          <view class="rank-stats">
+            <text class="rank-score">{{item.score}}分</text>
+            <text class="rank-percentage">{{item.percentage}}%</text>
+          </view>
+          
+          <view wx:if="{{index === 0}}" class="crown-icon">👑</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 判罚记录明细 -->
+    <view wx:if="{{totalFouls > 0}}" class="section">
+      <view class="section-title">判罚记录明细</view>
+      <view class="foul-summary">
+        <view class="foul-stat">
+          <text class="foul-count">{{foulStats.foul || 0}}</text>
+          <text class="foul-label">犯规</text>
+        </view>
+        <view class="foul-stat">
+          <text class="foul-count">{{foulStats.warning || 0}}</text>
+          <text class="foul-label">警告</text>
+        </view>
+        <view class="foul-stat">
+          <text class="foul-count">{{foulStats.freeThrow || 0}}</text>
+          <text class="foul-label">罚球</text>
+        </view>
+        <view class="foul-stat">
+          <text class="foul-count">{{foulStats.violation || 0}}</text>
+          <text class="foul-label">违例</text>
+        </view>
+      </view>
+
+      <view class="foul-details">
+        <view 
+          wx:for="{{allFouls}}" 
+          wx:key="index"
+          class="foul-detail-item card"
+        >
+          <view class="foul-type-badge {{item.type}}">
+            <text class="foul-type-text">{{item.typeName}}</text>
+          </view>
+          <view class="foul-player-info">
+            <text class="foul-player-name">{{item.playerName}}</text>
+            <text class="foul-time">{{item.time}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 分析报告区域 -->
+    <view class="analysis-section">
+      <view class="section-title analysis-title">📊 赛事分析报告</view>
+
+      <!-- 核心数据总览 -->
+      <view class="analysis-card card">
+        <view class="analysis-subtitle">核心数据总览</view>
+        <view class="data-grid">
+          <view class="data-item">
+            <text class="data-value highlight">{{finalTotalScore}}</text>
+            <text class="data-label">总得分</text>
+          </view>
+          <view class="data-item">
+            <text class="data-value">{{totalActions}}</text>
+            <text class="data-label">总操作数</text>
+          </view>
+          <view class="data-item">
+            <text class="data-value">{{avgEfficiency}}%</text>
+            <text class="data-label">得分效率</text>
+          </view>
+          <view class="data-item">
+            <text class="data-value">{{totalFouls}}</text>
+            <text class="data-label">判罚总数</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 球员个人数据看板 -->
+      <view class="analysis-card card">
+        <view class="analysis-subtitle">球员数据看板</view>
+        <view class="player-analysis-list">
+          <view 
+            wx:for="{{players}}" 
+            wx:key="id"
+            class="player-analysis-item"
+          >
+            <view class="pa-header">
+              <view class="pa-avatar">
+                <image 
+                  wx:if="{{item.avatar}}" 
+                  src="{{item.avatar}}"
+                  class="pa-avatar-img" 
+                  mode="aspectFill"
+                />
+                <view wx:else class="pa-avatar-placeholder">
+                  <text>{{item.number}}</text>
+                </view>
+              </view>
+              <view class="pa-info">
+                <text class="pa-name">{{item.name}}</text>
+                <text class="pa-number">#{{item.number}}</text>
+              </view>
+              <view class="pa-score-main">
+                <text class="pa-score">{{item.score}}分</text>
+                <text class="pa-percent">{{item.scorePercentage}}%</text>
+              </view>
+            </view>
+
+            <!-- 得分占比条 -->
+            <view class="progress-bar-container">
+              <view 
+                class="progress-bar" 
+                style="width: {{item.scorePercentage}}%"
+              ></view>
+            </view>
+
+            <!-- 判罚统计 -->
+            <view wx:if="{{getPlayerFouls(item).total > 0}}" class="pa-fouls">
+              <text class="pa-foul-text">
+                判罚: {{getPlayerFouls(item).foul}}犯规 {{getPlayerFouls(item).warning}}警告 {{getPlayerFouls(item).freeThrow}}罚球 {{getPlayerFouls(item).violation}}违例
+              </text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 关键时刻时间线 -->
+      <view wx:if="{{keyMoments.length > 0}}" class="analysis-card card">
+        <view class="analysis-subtitle">关键时刻记录</view>
+        <view class="timeline">
+          <view 
+            wx:for="{{keyMoments}}" 
+            wx:key="index"
+            class="timeline-item"
+          >
+            <view class="timeline-dot {{item.type}}"></view>
+            <view class="timeline-content">
+              <text class="timeline-time">{{item.time}}</text>
+              <text class="timeline-desc">{{item.description}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 底部操作按钮 -->
+    <view class="bottom-actions">
+      <button class="btn btn-ghost btn-action" bindtap="saveReport">
+        <text class="btn-icon">💾</text>
+        保存报告
+      </button>
+      
+      <button class="btn btn-primary btn-action" bindtap="shareResult">
+        <text class="btn-icon">📤</text>
+        分享赛果
+      </button>
+      
+      <button class="btn btn-success btn-action" bindtap="goHome">
+        <text class="btn-icon">🏠</text>
+        返回首页
+      </button>
+    </view>
+  </view>
+</view>

@@ -83,6 +83,14 @@ Page({
     }
   },
 
+  // 进入自定义比赛
+  startCustomMatch: function() {
+    const matchId = 'custom_' + Date.now()
+    wx.navigateTo({
+      url: `/pages/custom-match-setup/custom-match-setup?matchId=${matchId}`
+    })
+  },
+
   // 绘制比分走势折线图
   drawScoreTrend: function() {
     const ctx = wx.createCanvasContext('scoreTrendCanvas')

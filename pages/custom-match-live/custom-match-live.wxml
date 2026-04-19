@@ -1,0 +1,225 @@
+<!-- custom-match-live.wxml -->
+<view class="page-wrapper">
+  <view class="page-header-gradient"></view>
+  
+  <view class="container slide-up">
+    <!-- 顶部状态栏 - 添加计时器 -->
+    <view class="top-status-bar glass-effect">
+      <view class="status-left">
+        <view class="exit-btn" bindtap="exitMatch">
+          <text class="exit-icon">✕</text>
+        </view>
+        <view class="match-info">
+          <text class="match-title">自定义比赛</text>
+          <view class="status-badge in-progress">
+            <view class="status-dot"></view>
+            <text class="status-text">进行中</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 计时器 -->
+      <view class="timer-display">
+        <text class="timer-icon">⏱</text>
+        <text class="timer-text">{{matchTime}}</text>
+      </view>
+      
+      <view class="score-board">
+        <text class="total-score">{{totalScore}}</text>
+        <text class="score-label">总分</text>
+      </view>
+    </view>
+
+    <!-- 球员网格区域 - 按队伍分组 -->
+    <view class="players-grid-section">
+      <view class="grid-header">
+        <text class="grid-title">参赛球员</text>
+        <text class="player-count-info">{{players.length}}名球员 (A队:{{teamACount}} / B队:{{teamBCount}})</text>
+      </view>
+
+      <view class="players-grid">
+        <view 
+          wx:for="{{players}}" 
+          wx:key="id"
+          class="player-card card {{selectedPlayerId === item.id ? 'selected' : ''}} {{item.team === 'A' ? 'team-a' : 'team-b'}}"
+          bindtap="selectPlayer"
+          data-player="{{item}}"
+        >
+          <!-- 球员头像区域 - 增大并优化徽章位置 -->
+          <view class="card-avatar-area enlarged">
+            <image 
+              wx:if="{{item.avatar}}" 
+              src="{{item.avatar}}" 
+              class="card-avatar"
+              mode="aspectFill"
+            />
+            <view wx:else class="card-avatar-placeholder {{item.team}}">
+              <text class="card-avatar-number">{{item.number}}</text>
+            </view>
+            
+            <!-- 得分徽章 - 移到右上角外侧，增大尺寸 -->
+            <view wx:if="{{item.score > 0}}" class="score-badge-outer">
+              <text class="badge-score-large">{{item.score}}</text>
+            </view>
+          </view>
+
+          <!-- 球员信息 -->
+          <view class="card-info">
+            <text class="card-name">{{item.name}}</text>
+            <text class="card-number team-label-{{item.team}}">#{{item.number}} {{item.team === 'A' ? 'A队' : 'B队'}}</text>
+          </view>
+
+          <!-- 个人得分 - 增大显示 -->
+          <view class="card-score-display">
+            <text class="score-value-large {{item.score > 0 ? 'has-score' : ''}}">{{item.score}} 分</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作日志（可折叠） -->
+    <view wx:if="{{actionLog.length > 0}}" class="action-log-section">
+      <view class="log-header" bindtap="toggleLog">
+        <text class="log-title">操作记录</text>
+        <text class="log-count">{{actionLog.length}}条</text>
+        <text class="log-toggle {{showLog ? 'expanded' : ''}}">▼</text>
+      </view>
+      
+      <view wx:if="{{showLog}}" class="log-list">
+        <view wx:for="{{actionLog}}" wx:key="index" class="log-item" wx:for-item="log">
+          <view class="log-time">{{log.time}}</view>
+          <view class="log-content {{log.type}}">
+            <text class="log-text">{{log.playerName}} - {{log.action}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 球员操作浮层 - 优化按钮样式 -->
+  <view wx:if="{{selectedPlayer}}" class="action-overlay" bindtap="closePlayerAction">
+    <view class="action-panel card glass-effect-dark" catchtap="">
+      <!-- 球员头部信息 -->
+      <view class="panel-header">
+        <view class="panel-avatar {{selectedPlayer.team}}">
+          <image 
+            wx:if="{{selectedPlayer.avatar}}" 
+            src="{{selectedPlayer.avatar}}" 
+            class="panel-avatar-img"
+            mode="aspectFill"
+          />
+          <view wx:else class="panel-avatar-placeholder {{selectedPlayer.team}}">
+            <text>{{selectedPlayer.number}}</text>
+          </view>
+        </view>
+        <view class="panel-player-info">
+          <text class="panel-name">{{selectedPlayer.name}}</text>
+          <text class="panel-number">#{{selectedPlayer.number}} ({{selectedPlayer.team === 'A' ? 'A队' : 'B队'}})</text>
+        </view>
+        <view class="current-score">
+          <text class="current-label">当前得分</text>
+          <text class="current-value">{{selectedPlayer.score}}</text>
+        </view>
+      </view>
+
+      <!-- 分数加减模块 - 横向宽按钮，降低高度 -->
+      <view class="action-module">
+        <view class="module-title">分数加减</view>
+        <view class="score-buttons-wide">
+          <button 
+            class="score-btn-wide btn-plus-green"
+            bindtap="addScore"
+            data-points="1"
+          >
+            <text class="btn-text-large">+1 分</text>
+          </button>
+          <button 
+            class="score-btn-wide btn-plus-blue"
+            bindtap="addScore"
+            data-points="2"
+          >
+            <text class="btn-text-large">+2 分</text>
+          </button>
+          <button 
+            class="score-btn-wide btn-plus-gold highlight"
+            bindtap="addScore"
+            data-points="3"
+          >
+            <text class="btn-text-large">+3 分</text>
+          </button>
+          <button 
+            class="score-btn-wide btn-minus-red"
+            bindtap="subtractScore"
+            data-points="1"
+          >
+            <text class="btn-text-large">-1 分</text>
+          </button>
+        </view>
+      </view>
+
+      <!-- 判罚记录模块 - 横向宽按钮，降低高度 -->
+      <view class="action-module">
+        <view class="module-title">判罚记录</view>
+        <view class="foul-buttons-wide">
+          <button 
+            class="foul-btn-wide"
+            bindtap="recordFoul"
+            data-type="foul"
+          >
+            <text class="foul-icon-wide">⚠️</text>
+            <text class="foul-text-wide">犯规</text>
+          </button>
+          <button 
+            class="foul-btn-wide"
+            bindtap="recordFoul"
+            data-type="warning"
+          >
+            <text class="foul-icon-wide">📋</text>
+            <text class="foul-text-wide">警告</text>
+          </button>
+          <button 
+            class="foul-btn-wide"
+            bindtap="recordFoul"
+            data-type="freeThrow"
+          >
+            <text class="foul-icon-wide">🏀</text>
+            <text class="foul-text-wide">罚球</text>
+          </button>
+          <button 
+            class="foul-btn-wide"
+            bindtap="recordFoul"
+            data-type="violation"
+          >
+            <text class="foul-icon-wide">❌</text>
+            <text class="foul-text-wide">违例</text>
+          </button>
+        </view>
+      </view>
+
+      <!-- 关闭按钮 -->
+      <button class="close-panel-btn" bindtap="closePlayerAction">
+        关闭
+      </button>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 - 统一背景 -->
+  <view class="bottom-bar unified-bg">
+    <button 
+      class="bar-btn btn-undo {{actionLog.length === 0 ? 'disabled' : ''}}"
+      bindtap="undoLastAction"
+      disabled="{{actionLog.length === 0}}"
+    >
+      <text class="bar-btn-icon">↩</text>
+      <text class="bar-btn-text">撤销上一步</text>
+    </button>
+    
+    <button 
+      class="bar-btn btn-end"
+      bindtap="endMatch"
+    >
+      <text class="bar-btn-icon">⏹</text>
+      <text class="bar-btn-text">结束比赛</text>
+    </button>
+  </view>
+</view>

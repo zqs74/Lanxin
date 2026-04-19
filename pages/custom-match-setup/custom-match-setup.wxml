@@ -1,0 +1,237 @@
+<!-- custom-match-setup.wxml -->
+<view class="page-wrapper">
+  <view class="page-header-gradient"></view>
+  
+  <view class="container slide-up">
+    <!-- 顶部导航栏 -->
+    <view class="top-nav">
+      <view class="nav-header">
+        <view class="back-btn" bindtap="goBack">
+          <text class="back-icon">←</text>
+        </view>
+        <view class="nav-title">球员配置</view>
+        <view class="nav-placeholder"></view>
+      </view>
+    </view>
+
+    <!-- 页面说明卡片 -->
+    <view class="info-card card glass-effect">
+      <view class="info-icon">📋</view>
+      <view class="info-content">
+        <view class="info-title">参赛球员信息</view>
+        <view class="info-desc">请分别录入A队和B队的球员信息，开赛后不可修改</view>
+      </view>
+    </view>
+
+    <!-- 队伍切换标签 -->
+    <view class="team-tabs glass-effect">
+      <view 
+        class="team-tab {{currentTeam === 'A' ? 'active' : ''}}"
+        bindtap="switchTeam"
+        data-team="A"
+      >
+        <text class="team-tab-text">A 队</text>
+        <text class="team-tab-count">{{teamAPlayers.length}}人</text>
+        <view wx:if="{{currentTeam === 'A'}}" class="tab-active-indicator"></view>
+      </view>
+      
+      <view 
+        class="team-tab {{currentTeam === 'B' ? 'active' : ''}}"
+        bindtap="switchTeam"
+        data-team="B"
+      >
+        <text class="team-tab-text">B 队</text>
+        <text class="team-tab-count">{{teamBPlayers.length}}人</text>
+        <view wx:if="{{currentTeam === 'B'}}" class="tab-active-indicator"></view>
+      </view>
+
+      <view class="total-count">
+        <text class="total-label">总计</text>
+        <text class="total-number">{{players.length}}/30人</text>
+      </view>
+    </view>
+
+    <!-- A队球员列表 -->
+    <view wx:if="{{currentTeam === 'A'}}" class="team-section">
+      <view class="section-header-row team-a-header">
+        <view class="team-badge team-a">
+          <text class="badge-icon">🔴</text>
+          <text class="badge-text">A 队球员</text>
+        </view>
+      </view>
+
+      <view class="players-list">
+        <view 
+          wx:for="{{teamAPlayers}}" 
+          wx:key="index" 
+          class="player-item card team-a-item"
+        >
+          <!-- 球员序号 -->
+          <view class="player-index team-a-index">
+            <text class="index-text">{{index + 1}}</text>
+          </view>
+
+          <!-- 球员头像区域 -->
+          <view class="player-avatar-area" bindtap="chooseAvatar" data-index="{{item._originalIndex}}">
+            <image 
+              wx:if="{{item.avatar}}" 
+              src="{{item.avatar}}" 
+              class="avatar-image"
+              mode="aspectFill"
+            />
+            <view wx:else class="avatar-placeholder">
+              <text class="avatar-number">{{item.number || '?'}}</text>
+            </view>
+            <view class="avatar-upload-hint">上传</view>
+          </view>
+
+          <!-- 球员信息输入区 - 增大尺寸 -->
+          <view class="player-inputs enlarged">
+            <view class="input-group">
+              <input 
+                class="input-field input-large {{item.nameError ? 'error' : ''}}"
+                type="text"
+                placeholder="请输入球员姓名 (2-10字符)"
+                value="{{item.name}}"
+                bindinput="onNameInput"
+                data-index="{{item._originalIndex}}"
+                maxlength="10"
+              />
+              <view wx:if="{{item.nameError}}" class="error-hint">{{item.nameError}}</view>
+            </view>
+
+            <view class="input-group">
+              <input 
+                class="input-field input-large number-input {{item.numberError ? 'error' : ''}}"
+                type="number"
+                placeholder="球衣编号 (1-999)"
+                value="{{item.number}}"
+                bindinput="onNumberInput"
+                data-index="{{item._originalIndex}}"
+                maxlength="3"
+              />
+              <view wx:if="{{item.numberError}}" class="error-hint">{{item.numberError}}</view>
+            </view>
+          </view>
+
+          <!-- 删除按钮 -->
+          <view 
+            class="delete-btn {{players.length <= 2 ? 'disabled' : ''}}"
+            bindtap="deletePlayer"
+            data-index="{{item._originalIndex}}"
+          >
+            <text class="delete-icon">×</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- A队新增球员按钮 -->
+      <button 
+        class="btn btn-add-to-team team-a-btn {{players.length >= 30 ? 'disabled' : ''}}"
+        bindtap="addPlayerToTeam"
+        data-team="A"
+        disabled="{{players.length >= 30}}"
+      >
+        <text class="btn-plus">+</text>
+        为 A 队添加球员
+      </button>
+    </view>
+
+    <!-- B队球员列表 -->
+    <view wx:if="{{currentTeam === 'B'}}" class="team-section">
+      <view class="section-header-row team-b-header">
+        <view class="team-badge team-b">
+          <text class="badge-icon">🔵</text>
+          <text class="badge-text">B 队球员</text>
+        </view>
+      </view>
+
+      <view class="players-list">
+        <view 
+          wx:for="{{teamBPlayers}}" 
+          wx:key="index" 
+          class="player-item card team-b-item"
+        >
+          <!-- 球员序号 -->
+          <view class="player-index team-b-index">
+            <text class="index-text">{{index + 1}}</text>
+          </view>
+
+          <!-- 球员头像区域 -->
+          <view class="player-avatar-area" bindtap="chooseAvatar" data-index="{{item._originalIndex}}">
+            <image 
+              wx:if="{{item.avatar}}" 
+              src="{{item.avatar}}" 
+              class="avatar-image"
+              mode="aspectFill"
+            />
+            <view wx:else class="avatar-placeholder">
+              <text class="avatar-number">{{item.number || '?'}}</text>
+            </view>
+            <view class="avatar-upload-hint">上传</view>
+          </view>
+
+          <!-- 球员信息输入区 - 增大尺寸 -->
+          <view class="player-inputs enlarged">
+            <view class="input-group">
+              <input 
+                class="input-field input-large {{item.nameError ? 'error' : ''}}"
+                type="text"
+                placeholder="请输入球员姓名 (2-10字符)"
+                value="{{item.name}}"
+                bindinput="onNameInput"
+                data-index="{{item._originalIndex}}"
+                maxlength="10"
+              />
+              <view wx:if="{{item.nameError}}" class="error-hint">{{item.nameError}}</view>
+            </view>
+
+            <view class="input-group">
+              <input 
+                class="input-field input-large number-input {{item.numberError ? 'error' : ''}}"
+                type="number"
+                placeholder="球衣编号 (1-999)"
+                value="{{item.number}}"
+                bindinput="onNumberInput"
+                data-index="{{item._originalIndex}}"
+                maxlength="3"
+              />
+              <view wx:if="{{item.numberError}}" class="error-hint">{{item.numberError}}</view>
+            </view>
+          </view>
+
+          <!-- 删除按钮 -->
+          <view 
+            class="delete-btn {{players.length <= 2 ? 'disabled' : ''}}"
+            bindtap="deletePlayer"
+            data-index="{{item._originalIndex}}"
+          >
+            <text class="delete-icon">×</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- B队新增球员按钮 -->
+      <button 
+        class="btn btn-add-to-team team-b-btn {{players.length >= 30 ? 'disabled' : ''}}"
+        bindtap="addPlayerToTeam"
+        data-team="B"
+        disabled="{{players.length >= 30}}"
+      >
+        <text class="btn-plus">+</text>
+        为 B 队添加球员
+      </button>
+    </view>
+
+    <!-- 底部操作区 -->
+    <view class="bottom-actions">
+      <button 
+        class="btn btn-primary btn-start-full"
+        bindtap="startMatch"
+      >
+        <text class="btn-icon">▶</text>
+        开始比赛
+      </button>
+    </view>
+  </view>
+</view>

@@ -7,7 +7,10 @@
     "pages/create/create",
     "pages/match-detail/match-detail",
     "pages/chat/chat",
-    "pages/profile-edit/profile-edit"
+    "pages/profile-edit/profile-edit",
+    "pages/custom-match-setup/custom-match-setup",
+    "pages/custom-match-live/custom-match-live",
+    "pages/custom-match-result/custom-match-result"
   ],
   "window": {
     "backgroundTextStyle": "dark",

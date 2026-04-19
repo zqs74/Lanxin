@@ -30,6 +30,22 @@
       </view>
     </view>
 
+    <!-- 自定义比赛入口 -->
+    <view class="section custom-match-section">
+      <view class="custom-match-card card glass-effect" bindtap="startCustomMatch">
+        <view class="custom-match-icon">
+          <text class="icon-text">🏀</text>
+        </view>
+        <view class="custom-match-content">
+          <view class="custom-title">自定义即时计分比赛</view>
+          <view class="custom-desc">创建属于你的比赛，实时记录得分与判罚</view>
+        </view>
+        <view class="custom-arrow">
+          <text class="arrow-icon">→</text>
+        </view>
+      </view>
+    </view>
+
     <!-- 视频预览区 -->
     <view class="section">
       <view class="section-header">
