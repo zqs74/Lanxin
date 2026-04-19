@@ -18,10 +18,15 @@ Component({
   methods: {
     initPosition() {
       const systemInfo = wx.getSystemInfoSync()
-      const rightMargin = 8
-      const tabBarHeight = 120
-      const x = systemInfo.windowWidth - 120 - rightMargin
-      const y = systemInfo.windowHeight - 120 - tabBarHeight - 8
+      const pxToRpx = systemInfo.windowWidth / 750
+      
+      const btnSize = Math.round(110 * pxToRpx)
+      const rightMargin = Math.round(24 * pxToRpx)
+      const bottomMargin = Math.round(180 * pxToRpx)
+      
+      const x = systemInfo.windowWidth - btnSize - rightMargin
+      const y = systemInfo.windowHeight - btnSize - bottomMargin
+      
       this.setData({ x, y })
     },
 
@@ -38,23 +43,28 @@ Component({
       
       const touch = e.touches[0]
       const systemInfo = wx.getSystemInfoSync()
-      const tabBarHeight = 120
+      const pxToRpx = systemInfo.windowWidth / 750
       
-      let x = touch.clientX - 60
-      let y = touch.clientY - 60
+      const btnSize = Math.round(110 * pxToRpx)
+      const edgeMargin = Math.round(16 * pxToRpx)
+      const bottomSafeArea = Math.round(200 * pxToRpx)
       
-      const maxX = systemInfo.windowWidth - 120
-      const maxY = systemInfo.windowHeight - 120 - tabBarHeight
+      let x = touch.clientX - btnSize / 2
+      let y = touch.clientY - btnSize / 2
       
-      x = Math.max(0, Math.min(x, maxX))
-      y = Math.max(0, Math.min(y, maxY))
+      const maxX = systemInfo.windowWidth - btnSize - edgeMargin
+      const maxY = systemInfo.windowHeight - btnSize - bottomSafeArea
+      
+      x = Math.max(edgeMargin, Math.min(x, maxX))
+      y = Math.max(edgeMargin, Math.min(y, maxY))
       
       this.setData({ x, y })
     },
 
     onTouchEnd(e) {
       const systemInfo = wx.getSystemInfoSync()
-      const tabBarHeight = 120
+      const pxToRpx = systemInfo.windowWidth / 750
+      
       const deltaX = Math.abs(e.changedTouches[0].clientX - this.data.startX)
       const deltaY = Math.abs(e.changedTouches[0].clientY - this.data.startY)
       
@@ -67,18 +77,21 @@ Component({
       this.setData({ isDragging: false })
       
       const centerX = systemInfo.windowWidth / 2
-      const maxY = systemInfo.windowHeight - 120 - tabBarHeight
+      const btnSize = Math.round(110 * pxToRpx)
+      const edgeMargin = Math.round(20 * pxToRpx)
+      const bottomSafeArea = Math.round(200 * pxToRpx)
+      const maxY = systemInfo.windowHeight - btnSize - bottomSafeArea
       
       let x = this.data.x
       let y = this.data.y
       
       if (x < centerX) {
-        x = 8
+        x = edgeMargin
       } else {
-        x = systemInfo.windowWidth - 120 - 8
+        x = systemInfo.windowWidth - btnSize - edgeMargin
       }
       
-      y = Math.max(0, Math.min(y, maxY))
+      y = Math.max(edgeMargin, Math.min(y, maxY))
       
       this.setData({ x, y })
     },

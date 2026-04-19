@@ -6,7 +6,7 @@
   <view class="button-inner">
     <view class="glow-effect"></view>
     <view class="icon-container">
-      <text class="ai-icon">🤖</text>
+      <image class="ai-icon-svg" src="/images/ai-robot.svg" mode="aspectFit"></image>
     </view>
     <view class="ripple"></view>
   </view>

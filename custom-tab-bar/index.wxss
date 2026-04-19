@@ -1,59 +1,82 @@
 .tab-bar-container {
   width: 100%;
   position: fixed;
-  bottom: 40rpx;
+  bottom: 30rpx;
   left: 0;
   right: 0;
   z-index: 9999;
 }
 
 .t-tab-bar {
-  --td-tab-bar-height: 100rpx;
-  --td-tab-bar-tag-border-radius: 40rpx;
-  --td-tab-bar-tag-height: 64rpx;
-  --td-tab-bar-tag-margin: 16rpx 0;
-  --td-tab-bar-tag-padding: 0 32rpx;
-  --td-tab-bar-icon-size: 32rpx;
-  --td-tab-bar-text-font-size: 24rpx;
+  --td-tab-bar-height: 80rpx;
+  --td-tab-bar-tag-border-radius: 44rpx;
+  --td-tab-bar-tag-height: 56rpx;
+  --td-tab-bar-tag-margin: 8rpx 0;
+  --td-tab-bar-tag-padding: 0 24rpx;
+  --td-tab-bar-icon-size: 26rpx;
+  --td-tab-bar-text-font-size: 20rpx;
 
-  --td-tab-bar-color: #999999;
+  --td-tab-bar-color: #777777;
   --td-tab-bar-active-color: #D4AF37;
-  --td-tab-bar-hover-bg-color: rgba(212, 175, 55, 0.2);
+  --td-tab-bar-hover-bg-color: transparent;
 
-  --td-tab-bar-bg-color: rgba(26, 26, 26, 0.85);
-  --td-tab-bar-border-color: rgba(212, 175, 55, 0.3);
-  -webkit-backdrop-filter: blur(35rpx);
-  backdrop-filter: blur(35rpx);
-  box-shadow: 0 4rpx 30rpx rgba(0, 0, 0, 0.5), 0 0 20rpx rgba(212, 175, 55, 0.1);
-  border: 1rpx solid rgba(212, 175, 55, 0.25);
+  --td-tab-bar-bg-color: rgba(18, 18, 18, 0.75);
+  --td-tab-bar-border-color: rgba(212, 175, 55, 0.2);
+  
+  -webkit-backdrop-filter: blur(40rpx) saturate(180%);
+  backdrop-filter: blur(40rpx) saturate(180%);
+  
+  box-shadow:
+    0 2rpx 16rpx rgba(0, 0, 0, 0.4),
+    0 0 1rpx rgba(212, 175, 55, 0.15),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.03);
+  border: 1rpx solid rgba(212, 175, 55, 0.15);
 
   position: fixed !important;
   left: 0 !important;
   right: 0 !important;
-  width: 90% !important;
+  width: 88% !important;
   margin: 0 auto !important;
-  bottom: 60rpx !important;
+  bottom: 50rpx !important;
   z-index: 9999 !important;
 
-  border-radius: 50rpx;
-  padding: 0 !important;
+  border-radius: 44rpx;
+  padding: 6rpx 10rpx !important;
   box-sizing: border-box !important;
 }
 
 .t-tab-bar__item {
   transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
 }
 
 .t-tab-bar__item--active {
-  transform: translateY(-3rpx);
+  transform: translateY(-2rpx) scale(1.02);
   transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .t-tab-bar--tag .t-tab-bar__track {
+  background: linear-gradient(
+    135deg,
+    rgba(212, 175, 55, 0.12) 0%,
+    rgba(255, 215, 0, 0.08) 50%,
+    rgba(212, 175, 55, 0.12) 100%
+  ) !important;
+  backdrop-filter: blur(20rpx);
+  -webkit-backdrop-filter: blur(20rpx);
+  border: 1rpx solid rgba(212, 175, 55, 0.2) !important;
+  box-shadow:
+    0 2rpx 12rpx rgba(212, 175, 55, 0.1),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.05);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
 }
 
 .t-tab-bar--tag .t-tab-bar__indicator {
+  width: 24rpx !important;
+  height: 4rpx !important;
+  border-radius: 2rpx !important;
+  background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%) !important;
+  box-shadow: 0 0 8rpx rgba(212, 175, 55, 0.5);
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
 }
 

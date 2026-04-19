@@ -153,7 +153,6 @@ Page({
     this.setData({ overallScore: avg })
   },
 
-  // 奢华风格雷达图绘制 - 金色渐变 + 发光效果
   drawRadarChart() {
     const ctx = wx.createCanvasContext('radarChart')
     const data = this.data.radarData
@@ -166,7 +165,6 @@ Page({
 
     ctx.clearRect(0, 0, width, height)
 
-    // 绘制背景六边形 - 金色渐变层次
     for (let i = 5; i >= 1; i--) {
       const r = radius * i / 5
       ctx.beginPath()
@@ -182,7 +180,6 @@ Page({
       }
       ctx.closePath()
 
-      // 金色渐变透明度，越往外越淡
       const alpha = 0.12 - (i - 1) * 0.02
       const strokeAlpha = 0.15 - (i - 1) * 0.025
 
@@ -193,26 +190,19 @@ Page({
       ctx.stroke()
     }
 
-    // 绘制轴线 - 金色半透明
     for (let i = 0; i < data.dimensions.length; i++) {
       const angle = (i * 2 * Math.PI) / data.dimensions.length - Math.PI / 2
       const x = centerX + radius * Math.cos(angle)
       const y = centerY + radius * Math.sin(angle)
 
-      // 轴线渐变效果（从中心到边缘）
-      const gradient = ctx.createLinearGradient(centerX, centerY, x, y)
-      gradient.addColorStop(0, 'rgba(212, 175, 55, 0.4)')
-      gradient.addColorStop(1, 'rgba(212, 175, 55, 0.08)')
-
       ctx.beginPath()
       ctx.moveTo(centerX, centerY)
       ctx.lineTo(x, y)
-      ctx.setStrokeStyle(gradient)
+      ctx.setStrokeStyle('rgba(212, 175, 55, 0.25)')
       ctx.setLineWidth(1.5)
       ctx.stroke()
     }
 
-    // 绘制数据区域 - 金色渐变填充
     ctx.beginPath()
     for (let i = 0; i < data.dimensions.length; i++) {
       const angle = (i * 2 * Math.PI) / data.dimensions.length - Math.PI / 2
@@ -227,20 +217,12 @@ Page({
     }
     ctx.closePath()
 
-    // 数据区域填充 - 金色渐变
-    const fillGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius * 0.8)
-    fillGradient.addColorStop(0, 'rgba(255, 215, 0, 0.4)')
-    fillGradient.addColorStop(0.5, 'rgba(212, 175, 55, 0.3)')
-    fillGradient.addColorStop(1, 'rgba(184, 134, 11, 0.2)')
-    ctx.setFillStyle(fillGradient)
+    ctx.setFillStyle('rgba(212, 175, 55, 0.3)')
     ctx.fill()
-
-    // 数据区域边框 - 金色发光
     ctx.setStrokeStyle('#FFD700')
     ctx.setLineWidth(3)
     ctx.stroke()
 
-    // 绘制外发光效果
     ctx.beginPath()
     for (let i = 0; i < data.dimensions.length; i++) {
       const angle = (i * 2 * Math.PI) / data.dimensions.length - Math.PI / 2
@@ -258,42 +240,31 @@ Page({
     ctx.setLineWidth(6)
     ctx.stroke()
 
-    // 绘制数据点 - 金色圆点 + 发光效果
     for (let i = 0; i < data.dimensions.length; i++) {
       const angle = (i * 2 * Math.PI) / data.dimensions.length - Math.PI / 2
       const r = radius * data.values[i] / 100
       const x = centerX + r * Math.cos(angle)
       const y = centerY + r * Math.sin(angle)
 
-      // 外发光圈
       ctx.beginPath()
       ctx.arc(x, y, 10, 0, 2 * Math.PI)
       ctx.fillStyle = `rgba(255, 215, 0, ${0.15 + (data.values[i] / 100) * 0.15})`
       ctx.fill()
 
-      // 中间光晕
       ctx.beginPath()
       ctx.arc(x, y, 7, 0, 2 * Math.PI)
       ctx.fillStyle = `rgba(212, 175, 55, ${0.3 + (data.values[i] / 100) * 0.2})`
       ctx.fill()
 
-      // 内部实心点
       ctx.beginPath()
       ctx.arc(x, y, 5, 0, 2 * Math.PI)
-      const pointGradient = ctx.createRadialGradient(x - 1, y - 1, 0, x, y, 5)
-      pointGradient.addColorStop(0, '#FFFFFF')
-      pointGradient.addColorStop(0.4, '#FFE066')
-      pointGradient.addColorStop(1, '#D4AF37')
-      ctx.fillStyle = pointGradient
+      ctx.setFillStyle('#FFD700')
       ctx.fill()
-
-      // 边框
       ctx.strokeStyle = '#B8860B'
       ctx.lineWidth = 2
       ctx.stroke()
     }
 
-    // 绘制标签 - 深色文字配金色强调
     ctx.setFontSize(12)
     ctx.setTextAlign('center')
     for (let i = 0; i < data.dimensions.length; i++) {
@@ -302,18 +273,13 @@ Page({
       const x = centerX + r * Math.cos(angle)
       let y = centerY + r * Math.sin(angle) + 4
 
-      // 标签背景（可选）
       ctx.fillStyle = '#E0E0E0'
       ctx.fillText(data.dimensions[i], x, y)
     }
 
-    // 中心装饰 - 金色小圆点
     ctx.beginPath()
     ctx.arc(centerX, centerY, 4, 0, 2 * Math.PI)
-    const centerGradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 4)
-    centerGradient.addColorStop(0, '#FFD700')
-    centerGradient.addColorStop(1, '#D4AF37')
-    ctx.fillStyle = centerGradient
+    ctx.setFillStyle('#FFD700')
     ctx.fill()
 
     ctx.draw()
