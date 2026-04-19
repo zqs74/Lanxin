@@ -1,4 +1,4 @@
-/* create.wxss - 现代化UI设计 */
+/* create.wxss - 酷炫黑金风格 */
 .page-wrapper {
   position: relative;
   min-height: 100vh;
@@ -11,7 +11,6 @@
   z-index: 1;
 }
 
-/* 页面标题 */
 .page-header {
   margin-bottom: 40rpx;
   padding-top: 20rpx;
@@ -20,16 +19,15 @@
 .page-title {
   font-size: 40rpx;
   font-weight: 800;
-  color: #1a1a1a;
+  color: #ffffff;
   margin-bottom: 8rpx;
 }
 
 .page-subtitle {
   font-size: 26rpx;
-  color: #666;
+  color: #999;
 }
 
-/* 通用section样式 */
 .section {
   margin-bottom: 32rpx;
 }
@@ -44,7 +42,7 @@
 .section-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #ffffff;
   position: relative;
 }
 
@@ -55,22 +53,21 @@
   bottom: -8rpx;
   width: 48rpx;
   height: 6rpx;
-  background: linear-gradient(90deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%);
   border-radius: 3rpx;
 }
 
-/* 视频预览区域 */
 .video-info-badge {
   display: flex;
   align-items: center;
   gap: 8rpx;
   padding: 8rpx 20rpx;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.1) 0%, rgba(89, 168, 255, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.1) 100%);
   border-radius: 30rpx;
   font-size: 22rpx;
-  color: #44ceff;
+  color: #D4AF37;
   font-weight: 600;
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
 }
 
 .video-icon {
@@ -86,7 +83,7 @@
 
 .preview-placeholder {
   height: 400rpx;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.08) 0%, rgba(89, 168, 255, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.08) 0%, rgba(255, 215, 0, 0.05) 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -101,16 +98,15 @@
 
 .preview-text {
   font-size: 28rpx;
-  color: #666;
+  color: #999;
   font-weight: 500;
 }
 
 .preview-hint {
   font-size: 24rpx;
-  color: #999;
+  color: #666;
 }
 
-/* 功能按钮 */
 .action-buttons {
   display: flex;
   gap: 16rpx;
@@ -132,7 +128,6 @@
   font-size: 28rpx;
 }
 
-/* 已选择标签 */
 .selected-tag {
   display: flex;
   align-items: center;
@@ -151,7 +146,6 @@
   font-weight: bold;
 }
 
-/* 精彩片段列表 */
 .clip-list {
   padding: 8rpx;
   border-radius: 24rpx;
@@ -166,7 +160,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.02) 0%, rgba(89, 168, 255, 0.01) 100%);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.02) 0%, rgba(255, 215, 0, 0.01) 100%);
   pointer-events: none;
 }
 
@@ -182,17 +176,17 @@
 }
 
 .clip-item:hover {
-  background: rgba(68, 206, 255, 0.05);
+  background: rgba(212, 175, 55, 0.05);
   transform: translateX(4rpx);
 }
 
 .clip-item.selected {
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.1) 0%, rgba(89, 168, 255, 0.08) 100%);
-  border: 2rpx solid rgba(68, 206, 255, 0.3);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.08) 100%);
+  border: 2rpx solid rgba(212, 175, 55, 0.3);
 }
 
 .clip-item + .clip-item {
-  border-top: 1rpx solid rgba(68, 206, 255, 0.1);
+  border-top: 1rpx solid rgba(212, 175, 55, 0.1);
 }
 
 .clip-checkbox {
@@ -203,22 +197,22 @@
   width: 44rpx;
   height: 44rpx;
   border-radius: 50%;
-  border: 3rpx solid #ddd;
+  border: 3rpx solid #444;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  background: white;
+  background: #2a2a2a;
 }
 
 .checkbox-inner.checked {
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
-  border-color: #44ceff;
-  box-shadow: 0 4rpx 12rpx rgba(68, 206, 255, 0.4);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+  border-color: #D4AF37;
+  box-shadow: 0 4rpx 12rpx rgba(212, 175, 55, 0.4);
 }
 
 .check-mark {
-  color: white;
+  color: #1a1a1a;
   font-size: 24rpx;
   font-weight: bold;
 }
@@ -232,27 +226,26 @@
 
 .clip-time {
   font-size: 22rpx;
-  color: #999;
+  color: #666;
   font-weight: 500;
 }
 
 .clip-description {
   font-size: 28rpx;
-  color: #1a1a1a;
+  color: #ffffff;
   font-weight: 500;
 }
 
 .clip-type-badge {
   padding: 8rpx 16rpx;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.1) 0%, rgba(89, 168, 255, 0.1) 100%);
-  color: #44ceff;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.1) 100%);
+  color: #D4AF37;
   border-radius: 20rpx;
   font-size: 20rpx;
   font-weight: 600;
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
 }
 
-/* AI生成按钮区域 */
 .create-action-section {
   display: flex;
   flex-direction: column;
@@ -275,6 +268,6 @@
 
 .create-hint {
   font-size: 24rpx;
-  color: #999;
+  color: #666;
   text-align: center;
 }

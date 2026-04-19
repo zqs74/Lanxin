@@ -1,4 +1,4 @@
-/* match.wxss - 现代化UI设计 */
+/* match.wxss - 酷炫黑金风格 */
 .page-wrapper {
   position: relative;
   min-height: 100vh;
@@ -11,7 +11,6 @@
   z-index: 1;
 }
 
-/* 页面标题 */
 .page-header {
   margin-bottom: 40rpx;
   padding-top: 20rpx;
@@ -20,16 +19,15 @@
 .page-title {
   font-size: 40rpx;
   font-weight: 800;
-  color: #1a1a1a;
+  color: #ffffff;
   margin-bottom: 8rpx;
 }
 
 .page-subtitle {
   font-size: 26rpx;
-  color: #666;
+  color: #999;
 }
 
-/* 搜索区 */
 .search-section {
   margin-bottom: 32rpx;
 }
@@ -43,19 +41,19 @@
 
 .search-icon {
   font-size: 32rpx;
+  color: #D4AF37;
 }
 
 .search-input {
   flex: 1;
   font-size: 28rpx;
-  color: #1a1a1a;
+  color: #e0e0e0;
 }
 
 .search-placeholder {
-  color: #aaa;
+  color: #666;
 }
 
-/* 通用section样式 */
 .section {
   margin-bottom: 40rpx;
 }
@@ -70,7 +68,7 @@
 .section-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #ffffff;
   position: relative;
 }
 
@@ -81,11 +79,10 @@
   bottom: -8rpx;
   width: 48rpx;
   height: 6rpx;
-  background: linear-gradient(90deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%);
   border-radius: 3rpx;
 }
 
-/* 日期选择区 */
 .date-section {
   margin-bottom: 40rpx;
 }
@@ -100,29 +97,29 @@
 
 .date-picker-icon {
   font-size: 36rpx;
+  color: #D4AF37;
 }
 
 .date-picker-text {
   flex: 1;
   font-size: 30rpx;
-  color: #1a1a1a;
+  color: #ffffff;
   font-weight: 600;
 }
 
 .date-picker-arrow {
   font-size: 36rpx;
-  color: #44ceff;
+  color: #D4AF37;
   font-weight: 300;
 }
 
-/* 比赛列表区 */
 .match-section {
   margin-bottom: 0;
 }
 
 .match-count {
   font-size: 24rpx;
-  color: #666;
+  color: #999;
   font-weight: 500;
 }
 
@@ -145,7 +142,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.03) 0%, rgba(89, 168, 255, 0.02) 100%);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.03) 0%, rgba(255, 215, 0, 0.02) 100%);
   pointer-events: none;
 }
 
@@ -161,18 +158,18 @@
 }
 
 .match-status-badge.playing {
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
-  color: white;
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+  color: #1a1a1a;
   display: flex;
   align-items: center;
   gap: 8rpx;
-  box-shadow: 0 4rpx 12rpx rgba(68, 206, 255, 0.4);
+  box-shadow: 0 4rpx 12rpx rgba(212, 175, 55, 0.4);
 }
 
 .status-dot {
   width: 12rpx;
   height: 12rpx;
-  background: white;
+  background: #1a1a1a;
   border-radius: 50%;
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -205,7 +202,7 @@
 
 .match-time {
   font-size: 26rpx;
-  color: #333;
+  color: #ccc;
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -218,7 +215,7 @@
 
 .match-venue {
   font-size: 24rpx;
-  color: #666;
+  color: #999;
   display: flex;
   align-items: center;
   gap: 8rpx;
@@ -255,7 +252,7 @@
   align-items: center;
   justify-content: center;
   font-size: 28rpx;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.3);
 }
 
 .team-shield.red {
@@ -263,7 +260,7 @@
 }
 
 .team-shield.blue {
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
 }
 
 .team-shield.green {
@@ -276,7 +273,7 @@
 
 .team-name {
   font-size: 30rpx;
-  color: #1a1a1a;
+  color: #ffffff;
   font-weight: 700;
 }
 
@@ -290,7 +287,7 @@
 .score {
   font-size: 44rpx;
   font-weight: 800;
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -301,31 +298,30 @@
 .match-venue-bottom {
   margin-top: 16rpx;
   padding-top: 16rpx;
-  border-top: 1rpx solid rgba(68, 206, 255, 0.1);
+  border-top: 1rpx solid rgba(212, 175, 55, 0.15);
   display: flex;
   align-items: center;
   gap: 8rpx;
   font-size: 24rpx;
-  color: #666;
+  color: #999;
   position: relative;
   z-index: 1;
 }
 
-/* 滚动条样式 */
 .date-list::-webkit-scrollbar {
   height: 6rpx;
 }
 
 .date-list::-webkit-scrollbar-track {
-  background: rgba(68, 206, 255, 0.1);
+  background: rgba(212, 175, 55, 0.1);
   border-radius: 3rpx;
 }
 
 .date-list::-webkit-scrollbar-thumb {
-  background: rgba(68, 206, 255, 0.3);
+  background: rgba(212, 175, 55, 0.3);
   border-radius: 3rpx;
 }
 
 .date-list::-webkit-scrollbar-thumb:hover {
-  background: rgba(68, 206, 255, 0.5);
+  background: rgba(212, 175, 55, 0.5);
 }

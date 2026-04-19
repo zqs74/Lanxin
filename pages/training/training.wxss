@@ -1,4 +1,4 @@
-/* training.wxss - 优化版训练中心 */
+/* training.wxss - 酷炫黑金风格训练中心 */
 .page-wrapper {
   position: relative;
   min-height: 100vh;
@@ -12,7 +12,6 @@
   padding-bottom: 180rpx;
 }
 
-/* 页面标题 */
 .page-header {
   margin-bottom: 40rpx;
   padding-top: 20rpx;
@@ -21,16 +20,15 @@
 .page-title {
   font-size: 40rpx;
   font-weight: 800;
-  color: #1a1a1a;
+  color: #ffffff;
   margin-bottom: 8rpx;
 }
 
 .page-subtitle {
   font-size: 26rpx;
-  color: #666;
+  color: #999;
 }
 
-/* 通用section样式 */
 .section {
   margin-bottom: 40rpx;
 }
@@ -45,7 +43,7 @@
 .section-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #ffffff;
   position: relative;
 }
 
@@ -56,33 +54,32 @@
   bottom: -8rpx;
   width: 48rpx;
   height: 6rpx;
-  background: linear-gradient(90deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%);
   border-radius: 3rpx;
 }
 
 .today-badge {
   padding: 8rpx 20rpx;
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
-  color: white;
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+  color: #1a1a1a;
   border-radius: 30rpx;
   font-size: 22rpx;
   font-weight: 600;
-  box-shadow: 0 4rpx 12rpx rgba(68, 206, 255, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(212, 175, 55, 0.3);
 }
 
 .view-all-btn {
   font-size: 24rpx;
-  color: #44ceff;
+  color: #D4AF37;
   font-weight: 500;
 }
 
 .radar-score {
   font-size: 24rpx;
-  color: #666;
+  color: #999;
   font-weight: 600;
 }
 
-/* 今日训练概览 */
 .today-summary {
   padding: 32rpx;
   display: flex;
@@ -104,7 +101,7 @@
 .summary-value {
   font-size: 32rpx;
   font-weight: 800;
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -112,17 +109,16 @@
 
 .summary-label {
   font-size: 22rpx;
-  color: #666;
+  color: #999;
   font-weight: 500;
 }
 
 .summary-divider {
   width: 2rpx;
   height: 60rpx;
-  background: linear-gradient(180deg, transparent 0%, rgba(68, 206, 255, 0.3) 50%, transparent 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(212, 175, 55, 0.3) 50%, transparent 100%);
 }
 
-/* 雷达图容器 */
 .radar-container {
   padding: 24rpx;
   position: relative;
@@ -157,17 +153,16 @@
 
 .legend-text {
   font-size: 24rpx;
-  color: #666;
+  color: #999;
   flex: 1;
 }
 
 .legend-value {
   font-size: 24rpx;
   font-weight: 700;
-  color: #44ceff;
+  color: #D4AF37;
 }
 
-/* 训练计划列表 */
 .plan-list {
   display: flex;
   flex-direction: column;
@@ -196,12 +191,12 @@
 .plan-day {
   font-size: 28rpx;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #ffffff;
 }
 
 .plan-date {
   font-size: 20rpx;
-  color: #999;
+  color: #666;
   margin-top: 4rpx;
 }
 
@@ -212,13 +207,13 @@
 .plan-title {
   font-size: 28rpx;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #ffffff;
   margin-bottom: 6rpx;
 }
 
 .plan-desc {
   font-size: 24rpx;
-  color: #666;
+  color: #999;
 }
 
 .plan-right {
@@ -240,9 +235,9 @@
 }
 
 .plan-status.today {
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
-  color: white;
-  box-shadow: 0 4rpx 12rpx rgba(68, 206, 255, 0.4);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+  color: #1a1a1a;
+  box-shadow: 0 4rpx 12rpx rgba(212, 175, 55, 0.4);
 }
 
 .plan-status.upcoming {
@@ -251,7 +246,6 @@
   border: 2rpx solid rgba(153, 153, 153, 0.3);
 }
 
-/* 训练记录列表 */
 .record-list {
   display: flex;
   flex-direction: column;
@@ -270,15 +264,15 @@
   align-items: center;
   min-width: 90rpx;
   padding: 16rpx 12rpx;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.1) 0%, rgba(89, 168, 255, 0.08) 100%);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.08) 100%);
   border-radius: 16rpx;
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
 }
 
 .record-day {
   font-size: 32rpx;
   font-weight: 800;
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -286,7 +280,7 @@
 
 .record-month {
   font-size: 20rpx;
-  color: #666;
+  color: #999;
   margin-top: 2rpx;
 }
 
@@ -297,7 +291,7 @@
 .record-title {
   font-size: 28rpx;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #ffffff;
   margin-bottom: 10rpx;
 }
 
@@ -309,7 +303,7 @@
 
 .meta-item {
   font-size: 22rpx;
-  color: #666;
+  color: #999;
 }
 
 .record-highlights {
@@ -320,15 +314,14 @@
 
 .highlight-tag {
   padding: 6rpx 14rpx;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.1) 0%, rgba(89, 168, 255, 0.08) 100%);
-  color: #44ceff;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.08) 100%);
+  color: #D4AF37;
   font-size: 20rpx;
   border-radius: 12rpx;
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
   font-weight: 500;
 }
 
-/* 快速训练 */
 .quick-train-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -356,28 +349,27 @@
   align-items: center;
   justify-content: center;
   font-size: 44rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.35);
 }
 
 .quick-train-title {
   font-size: 26rpx;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #ffffff;
 }
 
 .quick-train-time {
   font-size: 22rpx;
-  color: #999;
+  color: #666;
 }
 
-/* 弹窗样式 */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.7);
   z-index: 10000;
   display: flex;
   align-items: center;
@@ -397,13 +389,14 @@
 .modal-content {
   width: 85%;
   max-width: 600rpx;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(26, 26, 26, 0.95);
   backdrop-filter: blur(20rpx);
   -webkit-backdrop-filter: blur(20rpx);
   border-radius: 32rpx;
-  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20rpx 60rpx rgba(0, 0, 0, 0.6);
   animation: slideUp 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow: hidden;
+  border: 1rpx solid rgba(212, 175, 55, 0.2);
 }
 
 @keyframes slideUp {
@@ -422,13 +415,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 32rpx;
-  border-bottom: 1rpx solid rgba(68, 206, 255, 0.1);
+  border-bottom: 1rpx solid rgba(212, 175, 55, 0.15);
 }
 
 .modal-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #ffffff;
 }
 
 .modal-close {
@@ -440,12 +433,12 @@
   font-size: 40rpx;
   color: #999;
   border-radius: 50%;
-  background: rgba(68, 206, 255, 0.08);
+  background: rgba(212, 175, 55, 0.08);
   transition: all 0.3s ease;
 }
 
 .modal-close:active {
-  background: rgba(68, 206, 255, 0.15);
+  background: rgba(212, 175, 55, 0.15);
   transform: scale(0.95);
 }
 
@@ -464,18 +457,18 @@
 .form-label {
   font-size: 22rpx;
   font-weight: 600;
-  color: #1a1a1a;
+  color: #ffffff;
   margin-bottom: 10rpx;
 }
 
 .form-input {
   width: 100%;
   padding: 24rpx 28rpx;
-  background: rgba(255, 255, 255, 0.9);
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  background: rgba(35, 35, 35, 0.9);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
   border-radius: 14rpx;
   font-size: 26rpx;
-  color: #1a1a1a;
+  color: #e0e0e0;
   transition: all 0.3s ease;
   box-sizing: border-box;
   line-height: 1.5;
@@ -483,9 +476,9 @@
 }
 
 .form-input:focus {
-  border-color: #44ceff;
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 0 0 6rpx rgba(68, 206, 255, 0.12);
+  border-color: #D4AF37;
+  background: rgba(40, 40, 40, 1);
+  box-shadow: 0 0 0 6rpx rgba(212, 175, 55, 0.12);
 }
 
 .intensity-selector {
@@ -497,20 +490,20 @@
   flex: 1;
   padding: 16rpx;
   text-align: center;
-  background: rgba(255, 255, 255, 0.9);
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  background: rgba(35, 35, 35, 0.9);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
   border-radius: 14rpx;
   font-size: 22rpx;
-  color: #666;
+  color: #999;
   font-weight: 500;
   transition: all 0.3s ease;
 }
 
 .intensity-item.active {
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
-  color: white;
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+  color: #1a1a1a;
   border-color: transparent;
-  box-shadow: 0 4rpx 12rpx rgba(68, 206, 255, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(212, 175, 55, 0.3);
 }
 
 .intensity-item:active {
@@ -521,7 +514,7 @@
   display: flex;
   gap: 16rpx;
   padding: 32rpx;
-  border-top: 1rpx solid rgba(68, 206, 255, 0.1);
+  border-top: 1rpx solid rgba(212, 175, 55, 0.15);
 }
 
 .modal-btn {
@@ -535,22 +528,22 @@
 }
 
 .modal-btn.cancel {
-  background: rgba(68, 206, 255, 0.08);
-  color: #44ceff;
+  background: rgba(212, 175, 55, 0.08);
+  color: #D4AF37;
 }
 
 .modal-btn.cancel:active {
-  background: rgba(68, 206, 255, 0.15);
+  background: rgba(212, 175, 55, 0.15);
   transform: scale(0.98);
 }
 
 .modal-btn.confirm {
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
-  color: white;
-  box-shadow: 0 6rpx 20rpx rgba(68, 206, 255, 0.4);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+  color: #1a1a1a;
+  box-shadow: 0 6rpx 20rpx rgba(212, 175, 55, 0.4);
 }
 
 .modal-btn.confirm:active {
   transform: scale(0.98);
-  box-shadow: 0 4rpx 16rpx rgba(68, 206, 255, 0.3);
+  box-shadow: 0 4rpx 16rpx rgba(212, 175, 55, 0.3);
 }

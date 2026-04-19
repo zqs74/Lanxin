@@ -1,4 +1,4 @@
-/* profile-edit.wxss - 现代化UI设计 */
+/* profile-edit.wxss - 酷炫黑金风格 */
 .page-wrapper {
   position: relative;
   min-height: 100vh;
@@ -11,7 +11,6 @@
   z-index: 1;
 }
 
-/* 顶部导航栏 */
 .top-nav {
   display: flex;
   align-items: center;
@@ -27,21 +26,21 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.1) 0%, rgba(89, 168, 255, 0.1) 100%);
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.1) 100%);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
   transition: all 0.3s ease;
 }
 
 .back-icon {
   font-size: 36rpx;
-  color: #44ceff;
+  color: #D4AF37;
   font-weight: bold;
 }
 
 .nav-title {
   font-size: 36rpx;
   font-weight: 800;
-  color: #1a1a1a;
+  color: #ffffff;
 }
 
 .nav-placeholder {
@@ -52,7 +51,6 @@
   flex: 1;
 }
 
-/* 通用section样式 */
 .section {
   margin-bottom: 32rpx;
 }
@@ -64,7 +62,7 @@
 .section-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #ffffff;
   position: relative;
   display: inline-block;
 }
@@ -76,11 +74,10 @@
   bottom: -8rpx;
   width: 48rpx;
   height: 6rpx;
-  background: linear-gradient(90deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%);
   border-radius: 3rpx;
 }
 
-/* 头像部分 */
 .avatar-section {
   padding: 32rpx;
 }
@@ -99,7 +96,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(68, 206, 255, 0.3);
+  box-shadow: 0 8rpx 24rpx rgba(212, 175, 55, 0.3);
   transition: all 0.3s ease;
 }
 
@@ -109,7 +106,7 @@
 
 .avatar:hover {
   transform: scale(1.05);
-  box-shadow: 0 12rpx 32rpx rgba(68, 206, 255, 0.4);
+  box-shadow: 0 12rpx 32rpx rgba(212, 175, 55, 0.4);
 }
 
 .upload-hint {
@@ -125,11 +122,10 @@
 
 .upload-text {
   font-size: 24rpx;
-  color: #44ceff;
+  color: #D4AF37;
   font-weight: 600;
 }
 
-/* 表单卡片 */
 .form-card {
   padding: 8rpx;
 }
@@ -141,16 +137,16 @@
 }
 
 .form-item:hover {
-  background: rgba(68, 206, 255, 0.03);
+  background: rgba(212, 175, 55, 0.03);
 }
 
 .form-item + .form-item {
-  border-top: 1rpx solid rgba(68, 206, 255, 0.08);
+  border-top: 1rpx solid rgba(212, 175, 55, 0.08);
 }
 
 .label {
   font-size: 28rpx;
-  color: #1a1a1a;
+  color: #ffffff;
   font-weight: 600;
   margin-bottom: 16rpx;
   display: flex;
@@ -165,13 +161,13 @@
 .input {
   width: 100%;
   padding: 32rpx 28rpx;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(35, 35, 35, 0.9);
   backdrop-filter: blur(10rpx);
   -webkit-backdrop-filter: blur(10rpx);
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
   border-radius: 20rpx;
   font-size: 32rpx;
-  color: #1a1a1a;
+  color: #e0e0e0;
   transition: all 0.3s ease;
   box-sizing: border-box;
   line-height: 1.5;
@@ -179,16 +175,15 @@
 }
 
 .input:focus {
-  border-color: #44ceff;
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 0 0 4rpx rgba(68, 206, 255, 0.15);
+  border-color: #D4AF37;
+  background: rgba(40, 40, 40, 1);
+  box-shadow: 0 0 0 4rpx rgba(212, 175, 55, 0.15);
 }
 
 .input-placeholder {
-  color: #aaa;
+  color: #666;
 }
 
-/* 选择器 */
 .picker-wrapper {
   width: 100%;
 }
@@ -198,67 +193,65 @@
   align-items: center;
   justify-content: space-between;
   padding: 32rpx 28rpx;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(35, 35, 35, 0.9);
   backdrop-filter: blur(10rpx);
   -webkit-backdrop-filter: blur(10rpx);
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
   border-radius: 20rpx;
   transition: all 0.3s ease;
   min-height: 96rpx;
 }
 
 .picker-content:hover {
-  border-color: #44ceff;
-  background: rgba(255, 255, 255, 1);
+  border-color: #D4AF37;
+  background: rgba(40, 40, 40, 1);
 }
 
 .picker-text {
   font-size: 32rpx;
-  color: #1a1a1a;
+  color: #e0e0e0;
 }
 
 .picker-arrow {
   font-size: 36rpx;
-  color: #44ceff;
+  color: #D4AF37;
   font-weight: 300;
 }
 
-/* 多行文本 */
 .textarea {
   width: 100%;
   min-height: 200rpx;
   padding: 32rpx 28rpx;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(35, 35, 35, 0.9);
   backdrop-filter: blur(10rpx);
   -webkit-backdrop-filter: blur(10rpx);
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
   border-radius: 20rpx;
   font-size: 32rpx;
-  color: #1a1a1a;
+  color: #e0e0e0;
   transition: all 0.3s ease;
   box-sizing: border-box;
   line-height: 1.6;
 }
 
 .textarea:focus {
-  border-color: #44ceff;
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 0 0 4rpx rgba(68, 206, 255, 0.15);
+  border-color: #D4AF37;
+  background: rgba(40, 40, 40, 1);
+  box-shadow: 0 0 0 4rpx rgba(212, 175, 55, 0.15);
 }
 
 .textarea-placeholder {
-  color: #aaa;
+  color: #666;
 }
 
 .char-count {
   text-align: right;
   font-size: 22rpx;
-  color: #999;
+  color: #666;
   margin-top: 8rpx;
   font-weight: 500;
 }
 
-/* 保存按钮 */
 .save-section {
   margin-top: 40rpx;
 }

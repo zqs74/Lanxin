@@ -1,4 +1,4 @@
-/* match-detail.wxss - 现代化UI设计 */
+/* match-detail.wxss - 酷炫黑金风格 */
 .page-wrapper {
   position: relative;
   min-height: 100vh;
@@ -11,7 +11,6 @@
   z-index: 1;
 }
 
-/* 顶部导航栏 */
 .top-nav {
   margin-bottom: 32rpx;
 }
@@ -30,28 +29,27 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.1) 0%, rgba(89, 168, 255, 0.1) 100%);
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.1) 100%);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
   transition: all 0.3s ease;
 }
 
 .back-icon {
   font-size: 36rpx;
-  color: #44ceff;
+  color: #D4AF37;
   font-weight: bold;
 }
 
 .nav-title {
   font-size: 36rpx;
   font-weight: 800;
-  color: #1a1a1a;
+  color: #ffffff;
 }
 
 .nav-placeholder {
   width: 72rpx;
 }
 
-/* 比分容器 */
 .score-container {
   padding: 32rpx 24rpx;
   border-radius: 32rpx;
@@ -78,7 +76,7 @@
 .team-name {
   font-size: 28rpx;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #ffffff;
 }
 
 .score-info {
@@ -91,7 +89,7 @@
 .score {
   font-size: 56rpx;
   font-weight: 900;
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -99,11 +97,10 @@
 
 .game-time {
   font-size: 22rpx;
-  color: #999;
+  color: #666;
   font-weight: 500;
 }
 
-/* 通用section样式 */
 .section {
   margin-bottom: 32rpx;
 }
@@ -118,7 +115,7 @@
 .section-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #ffffff;
   position: relative;
 }
 
@@ -129,29 +126,27 @@
   bottom: -8rpx;
   width: 48rpx;
   height: 6rpx;
-  background: linear-gradient(90deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%);
   border-radius: 3rpx;
 }
 
-/* 视频徽章 */
 .video-badge {
   display: flex;
   align-items: center;
   gap: 8rpx;
   padding: 8rpx 20rpx;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.1) 0%, rgba(89, 168, 255, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.1) 100%);
   border-radius: 30rpx;
   font-size: 22rpx;
-  color: #44ceff;
+  color: #D4AF37;
   font-weight: 600;
-  border: 2rpx solid rgba(68, 206, 255, 0.2);
+  border: 2rpx solid rgba(212, 175, 55, 0.2);
 }
 
 .video-icon {
   font-size: 24rpx;
 }
 
-/* 视频预览 */
 .video-preview {
   height: 360rpx;
   border-radius: 32rpx;
@@ -166,7 +161,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.15) 0%, rgba(89, 168, 255, 0.1) 50%, rgba(68, 206, 255, 0.08) 100%);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(255, 215, 0, 0.1) 50%, rgba(212, 175, 55, 0.08) 100%);
 }
 
 .play-btn-wrapper {
@@ -181,11 +176,11 @@
   width: 100rpx;
   height: 100rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(68, 206, 255, 0.4);
+  box-shadow: 0 8rpx 24rpx rgba(212, 175, 55, 0.4);
   position: relative;
 }
 
@@ -195,7 +190,7 @@
   left: 55%;
   top: 50%;
   transform: translate(-50%, -50%);
-  border-left: 28rpx solid white;
+  border-left: 28rpx solid #1a1a1a;
   border-top: 16rpx solid transparent;
   border-bottom: 16rpx solid transparent;
 }
@@ -216,7 +211,6 @@
   font-weight: 600;
 }
 
-/* 标签切换栏 */
 .tab-bar {
   padding: 8rpx;
   border-radius: 24rpx;
@@ -239,17 +233,17 @@
 
 .tab-text {
   font-size: 26rpx;
-  color: #666;
+  color: #999;
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
 .tab-item.active {
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.15) 0%, rgba(89, 168, 255, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(255, 215, 0, 0.1) 100%);
 }
 
 .tab-item.active .tab-text {
-  color: #44ceff;
+  color: #D4AF37;
   font-weight: 700;
 }
 
@@ -258,7 +252,7 @@
   bottom: 8rpx;
   width: 40rpx;
   height: 4rpx;
-  background: linear-gradient(90deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%);
   border-radius: 2rpx;
   transform: scaleX(0);
   transition: transform 0.3s ease;
@@ -268,7 +262,6 @@
   transform: scaleX(1);
 }
 
-/* 标签内容 */
 .tab-content {
   padding-top: 8rpx;
 }
@@ -277,7 +270,15 @@
   animation: fadeIn 0.4s ease-out;
 }
 
-/* 图表容器 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .chart-container {
   height: 300rpx;
   padding: 20rpx;
@@ -289,7 +290,6 @@
   height: 100%;
 }
 
-/* 图例 */
 .legend {
   display: flex;
   gap: 32rpx;
@@ -326,11 +326,10 @@
 
 .legend-text {
   font-size: 22rpx;
-  color: #666;
+  color: #999;
   font-weight: 500;
 }
 
-/* 比赛表现表格 */
 .performance-table {
   border-radius: 24rpx;
   overflow: hidden;
@@ -346,7 +345,7 @@
 }
 
 .performance-row:hover {
-  background: rgba(68, 206, 255, 0.05);
+  background: rgba(212, 175, 55, 0.05);
 }
 
 .performance-row + .performance-row {
@@ -375,12 +374,11 @@
 .performance-label {
   flex: 1;
   font-size: 24rpx;
-  color: #666;
+  color: #999;
   text-align: center;
   font-weight: 500;
 }
 
-/* 最佳球员卡片 */
 .player-card {
   padding: 24rpx;
   border-radius: 24rpx;
@@ -393,11 +391,11 @@
   width: 96rpx;
   height: 96rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8rpx 24rpx rgba(68, 206, 255, 0.3);
+  box-shadow: 0 8rpx 24rpx rgba(212, 175, 55, 0.3);
 }
 
 .avatar-emoji {
@@ -414,12 +412,12 @@
 .player-name {
   font-size: 28rpx;
   font-weight: 700;
-  color: #1a1a1a;
+  color: #ffffff;
 }
 
 .player-team {
   font-size: 22rpx;
-  color: #999;
+  color: #666;
 }
 
 .player-stats {
@@ -432,7 +430,7 @@
 .stats-main {
   font-size: 26rpx;
   font-weight: 700;
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -440,10 +438,9 @@
 
 .stats-sub {
   font-size: 20rpx;
-  color: #999;
+  color: #666;
 }
 
-/* 提示卡片 */
 .hint-card {
   display: flex;
   align-items: center;
@@ -459,11 +456,10 @@
 
 .hint-text {
   font-size: 24rpx;
-  color: #666;
+  color: #999;
   font-weight: 500;
 }
 
-/* 片段统计 */
 .clip-stats {
   display: flex;
   align-items: center;
@@ -479,20 +475,19 @@
 
 .stats-text {
   font-size: 24rpx;
-  color: #666;
+  color: #999;
   font-weight: 500;
 }
 
 .stats-number {
   font-size: 32rpx;
   font-weight: 800;
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-/* 片段列表 */
 .clip-list {
   display: flex;
   flex-direction: column;
@@ -511,35 +506,35 @@
 
 .clip-item:hover {
   transform: translateY(-2rpx);
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.3);
 }
 
 .clip-item.selected {
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.1) 0%, rgba(89, 168, 255, 0.08) 100%);
-  border-color: rgba(68, 206, 255, 0.3);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.08) 100%);
+  border-color: rgba(212, 175, 55, 0.3);
 }
 
 .checkbox {
   width: 44rpx;
   height: 44rpx;
   border-radius: 50%;
-  border: 3rpx solid #ddd;
+  border: 3rpx solid #444;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
-  background: white;
+  background: #2a2a2a;
   flex-shrink: 0;
 }
 
 .checkbox.checked {
-  background: linear-gradient(135deg, #44ceff 0%, #59a8ff 100%);
-  border-color: #44ceff;
-  box-shadow: 0 4rpx 12rpx rgba(68, 206, 255, 0.4);
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+  border-color: #D4AF37;
+  box-shadow: 0 4rpx 12rpx rgba(212, 175, 55, 0.4);
 }
 
 .check-mark {
-  color: white;
+  color: #1a1a1a;
   font-size: 24rpx;
   font-weight: bold;
 }
@@ -563,13 +558,13 @@
 
 .clip-time {
   font-size: 22rpx;
-  color: #999;
+  color: #666;
   font-weight: 500;
 }
 
 .clip-type {
   font-size: 26rpx;
-  color: #1a1a1a;
+  color: #ffffff;
   font-weight: 600;
 }
 
@@ -577,7 +572,7 @@
   width: 56rpx;
   height: 56rpx;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(68, 206, 255, 0.1) 0%, rgba(89, 168, 255, 0.1) 100%);
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.1) 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -585,13 +580,12 @@
 }
 
 .play-icon-small {
-  border-left: 16rpx solid #44ceff;
+  border-left: 16rpx solid #D4AF37;
   border-top: 10rpx solid transparent;
   border-bottom: 10rpx solid transparent;
   margin-left: 4rpx;
 }
 
-/* 总结卡片 */
 .summary-card {
   padding: 24rpx;
   border-radius: 24rpx;
@@ -605,7 +599,7 @@
 }
 
 .summary-item + .summary-item {
-  border-top: 1rpx solid rgba(68, 206, 255, 0.1);
+  border-top: 1rpx solid rgba(212, 175, 55, 0.1);
 }
 
 .summary-icon {
@@ -616,7 +610,7 @@
 .summary-text {
   flex: 1;
   font-size: 26rpx;
-  color: #666;
+  color: #999;
   line-height: 1.6;
   font-weight: 500;
 }
