@@ -1,15 +1,26 @@
 // match.js
 Page({
   data: {
+    navHeight: 0,
     selectedDate: ''
   },
 
   onLoad() {
+    this.setNavHeight();
     // 设置今天为默认日期
     const today = new Date()
     const todayStr = this.formatDate(today)
     this.setData({
       selectedDate: todayStr
+    })
+  },
+
+  setNavHeight() {
+    const systemInfo = wx.getSystemInfoSync()
+    const statusBarHeight = systemInfo.statusBarHeight || 44
+    const navBarHeight = systemInfo.platform === 'ios' ? 44 : 48
+    this.setData({
+      navHeight: (statusBarHeight + navBarHeight) * 2
     })
   },
 

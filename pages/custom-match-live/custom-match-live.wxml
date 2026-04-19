@@ -1,13 +1,19 @@
 <!-- custom-match-live.wxml -->
 <view class="page-wrapper">
   <view class="page-header-gradient"></view>
-  
+
   <view class="container slide-up">
+    <!-- 页面标题 -->
+    <view class="page-header">
+      <view class="page-title">比赛进行中</view>
+      <view class="page-subtitle">实时记录得分与判罚</view>
+    </view>
+
     <!-- 顶部状态栏 - 添加计时器 -->
     <view class="top-status-bar glass-effect">
       <view class="status-left">
         <view class="exit-btn" bindtap="exitMatch">
-          <text class="exit-icon">✕</text>
+          <image class="exit-icon" src="/images/return.svg" mode="aspectFit"></image>
         </view>
         <view class="match-info">
           <text class="match-title">自定义比赛</text>

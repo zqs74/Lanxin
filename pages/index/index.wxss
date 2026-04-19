@@ -5,7 +5,7 @@
 }
 
 .container {
-  padding: 24rpx 32rpx;
+  padding: 48rpx 32rpx 24rpx;
   position: relative;
   z-index: 1;
 }

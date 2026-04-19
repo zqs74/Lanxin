@@ -1,6 +1,7 @@
 // index.js - 现代化UI
 Page({
   data: {
+    navHeight: 0,
     currentDate: '',
     careerStats: {
       points: 0,
@@ -28,8 +29,18 @@ Page({
 
   onLoad() {
     console.log('页面加载');
+    this.setNavHeight();
     this.setCurrentDate();
     this.loadCareerStats();
+  },
+
+  setNavHeight() {
+    const systemInfo = wx.getSystemInfoSync()
+    const statusBarHeight = systemInfo.statusBarHeight || 44
+    const navBarHeight = systemInfo.platform === 'ios' ? 44 : 48
+    this.setData({
+      navHeight: (statusBarHeight + navBarHeight) * 2
+    })
   },
 
   onShow() {

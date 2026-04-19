@@ -1,6 +1,7 @@
 // profile.js
 Page({
   data: {
+    navHeight: 0,
     stats: {
       points: 0,
       fieldGoals: 0,
@@ -12,6 +13,19 @@ Page({
       height: '0cm',
       weight: '0kg'
     }
+  },
+
+  onLoad() {
+    this.setNavHeight()
+  },
+
+  setNavHeight() {
+    const systemInfo = wx.getSystemInfoSync()
+    const statusBarHeight = systemInfo.statusBarHeight || 44
+    const navBarHeight = systemInfo.platform === 'ios' ? 44 : 48
+    this.setData({
+      navHeight: (statusBarHeight + navBarHeight) * 2
+    })
   },
 
   onShow() {

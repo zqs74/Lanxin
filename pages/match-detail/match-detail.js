@@ -1,6 +1,7 @@
 // match-detail.js
 Page({
   data: {
+    navHeight: 0,
     // 当前选中的标签
     activeTab: 0,
     // 已选择的片段数量
@@ -43,7 +44,16 @@ Page({
 
   // 页面加载
   onLoad: function(options) {
-    // 页面加载时初始化
+    this.setNavHeight()
+  },
+
+  setNavHeight: function() {
+    const systemInfo = wx.getSystemInfoSync()
+    const statusBarHeight = systemInfo.statusBarHeight || 44
+    const navBarHeight = systemInfo.platform === 'ios' ? 44 : 48
+    this.setData({
+      navHeight: (statusBarHeight + navBarHeight) * 2
+    })
   },
 
   // 返回上一页

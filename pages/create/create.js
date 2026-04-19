@@ -74,6 +74,11 @@ Page({
     }, 2000)
   },
 
+  // 返回上一页
+  goBack() {
+    wx.navigateBack()
+  },
+
   // 标签切换事件
   onTabChange(e) {
     const value = e.detail.value

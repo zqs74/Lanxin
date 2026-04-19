@@ -1,6 +1,7 @@
 // custom-match-live.js - 优化版（含计时器、双方队伍支持）
 Page({
   data: {
+    navHeight: 0,
     matchId: null,
     players: [],
     totalScore: 0,
@@ -20,8 +21,18 @@ Page({
   },
 
   onLoad: function(options) {
+    this.setNavHeight()
     this.setData({ matchId: options.matchId })
     this.loadMatchData()
+  },
+
+  setNavHeight: function() {
+    const systemInfo = wx.getSystemInfoSync()
+    const statusBarHeight = systemInfo.statusBarHeight || 44
+    const navBarHeight = systemInfo.platform === 'ios' ? 44 : 48
+    this.setData({
+      navHeight: (statusBarHeight + navBarHeight) * 2
+    })
   },
 
   onShow: function() {

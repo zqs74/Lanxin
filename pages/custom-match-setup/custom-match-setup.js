@@ -1,6 +1,7 @@
 // custom-match-setup.js - 支持双方队伍
 Page({
   data: {
+    navHeight: 0,
     players: [],
     matchId: null,
     currentTeam: 'A',
@@ -9,11 +10,21 @@ Page({
   },
 
   onLoad: function(options) {
+    this.setNavHeight()
     this.setData({
       matchId: options.matchId || 'custom_' + Date.now()
     })
-    
+
     this.initPlayers()
+  },
+
+  setNavHeight: function() {
+    const systemInfo = wx.getSystemInfoSync()
+    const statusBarHeight = systemInfo.statusBarHeight || 44
+    const navBarHeight = systemInfo.platform === 'ios' ? 44 : 48
+    this.setData({
+      navHeight: (statusBarHeight + navBarHeight) * 2
+    })
   },
 
   onShow: function() {
@@ -21,10 +32,13 @@ Page({
   },
 
   initPlayers: function() {
+    const now = Date.now()
+    // A队2人 + B队2人，带默认姓名和编号
     const defaultPlayers = [
-      { id: Date.now(), name: '', number: '', avatar: '', team: 'A', nameError: '', numberError: '' },
-      { id: Date.now() + 1, name: '', number: '', avatar: '', team: 'A', nameError: '', numberError: '' },
-      { id: Date.now() + 2, name: '', number: '', avatar: '', team: 'B', nameError: '', numberError: '' }
+      { id: now, name: 'A1-张三', number: '1', avatar: '', team: 'A', nameError: '', numberError: '' },
+      { id: now + 1, name: 'A2-李四', number: '2', avatar: '', team: 'A', nameError: '', numberError: '' },
+      { id: now + 2, name: 'B1-王五', number: '1', avatar: '', team: 'B', nameError: '', numberError: '' },
+      { id: now + 3, name: 'B2-赵六', number: '2', avatar: '', team: 'B', nameError: '', numberError: '' }
     ]
     
     this.setData({ 
@@ -112,13 +126,14 @@ Page({
     const index = parseInt(e.currentTarget.dataset.index)
     const value = e.detail.value.trim()
     const players = this.data.players
+    const currentTeam = players[index].team  // 获取当前球员所属队伍
     players[index].number = value
     
     if (value.length > 0) {
       if (!/^\d{1,3}$/.test(value) || parseInt(value) < 1 || parseInt(value) > 999) {
         players[index].numberError = '请输入1-999的数字'
-      } else if (this.checkDuplicateNumber(index, value)) {
-        players[index].numberError = `${value}号球衣编号重复，请修改`
+      } else if (this.checkDuplicateNumber(index, value, currentTeam)) {
+        players[index].numberError = `${currentTeam}队${value}号球衣编号已存在，请修改`
       } else {
         players[index].numberError = ''
       }
@@ -130,10 +145,14 @@ Page({
     this.updateTeamPlayers()
   },
 
-  checkDuplicateNumber: function(currentIndex, number) {
+  // 检查同队内编号是否重复（跨队可相同）
+  checkDuplicateNumber: function(currentIndex, number, team) {
     const players = this.data.players
     for (let i = 0; i < players.length; i++) {
-      if (i !== currentIndex && players[i].number === number) {
+      // 只检查同队且不是当前球员的
+      if (i !== currentIndex && 
+          players[i].team === team && 
+          players[i].number === number) {
         return true
       }
     }
@@ -243,11 +262,11 @@ Page({
       if (!player.number || !/^\d{1,3}$/.test(player.number)) {
         players[i].numberError = '请输入有效的球衣编号'
         isValid = false
-      } else if (this.checkDuplicateNumber(i, player.number)) {
-        players[i].numberError = `${player.number}号球衣编号重复`
+      } else if (this.checkDuplicateNumber(i, player.number, player.team)) {
+        players[i].numberError = `${player.team}队${player.number}号已存在`
         isValid = false
         if (!errorMessage) {
-          errorMessage = `${player.number}号球员球衣编号重复，请修改`
+          errorMessage = `${player.team}队${player.number}号球衣编号重复，请修改`
         }
       } else {
         players[i].numberError = ''

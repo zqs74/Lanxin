@@ -1,0 +1,19 @@
+<!-- nav-bar.wxml - 黑金风格自定义导航栏 -->
+<view class="nav-container" style="padding-top: {{statusBarHeight}}px;">
+  <view class="nav-content" style="height: {{navBarHeight}}px;">
+    <!-- 左侧返回按钮 -->
+    <view wx:if="{{showBack}}" class="nav-left" bindtap="goBack">
+      <text class="back-icon">←</text>
+    </view>
+    
+    <!-- 中间标题 -->
+    <view class="nav-center">
+      <text class="nav-title">{{title}}</text>
+    </view>
+    
+    <!-- 右侧占位 -->
+    <view class="nav-right">
+      <slot name="right"></slot>
+    </view>
+  </view>
+</view>

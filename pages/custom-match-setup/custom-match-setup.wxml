@@ -1,13 +1,13 @@
 <!-- custom-match-setup.wxml -->
 <view class="page-wrapper">
   <view class="page-header-gradient"></view>
-  
+
   <view class="container slide-up">
     <!-- 顶部导航栏 -->
     <view class="top-nav">
       <view class="nav-header">
         <view class="back-btn" bindtap="goBack">
-          <text class="back-icon">←</text>
+          <image class="back-icon" src="/images/return.svg" mode="aspectFit"></image>
         </view>
         <view class="nav-title">球员配置</view>
         <view class="nav-placeholder"></view>

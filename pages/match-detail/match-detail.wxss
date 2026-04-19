@@ -5,7 +5,7 @@
 }
 
 .container {
-  padding: 20rpx 30rpx 100rpx;
+  padding: 48rpx 30rpx 100rpx;
   min-height: 100vh;
   position: relative;
   z-index: 1;
@@ -23,21 +23,20 @@
 }
 
 .back-btn {
-  width: 72rpx;
-  height: 72rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.1) 100%);
-  border: 2rpx solid rgba(212, 175, 55, 0.2);
+  padding: 16rpx;
   transition: all 0.3s ease;
 }
 
+.back-btn:hover {
+  transform: translateX(-4rpx);
+}
+
 .back-icon {
-  font-size: 36rpx;
-  color: #D4AF37;
-  font-weight: bold;
+  width: 48rpx;
+  height: 48rpx;
 }
 
 .nav-title {

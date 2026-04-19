@@ -1,18 +1,18 @@
 <!-- match-detail.wxml - 现代化UI设计 -->
 <view class="page-wrapper">
   <view class="page-header-gradient"></view>
-  
+
   <view class="container slide-up">
     <!-- 顶部导航栏 -->
     <view class="top-nav">
       <view class="nav-header">
         <view class="back-btn" bindtap="goBack">
-          <text class="back-icon">←</text>
+          <image class="back-icon" src="/images/return.svg" mode="aspectFit"></image>
         </view>
         <view class="nav-title">比赛概况</view>
         <view class="nav-placeholder"></view>
       </view>
-      
+
       <!-- 比分显示 -->
       <view class="score-container glass-effect">
         <view class="team-info">

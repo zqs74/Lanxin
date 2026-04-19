@@ -6,7 +6,7 @@
 }
 
 .container {
-  padding: 20rpx 30rpx;
+  padding: 48rpx 30rpx 20rpx;
   min-height: 100vh;
   position: relative;
   z-index: 1;
@@ -24,21 +24,20 @@
 }
 
 .back-btn {
-  width: 72rpx;
-  height: 72rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(255, 215, 0, 0.1) 100%);
-  border: 2rpx solid rgba(212, 175, 55, 0.2);
+  padding: 16rpx;
   transition: all 0.3s ease;
 }
 
+.back-btn:hover {
+  transform: translateX(-4rpx);
+}
+
 .back-icon {
-  font-size: 36rpx;
-  color: #D4AF37;
-  font-weight: bold;
+  width: 48rpx;
+  height: 48rpx;
 }
 
 .nav-title {
@@ -686,4 +685,431 @@
 
 .btn-icon {
   font-size: 28rpx;
+}
+
+/* ===== A队B队 VS 对比样式 ===== */
+.team-vs-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin: 32rpx 0;
+  padding: 24rpx 0;
+}
+
+.team-score-block {
+  flex: 1;
+  padding: 20rpx;
+  border-radius: 24rpx;
+  text-align: center;
+}
+
+.team-a-block {
+  background: linear-gradient(135deg, rgba(255, 77, 79, 0.12) 0%, rgba(255, 120, 117, 0.08) 100%);
+  border: 2rpx solid rgba(255, 77, 79, 0.3);
+}
+
+.team-b-block {
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.12) 0%, rgba(64, 169, 255, 0.08) 100%);
+  border: 2rpx solid rgba(24, 144, 255, 0.3);
+}
+
+.team-label-a {
+  font-size: 26rpx;
+  color: #ff4d4f;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+}
+
+.team-label-b {
+  font-size: 26rpx;
+  color: #1890ff;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+}
+
+.team-total-score {
+  font-size: 56rpx;
+  font-weight: 900;
+  display: block;
+  line-height: 1.2;
+}
+
+.team-a-score {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.team-b-score {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.team-player-count {
+  font-size: 22rpx;
+  color: #999;
+  font-weight: 500;
+  margin-top: 8rpx;
+}
+
+.vs-divider {
+  width: 60rpx;
+  height: 60rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(255, 215, 0, 0.1) 100%);
+  border: 2rpx solid rgba(212, 175, 55, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.vs-text {
+  font-size: 22rpx;
+  font-weight: 800;
+  color: #D4AF37;
+}
+
+.final-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+  background: rgba(17, 17, 17, 0.8);
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+  border: 1rpx solid rgba(212, 175, 55, 0.15);
+}
+
+.final-total-label {
+  font-size: 26rpx;
+  color: #999;
+  font-weight: 600;
+}
+
+.final-total-value {
+  font-size: 40rpx;
+  font-weight: 900;
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.highlight-time {
+  color: #D4AF37 !important;
+  font-weight: 700 !important;
+  font-family: 'Courier New', monospace;
+}
+
+/* ===== A队B队 分组标题样式 ===== */
+.team-section-a,
+.team-section-b {
+  margin-bottom: 36rpx;
+}
+
+.team-title-a {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  color: #ff4d4f !important;
+  position: relative;
+}
+
+.team-title-b {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  color: #1890ff !important;
+  position: relative;
+}
+
+.team-title-a::before,
+.team-title-b::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -10rpx;
+  width: 48rpx;
+  height: 4rpx;
+  border-radius: 2rpx;
+}
+
+.team-title-a::before {
+  background: linear-gradient(90deg, #ff4d4f 0%, #ff7875 100%);
+}
+
+.team-title-b::before {
+  background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%);
+}
+
+.team-icon {
+  font-size: 30rpx;
+}
+
+.team-subtotal {
+  font-size: 24rpx;
+  font-weight: 600;
+  opacity: 0.8;
+  margin-left: auto;
+}
+
+/* ===== A队B队 排行项样式（无左边框）===== */
+.team-a-item {
+  /* 去掉左侧红边框，保持干净 */
+}
+
+.team-a-item:hover {
+  box-shadow: 0 8rpx 32rpx rgba(255, 77, 79, 0.15);
+}
+
+.team-b-item {
+  /* 去掉左侧蓝边框，保持干净 */
+}
+
+.team-b-item:hover {
+  box-shadow: 0 8rpx 32rpx rgba(24, 144, 255, 0.15);
+}
+
+.rank-a {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%) !important;
+  border-color: transparent !important;
+}
+
+.rank-b {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+  border-color: transparent !important;
+}
+
+.rank-avatar-a {
+  background: linear-gradient(135deg, rgba(255, 77, 79, 0.2) 0%, rgba(255, 120, 117, 0.15) 100%) !important;
+}
+
+.rank-avatar-b {
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.2) 0%, rgba(64, 169, 255, 0.15) 100%) !important;
+}
+
+.rank-score-a {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+.rank-score-b {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  color: transparent !important;
+}
+
+/* ===== 全场总榜紧凑样式 ===== */
+.ranking-list.compact {
+  gap: 12rpx;
+}
+
+.compact-item {
+  padding: 18rpx 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.compact-rank {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  width: 50rpx;
+  flex-shrink: 0;
+}
+
+.compact-number {
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #999;
+}
+
+.compact-team {
+  font-size: 18rpx;
+  font-weight: 700;
+  padding: 2rpx 10rpx;
+  border-radius: 8rpx;
+}
+
+.tag-a {
+  background: rgba(255, 77, 79, 0.2);
+  color: #ff4d4f;
+}
+
+.tag-b {
+  background: rgba(24, 144, 255, 0.2);
+  color: #1890ff;
+}
+
+.team-a-border {
+  /* 去掉左侧红边框 */
+}
+
+.team-b-border {
+  /* 去掉左侧蓝边框 */
+}
+
+.compact-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rpx;
+}
+
+.compact-name {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.compact-num {
+  font-size: 20rpx;
+  color: #666;
+}
+
+.compact-score {
+  font-size: 28rpx;
+  font-weight: 800;
+  color: #D4AF37;
+}
+
+/* ===== 判罚记录队伍统计 ===== */
+.foul-team-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.foul-team-stat {
+  padding: 18rpx 20rpx;
+  border-radius: 18rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.team-a-foul {
+  background: linear-gradient(135deg, rgba(255, 77, 79, 0.12) 0%, rgba(255, 120, 117, 0.08) 100%);
+  border: 1rpx solid rgba(255, 77, 79, 0.25);
+}
+
+.team-b-foul {
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.12) 0%, rgba(64, 169, 255, 0.08) 100%);
+  border: 1rpx solid rgba(24, 144, 255, 0.25);
+}
+
+.foul-team-label {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: #999;
+}
+
+.foul-team-count {
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.team-a-foul .foul-team-count { color: #ff4d4f; }
+.team-b-foul .foul-team-count { color: #1890ff; }
+
+.foul-a {
+  /* 去掉左侧红边框 */
+}
+
+.foul-b {
+  /* 去掉左侧蓝边框 */
+}
+
+.foul-team-tag {
+  font-size: 18rpx;
+  font-weight: 800;
+  padding: 2rpx 10rpx;
+  border-radius: 6rpx;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+}
+
+/* ===== 分析报告 - 队伍数据增强样式 ===== */
+.data-grid.enhanced {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14rpx;
+}
+
+.data-item-main {
+  grid-column: span 1;
+}
+
+.team-data-a .data-value {
+  color: #ff4d4f !important;
+  font-weight: 900;
+}
+
+.team-data-b .data-value {
+  color: #1890ff !important;
+  font-weight: 900;
+}
+
+.team-analysis-group {
+  margin-bottom: 28rpx;
+}
+
+.team-analysis-header {
+  padding: 16rpx 20rpx;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  margin-bottom: 16rpx;
+}
+
+.team-a-header {
+  background: linear-gradient(135deg, rgba(255, 77, 79, 0.15) 0%, rgba(255, 120, 117, 0.1) 100%);
+  color: #ff4d4f;
+}
+
+.team-b-header {
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.15) 0%, rgba(64, 169, 255, 0.1) 100%);
+  color: #1890ff;
+}
+
+.player-a-item {
+  /* 去掉左侧红边框 */
+}
+
+.player-b-item {
+  /* 去掉左侧蓝边框 */
+}
+
+.pa-avatar-a {
+  background: linear-gradient(135deg, rgba(255, 77, 79, 0.2) 0%, rgba(255, 120, 117, 0.15) 100%) !important;
+  border-color: rgba(255, 77, 79, 0.4) !important;
+}
+
+.pa-avatar-b {
+  background: linear-gradient(135deg, rgba(24, 144, 255, 0.2) 0%, rgba(64, 169, 255, 0.15) 100%) !important;
+  border-color: rgba(24, 144, 255, 0.4) !important;
+}
+
+.pa-score-a .pa-score {
+  color: #ff4d4f !important;
+}
+
+.pa-score-b .pa-score {
+  color: #1890ff !important;
+}
+
+.progress-a .progress-bar {
+  background: linear-gradient(90deg, #ff4d4f 0%, #ff7875 100%) !important;
+}
+
+.progress-b .progress-bar {
+  background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%) !important;
 }

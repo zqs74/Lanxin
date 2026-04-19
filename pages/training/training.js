@@ -1,6 +1,7 @@
 // training.js - 奢华黑金风格训练中心
 Page({
   data: {
+    navHeight: 0,
     todayDate: '',
     overallScore: 72,
     showAddModal: false,
@@ -126,9 +127,19 @@ Page({
   },
 
   onLoad() {
+    this.setNavHeight()
     this.setTodayDate()
     this.calculateOverallScore()
     this.drawRadarChart()
+  },
+
+  setNavHeight() {
+    const systemInfo = wx.getSystemInfoSync()
+    const statusBarHeight = systemInfo.statusBarHeight || 44
+    const navBarHeight = systemInfo.platform === 'ios' ? 44 : 48
+    this.setData({
+      navHeight: (statusBarHeight + navBarHeight) * 2
+    })
   },
 
   onShow() {

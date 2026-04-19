@@ -3,14 +3,42 @@
   position: relative;
   min-height: 100vh;
   padding-bottom: 180rpx;
-  background: linear-gradient(180deg, #0a0a0a 0%, #0d0d0d 40%, #111 100%);
 }
 
 .container {
-  padding: 20rpx 30rpx;
+  padding: 48rpx 30rpx 20rpx;
   min-height: 100vh;
   position: relative;
   z-index: 1;
+}
+
+.page-header {
+  margin-bottom: 32rpx;
+  padding-top: 20rpx;
+}
+
+.page-title {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 8rpx;
+  position: relative;
+}
+
+.page-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -8rpx;
+  width: 48rpx;
+  height: 6rpx;
+  background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%);
+  border-radius: 3rpx;
+}
+
+.page-subtitle {
+  font-size: 26rpx;
+  color: #999;
 }
 
 .top-status-bar {
@@ -31,27 +59,20 @@
 }
 
 .exit-btn {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255, 77, 79, 0.15) 0%, rgba(255, 120, 117, 0.1) 100%);
-  border: 2rpx solid rgba(255, 77, 79, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  padding: 16rpx;
   transition: all 0.3s ease;
 }
 
 .exit-btn:hover {
-  background: linear-gradient(135deg, rgba(255, 77, 79, 0.25) 0%, rgba(255, 120, 117, 0.15) 100%);
-  transform: scale(1.05);
+  transform: translateX(-4rpx);
 }
 
 .exit-icon {
-  font-size: 30rpx;
-  color: #ff4d4f;
-  font-weight: bold;
+  width: 48rpx;
+  height: 48rpx;
 }
 
 .match-info {
@@ -228,26 +249,24 @@
     inset 0 0 30rpx rgba(212, 175, 55, 0.08);
 }
 
-/* A队/B队颜色标识 */
+/* A队/B队颜色标识 - 无左边框 */
 .player-card.team-a {
-  border-left: 4rpx solid #ff4d4f;
+  /* 去掉左侧红边框，保持干净 */
 }
 
 .player-card.team-a:hover,
 .player-card.team-a.selected {
-  border-color: rgba(255, 77, 79, 0.5);
   box-shadow:
     0 16rpx 48rpx rgba(0, 0, 0, 0.65),
     0 0 40rpx rgba(255, 77, 79, 0.15);
 }
 
 .player-card.team-b {
-  border-left: 4rpx solid #1890ff;
+  /* 去掉左侧蓝边框，保持干净 */
 }
 
 .player-card.team-b:hover,
 .player-card.team-b.selected {
-  border-color: rgba(24, 144, 255, 0.5);
   box-shadow:
     0 16rpx 48rpx rgba(0, 0, 0, 0.65),
     0 0 40rpx rgba(24, 144, 255, 0.15);
