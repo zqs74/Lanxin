@@ -21,7 +21,7 @@
 
 ### 3. 训练模块
 - 技能雷达图展示
-- AI智能体聊天功能（接入方舟API）
+- AI智能体聊天功能（微信云开发DeepSeek）
 - 训练计划管理
 - 训练记录管理
 
@@ -47,7 +47,7 @@
 - **前端框架**：微信小程序原生开发
 - **UI设计**：酷炫黑金风格主题，深色背景配金色强调色
 - **数据存储**：微信小程序本地存储
-- **API接口**：方舟API（AI智能体）
+- **API接口**：微信云开发DeepSeek（AI智能体）
 - **图表库**：Canvas 2D API（雷达图）
 
 ## 安装与运行
@@ -55,14 +55,15 @@
 ### 前提条件
 - 安装微信开发者工具
 - 注册微信小程序账号
-- 获取方舟API密钥（用于AI智能体功能）
+- 开通微信云开发服务（用于AI智能体功能）
 
 ### 安装步骤
 1. 克隆本项目到本地
 2. 打开微信开发者工具
 3. 导入项目
-4. 在`pages/chat/chat.js`和`pages/training/training.js`中配置方舟API密钥
-5. 编译并运行项目
+4. 在微信开发者工具中开通云开发服务
+5. 确保云环境ID与 `app.js` 中的配置一致（默认：`cloud1-d8gg26do45365a017`）
+6. 编译并运行项目
 
 ## 项目结构
 
@@ -91,27 +92,38 @@ CompReain/
 
 ## API接口说明
 
-### AI智能体接口
-- **接口地址**：`https://ark.cn-beijing.volces.com/api/v3/chat/completions`
-- **请求方式**：POST
-- **请求头**：
-  - `Content-Type: application/json`
-  - `Authorization: Bearer {API_KEY}`
-- **请求体**：
-  ```json
-  {
-    "model": "ep-20260322162122-hgksb",
-    "messages": [
-      {"role": "system", "content": "你是人工智能助手"},
+### AI智能体接口（微信云开发DeepSeek）
+- **接口方式**：`wx.cloud.extend.AI.createModel`
+- **模型ID**：`deepseek-r1-0528`
+- **特性**：
+  - 流式输出（逐字显示）
+  - 思维链展示（AI推理过程）
+  - Markdown支持（表格、标题等）
+  - 上下文记忆
+
+**调用示例**：
+```javascript
+// 初始化云开发
+wx.cloud.init({
+  env: "cloud1-d8gg26do45365a017"
+});
+
+// 调用DeepSeek模型
+const res = await wx.cloud.extend.AI.createModel("deepseek").streamText({
+  data: {
+    model: "deepseek-r1-0528",
+    messages: [
+      {"role": "system", "content": "你是昇梦AI助手..."},
       {"role": "user", "content": "你的问题"}
     ]
   }
-  ```
+});
+```
 
 ## 注意事项
 
 1. 本项目使用酷炫黑金风格设计，深色背景配金色强调色，界面现代奢华
-2. AI智能体功能需要有效的方舟API密钥
+2. AI智能体功能需要开通微信云开发服务
 3. 部分功能可能需要网络连接才能正常使用
 4. 数据存储在本地，卸载小程序后数据会丢失
 5. 自定义比赛模块支持A队/B队双队伍，球员编号允许跨队重复但同队内不可重复
@@ -127,4 +139,4 @@ CompReain/
 ---
 
 **版本信息**：v3.0.0
-**最后更新**：2026-04-19
+**最后更新**：2026-04-26

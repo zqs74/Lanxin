@@ -2,7 +2,7 @@
 
 > **版本号**：v3.0.0  
 > **最后更新**：2026-04-19  
-> **项目名称**：CompReain（昇梦体育）  
+> **项目名称**：CompTrain（昇梦体育）  
 > **许可证**：MIT License
 
 ---
@@ -68,33 +68,59 @@
 
 ### 4. API 接口
 
-#### 4.1 AI 智能体接口（方舟 API）
+#### 4.1 AI 智能体接口（微信云开发 DeepSeek）
 ```yaml
-接口地址: https://ark.cn-beijing.volces.com/api/v3/chat/completions
-请求方式: POST
-认证方式: Bearer Token
-模型ID: ep-20260322162122-hgksb
+接口方式: wx.cloud.extend.AI.createModel
+模型ID: deepseek-r1-0528
 功能: 篮球训练顾问 AI 助手（昇梦AI助手）
+特性: 流式输出、思维链展示、Markdown支持
 ```
 
-**请求头**：
-```json
-{
-  "Content-Type": "application/json",
-  "Authorization": "Bearer {API_KEY}"
+**调用示例**：
+```javascript
+// 初始化云开发环境
+wx.cloud.init({
+  env: "cloud1-d8gg26do45365a017"
+});
+
+// 调用 DeepSeek 模型（流式输出）
+const res = await wx.cloud.extend.AI.createModel("deepseek").streamText({
+  data: {
+    model: "deepseek-r1-0528",
+    messages: [
+      { "role": "system", "content": "你是昇梦AI助手，一位专业的篮球训练顾问..." },
+      { "role": "user", "content": "用户问题" }
+    ]
+  }
+});
+
+// 处理流式响应
+for await (let event of res.eventStream) {
+  if (event.data === "[DONE]") break;
+  
+  const data = JSON.parse(event.data);
+  
+  // 思维链内容（DeepSeek-R1 特性）
+  const think = data?.choices?.[0]?.delta?.reasoning_content;
+  if (think) {
+    console.log('思考过程:', think);
+  }
+  
+  // 实际回复内容
+  const text = data?.choices?.[0]?.delta?.content;
+  if (text) {
+    console.log('回复内容:', text);
+  }
 }
 ```
 
-**请求体示例**：
-```json
-{
-  "model": "ep-20260322162122-hgksb",
-  "messages": [
-    {"role": "system", "content": "你是昇梦AI助手，一位专业的篮球训练顾问..."},
-    {"role": "user", "content": "用户问题"}
-  ]
-}
-```
+**特性**：
+- ✅ 流式输出：逐字显示，减少等待感
+- ✅ 思维链：AI推理过程可视化
+- ✅ Markdown支持：表格、标题、代码等富文本
+- ✅ 上下文记忆：完整对话历史维护
+
+**实现位置**：[pages/chat/chat.js](./pages/chat/chat.js) 第 138-237 行
 
 #### 4.2 后端 API 接口（预留）
 ```yaml
@@ -378,10 +404,11 @@ Base URL: http://192.168.43.233:8080（局域网开发环境）
 **文件路径**：`pages/chat/chat.js`
 
 #### 💬 对话界面
-- **消息类型**：用户消息（User）/ AI 回复（Assistant）
+- **消息类型**：用户消息（User，右侧）/ AI 回复（Assistant，左侧）
 - **时间戳显示**：每条消息显示发送时间
 - **加载状态**：AI 思考中的 loading 动画
 - **自动滚动**：新消息自动滚动到底部
+- **响应式布局**：适配不同屏幕尺寸
 
 #### 🤖 AI 能力
 **系统提示词**：
@@ -391,11 +418,41 @@ Base URL: http://192.168.43.233:8080（局域网开发环境）
 能够提供个性化的篮球训练建议。
 你的回答应该专业、实用、有针对性，
 并且要体现出你了解用户的具体情况。
+回答时可以使用Markdown格式来组织内容。
 ```
 
-**特性**：
-- 上下文记忆：维护完整对话历史
-- 快捷问题：预设常用问题按钮（可选）
+**核心特性**：
+- ✅ 流式输出：逐字显示，减少等待感
+- ✅ 思维链：AI推理过程可视化，可展开/收起
+- ✅ Markdown支持：表格、标题、代码等富文本
+- ✅ 上下文记忆：维护完整对话历史
+- ✅ 快捷问题：预设常用问题按钮（可选）
+- ✅ 智能状态管理：思考中/在线状态切换
+
+**技术实现**：
+- 基于微信云开发 DeepSeek-R1 模型
+- 流式响应处理（for await 循环）
+- 实时 UI 更新（逐字显示）
+- Markdown 解析器（支持表格等复杂格式）
+- 思考过程显示/隐藏切换
+
+**界面特色**：
+- 黑金奢华风格（与整体设计统一）
+- 玻璃拟态消息气泡
+- 金色渐变用户消息
+- 蓝色主题思考过程
+- 流畅的动画效果
+
+**关键 API 调用**：
+```javascript
+// 云开发 DeepSeek 模型调用
+const res = await wx.cloud.extend.AI.createModel("deepseek").streamText({
+  data: {
+    model: "deepseek-r1-0528",
+    messages: messages
+  }
+});
+```
 
 ---
 
@@ -542,7 +599,7 @@ Page 层（业务逻辑处理）
 | **UI 库** | TDesign MiniProgram | 腾讯开源，提供 PullDownRefresh、TabBar 等基础组件 |
 | **设计语言** | 黑金奢华风 | 深色模式 + 金色强调，玻璃拟态 + 渐变系统 |
 | **数据可视化** | Canvas 2D | 手写雷达图/折线图/柱状图绘制，无第三方图表库 |
-| **AI 能力** | 方舟 API | 字节跳动火山引擎 AI 平台 |
+| **AI 能力** | 微信云开发 DeepSeek | 基于 DeepSeek-R1 模型，支持流式输出和思维链 |
 | **状态管理** | 全局 Data + 本地 Storage | 轻量级，无 Redux/MobX |
 | **构建工具** | 微信开发者工具 | 内置 PostCSS、ES6 转译、代码压缩 |
 | **图标方案** | SVG + PNG | Tab 栏使用 SVG 矢量图标 |

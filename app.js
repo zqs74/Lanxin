@@ -1,6 +1,11 @@
 // app.js
 App({
   onLaunch() {
+    // 初始化云开发环境
+    wx.cloud.init({
+      env: "cloud1-d8gg26do45365a017"
+    })
+    
     // 初始化数据
     this.globalData = {
       userInfo: null,
