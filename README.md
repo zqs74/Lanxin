@@ -21,16 +21,24 @@
 - 技能雷达图展示
 - AI智能体聊天功能（接入方舟API）
 - 训练计划管理
+- 训练记录管理
 
-### 4. 个人中心
+### 4. 自定义比赛模块
+- 球员配置（A队/B队双队伍支持）
+- 实时比赛计分
+- 计时器功能
+- 判罚记录
+- 比赛结果分析报告
+
+### 5. 个人中心
 - 个人资料管理
 - 个人数据统计
 - 资料编辑功能
 
-### 5. 创建模块
-- 创建新比赛
-- 记录比赛数据
-- 生成比赛报告
+### 6. AI创作模块
+- 视频上传与选择
+- 精彩片段选择
+- AI智能生成集锦
 
 ## 技术栈
 
@@ -59,22 +67,24 @@
 ```
 CompReain/
 ├── pages/
-│   ├── index/           # 首页
-│   ├── match/           # 赛事页面
-│   ├── match-detail/    # 比赛详情页面
-│   ├── training/        # 训练页面
-│   ├── profile/         # 个人中心
-│   ├── profile-edit/    # 个人资料编辑页面
-│   ├── chat/            # AI智能体聊天页面
-│   └── create/          # 创建比赛页面
-├── components/          # 自定义组件
-├── custom-tab-bar/      # 自定义Tab栏
-├── images/              # 图片资源
-├── miniprogram_npm/     # TDesign组件库
-├── app.js               # 小程序入口文件
-├── app.json             # 小程序配置文件
-├── app.wxss             # 全局样式文件
-└── README.md            # 项目说明文件
+│   ├── index/              # 首页
+│   ├── match/             # 赛事页面
+│   ├── match-detail/      # 比赛详情页面
+│   ├── custom-match-setup/    # 自定义比赛-球员配置
+│   ├── custom-match-live/     # 自定义比赛-实时计分
+│   ├── custom-match-result/   # 自定义比赛-赛果报告
+│   ├── training/           # 训练页面
+│   ├── profile/            # 个人中心
+│   ├── profile-edit/       # 个人资料编辑页面
+│   ├── chat/               # AI智能体聊天页面
+│   └── create/             # AI创作页面
+├── components/             # 自定义组件
+├── custom-tab-bar/         # 自定义Tab栏
+├── images/                 # 图片资源
+├── app.js                 # 小程序入口文件
+├── app.json               # 小程序配置文件
+├── app.wxss               # 全局样式文件
+└── README.md               # 项目说明文件
 ```
 
 ## API接口说明
