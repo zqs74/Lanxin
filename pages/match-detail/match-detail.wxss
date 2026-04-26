@@ -5,7 +5,7 @@
 }
 
 .container {
-  padding: 148rpx 30rpx 100rpx;
+  padding: 48rpx 30rpx 100rpx;
   min-height: 100vh;
   position: relative;
   z-index: 1;
