@@ -6,16 +6,52 @@ Component({
     y: 0,
     isDragging: false,
     startX: 0,
-    startY: 0
+    startY: 0,
+    themeClass: 'theme-dark'
   },
 
   lifetimes: {
     attached() {
+      this.syncTheme()
+      const app = getApp()
+      if (app.registerFloatAIButton) {
+        app.registerFloatAIButton(this)
+      }
       this.initPosition()
+    },
+
+    detached() {
+      const app = getApp()
+      if (app.unregisterFloatAIButton) {
+        app.unregisterFloatAIButton(this)
+      }
+    }
+  },
+
+  pageLifetimes: {
+    show() {
+      this.syncTheme()
     }
   },
 
   methods: {
+    getThemeClass(theme) {
+      if (theme === 'light') return 'theme-light'
+      if (theme === 'dark') return 'theme-dark'
+
+      const app = getApp()
+      const userTheme = app.getUserTheme ? app.getUserTheme() : 'auto'
+      if (userTheme === 'light') return 'theme-light'
+      if (userTheme === 'dark') return 'theme-dark'
+
+      const resolvedTheme = app.getTheme ? app.getTheme() : 'dark'
+      return resolvedTheme === 'light' ? 'theme-light' : 'theme-dark'
+    },
+
+    syncTheme(theme) {
+      this.setData({ themeClass: this.getThemeClass(theme) })
+    },
+
     initPosition() {
       const systemInfo = wx.getSystemInfoSync()
       const pxToRpx = systemInfo.windowWidth / 750

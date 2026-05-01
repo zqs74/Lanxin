@@ -25,14 +25,16 @@
       <view class="section-header">
         <view class="section-title">视频预览</view>
         <view class="video-info-badge">
-          <text class="video-icon">📹</text>
+          <t-icon class="video-icon" name="video-camera" size="24rpx" color="#D4AF37" />
           选择视频
         </view>
       </view>
       
       <view class="video-preview card">
         <view class="preview-placeholder">
-          <view class="preview-icon">🎬</view>
+          <view class="preview-icon">
+            <t-icon name="movie-clapper" size="80rpx" color="#D4AF37" />
+          </view>
           <view class="preview-text">点击上传或选择视频</view>
           <view class="preview-hint">支持本地视频和云端视频</view>
         </view>
@@ -42,11 +44,11 @@
     <!-- 功能按钮 -->
     <view class="action-buttons">
       <button class="btn btn-primary" bindtap="uploadLocalVideo">
-        <text class="btn-icon">💾</text>
+        <t-icon class="btn-icon" name="save" size="28rpx" color="#0a0a0a" />
         上传本地视频
       </button>
       <button class="btn btn-success" bindtap="useCloudVideo">
-        <text class="btn-icon">☁️</text>
+        <t-icon class="btn-icon" name="cloud-upload" size="28rpx" color="#0a0a0a" />
         使用云端视频
       </button>
     </view>
@@ -56,7 +58,7 @@
       <view class="section-header">
         <view class="section-title">精彩片段选择</view>
         <view class="selected-tag">
-          <text class="selected-icon">✓</text>
+          <t-icon class="selected-icon" name="check" size="20rpx" color="#ffffff" />
           已选择 {{ selectedCount }} 个
         </view>
       </view>
@@ -67,7 +69,7 @@
               bindtap="toggleClip" data-index="{{ index }}">
           <view class="clip-checkbox">
             <view class="checkbox-inner {{ item.selected ? 'checked' : '' }}">
-              <text wx:if="{{ item.selected }}" class="check-mark">✓</text>
+              <t-icon wx:if="{{ item.selected }}" class="check-mark" name="check" size="24rpx" color="#1a1a1a" />
             </view>
           </view>
           <view class="clip-content">
@@ -84,7 +86,7 @@
     <!-- AI生成按钮 -->
     <view class="create-action-section">
       <button class="btn btn-primary btn-large create-btn" bindtap="generateWithAI">
-        <text class="create-icon">✨</text>
+        <t-icon class="create-icon" name="flashlight" size="32rpx" color="#0a0a0a" />
         AI智能生成集锦
       </button>
       <view class="create-hint">AI将自动剪辑最精彩的瞬间</view>

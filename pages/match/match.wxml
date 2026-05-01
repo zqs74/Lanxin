@@ -13,7 +13,7 @@
     <!-- 搜索区 -->
     <view class="search-section">
       <view class="search-box card">
-        <view class="search-icon">🔍</view>
+        <view class="search-icon"><t-icon name="search" size="30rpx" color="#D4AF37" /></view>
         <input placeholder="搜索球队名称..." class="search-input" placeholder-class="search-placeholder"></input>
       </view>
     </view>
@@ -31,7 +31,7 @@
         bindchange="onDateChange"
       >
         <view class="date-picker card">
-          <text class="date-picker-icon">📅</text>
+          <t-icon class="date-picker-icon" name="calendar" size="30rpx" color="#D4AF37" />
           <text class="date-picker-text">{{ selectedDate }}</text>
           <text class="date-picker-arrow">›</text>
         </view>
@@ -55,14 +55,14 @@
           
           <view class="match-header">
             <view class="match-time">
-              <text class="time-icon">⏰</text>
+              <t-icon class="time-icon" name="time" size="24rpx" color="#D4AF37" />
               16:30
             </view>
           </view>
           
           <view class="match-teams">
             <view class="team">
-              <view class="team-shield red">🛡️</view>
+              <view class="team-shield red"><t-icon name="flag" size="34rpx" color="#ffffff" /></view>
               <view class="team-name">红队</view>
             </view>
             
@@ -72,12 +72,12 @@
             
             <view class="team">
               <view class="team-name">蓝队</view>
-              <view class="team-shield blue">🛡️</view>
+              <view class="team-shield blue"><t-icon name="flag" size="34rpx" color="#ffffff" /></view>
             </view>
           </view>
           
           <view class="match-venue-bottom">
-            <text class="venue-icon">📍</text>
+            <t-icon class="venue-icon" name="location" size="24rpx" color="#D4AF37" />
             场地1
           </view>
         </view>
@@ -90,14 +90,14 @@
           
           <view class="match-header">
             <view class="match-time">
-              <text class="time-icon">⏰</text>
+              <t-icon class="time-icon" name="time" size="24rpx" color="#D4AF37" />
               18:30
             </view>
           </view>
           
           <view class="match-teams">
             <view class="team">
-              <view class="team-shield green">🛡️</view>
+              <view class="team-shield green"><t-icon name="flag" size="34rpx" color="#ffffff" /></view>
               <view class="team-name">A队</view>
             </view>
             
@@ -107,12 +107,12 @@
             
             <view class="team">
               <view class="team-name">B队</view>
-              <view class="team-shield orange">🛡️</view>
+              <view class="team-shield orange"><t-icon name="flag" size="34rpx" color="#ffffff" /></view>
             </view>
           </view>
           
           <view class="match-venue-bottom">
-            <text class="venue-icon">📍</text>
+            <t-icon class="venue-icon" name="location" size="24rpx" color="#D4AF37" />
             场地2
           </view>
         </view>

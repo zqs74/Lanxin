@@ -27,10 +27,10 @@ Page({
       { id: 3, day: '24', month: '03月', title: '个人技术训练', duration: 45, intensity: '低强度', highlights: ['运球熟练'] }
     ],
     quickTrain: [
-      { id: 1, icon: '🏀', title: '投篮练习', duration: '30分钟', bgColor: 'linear-gradient(135deg, #D4AF37 0%, #FFD700 100%)' },
-      { id: 2, icon: '💪', title: '力量训练', duration: '20分钟', bgColor: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)' },
-      { id: 3, icon: '🏃', title: '体能训练', duration: '25分钟', bgColor: 'linear-gradient(135deg, #faad14 0%, #ffc53d 100%)' },
-      { id: 4, icon: '🎯', title: '技巧训练', duration: '35分钟', bgColor: 'linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)' }
+      { id: 1, iconName: 'pen-ball', title: '投篮练习', duration: '30分钟', bgColor: 'linear-gradient(135deg, #D4AF37 0%, #FFD700 100%)' },
+      { id: 2, iconName: 'activity', title: '力量训练', duration: '20分钟', bgColor: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)' },
+      { id: 3, iconName: 'flashlight', title: '体能训练', duration: '25分钟', bgColor: 'linear-gradient(135deg, #faad14 0%, #ffc53d 100%)' },
+      { id: 4, iconName: 'chart-radar', title: '技巧训练', duration: '35分钟', bgColor: 'linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)' }
     ]
   },
 

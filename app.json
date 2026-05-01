@@ -60,6 +60,7 @@
   "sitemapLocation": "sitemap.json",
   "usingComponents": {
     "t-pull-down-refresh": "tdesign-miniprogram/pull-down-refresh/pull-down-refresh",
+    "t-icon": "tdesign-miniprogram/icon/icon",
     "nav-bar": "/components/nav-bar/nav-bar"
   }
 }

@@ -18,19 +18,19 @@
       </view>
       <view class="today-summary card">
         <view class="summary-item">
-          <view class="summary-icon">⏱️</view>
+          <view class="summary-icon"><t-icon name="time" size="40rpx" color="#D4AF37" /></view>
           <view class="summary-value">60</view>
           <view class="summary-label">分钟</view>
         </view>
         <view class="summary-divider"></view>
         <view class="summary-item">
-          <view class="summary-icon">🔥</view>
+          <view class="summary-icon"><t-icon name="activity" size="40rpx" color="#D4AF37" /></view>
           <view class="summary-value">4</view>
           <view class="summary-label">项目</view>
         </view>
         <view class="summary-divider"></view>
         <view class="summary-item">
-          <view class="summary-icon">💪</view>
+          <view class="summary-icon"><t-icon name="flashlight" size="40rpx" color="#D4AF37" /></view>
           <view class="summary-value">高强度</view>
           <view class="summary-label">强度</view>
         </view>
@@ -96,8 +96,8 @@
           <view class="record-content">
             <view class="record-title">{{ item.title }}</view>
             <view class="record-meta">
-              <text class="meta-item">⏱️ {{ item.duration }}分钟</text>
-              <text class="meta-item">🔥 {{ item.intensity }}</text>
+              <text class="meta-item"><t-icon name="time" size="22rpx" color="#D4AF37" /> {{ item.duration }}分钟</text>
+              <text class="meta-item"><t-icon name="activity" size="22rpx" color="#D4AF37" /> {{ item.intensity }}</text>
             </view>
             <view class="record-highlights">
               <text class="highlight-tag" wx:for="{{ item.highlights }}" wx:key="index" wx:for-item="highlight">
@@ -117,7 +117,7 @@
       <view class="quick-train-grid">
         <view class="quick-train-item card" wx:for="{{ quickTrain }}" wx:key="id" bindtap="startQuickTrain" data-id="{{ item.id }}">
           <view class="quick-train-icon" style="background: {{ item.bgColor }}">
-            {{ item.icon }}
+            <t-icon name="{{ item.iconName }}" size="44rpx" color="#ffffff" />
           </view>
           <view class="quick-train-title">{{ item.title }}</view>
           <view class="quick-train-time">{{ item.duration }}</view>

@@ -12,17 +12,17 @@ Page({
       shootingPercentage: 0.0, totalGames: 0
     },
     statsData: [
-      { id: 1, icon: '🏆', value: '0', label: '得分' },
-      { id: 2, icon: '📊', value: '0', label: '篮板' },
-      { id: 3, icon: '🎯', value: '0', label: '助攻' },
-      { id: 4, icon: '🎪', value: '0%', label: '命中率' },
-      { id: 5, icon: '⚡', value: '0', label: '场次' }
+      { id: 1, iconName: 'chart-line', value: '0', label: '得分' },
+      { id: 2, iconName: 'chart-column', value: '0', label: '篮板' },
+      { id: 3, iconName: 'assignment-user', value: '0', label: '助攻' },
+      { id: 4, iconName: 'chart-radar', value: '0%', label: '命中率' },
+      { id: 5, iconName: 'time', value: '0', label: '场次' }
     ],
     quickActions: [
-      { id: 1, icon: '📝', label: '创建比赛', action: 'createMatch', bgColor: 'linear-gradient(135deg, #44ceff 0%, #59a8ff 100%)' },
-      { id: 2, icon: '📺', label: '查看训练', action: 'goTraining', bgColor: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)' },
-      { id: 3, icon: '🤖', label: 'AI助手', action: 'goChat', bgColor: 'linear-gradient(135deg, #faad14 0%, #ffc53d 100%)' },
-      { id: 4, icon: '👤', label: '个人中心', action: 'goProfile', bgColor: 'linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)' }
+      { id: 1, iconName: 'edit-1', label: '创建比赛', action: 'createMatch', bgColor: 'linear-gradient(135deg, #44ceff 0%, #59a8ff 100%)' },
+      { id: 2, iconName: 'activity', label: '查看训练', action: 'goTraining', bgColor: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)' },
+      { id: 3, iconName: 'robot', label: 'AI助手', action: 'goChat', bgColor: 'linear-gradient(135deg, #faad14 0%, #ffc53d 100%)' },
+      { id: 4, iconName: 'user', label: '个人中心', action: 'goProfile', bgColor: 'linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)' }
     ],
     activeVideoTab: 'collection',
     contentAnimClass: '',
@@ -85,11 +85,11 @@ Page({
         this.setData({
           careerStats: stats,
           statsData: [
-            { id: 1, icon: '🏆', value: stats.points.toString(), label: '得分' },
-            { id: 2, icon: '📊', value: stats.rebounds.toString(), label: '篮板' },
-            { id: 3, icon: '🎯', value: stats.assists.toString(), label: '助攻' },
-            { id: 4, icon: '🎪', value: stats.shootingPercentage + '%', label: '命中率' },
-            { id: 5, icon: '⚡', value: stats.totalGames.toString(), label: '场次' }
+            { id: 1, iconName: 'chart-line', value: stats.points.toString(), label: '得分' },
+            { id: 2, iconName: 'chart-column', value: stats.rebounds.toString(), label: '篮板' },
+            { id: 3, iconName: 'assignment-user', value: stats.assists.toString(), label: '助攻' },
+            { id: 4, iconName: 'chart-radar', value: stats.shootingPercentage + '%', label: '命中率' },
+            { id: 5, iconName: 'time', value: stats.totalGames.toString(), label: '场次' }
           ]
         })
       }

@@ -101,7 +101,8 @@
 }
 
 .avatar-emoji {
-  font-size: 72rpx;
+  display: inline-flex;
+  align-items: center;
 }
 
 .avatar:hover {
@@ -117,7 +118,8 @@
 }
 
 .upload-icon {
-  font-size: 32rpx;
+  display: inline-flex;
+  align-items: center;
 }
 
 .upload-text {
@@ -155,7 +157,9 @@
 }
 
 .label-icon {
-  font-size: 28rpx;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .input {
@@ -265,5 +269,6 @@
 }
 
 .btn-icon {
-  font-size: 32rpx;
+  display: inline-flex;
+  align-items: center;
 }

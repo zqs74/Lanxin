@@ -55,7 +55,7 @@
 .rank-stats { display: flex; flex-direction: column; align-items: flex-end; gap: 4rpx; }
 .rank-score { font-size: 36rpx; font-weight: 900; background: var(--gold-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .rank-percentage { font-size: 20rpx; color: var(--text-tertiary); font-weight: 500; }
-.crown-icon { position: absolute; top: -10rpx; right: 20rpx; font-size: 40rpx; animation: float 3s ease-in-out infinite; }
+.crown-icon { position: absolute; top: -10rpx; right: 20rpx; display: flex; align-items: center; justify-content: center; animation: float 3s ease-in-out infinite; }
 @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12rpx); } }
 
 .foul-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16rpx; margin-bottom: 24rpx; }
@@ -75,7 +75,8 @@
 .foul-time { font-size: 22rpx; color: var(--text-tertiary); font-weight: 500; }
 
 .analysis-section { margin-top: 40rpx; }
-.analysis-title { display: flex; align-items: center; gap: 12rpx; }
+.analysis-title, .icon-title { display: flex; align-items: center; gap: 12rpx; }
+.title-icon { display: inline-flex; align-items: center; }
 .analysis-card { padding: 28rpx 30rpx; border-radius: 28rpx; margin-bottom: 24rpx; }
 .analysis-subtitle { font-size: 28rpx; font-weight: 700; color: var(--gold); margin-bottom: 24rpx; letter-spacing: 1rpx; }
 
@@ -118,8 +119,8 @@
 .team-score-block { flex: 1; padding: 20rpx; border-radius: 24rpx; text-align: center; }
 .team-a-block { background: linear-gradient(135deg, rgba(255,77,79,0.12) 0%, rgba(255,120,117,0.08) 100%); border: 2rpx solid rgba(255,77,79,0.3); }
 .team-b-block { background: linear-gradient(135deg, rgba(24,144,255,0.12) 0%, rgba(64,169,255,0.08) 100%); border: 2rpx solid rgba(24,144,255,0.3); }
-.team-label-a { font-size: 26rpx; color: #ff4d4f; font-weight: 700; margin-bottom: 12rpx; }
-.team-label-b { font-size: 26rpx; color: #1890ff; font-weight: 700; margin-bottom: 12rpx; }
+.team-label-a { font-size: 26rpx; color: #ff4d4f; font-weight: 700; margin-bottom: 12rpx; display: flex; align-items: center; justify-content: center; gap: 8rpx; }
+.team-label-b { font-size: 26rpx; color: #1890ff; font-weight: 700; margin-bottom: 12rpx; display: flex; align-items: center; justify-content: center; gap: 8rpx; }
 .team-total-score { font-size: 56rpx; font-weight: 900; display: block; line-height: 1.2; }
 .team-a-score { background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .team-b-score { background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -137,7 +138,7 @@
 .team-title-b { display: flex; align-items: center; gap: 12rpx; color: #1890ff !important; position: relative; }
 .team-title-a::before { content: ''; position: absolute; left: 0; bottom: -10rpx; width: 48rpx; height: 4rpx; border-radius: 2rpx; background: linear-gradient(90deg, #ff4d4f 0%, #ff7875 100%); }
 .team-title-b::before { content: ''; position: absolute; left: 0; bottom: -10rpx; width: 48rpx; height: 4rpx; border-radius: 2rpx; background: linear-gradient(90deg, #1890ff 0%, #40a9ff 100%); }
-.team-icon { font-size: 30rpx; }
+.team-icon { display: inline-flex; align-items: center; }
 .team-subtotal { font-size: 24rpx; font-weight: 600; opacity: 0.8; margin-left: auto; }
 
 .ranking-list.compact { gap: 12rpx; }
@@ -166,7 +167,7 @@
 .team-data-b .data-value { color: #1890ff !important; font-weight: 900; }
 
 .team-analysis-group { margin-bottom: 28rpx; }
-.team-analysis-header { padding: 16rpx 20rpx; border-radius: 16rpx; font-size: 26rpx; font-weight: 700; margin-bottom: 16rpx; }
+.team-analysis-header { padding: 16rpx 20rpx; border-radius: 16rpx; font-size: 26rpx; font-weight: 700; margin-bottom: 16rpx; display: flex; align-items: center; gap: 8rpx; }
 .team-a-header { background: linear-gradient(135deg, rgba(255,77,79,0.15) 0%, rgba(255,120,117,0.1) 100%); color: #ff4d4f; }
 .team-b-header { background: linear-gradient(135deg, rgba(24,144,255,0.15) 0%, rgba(64,169,255,0.1) 100%); color: #1890ff; }
 

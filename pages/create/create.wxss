@@ -34,7 +34,7 @@
   font-size: 22rpx; color: var(--gold); font-weight: 600;
   border: 2rpx solid var(--border-stat);
 }
-.video-icon { font-size: 24rpx; }
+.video-icon { display: inline-flex; align-items: center; }
 
 .video-preview { padding: 0; border-radius: 24rpx; overflow: hidden; position: relative; }
 .preview-placeholder {
@@ -42,13 +42,13 @@
   background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(255,215,0,0.05) 100%);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16rpx;
 }
-.preview-icon { font-size: 80rpx; opacity: 0.6; }
+.preview-icon { opacity: 0.72; display: flex; align-items: center; justify-content: center; }
 .preview-text { font-size: 28rpx; color: var(--text-secondary); font-weight: 500; }
 .preview-hint { font-size: 24rpx; color: var(--text-tertiary); }
 
 .action-buttons { display: flex; gap: 16rpx; margin-bottom: 40rpx; }
 .action-buttons .btn { flex: 1; padding: 24rpx 20rpx; font-size: 28rpx; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8rpx; }
-.btn-icon { font-size: 28rpx; }
+.btn-icon { display: inline-flex; align-items: center; }
 
 .selected-tag {
   display: flex; align-items: center; gap: 8rpx;
@@ -57,7 +57,7 @@
   color: white; border-radius: 30rpx; font-size: 22rpx; font-weight: 600;
   box-shadow: 0 4rpx 12rpx rgba(82,196,26,0.3);
 }
-.selected-icon { font-size: 20rpx; font-weight: bold; }
+.selected-icon { display: inline-flex; align-items: center; }
 
 .clip-list { padding: 8rpx; border-radius: 24rpx; position: relative; overflow: hidden; }
 .clip-list::before {
@@ -84,7 +84,7 @@
   transition: all 0.3s ease; background: var(--bg-checkbox);
 }
 .checkbox-inner.checked { background: var(--gold-gradient); border-color: var(--gold); box-shadow: 0 4rpx 12rpx rgba(212,175,55,0.4); }
-.check-mark { color: #1a1a1a; font-size: 24rpx; font-weight: bold; }
+.check-mark { display: inline-flex; align-items: center; }
 
 .clip-content { flex: 1; display: flex; flex-direction: column; gap: 4rpx; }
 .clip-time { font-size: 22rpx; color: var(--text-tertiary); font-weight: 500; }
@@ -93,5 +93,5 @@
 
 .create-action-section { display: flex; flex-direction: column; align-items: center; gap: 16rpx; margin-top: 20rpx; }
 .create-btn { width: 100%; display: flex; align-items: center; justify-content: center; gap: 12rpx; }
-.create-icon { font-size: 32rpx; }
+.create-icon { display: inline-flex; align-items: center; }
 .create-hint { font-size: 24rpx; color: var(--text-tertiary); text-align: center; }

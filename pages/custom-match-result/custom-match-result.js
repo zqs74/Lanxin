@@ -312,8 +312,8 @@ Page({
     const topPlayerA = this.data.teamARanking[0]
     const topPlayerB = this.data.teamBRanking[0]
     
-    const shareContent = `🏀 自定义比赛赛果\n` +
-      `🔴 A队: ${this.data.teamATotalScore}分 | 🔵 B队: ${this.data.teamBTotalScore}分\n` +
+    const shareContent = `自定义比赛赛果\n` +
+      `A队: ${this.data.teamATotalScore}分 | B队: ${this.data.teamBTotalScore}分\n` +
       `全场总分: ${this.data.finalTotalScore}分\n` +
       `比赛时长: ${this.data.matchDuration}\n` +
       `A队MVP: ${topPlayerA ? topPlayerA.name : '-'} (${topPlayerA ? topPlayerA.score : 0}分)\n` +

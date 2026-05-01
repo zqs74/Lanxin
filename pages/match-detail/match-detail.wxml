@@ -17,7 +17,9 @@
       <!-- 比分显示 -->
       <view class="score-container glass-effect">
         <view class="team-info">
-          <view class="team-logo red">🔴</view>
+          <view class="team-logo red">
+            <t-icon name="flag" size="48rpx" color="#ff4d4f" />
+          </view>
           <view class="team-name">红队</view>
         </view>
         <view class="score-info">
@@ -26,7 +28,9 @@
         </view>
         <view class="team-info right">
           <view class="team-name">蓝队</view>
-          <view class="team-logo blue">🔵</view>
+          <view class="team-logo blue">
+            <t-icon name="flag" size="48rpx" color="#1890ff" />
+          </view>
         </view>
       </view>
     </view>
@@ -35,7 +39,7 @@
     <view class="section custom-match-section">
       <view class="custom-match-card card glass-effect" bindtap="startCustomMatch">
         <view class="custom-match-icon">
-          <text class="icon-text">🏀</text>
+          <t-icon class="icon-text" name="pen-ball" size="48rpx" color="#0a0a0a" />
         </view>
         <view class="custom-match-content">
           <view class="custom-title">自定义即时计分比赛</view>
@@ -52,7 +56,7 @@
       <view class="section-header">
         <view class="section-title">比赛集锦</view>
         <view class="video-badge">
-          <text class="video-icon">🎬</text>
+          <t-icon class="video-icon" name="movie-clapper" size="24rpx" color="#D4AF37" />
           精彩瞬间
         </view>
       </view>
@@ -134,7 +138,7 @@
           <view class="section-title">最佳球员</view>
           <view class="player-card card">
             <view class="player-avatar">
-              <text class="avatar-emoji">⭐</text>
+              <t-icon class="avatar-emoji" name="star" size="48rpx" color="#0a0a0a" />
             </view>
             <view class="player-info">
               <view class="player-name">最佳球员</view>
@@ -152,7 +156,7 @@
       <view wx:if="{{activeTab === 1}}" class="tab-panel fade-in">
         <view class="section">
           <view class="hint-card glass-effect">
-            <text class="hint-icon">💡</text>
+            <t-icon class="hint-icon" name="lightbulb" size="32rpx" color="#D4AF37" />
             <text class="hint-text">可以选择多个投篮的片段来剪辑</text>
           </view>
           <view class="clip-stats">
@@ -165,7 +169,7 @@
               class="btn {{selectedCount > 0 ? 'btn-primary' : 'btn-ghost'}}" 
               bindtap="startEdit"
             >
-              <text class="btn-icon">✂️</text>
+              <t-icon class="btn-icon" name="cut" size="28rpx" color="#0a0a0a" />
               开始剪辑
             </button>
           </view>
@@ -180,10 +184,12 @@
                 class="checkbox {{item.selected ? 'checked' : ''}}" 
                 bindtap="selectClip"
               >
-                <text wx:if="{{item.selected}}" class="check-mark">✓</text>
+                <t-icon wx:if="{{item.selected}}" class="check-mark" name="check" size="24rpx" color="#1a1a1a" />
               </view>
               <view class="clip-info">
-                <view class="film-icon">🎞️</view>
+                <view class="film-icon">
+                  <t-icon name="movie-clapper" size="36rpx" color="#D4AF37" />
+                </view>
                 <view class="clip-details">
                   <view class="clip-time">{{item.time}}</view>
                   <view class="clip-type">{{item.type}} {{item.result}}</view>
@@ -204,15 +210,15 @@
           <view class="section-title">单场表现总结</view>
           <view class="summary-card card">
             <view class="summary-item">
-              <text class="summary-icon">📊</text>
+              <t-icon class="summary-icon" name="chart-column" size="32rpx" color="#D4AF37" />
               <text class="summary-text">本场比赛你共出场XX分钟，取得XX分XX篮板XX助攻的数据。</text>
             </view>
             <view class="summary-item">
-              <text class="summary-icon">✅</text>
+              <t-icon class="summary-icon" name="check-circle" size="32rpx" color="#52c41a" />
               <text class="summary-text">优势点：本场比赛在篮下终结效率较高，前场篮板拼抢积极。</text>
             </view>
             <view class="summary-item">
-              <text class="summary-icon">📈</text>
+              <t-icon class="summary-icon" name="chart-line" size="32rpx" color="#D4AF37" />
               <text class="summary-text">提升点：外线三分投射稳定性不足，防守端的协防意识有待加强。</text>
             </view>
           </view>

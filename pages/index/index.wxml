@@ -8,7 +8,7 @@
     <!-- 顶部导航区 -->
     <view class="top-nav">
       <view class="user-greeting">
-        <view class="greeting-text">你好！👋</view>
+        <view class="greeting-text">你好！</view>
         <view class="date-text">{{ currentDate }}</view>
       </view>
       <view class="app-title">
@@ -19,7 +19,9 @@
 
     <!-- 创作入口区 -->
     <view class="create-entry card" bindtap="goToCreate">
-      <view class="camera-icon pulse-animation">🏀</view>
+      <view class="camera-icon pulse-animation">
+        <t-icon name="pen-ball" size="56rpx" color="#0a0a0a" />
+      </view>
       <view class="create-info">
         <view class="create-title">AI创作</view>
         <view class="create-subtitle">自动记录你的精彩瞬间</view>
@@ -32,7 +34,9 @@
       <view class="section-title">生涯数据</view>
       <view class="stats-grid">
         <view class="stat-item card-gradient" wx:for="{{ statsData }}" wx:key="id">
-          <view class="stat-icon">{{ item.icon }}</view>
+          <view class="stat-icon">
+            <t-icon name="{{ item.iconName }}" size="44rpx" color="#D4AF37" />
+          </view>
           <view class="stat-value gradient-text">{{ item.value }}</view>
           <view class="stat-label">{{ item.label }}</view>
         </view>
@@ -50,12 +54,16 @@
         </view>
       </view>
       <view wx:if="{{ activeVideoTab === 'collection' }}" class="no-videos card {{ contentAnimClass }}">
-        <view class="film-icon float-animation">🎬</view>
+        <view class="film-icon float-animation">
+          <t-icon name="movie-clapper" size="104rpx" color="#D4AF37" />
+        </view>
         <view class="no-data-text">暂无创作集锦</view>
         <view class="hint-text">点击上方"开始创作"录制你的第一个精彩瞬间</view>
       </view>
       <view wx:else class="no-videos card {{ contentAnimClass }}">
-        <view class="film-icon float-animation">🎬</view>
+        <view class="film-icon float-animation">
+          <t-icon name="movie-clapper" size="104rpx" color="#D4AF37" />
+        </view>
         <view class="no-data-text">暂无精选视频</view>
         <view class="hint-text">敬请期待精彩内容</view>
       </view>
@@ -67,7 +75,7 @@
       <view class="quick-actions">
         <view class="action-item card" wx:for="{{ quickActions }}" wx:key="id" bindtap="handleAction" data-action="{{ item.action }}">
           <view class="action-icon" style="background: {{ item.bgColor }}">
-            {{ item.icon }}
+            <t-icon name="{{ item.iconName }}" size="44rpx" color="#ffffff" />
           </view>
           <view class="action-label">{{ item.label }}</view>
         </view>

@@ -27,7 +27,7 @@
 
       <!-- 计时器 -->
       <view class="timer-display">
-        <text class="timer-icon">⏱</text>
+        <t-icon class="timer-icon" name="time" size="24rpx" color="#D4AF37" />
         <text class="timer-text">{{matchTime}}</text>
       </view>
       
@@ -173,7 +173,7 @@
             bindtap="recordFoul"
             data-type="foul"
           >
-            <text class="foul-icon-wide">⚠️</text>
+            <t-icon class="foul-icon-wide" name="error-triangle" size="26rpx" color="#faad14" />
             <text class="foul-text-wide">犯规</text>
           </button>
           <button 
@@ -181,7 +181,7 @@
             bindtap="recordFoul"
             data-type="warning"
           >
-            <text class="foul-icon-wide">📋</text>
+            <t-icon class="foul-icon-wide" name="view-list" size="26rpx" color="#D4AF37" />
             <text class="foul-text-wide">警告</text>
           </button>
           <button 
@@ -189,7 +189,7 @@
             bindtap="recordFoul"
             data-type="freeThrow"
           >
-            <text class="foul-icon-wide">🏀</text>
+            <t-icon class="foul-icon-wide" name="pen-ball" size="26rpx" color="#D4AF37" />
             <text class="foul-text-wide">罚球</text>
           </button>
           <button 
@@ -197,7 +197,7 @@
             bindtap="recordFoul"
             data-type="violation"
           >
-            <text class="foul-icon-wide">❌</text>
+            <t-icon class="foul-icon-wide" name="close-circle" size="26rpx" color="#ff4d4f" />
             <text class="foul-text-wide">违例</text>
           </button>
         </view>

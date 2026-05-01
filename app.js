@@ -11,6 +11,7 @@ App({
       resolvedTheme: 'dark',
       tabBarSelected: -1,
       tabBarInstances: [],
+      floatAIButtonInstances: [],
       careerStats: {
         points: 128,
         rebounds: 86,
@@ -30,6 +31,7 @@ App({
     resolvedTheme: 'dark',
     tabBarSelected: -1,
     tabBarInstances: [],
+    floatAIButtonInstances: [],
     careerStats: {
       points: 128,
       rebounds: 86,
@@ -108,6 +110,32 @@ App({
     })
   },
 
+  registerFloatAIButton(instance) {
+    if (!instance) return
+    const instances = this.globalData.floatAIButtonInstances || []
+    if (!instances.includes(instance)) {
+      instances.push(instance)
+      this.globalData.floatAIButtonInstances = instances
+    }
+    if (instance.syncTheme) {
+      instance.syncTheme(this.globalData.resolvedTheme)
+    }
+  },
+
+  unregisterFloatAIButton(instance) {
+    const instances = this.globalData.floatAIButtonInstances || []
+    this.globalData.floatAIButtonInstances = instances.filter(item => item !== instance)
+  },
+
+  notifyFloatAIButtons() {
+    const instances = this.globalData.floatAIButtonInstances || []
+    instances.forEach(instance => {
+      if (instance && instance.syncTheme) {
+        instance.syncTheme(this.globalData.resolvedTheme)
+      }
+    })
+  },
+
   loadTheme() {
     try {
       const stored = wx.getStorageSync('app_theme')
@@ -143,6 +171,7 @@ App({
             this.globalData.resolvedTheme = newResolved
             this.applyNavBarColor(newResolved)
             this.notifyAllPages(newResolved)
+            this.notifyFloatAIButtons()
           }
         }
       })
@@ -196,6 +225,7 @@ App({
     this.applyNavBarColor(resolved)
     this.notifyAllPages(resolved)
     this.notifyTabBarInstances()
+    this.notifyFloatAIButtons()
 
     return resolved
   },

@@ -28,7 +28,10 @@
       <!-- A队 vs B队 对比显示 -->
       <view class="team-vs-container">
         <view class="team-score-block team-a-block">
-          <view class="team-label-a">🔴 A 队</view>
+          <view class="team-label-a">
+            <t-icon class="team-icon" name="flag" size="26rpx" color="#ff4d4f" />
+            A 队
+          </view>
           <text class="team-total-score team-a-score">{{teamATotalScore}}</text>
           <text class="team-player-count">{{teamAPlayers.length}}人</text>
         </view>
@@ -38,7 +41,10 @@
         </view>
 
         <view class="team-score-block team-b-block">
-          <view class="team-label-b">🔵 B 队</view>
+          <view class="team-label-b">
+            <t-icon class="team-icon" name="flag" size="26rpx" color="#1890ff" />
+            B 队
+          </view>
           <text class="team-total-score team-b-score">{{teamBTotalScore}}</text>
           <text class="team-player-count">{{teamBPlayers.length}}人</text>
         </view>
@@ -65,7 +71,7 @@
     <!-- A队得分排行 -->
     <view wx:if="{{teamAPlayers.length > 0}}" class="section team-section-a">
       <view class="section-title team-title-a">
-        <text class="team-icon">🔴</text>
+        <t-icon class="team-icon" name="flag" size="30rpx" color="#ff4d4f" />
         A 队得分排行
         <text class="team-subtotal">共 {{teamATotalScore}} 分</text>
       </view>
@@ -101,7 +107,9 @@
             <text class="rank-percentage">{{item.percentage}}%</text>
           </view>
           
-          <view wx:if="{{index === 0}}" class="crown-icon">👑</view>
+          <view wx:if="{{index === 0}}" class="crown-icon">
+            <t-icon name="star" size="40rpx" color="#D4AF37" />
+          </view>
         </view>
       </view>
     </view>
@@ -109,7 +117,7 @@
     <!-- B队得分排行 -->
     <view wx:if="{{teamBPlayers.length > 0}}" class="section team-section-b">
       <view class="section-title team-title-b">
-        <text class="team-icon">🔵</text>
+        <t-icon class="team-icon" name="flag" size="30rpx" color="#1890ff" />
         B 队得分排行
         <text class="team-subtotal">共 {{teamBTotalScore}} 分</text>
       </view>
@@ -145,14 +153,19 @@
             <text class="rank-percentage">{{item.percentage}}%</text>
           </view>
           
-          <view wx:if="{{index === 0}}" class="crown-icon">👑</view>
+          <view wx:if="{{index === 0}}" class="crown-icon">
+            <t-icon name="star" size="40rpx" color="#D4AF37" />
+          </view>
         </view>
       </view>
     </view>
 
     <!-- 全场总排行榜（可选） -->
     <view class="section">
-      <view class="section-title">🏆 全场得分总榜</view>
+      <view class="section-title icon-title">
+        <t-icon class="title-icon" name="chart-bar" size="34rpx" color="#D4AF37" />
+        全场得分总榜
+      </view>
       <view class="ranking-list compact">
         <view 
           wx:for="{{playerRanking}}" 
@@ -229,7 +242,10 @@
 
     <!-- 分析报告区域 -->
     <view class="analysis-section">
-      <view class="section-title analysis-title">📊 赛事分析报告</view>
+      <view class="section-title analysis-title">
+        <t-icon class="title-icon" name="chart-column" size="34rpx" color="#D4AF37" />
+        赛事分析报告
+      </view>
 
       <!-- 核心数据总览 - 包含A队B队对比 -->
       <view class="analysis-card card">
@@ -261,7 +277,8 @@
         <!-- A队球员数据 -->
         <view wx:if="{{teamAPlayers.length > 0}}" class="team-analysis-group">
           <view class="team-analysis-header team-a-header">
-            <text>🔴 A 队球员 ({{teamAPlayers.length}}人)</text>
+            <t-icon class="team-icon" name="flag" size="26rpx" color="#ff4d4f" />
+            <text>A 队球员 ({{teamAPlayers.length}}人)</text>
           </view>
           <view class="player-analysis-list">
             <view 
@@ -296,7 +313,8 @@
         <!-- B队球员数据 -->
         <view wx:if="{{teamBPlayers.length > 0}}" class="team-analysis-group">
           <view class="team-analysis-header team-b-header">
-            <text>🔵 B 队球员 ({{teamBPlayers.length}}人)</text>
+            <t-icon class="team-icon" name="flag" size="26rpx" color="#1890ff" />
+            <text>B 队球员 ({{teamBPlayers.length}}人)</text>
           </view>
           <view class="player-analysis-list">
             <view 
@@ -347,17 +365,17 @@
     <!-- 底部操作按钮 -->
     <view class="bottom-actions">
       <button class="btn btn-ghost btn-action" bindtap="saveReport">
-        <text class="btn-icon">💾</text>
+        <t-icon class="btn-icon" name="save" size="28rpx" color="#D4AF37" />
         保存报告
       </button>
       
       <button class="btn btn-primary btn-action" bindtap="shareResult">
-        <text class="btn-icon">📤</text>
+        <t-icon class="btn-icon" name="share" size="28rpx" color="#0a0a0a" />
         分享赛果
       </button>
       
       <button class="btn btn-success btn-action" bindtap="goHome">
-        <text class="btn-icon">🏠</text>
+        <t-icon class="btn-icon" name="home" size="28rpx" color="#0a0a0a" />
         返回首页
       </button>
     </view>

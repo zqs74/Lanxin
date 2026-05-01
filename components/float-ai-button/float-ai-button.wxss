@@ -63,6 +63,7 @@
 .ai-icon-svg {
   width: 48rpx;
   height: 48rpx;
+  transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
 .ripple {
@@ -95,7 +96,7 @@
 }
 
 /* ===== 亮色主题：白色背景按钮 ===== */
-.theme-light .icon-container {
+.float-button.theme-light .icon-container {
   background: #ffffff;
   box-shadow:
     0 4rpx 16rpx rgba(0,0,0,0.1),
@@ -103,15 +104,27 @@
     inset 0 1rpx 0 rgba(255,255,255,0.8);
 }
 
-.theme-light .button-inner:active .icon-container {
+.float-button.theme-light .ai-icon-svg {
+  filter: brightness(0) saturate(100%) invert(13%) sepia(3%) saturate(16%) hue-rotate(344deg) brightness(97%) contrast(94%);
+}
+
+.float-button.theme-light .button-inner:active .icon-container {
   box-shadow:
     0 2rpx 8rpx rgba(0,0,0,0.15),
     0 0 32rpx rgba(212,175,55,0.2),
     inset 0 1rpx 0 rgba(255,255,255,0.9);
 }
 
-.theme-light .ai-label {
+.float-button.theme-light .ai-label {
   text-shadow:
     0 0 12rpx rgba(212,175,55,0.55),
     0 2rpx 6rpx rgba(0,0,0,0.3);
+}
+
+.float-button.theme-dark .icon-container {
+  background: #0a0a0a;
+}
+
+.float-button.theme-dark .ai-icon-svg {
+  filter: none;
 }

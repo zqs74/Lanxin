@@ -17,7 +17,9 @@
 
     <!-- 页面说明卡片 -->
     <view class="info-card card glass-effect">
-      <view class="info-icon">📋</view>
+      <view class="info-icon">
+        <t-icon name="view-list" size="40rpx" color="#D4AF37" />
+      </view>
       <view class="info-content">
         <view class="info-title">参赛球员信息</view>
         <view class="info-desc">请分别录入A队和B队的球员信息，开赛后不可修改</view>
@@ -56,7 +58,7 @@
     <view wx:if="{{currentTeam === 'A'}}" class="team-section">
       <view class="section-header-row team-a-header">
         <view class="team-badge team-a">
-          <text class="badge-icon">🔴</text>
+          <t-icon class="badge-icon" name="flag" size="28rpx" color="#ff4d4f" />
           <text class="badge-text">A 队球员</text>
         </view>
       </view>
@@ -142,7 +144,7 @@
     <view wx:if="{{currentTeam === 'B'}}" class="team-section">
       <view class="section-header-row team-b-header">
         <view class="team-badge team-b">
-          <text class="badge-icon">🔵</text>
+          <t-icon class="badge-icon" name="flag" size="28rpx" color="#1890ff" />
           <text class="badge-text">B 队球员</text>
         </view>
       </view>

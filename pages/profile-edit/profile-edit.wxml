@@ -22,10 +22,10 @@
         <view class="avatar-section card">
           <view class="avatar-upload" bindtap="uploadAvatar">
             <view class="avatar gradient-bg">
-              <text class="avatar-emoji">🏀</text>
+              <t-icon class="avatar-emoji" name="pen-ball" size="52rpx" color="#0a0a0a" />
             </view>
             <view class="upload-hint">
-              <text class="upload-icon">📷</text>
+              <t-icon class="upload-icon" name="camera" size="28rpx" color="#D4AF37" />
               <text class="upload-text">点击更换头像</text>
             </view>
           </view>
@@ -41,7 +41,7 @@
           <!-- 姓名 -->
           <view class="form-item">
             <view class="label">
-              <text class="label-icon">👤</text>
+              <t-icon class="label-icon" name="user" size="28rpx" color="#D4AF37" />
               姓名
             </view>
             <input 
@@ -56,7 +56,7 @@
           <!-- 位置 -->
           <view class="form-item">
             <view class="label">
-              <text class="label-icon">🏆</text>
+              <t-icon class="label-icon" name="chart-radar" size="28rpx" color="#D4AF37" />
               场上位置
             </view>
             <picker 
@@ -75,7 +75,7 @@
           <!-- 年龄 -->
           <view class="form-item">
             <view class="label">
-              <text class="label-icon">🎂</text>
+              <t-icon class="label-icon" name="cake" size="28rpx" color="#D4AF37" />
               年龄
             </view>
             <input 
@@ -99,7 +99,7 @@
           <!-- 身高 -->
           <view class="form-item">
             <view class="label">
-              <text class="label-icon">📏</text>
+              <t-icon class="label-icon" name="ruler" size="28rpx" color="#D4AF37" />
               身高 (cm)
             </view>
             <input 
@@ -115,7 +115,7 @@
           <!-- 体重 -->
           <view class="form-item">
             <view class="label">
-              <text class="label-icon">⚖️</text>
+              <t-icon class="label-icon" name="chart-radar" size="28rpx" color="#D4AF37" />
               体重 (kg)
             </view>
             <input 
@@ -131,7 +131,7 @@
           <!-- 球龄 -->
           <view class="form-item">
             <view class="label">
-              <text class="label-icon">⏱️</text>
+              <t-icon class="label-icon" name="time" size="28rpx" color="#D4AF37" />
               球龄 (年)
             </view>
             <input 
@@ -154,7 +154,7 @@
         <view class="form-card card">
           <view class="form-item">
             <view class="label">
-              <text class="label-icon">⭐</text>
+              <t-icon class="label-icon" name="star" size="28rpx" color="#D4AF37" />
               技术特点
             </view>
             <textarea 
@@ -173,7 +173,7 @@
       <!-- 保存按钮 -->
       <view class="save-section">
         <button class="btn btn-primary btn-large save-btn" bindtap="saveProfile">
-          <text class="btn-icon">💾</text>
+          <t-icon class="btn-icon" name="save" size="28rpx" color="#0a0a0a" />
           保存资料
         </button>
       </view>
