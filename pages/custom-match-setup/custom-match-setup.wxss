@@ -1,572 +1,105 @@
-/* custom-match-setup.wxss - 球员信息配置页（支持双方队伍） */
-.page-wrapper {
-  position: relative;
-  min-height: 100vh;
-  padding-bottom: 240rpx;
-}
+/* custom-match-setup.wxss - 主题适配 球员信息配置页 */
+.page-wrapper { position: relative; min-height: 100vh; padding-bottom: 240rpx; }
+.container { padding: 48rpx 30rpx 20rpx; min-height: 100vh; position: relative; z-index: 1; }
+.top-nav { margin-bottom: 32rpx; }
 
-.container {
-  padding: 48rpx 30rpx 20rpx;
-  min-height: 100vh;
-  position: relative;
-  z-index: 1;
-}
+.nav-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24rpx; }
+.back-btn { display: flex; align-items: center; justify-content: center; padding: 16rpx; transition: all 0.3s ease; }
+.back-btn:hover { transform: translateX(-4rpx); }
+.back-icon { width: 48rpx; height: 48rpx; }
+.nav-title { font-size: 36rpx; font-weight: 800; color: var(--text-primary); }
+.nav-placeholder { width: 72rpx; }
 
-.top-nav {
-  margin-bottom: 32rpx;
-}
+.info-card { padding: 28rpx 32rpx; border-radius: 24rpx; display: flex; align-items: center; gap: 20rpx; margin-bottom: 28rpx; }
+.info-icon { font-size: 48rpx; }
+.info-content { flex: 1; }
+.info-title { font-size: 30rpx; font-weight: 700; color: var(--gold); margin-bottom: 8rpx; }
+.info-desc { font-size: 24rpx; color: var(--text-secondary); line-height: 1.5; }
 
-.nav-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 24rpx;
-}
+.team-tabs { padding: 16rpx 20rpx; border-radius: 24rpx; margin-bottom: 28rpx; display: flex; align-items: center; gap: 12rpx; }
+.team-tab { flex: 1; padding: 18rpx 20rpx; border-radius: 18rpx; text-align: center; cursor: pointer; transition: all 0.3s ease; position: relative; display: flex; flex-direction: column; align-items: center; gap: 6rpx; }
+.team-tab.active { background: linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(255,215,0,0.08) 100%); }
+.team-tab-text { font-size: 28rpx; font-weight: 700; color: var(--text-secondary); transition: all 0.3s ease; }
+.team-tab.active .team-tab-text { color: var(--gold); }
+.team-tab-count { font-size: 22rpx; color: var(--text-tertiary); font-weight: 500; }
+.tab-active-indicator { position: absolute; bottom: 10rpx; left: 50%; transform: translateX(-50%); width: 40rpx; height: 4rpx; background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%); border-radius: 2rpx; }
 
-.back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16rpx;
-  transition: all 0.3s ease;
-}
+.total-count { padding: 14rpx 20rpx; background: var(--bg-card-flat); border-radius: 16rpx; border: 1rpx solid var(--border-light); display: flex; align-items: center; gap: 8rpx; }
+.total-label { font-size: 22rpx; color: var(--text-secondary); font-weight: 500; }
+.total-number { font-size: 26rpx; font-weight: 700; color: var(--gold); }
 
-.back-btn:hover {
-  transform: translateX(-4rpx);
-}
+.team-section { animation: fadeIn 0.3s ease-out; }
+.section-header-row { margin-bottom: 20rpx; }
+.team-badge { display: inline-flex; align-items: center; gap: 12rpx; padding: 14rpx 24rpx; border-radius: 20rpx; font-size: 28rpx; font-weight: 700; }
+.team-badge.team-a { background: linear-gradient(135deg, rgba(255,77,79,0.15) 0%, rgba(255,120,117,0.1) 100%); border: 2rpx solid rgba(255,77,79,0.35); color: #ff4d4f; }
+.team-badge.team-b { background: linear-gradient(135deg, rgba(24,144,255,0.15) 0%, rgba(64,169,255,0.1) 100%); border: 2rpx solid rgba(24,144,255,0.35); color: #1890ff; }
+.badge-icon { font-size: 28rpx; }
+.badge-text { letter-spacing: 1rpx; }
 
-.back-icon {
-  width: 48rpx;
-  height: 48rpx;
-}
-
-.nav-title {
-  font-size: 36rpx;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.nav-placeholder {
-  width: 72rpx;
-}
-
-.info-card {
-  padding: 28rpx 32rpx;
-  border-radius: 24rpx;
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  margin-bottom: 28rpx;
-}
-
-.info-icon {
-  font-size: 48rpx;
-}
-
-.info-content {
-  flex: 1;
-}
-
-.info-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #D4AF37;
-  margin-bottom: 8rpx;
-}
-
-.info-desc {
-  font-size: 24rpx;
-  color: #999;
-  line-height: 1.5;
-}
-
-/* ===== 队伍切换标签 ===== */
-.team-tabs {
-  padding: 16rpx 20rpx;
-  border-radius: 24rpx;
-  margin-bottom: 28rpx;
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-}
-
-.team-tab {
-  flex: 1;
-  padding: 18rpx 20rpx;
-  border-radius: 18rpx;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6rpx;
-}
-
-.team-tab.active {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(255, 215, 0, 0.08) 100%);
-}
-
-.team-tab-text {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: #999;
-  transition: all 0.3s ease;
-}
-
-.team-tab.active .team-tab-text {
-  color: #D4AF37;
-}
-
-.team-tab-count {
-  font-size: 22rpx;
-  color: #666;
-  font-weight: 500;
-}
-
-.tab-active-indicator {
-  position: absolute;
-  bottom: 10rpx;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40rpx;
-  height: 4rpx;
-  background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%);
-  border-radius: 2rpx;
-}
-
-.total-count {
-  padding: 14rpx 20rpx;
-  background: rgba(17, 17, 17, 0.9);
-  border-radius: 16rpx;
-  border: 1rpx solid rgba(212, 175, 55, 0.15);
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.total-label {
-  font-size: 22rpx;
-  color: #999;
-  font-weight: 500;
-}
-
-.total-number {
-  font-size: 26rpx;
-  font-weight: 700;
-  color: #D4AF37;
-}
-
-/* ===== 队伍区域 ===== */
-.team-section {
-  animation: fadeIn 0.3s ease-out;
-}
-
-.section-header-row {
-  margin-bottom: 20rpx;
-}
-
-.team-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 12rpx;
-  padding: 14rpx 24rpx;
-  border-radius: 20rpx;
-  font-size: 28rpx;
-  font-weight: 700;
-}
-
-.team-badge.team-a {
-  background: linear-gradient(135deg, rgba(255, 77, 79, 0.15) 0%, rgba(255, 120, 117, 0.1) 100%);
-  border: 2rpx solid rgba(255, 77, 79, 0.35);
-  color: #ff4d4f;
-}
-
-.team-badge.team-b {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.15) 0%, rgba(64, 169, 255, 0.1) 100%);
-  border: 2rpx solid rgba(24, 144, 255, 0.35);
-  color: #1890ff;
-}
-
-.badge-icon {
-  font-size: 28rpx;
-}
-
-.badge-text {
-  letter-spacing: 1rpx;
-}
-
-/* ===== 球员列表（黑金UI风格+辉光效果）===== */
-.players-list {
-  display: flex;
-  flex-direction: column;
-  gap: 24rpx;
-  margin-bottom: 24rpx;
-}
+.players-list { display: flex; flex-direction: column; gap: 24rpx; margin-bottom: 24rpx; }
 
 .player-item {
-  padding: 28rpx 28rpx;
-  border-radius: 28rpx;
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  position: relative;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  
-  /* 黑金玻璃质感基础样式 */
-  background: linear-gradient(
-    145deg,
-    rgba(17, 17, 17, 0.95) 0%,
-    rgba(22, 22, 22, 0.92) 100%
-  );
-  border: 2rpx solid rgba(212, 175, 55, 0.2);
-  box-shadow:
-    inset 0 2rpx 8rpx rgba(0, 0, 0, 0.4),
-    0 8rpx 32rpx rgba(0, 0, 0, 0.5);
+  padding: 28rpx 28rpx; border-radius: 28rpx; display: flex; align-items: center; gap: 20rpx;
+  position: relative; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  background: var(--bg-player-card);
+  border: 2rpx solid var(--border-card);
+  box-shadow: var(--shadow-card);
   backdrop-filter: blur(12rpx);
 }
 
-/* A队 - 默认淡淡红边框 */
-.player-item.team-a-item {
-  border-color: rgba(255, 77, 79, 0.25);
-  /* 默认无额外发光，保持干净 */
-}
+.player-item.team-a-item { border-color: rgba(255,77,79,0.25); }
+.player-item.team-a-item:hover { transform: translateY(-6rpx) scale(1.02); border-color: rgba(255,77,79,0.7); box-shadow: 0 16rpx 48rpx rgba(0,0,0,0.6), 0 0 40rpx rgba(255,77,79,0.25), 0 0 80rpx rgba(255,77,79,0.12); }
+.player-item.team-b-item { border-color: rgba(24,144,255,0.25); }
+.player-item.team-b-item:hover { transform: translateY(-6rpx) scale(1.02); border-color: rgba(24,144,255,0.7); box-shadow: 0 16rpx 48rpx rgba(0,0,0,0.6), 0 0 40rpx rgba(24,144,255,0.25), 0 0 80rpx rgba(24,144,255,0.12); }
 
-.player-item.team-a-item:hover {
-  transform: translateY(-6rpx) scale(1.02);
-  border-color: rgba(255, 77, 79, 0.7);
-  box-shadow:
-    inset 0 2rpx 8rpx rgba(0, 0, 0, 0.3),
-    0 16rpx 48rpx rgba(0, 0, 0, 0.6),
-    0 0 40rpx rgba(255, 77, 79, 0.25),      /* 悬浮时红色辉光 */
-    0 0 80rpx rgba(255, 77, 79, 0.12);     /* 扩散红光 */
-  background: linear-gradient(
-    145deg,
-    rgba(255, 77, 79, 0.06) 0%,
-    rgba(26, 26, 26, 0.95) 50%,
-    rgba(17, 17, 17, 0.92) 100%
-  );
-}
+.player-index { width: 64rpx; height: 64rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.3s ease; font-weight: 800; font-size: 28rpx; }
+.player-index.team-a-index { background: rgba(255,77,79,0.15); color: #ff7875; border: 2rpx solid rgba(255,77,79,0.3); }
+.player-index.team-a-index:hover { background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%); color: #fff; box-shadow: 0 4rpx 16rpx rgba(255,77,79,0.5), 0 0 24rpx rgba(255,77,79,0.25); border: none; transform: scale(1.1); }
+.player-index.team-b-index { background: rgba(24,144,255,0.15); color: #69c0ff; border: 2rpx solid rgba(24,144,255,0.3); }
+.player-index.team-b-index:hover { background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%); color: #fff; box-shadow: 0 4rpx 16rpx rgba(24,144,255,0.5), 0 0 24rpx rgba(24,144,255,0.25); border: none; transform: scale(1.1); }
+.index-text { font-size: 28rpx; font-weight: 900; }
 
-/* B队 - 默认淡淡蓝边框 */
-.player-item.team-b-item {
-  border-color: rgba(24, 144, 255, 0.25);
-  /* 默认无额外发光，保持干净 */
-}
+.player-avatar-area { width: 110rpx; height: 110rpx; border-radius: 50%; overflow: hidden; position: relative; flex-shrink: 0; cursor: pointer; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.team-a-item .player-avatar-area { border: 3rpx solid rgba(255,77,79,0.3); }
+.team-a-item .player-avatar-area:hover { border-color: #ff4d4f; box-shadow: 0 0 28rpx rgba(255,77,79,0.35), 0 0 56rpx rgba(255,77,79,0.15); transform: scale(1.08); }
+.team-b-item .player-avatar-area { border: 3rpx solid rgba(24,144,255,0.3); }
+.team-b-item .player-avatar-area:hover { border-color: #1890ff; box-shadow: 0 0 28rpx rgba(24,144,255,0.35), 0 0 56rpx rgba(24,144,255,0.15); transform: scale(1.08); }
+.avatar-image { width: 100%; height: 100%; }
+.avatar-placeholder { width: 100%; height: 100%; background: var(--bg-avatar-placeholder); display: flex; align-items: center; justify-content: center; }
+.avatar-number { font-size: 40rpx; font-weight: 800; color: var(--gold); }
+.avatar-upload-hint { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.75); color: #fff; font-size: 18rpx; text-align: center; padding: 4rpx 0; backdrop-filter: blur(8rpx); }
 
-.player-item.team-b-item:hover {
-  transform: translateY(-6rpx) scale(1.02);
-  border-color: rgba(24, 144, 255, 0.7);
-  box-shadow:
-    inset 0 2rpx 8rpx rgba(0, 0, 0, 0.3),
-    0 16rpx 48rpx rgba(0, 0, 0, 0.6),
-    0 0 40rpx rgba(24, 144, 255, 0.25),   /* 悬浮时蓝色辉光 */
-    0 0 80rpx rgba(24, 144, 255, 0.12);  /* 扩散蓝光 */
-  background: linear-gradient(
-    145deg,
-    rgba(24, 144, 255, 0.06) 0%,
-    rgba(26, 26, 26, 0.95) 50%,
-    rgba(17, 17, 17, 0.92) 100%
-  );
-}
+.player-inputs { flex: 1; display: flex; flex-direction: column; gap: 16rpx; }
+.player-inputs.enlarged { gap: 18rpx; }
+.input-group { position: relative; }
+.input-field { width: 100%; padding: 22rpx 28rpx; background: var(--bg-input); border: 2rpx solid var(--border-input); border-radius: 18rpx; font-size: 28rpx; color: var(--text-primary-alt); transition: all 0.3s ease; box-sizing: border-box; box-shadow: var(--shadow-input); min-height: 72rpx; }
+.input-large { padding: 24rpx 30rpx; font-size: 30rpx; min-height: 80rpx; border-radius: 20rpx; }
+.input-field:focus { border-color: var(--border-input-focus); background: var(--bg-input-focus); box-shadow: var(--shadow-input), 0 0 0 4rpx rgba(212,175,55,0.12); outline: none; }
+.input-field.error { border-color: #ff4d4f; animation: shake 0.4s ease; }
+.number-input { width: 65%; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-8rpx); } 75% { transform: translateX(8rpx); } }
+.error-hint { position: absolute; top: 100%; left: 0; font-size: 22rpx; color: #ff4d4f; margin-top: 6rpx; font-weight: 500; }
 
-/* 序号圆圈 - 默认淡色，不抢眼 */
-.player-index {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-  font-weight: 800;
-  font-size: 28rpx;
-}
+.delete-btn { width: 68rpx; height: 68rpx; border-radius: 50%; background: linear-gradient(135deg, rgba(255,77,79,0.15) 0%, rgba(255,120,117,0.1) 100%); border: 2rpx solid rgba(255,77,79,0.3); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s ease; flex-shrink: 0; }
+.delete-btn:hover:not(.disabled) { background: linear-gradient(135deg, rgba(255,77,79,0.25) 0%, rgba(255,120,117,0.15) 100%); border-color: #ff4d4f; transform: scale(1.05); }
+.delete-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+.delete-icon { font-size: 40rpx; color: #ff4d4f; font-weight: bold; line-height: 1; }
 
-.player-index.team-a-index {
-  background: rgba(255, 77, 79, 0.15);
-  color: #ff7875;
-  border: 2rpx solid rgba(255, 77, 79, 0.3);
-  /* 默认淡色，无阴影 */
-}
+.btn-add-to-team { width: 100%; margin-top: 20rpx; padding: 26rpx 32rpx; border-radius: 24rpx; font-size: 28rpx; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 12rpx; transition: all 0.3s ease; border: none; cursor: pointer; }
+.btn-add-to-team.team-a-btn { background: linear-gradient(135deg, rgba(255,77,79,0.12) 0%, rgba(255,120,117,0.08) 100%); color: #ff4d4f; border: 2rpx solid rgba(255,77,79,0.35); }
+.btn-add-to-team.team-a-btn:not(.disabled):hover { background: rgba(255,77,79,0.18); transform: translateY(-3rpx); box-shadow: 0 8rpx 24rpx rgba(255,77,79,0.25); }
+.btn-add-to-team.team-b-btn { background: linear-gradient(135deg, rgba(24,144,255,0.12) 0%, rgba(64,169,255,0.08) 100%); color: #1890ff; border: 2rpx solid rgba(24,144,255,0.35); }
+.btn-add-to-team.team-b-btn:not(.disabled):hover { background: rgba(24,144,255,0.18); transform: translateY(-3rpx); box-shadow: 0 8rpx 24rpx rgba(24,144,255,0.25); }
+.btn-add-to-team.disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-plus { font-size: 36rpx; font-weight: bold; }
 
-.player-index.team-a-index:hover {
-  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
-  color: #fff;
-  box-shadow:
-    0 4rpx 16rpx rgba(255, 77, 79, 0.5),
-    0 0 24rpx rgba(255, 77, 79, 0.25);  /* 悬浮时才发光 */
-  border: none;
-  transform: scale(1.1);
-}
-
-.player-index.team-b-index {
-  background: rgba(24, 144, 255, 0.15);
-  color: #69c0ff;
-  border: 2rpx solid rgba(24, 144, 255, 0.3);
-  /* 默认淡色，无阴影 */
-}
-
-.player-index.team-b-index:hover {
-  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
-  color: #fff;
-  box-shadow:
-    0 4rpx 16rpx rgba(24, 144, 255, 0.5),
-    0 0 24rpx rgba(24, 144, 255, 0.25);  /* 悬浮时才发光 */
-  border: none;
-  transform: scale(1.1);
-}
-
-.index-text {
-  font-size: 28rpx;
-  font-weight: 900;
-}
-
-/* 球员头像 - 增大尺寸+队伍辉光 */
-.player-avatar-area {
-  width: 110rpx;
-  height: 110rpx;
-  border-radius: 50%;
-  overflow: hidden;
-  position: relative;
-  flex-shrink: 0;
-  cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* A队头像 - 默认淡淡红边框 */
-.team-a-item .player-avatar-area {
-  border: 3rpx solid rgba(255, 77, 79, 0.3);
-  /* 默认无发光，保持干净 */
-}
-
-.team-a-item .player-avatar-area:hover {
-  border-color: #ff4d4f;
-  box-shadow:
-    0 0 28rpx rgba(255, 77, 79, 0.35),
-    0 0 56rpx rgba(255, 77, 79, 0.15);  /* 悬浮时红辉光 */
-  transform: scale(1.08);
-}
-
-/* B队头像 - 默认淡淡蓝边框 */
-.team-b-item .player-avatar-area {
-  border: 3rpx solid rgba(24, 144, 255, 0.3);
-  /* 默认无发光，保持干净 */
-}
-
-.team-b-item .player-avatar-area:hover {
-  border-color: #1890ff;
-  box-shadow:
-    0 0 28rpx rgba(24, 144, 255, 0.35),
-    0 0 56rpx rgba(24, 144, 255, 0.15);  /* 悬浮时蓝辉光 */
-  transform: scale(1.08);
-}
-
-.avatar-image {
-  width: 100%;
-  height: 100%;
-}
-
-.avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(26, 26, 26, 1) 0%, rgba(17, 17, 17, 1) 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.avatar-number {
-  font-size: 40rpx;
-  font-weight: 800;
-  color: #D4AF37;
-}
-
-.avatar-upload-hint {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.75);
-  color: #fff;
-  font-size: 18rpx;
-  text-align: center;
-  padding: 4rpx 0;
-  backdrop-filter: blur(8rpx);
-}
-
-/* 球员输入区 - 增大尺寸 */
-.player-inputs {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.player-inputs.enlarged {
-  gap: 18rpx;
-}
-
-.input-group {
-  position: relative;
-}
-
-.input-field {
-  width: 100%;
-  padding: 22rpx 28rpx; /* 增加内边距 */
-  background: rgba(17, 17, 17, 0.95);
-  border: 2rpx solid rgba(212, 175, 55, 0.2);
-  border-radius: 18rpx; /* 增大圆角 */
-  font-size: 28rpx; /* 增大字号 */
-  color: #f5f5f5;
-  transition: all 0.3s ease;
-  box-sizing: border-box;
-  box-shadow: inset 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
-  min-height: 72rpx; /* 最小高度 */
-}
-
-.input-large {
-  padding: 24rpx 30rpx; /* 更大的内边距 */
-  font-size: 30rpx; /* 更大的字体 */
-  min-height: 80rpx; /* 更大的最小高度 */
-  border-radius: 20rpx;
-}
-
-.input-field:focus {
-  border-color: #D4AF37;
-  background: rgba(22, 22, 22, 1);
-  box-shadow:
-    inset 0 2rpx 8rpx rgba(0, 0, 0, 0.3),
-    0 0 0 4rpx rgba(212, 175, 55, 0.12);
-  outline: none;
-}
-
-.input-field.error {
-  border-color: #ff4d4f;
-  animation: shake 0.4s ease;
-}
-
-.number-input {
-  width: 65%; /* 增宽号码输入框 */
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-8rpx); }
-  75% { transform: translateX(8rpx); }
-}
-
-.error-hint {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  font-size: 22rpx; /* 增大错误提示字号 */
-  color: #ff4d4f;
-  margin-top: 6rpx;
-  font-weight: 500;
-}
-
-.delete-btn {
-  width: 68rpx;
-  height: 68rpx;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255, 77, 79, 0.15) 0%, rgba(255, 120, 117, 0.1) 100%);
-  border: 2rpx solid rgba(255, 77, 79, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  flex-shrink: 0;
-}
-
-.delete-btn:hover:not(.disabled) {
-  background: linear-gradient(135deg, rgba(255, 77, 79, 0.25) 0%, rgba(255, 120, 117, 0.15) 100%);
-  border-color: #ff4d4f;
-  transform: scale(1.05);
-}
-
-.delete-btn.disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.delete-icon {
-  font-size: 40rpx;
-  color: #ff4d4f;
-  font-weight: bold;
-  line-height: 1;
-}
-
-/* ===== 新增球员按钮（按队伍）===== */
-.btn-add-to-team {
-  width: 100%;
-  margin-top: 20rpx;
-  padding: 26rpx 32rpx;
-  border-radius: 24rpx;
-  font-size: 28rpx;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12rpx;
-  transition: all 0.3s ease;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-add-to-team.team-a-btn {
-  background: linear-gradient(135deg, rgba(255, 77, 79, 0.12) 0%, rgba(255, 120, 117, 0.08) 100%);
-  color: #ff4d4f;
-  border: 2rpx solid rgba(255, 77, 79, 0.35);
-}
-
-.btn-add-to-team.team-a-btn:not(.disabled):hover {
-  background: rgba(255, 77, 79, 0.18);
-  transform: translateY(-3rpx);
-  box-shadow: 0 8rpx 24rpx rgba(255, 77, 79, 0.25);
-}
-
-.btn-add-to-team.team-b-btn {
-  background: linear-gradient(135deg, rgba(24, 144, 255, 0.12) 0%, rgba(64, 169, 255, 0.08) 100%);
-  color: #1890ff;
-  border: 2rpx solid rgba(24, 144, 255, 0.35);
-}
-
-.btn-add-to-team.team-b-btn:not(.disabled):hover {
-  background: rgba(24, 144, 255, 0.18);
-  transform: translateY(-3rpx);
-  box-shadow: 0 8rpx 24rpx rgba(24, 144, 255, 0.25);
-}
-
-.btn-add-to-team.disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.btn-plus {
-  font-size: 36rpx;
-  font-weight: bold;
-}
-
-/* ===== 底部操作区 ===== */
 .bottom-actions {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  position: fixed; bottom: 0; left: 0; right: 0;
   padding: 24rpx 30rpx;
-  background: linear-gradient(to top, rgba(10, 10, 10, 0.98) 0%, rgba(10, 10, 10, 0.92) 80%, transparent 100%);
+  background: var(--bg-bottom-blur);
   backdrop-filter: blur(20rpx);
   z-index: 100;
-  border-top: 1rpx solid rgba(212, 175, 55, 0.15);
+  border-top: 1rpx solid var(--border-light);
 }
 
-.btn-start-full {
-  width: 100%;
-  padding: 28rpx 48rpx;
-  font-size: 32rpx;
-  font-weight: 800;
-}
+.btn-start-full { width: 100%; padding: 28rpx 48rpx; font-size: 32rpx; font-weight: 800; }

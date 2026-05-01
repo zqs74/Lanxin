@@ -1,6 +1,9 @@
 // custom-match-result.js - 按A队B队分组显示 + 修复比赛时长
+const app = getApp()
+
 Page({
   data: {
+    themeClass: '',
     navHeight: 0,
     matchId: null,
     players: [],
@@ -29,9 +32,20 @@ Page({
   },
 
   onLoad: function(options) {
+    this.initTheme()
     this.setNavHeight()
     this.setData({ matchId: options.matchId })
     this.loadMatchResult()
+  },
+
+  initTheme: function() {
+    const ut = app.getUserTheme()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+  },
+
+  setTheme: function(theme) {
+    const ut = app.getUserTheme()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
   },
 
   setNavHeight: function() {

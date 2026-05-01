@@ -1,102 +1,75 @@
-// create.js - 现代化UI
+// create.js - 昇梦体育 AI创作
+const app = getApp()
+
 Page({
   data: {
-    clips: [
-      { id: 1, time: '第一节 08:24', description: '两分跳投命中', type: '跳投', selected: false },
-      { id: 2, time: '第二节 12:35', description: '三分远投命中', type: '三分', selected: false },
-      { id: 3, time: '第三节 05:42', description: '抢断后快攻', type: '快攻', selected: false },
-      { id: 4, time: '第四节 01:18', description: '压哨三分', type: '关键球', selected: false }
-    ],
+    themeClass: '',
     selectedCount: 0,
-    tabValue: 'create',
-    tabList: [
-      { value: 'home', icon: 'home', ariaLabel: '首页' },
-      { value: 'match', icon: 'app', ariaLabel: '赛事' },
-      { value: 'training', icon: 'chat', ariaLabel: '训练' },
-      { value: 'profile', icon: 'user', ariaLabel: '我的' },
-    ],
+    clips: [
+      { id: 1, time: '第一节 08:24', description: '两分跳投', type: '投篮', selected: false },
+      { id: 2, time: '第一节 06:12', description: '突破上篮', type: '上篮', selected: false },
+      { id: 3, time: '第二节 10:05', description: '三分远投', type: '三分', selected: false },
+      { id: 4, time: '第三节 05:30', description: '罚球得分', type: '罚球', selected: false },
+      { id: 5, time: '第四节 01:20', description: '关键三分', type: '三分', selected: false }
+    ]
   },
 
-  // 上传本地视频
+  onLoad() {
+    const ut = app.getUserTheme()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+  },
+
+  onShow() {
+    const ut = app.getUserTheme()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+  },
+
+  setTheme(t) {
+    const ut = app.getUserTheme()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+  },
+
+  goBack() {
+    const pages = getCurrentPages()
+    if (pages.length > 1) {
+      wx.navigateBack()
+    } else {
+      wx.switchTab({ url: '/pages/index/index' })
+    }
+  },
+
+  toggleClip(e) {
+    const index = e.currentTarget.dataset.index
+    const clips = this.data.clips
+    clips[index].selected = !clips[index].selected
+    const selectedCount = clips.filter(c => c.selected).length
+    this.setData({ clips, selectedCount })
+  },
+
   uploadLocalVideo() {
     wx.chooseVideo({
       sourceType: ['album', 'camera'],
       maxDuration: 60,
       camera: 'back',
       success: (res) => {
-        console.log('选择视频成功', res)
-        wx.showToast({
-          title: '视频已选择',
-          icon: 'success'
-        })
-      },
-      fail: (err) => {
-        console.log('选择视频失败', err)
+        wx.showToast({ title: '视频已选择', icon: 'success' })
       }
     })
   },
 
-  // 使用云端视频
   useCloudVideo() {
-    console.log('使用云端视频')
-    wx.showToast({
-      title: '功能开发中',
-      icon: 'none'
-    })
+    wx.showToast({ title: '云端视频功能开发中', icon: 'none' })
   },
 
-  // 切换片段选择状态
-  toggleClip(e) {
-    const index = e.currentTarget.dataset.index
-    const clips = [...this.data.clips]
-    clips[index].selected = !clips[index].selected
-    
-    const selectedCount = clips.filter(clip => clip.selected).length
-    
-    this.setData({ 
-      clips, 
-      selectedCount 
-    })
-  },
-
-  // AI智能生成
   generateWithAI() {
-    wx.showLoading({
-      title: 'AI生成中...'
-    })
-    
+    if (this.data.selectedCount === 0) {
+      wx.showToast({ title: '请选择至少一个精彩片段', icon: 'none' })
+      return
+    }
+    wx.showLoading({ title: 'AI生成中...' })
     setTimeout(() => {
       wx.hideLoading()
-      wx.showToast({
-        title: '生成成功！',
-        icon: 'success'
-      })
+      wx.showToast({ title: 'AI集锦生成成功！', icon: 'success' })
     }, 2000)
-  },
-
-  // 返回上一页
-  goBack() {
-    wx.navigateBack()
-  },
-
-  // 标签切换事件
-  onTabChange(e) {
-    const value = e.detail.value
-    this.setData({ tabValue: value })
-    
-    switch (value) {
-      case 'home':
-        wx.switchTab({ url: '/pages/index/index' })
-        break
-      case 'match':
-        wx.switchTab({ url: '/pages/match/match' })
-        break
-      case 'training':
-        wx.switchTab({ url: '/pages/training/training' })
-        break
-      case 'profile':
-        wx.switchTab({ url: '/pages/profile/profile' })
-        break
-    }
   }
 })

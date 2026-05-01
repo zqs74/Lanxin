@@ -1,6 +1,9 @@
 // custom-match-setup.js - 支持双方队伍
+const app = getApp()
+
 Page({
   data: {
+    themeClass: '',
     navHeight: 0,
     players: [],
     matchId: null,
@@ -10,12 +13,23 @@ Page({
   },
 
   onLoad: function(options) {
+    this.initTheme()
     this.setNavHeight()
     this.setData({
       matchId: options.matchId || 'custom_' + Date.now()
     })
 
     this.initPlayers()
+  },
+
+  initTheme: function() {
+    const ut = app.getUserTheme()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+  },
+
+  setTheme: function(theme) {
+    const ut = app.getUserTheme()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
   },
 
   setNavHeight: function() {
@@ -28,6 +42,8 @@ Page({
   },
 
   onShow: function() {
+    const ut = app.getUserTheme()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
     this.checkUnfinishedMatch()
   },
 

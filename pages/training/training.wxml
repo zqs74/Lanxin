@@ -1,5 +1,5 @@
 <!-- training.wxml - 优化版训练中心 -->
-<view class="page-wrapper">
+<view class="page-wrapper {{themeClass}}">
   <view class="page-header-gradient"></view>
 
   <view class="container slide-up">

@@ -1,5 +1,5 @@
 
-<view class="tab-bar-container">
+<view class="tab-bar-container {{themeClass}}">
   <t-tab-bar 
     t-class="t-tab-bar" 
     value="{{tabList[selected].value}}" 

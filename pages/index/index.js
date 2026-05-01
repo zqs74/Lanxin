@@ -1,14 +1,14 @@
-// index.js - 现代化UI
+// index.js - 昇梦体育 首页
+const app = getApp()
+
 Page({
   data: {
     navHeight: 0,
+    themeClass: '',
     currentDate: '',
     careerStats: {
-      points: 0,
-      rebounds: 0,
-      assists: 0,
-      shootingPercentage: 0.0,
-      totalGames: 0
+      points: 0, rebounds: 0, assists: 0,
+      shootingPercentage: 0.0, totalGames: 0
     },
     statsData: [
       { id: 1, icon: '🏆', value: '0', label: '得分' },
@@ -28,42 +28,49 @@ Page({
   },
 
   onLoad() {
-    console.log('页面加载');
-    this.setNavHeight();
-    this.setCurrentDate();
-    this.loadCareerStats();
+    this.initTheme()
+    this.setNavHeight()
+    this.setCurrentDate()
+    this.loadCareerStats()
+  },
+
+  initTheme() {
+    const userTheme = app.getUserTheme()
+    this.setData({ themeClass: this.getThemeClass(userTheme) })
+  },
+
+  getThemeClass(userTheme) {
+    if (userTheme === 'auto') return ''
+    return userTheme === 'light' ? 'theme-light' : 'theme-dark'
+  },
+
+  setTheme(theme) {
+    const userTheme = app.getUserTheme()
+    this.setData({ themeClass: this.getThemeClass(userTheme) })
   },
 
   setNavHeight() {
     const systemInfo = wx.getSystemInfoSync()
     const statusBarHeight = systemInfo.statusBarHeight || 44
     const navBarHeight = systemInfo.platform === 'ios' ? 44 : 48
-    this.setData({
-      navHeight: (statusBarHeight + navBarHeight) * 2
-    })
+    this.setData({ navHeight: (statusBarHeight + navBarHeight) * 2 })
   },
 
   onShow() {
-    console.log('页面显示');
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().updateSelected(0);
-    }
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) { this.getTabBar().updateSelected(0) }
+    const userTheme = app.getUserTheme()
+    this.setData({ themeClass: this.getThemeClass(userTheme) })
   },
 
   setCurrentDate() {
-    const now = new Date();
-    const month = now.getMonth() + 1;
-    const day = now.getDate();
-    const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
-    const weekday = weekdays[now.getDay()];
-    this.setData({
-      currentDate: `${month}月${day}日 ${weekday}`
-    });
+    const now = new Date(); const month = now.getMonth() + 1; const day = now.getDate()
+    const weekdays = ['周日','周一','周二','周三','周四','周五','周六']
+    this.setData({ currentDate: `${month}月${day}日 ${weekdays[now.getDay()]}` })
   },
 
   loadCareerStats() {
     try {
-      const stats = wx.getStorageSync('careerStats');
+      const stats = wx.getStorageSync('careerStats')
       if (stats) {
         this.setData({
           careerStats: stats,
@@ -74,54 +81,27 @@ Page({
             { id: 4, icon: '🎪', value: stats.shootingPercentage + '%', label: '命中率' },
             { id: 5, icon: '⚡', value: stats.totalGames.toString(), label: '场次' }
           ]
-        });
+        })
       }
-    } catch (e) {
-      console.error('加载生涯数据失败', e);
-    }
+    } catch (e) { console.error('加载生涯数据失败', e) }
   },
 
   switchVideoTab(e) {
-    const tab = e.currentTarget.dataset.tab;
-    if (tab === this.data.activeVideoTab) return;
-
-    this.setData({ contentAnimClass: 'fade-out' });
-    
-    setTimeout(() => {
-      this.setData({ activeVideoTab: tab, contentAnimClass: 'fade-in' });
-    }, 150);
+    const tab = e.currentTarget.dataset.tab
+    if (tab === this.data.activeVideoTab) return
+    this.setData({ contentAnimClass: 'fade-out' })
+    setTimeout(() => { this.setData({ activeVideoTab: tab, contentAnimClass: 'fade-in' }) }, 150)
   },
 
-  goToCreate() {
-    wx.navigateTo({
-      url: '/pages/create/create'
-    });
-  },
+  goToCreate() { wx.navigateTo({ url: '/pages/create/create' }) },
 
   handleAction(e) {
-    const action = e.currentTarget.dataset.action;
-    
+    const action = e.currentTarget.dataset.action
     switch(action) {
-      case 'createMatch':
-        wx.navigateTo({
-          url: '/pages/create/create'
-        });
-        break;
-      case 'goTraining':
-        wx.switchTab({
-          url: '/pages/training/training'
-        });
-        break;
-      case 'goChat':
-        wx.navigateTo({
-          url: '/pages/chat/chat'
-        });
-        break;
-      case 'goProfile':
-        wx.switchTab({
-          url: '/pages/profile/profile'
-        });
-        break;
+      case 'createMatch': wx.navigateTo({ url: '/pages/create/create' }); break
+      case 'goTraining': wx.switchTab({ url: '/pages/training/training' }); break
+      case 'goChat': wx.navigateTo({ url: '/pages/chat/chat' }); break
+      case 'goProfile': wx.switchTab({ url: '/pages/profile/profile' }); break
     }
   }
 })

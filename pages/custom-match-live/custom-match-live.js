@@ -1,6 +1,9 @@
 // custom-match-live.js - 优化版（含计时器、双方队伍支持）
+const app = getApp()
+
 Page({
   data: {
+    themeClass: '',
     navHeight: 0,
     matchId: null,
     players: [],
@@ -21,9 +24,20 @@ Page({
   },
 
   onLoad: function(options) {
+    this.initTheme()
     this.setNavHeight()
     this.setData({ matchId: options.matchId })
     this.loadMatchData()
+  },
+
+  initTheme: function() {
+    const ut = app.getUserTheme()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+  },
+
+  setTheme: function(theme) {
+    const ut = app.getUserTheme()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
   },
 
   setNavHeight: function() {
@@ -36,6 +50,8 @@ Page({
   },
 
   onShow: function() {
+    const ut = app.getUserTheme()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
     if (this.data.matchId) {
       this.loadMatchData()
       this.startTimer()

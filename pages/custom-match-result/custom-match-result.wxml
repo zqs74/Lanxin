@@ -1,5 +1,5 @@
 <!-- custom-match-result.wxml - 按A队B队分组显示 -->
-<view class="page-wrapper">
+<view class="page-wrapper {{themeClass}}">
   <view class="page-header-gradient"></view>
 
   <view class="container slide-up">

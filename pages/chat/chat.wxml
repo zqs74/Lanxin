@@ -1,5 +1,5 @@
 <!-- chat.wxml - 昇梦体育 DeepSeek-R1 AI对话界面 -->
-<view class="page-wrapper">
+<view class="page-wrapper {{themeClass}}">
   <view class="page-header-gradient"></view>
   
   <view class="container">

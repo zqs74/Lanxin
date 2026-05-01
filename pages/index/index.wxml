@@ -1,5 +1,5 @@
 <!-- index.wxml - 现代化UI设计 -->
-<view class="page-wrapper">
+<view class="page-wrapper {{themeClass}}">
   <!-- 页面顶部渐变装饰 -->
   <view class="page-header-gradient"></view>
 

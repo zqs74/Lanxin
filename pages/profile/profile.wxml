@@ -1,15 +1,13 @@
-<!-- profile.wxml - 现代化UI设计 -->
-<view class="page-wrapper">
+<!-- profile.wxml - 昇梦体育 个人中心 -->
+<view class="page-wrapper {{themeClass}}">
   <view class="page-header-gradient"></view>
 
   <view class="container slide-up">
-    <!-- 页面标题 -->
     <view class="page-header">
       <view class="page-title">个人中心</view>
       <view class="page-subtitle">管理你的个人信息</view>
     </view>
 
-    <!-- 个人资料卡片 -->
     <view class="section">
       <view class="profile-card card">
         <view class="profile-header">
@@ -45,7 +43,6 @@
       </view>
     </view>
 
-    <!-- 个人数据 -->
     <view class="section">
       <view class="section-header">
         <view class="section-title">个人数据</view>
@@ -69,8 +66,36 @@
         </view>
       </view>
     </view>
+
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">设置</view>
+      </view>
+
+      <view class="settings-list card">
+        <view class="setting-item" bindtap="handleToggleTheme">
+          <view class="setting-left">
+            <view class="setting-icon" style="background:linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(255,215,0,0.1) 100%);">
+              🎨
+            </view>
+            <view class="setting-text">主题模式</view>
+          </view>
+          <view class="theme-value">{{ themeLabel }}</view>
+          <view class="setting-arrow">→</view>
+        </view>
+
+        <view class="setting-item" bindtap="goToChat">
+          <view class="setting-left">
+            <view class="setting-icon" style="background:linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(255,215,0,0.1) 100%);">
+              🤖
+            </view>
+            <view class="setting-text">昇梦AI助手</view>
+          </view>
+          <view class="setting-arrow">→</view>
+        </view>
+      </view>
+    </view>
   </view>
   
-  <!-- 悬浮AI按钮 -->
   <float-ai-button></float-ai-button>
 </view>
