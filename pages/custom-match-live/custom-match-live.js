@@ -13,15 +13,23 @@ Page({
     selectedPlayerId: null,
     actionLog: [],
     showLog: false,
-    
+    teamAPlayers: [],
+    teamBPlayers: [],
+
     // 计时器相关
     matchTime: '00:00:00',
     startTime: null,
     timerInterval: null,
-    
+
     // 队伍统计
     teamACount: 0,
-    teamBCount: 0
+    teamBCount: 0,
+    teamAScore: 0,
+    teamBScore: 0,
+    teamAFouls: 0,
+    teamBFouls: 0,
+    teamAFoulRecords: [],
+    teamBFoulRecords: []
   },
 
   onLoad: function(options) {
@@ -70,20 +78,27 @@ Page({
   loadMatchData: function() {
     try {
       const matchData = wx.getStorageSync('custom_match_' + this.data.matchId)
-      
+
       if (matchData && matchData.status === 'in_progress') {
-        const players = matchData.players || []
-        
-        // 计算队伍统计
-        const teamACount = players.filter(p => p.team === 'A').length
-        const teamBCount = players.filter(p => p.team === 'B').length
-        
+        const players = this.normalizePlayers(matchData.players || [])
+        const teamAFoulRecords = matchData.teamAFoulRecords || []
+        const teamBFoulRecords = matchData.teamBFoulRecords || []
+        const teamStats = this.calculateTeamStats(players, teamAFoulRecords, teamBFoulRecords)
+
         this.setData({
           players: players,
+          teamAPlayers: players.filter(p => p.team === 'A'),
+          teamBPlayers: players.filter(p => p.team === 'B'),
           totalScore: this.calculateTotalScore(players),
           actionLog: matchData.actionLog || [],
-          teamACount: teamACount,
-          teamBCount: teamBCount,
+          teamACount: teamStats.teamACount,
+          teamBCount: teamStats.teamBCount,
+          teamAScore: teamStats.teamAScore,
+          teamBScore: teamStats.teamBScore,
+          teamAFouls: teamStats.teamAFouls,
+          teamBFouls: teamStats.teamBFouls,
+          teamAFoulRecords,
+          teamBFoulRecords,
           startTime: new Date(matchData.startTime)
         })
       } else {
@@ -115,7 +130,7 @@ Page({
     }
 
     this.updateMatchTime()
-    
+
     this.data.timerInterval = setInterval(() => {
       this.updateMatchTime()
     }, 1000)
@@ -130,21 +145,47 @@ Page({
 
   updateMatchTime: function() {
     if (!this.data.startTime) return
-    
+
     const now = new Date()
     const diff = now - this.data.startTime
-    
+
     const hours = Math.floor(diff / 3600000)
     const minutes = Math.floor((diff % 3600000) / 60000)
     const seconds = Math.floor((diff % 60000) / 1000)
-    
+
     const timeStr = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-    
+
     this.setData({ matchTime: timeStr })
   },
 
   calculateTotalScore: function(players) {
     return players.reduce((total, player) => total + (player.score || 0), 0)
+  },
+
+  normalizePlayers: function(players) {
+    return players.map(player => ({
+      ...player,
+      score: player.score || 0,
+      fouls: player.fouls || [],
+      rebounds: player.rebounds || [],
+      steals: player.steals || [],
+      assists: player.assists || [],
+      turnovers: player.turnovers || [],
+      blocks: player.blocks || []
+    }))
+  },
+
+  calculateTeamStats: function(players, teamAFoulRecords = this.data.teamAFoulRecords, teamBFoulRecords = this.data.teamBFoulRecords) {
+    const teamAPlayers = players.filter(p => p.team === 'A')
+    const teamBPlayers = players.filter(p => p.team === 'B')
+    return {
+      teamACount: teamAPlayers.length,
+      teamBCount: teamBPlayers.length,
+      teamAScore: teamAPlayers.reduce((sum, p) => sum + (p.score || 0), 0),
+      teamBScore: teamBPlayers.reduce((sum, p) => sum + (p.score || 0), 0),
+      teamAFouls: teamAPlayers.reduce((sum, p) => sum + ((p.fouls || []).length), 0) + teamAFoulRecords.length,
+      teamBFouls: teamBPlayers.reduce((sum, p) => sum + ((p.fouls || []).length), 0) + teamBFoulRecords.length
+    }
   },
 
   selectPlayer: function(e) {
@@ -164,6 +205,7 @@ Page({
 
   addScore: function(e) {
     const points = parseInt(e.currentTarget.dataset.points)
+    const scoreType = e.currentTarget.dataset.scoreType || `${points}分`
     const playerId = this.data.selectedPlayer.id
     const players = this.data.players
     const playerIndex = players.findIndex(p => p.id === playerId)
@@ -175,56 +217,16 @@ Page({
       this.recordAction({
         type: 'score',
         playerName: players[playerIndex].name,
-        action: `+${points}分 (${oldScore} → ${players[playerIndex].score})`,
+        action: `${scoreType} +${points}分 (${oldScore} → ${players[playerIndex].score})`,
         playerId: playerId,
         points: points,
+        scoreType: scoreType,
         oldScore: oldScore,
         newScore: players[playerIndex].score
       })
 
       this.updateMatchData(players)
-      
-      wx.showToast({
-        title: '操作成功',
-        icon: 'success',
-        duration: 800
-      })
-    }
 
-    this.closePlayerAction()
-  },
-
-  subtractScore: function(e) {
-    const points = parseInt(e.currentTarget.dataset.points)
-    const playerId = this.data.selectedPlayer.id
-    const players = this.data.players
-    const playerIndex = players.findIndex(p => p.id === playerId)
-
-    if (playerIndex !== -1) {
-      if (players[playerIndex].score < points) {
-        wx.showToast({
-          title: '得分不能为负数',
-          icon: 'none',
-          duration: 1500
-        })
-        return
-      }
-
-      const oldScore = players[playerIndex].score
-      players[playerIndex].score -= points
-
-      this.recordAction({
-        type: 'score',
-        playerName: players[playerIndex].name,
-        action: `-${points}分 (${oldScore} → ${players[playerIndex].score})`,
-        playerId: playerId,
-        points: -points,
-        oldScore: oldScore,
-        newScore: players[playerIndex].score
-      })
-
-      this.updateMatchData(players)
-      
       wx.showToast({
         title: '操作成功',
         icon: 'success',
@@ -236,20 +238,12 @@ Page({
   },
 
   recordFoul: function(e) {
-    const foulType = e.currentTarget.dataset.type
     const playerId = this.data.selectedPlayer.id
     const players = this.data.players
     const playerIndex = players.findIndex(p => p.id === playerId)
 
     if (playerIndex !== -1) {
-      const foulTypeNames = {
-        foul: '犯规',
-        warning: '警告',
-        freeThrow: '罚球',
-        violation: '违例'
-      }
-
-      const timestamp = new Date().toLocaleTimeString('zh-CN', { 
+      const timestamp = new Date().toLocaleTimeString('zh-CN', {
         hour12: false,
         hour: '2-digit',
         minute: '2-digit',
@@ -257,28 +251,114 @@ Page({
       })
 
       const foulRecord = {
-        type: foulType,
+        type: 'foul',
         time: timestamp
       }
 
-      if (!players[playerIndex][foulType + 's']) {
-        players[playerIndex][foulType + 's'] = []
-      }
-      players[playerIndex][foulType + 's'].push(foulRecord)
+      players[playerIndex].fouls = players[playerIndex].fouls || []
+      players[playerIndex].fouls.push(foulRecord)
 
       this.recordAction({
         type: 'foul',
         playerName: players[playerIndex].name,
-        action: `${foulTypeNames[foulType]}`,
+        action: `个人犯规 ${players[playerIndex].fouls.length}次`,
         playerId: playerId,
-        foulType: foulType,
+        statField: 'fouls',
         foulRecord: foulRecord
       })
 
       this.updateMatchData(players)
-      
+
       wx.showToast({
-        title: '判罚已记录',
+        title: '犯规已记录',
+        icon: 'success',
+        duration: 800
+      })
+    }
+
+    this.closePlayerAction()
+  },
+
+  recordTeamFoul: function(e) {
+    const team = e.currentTarget.dataset.team || this.data.selectedPlayer?.team
+    if (!team) return
+
+    const timestamp = new Date().toLocaleTimeString('zh-CN', {
+      hour12: false,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    })
+    const foulRecord = {
+      type: 'teamFoul',
+      team,
+      time: timestamp
+    }
+    const teamAFoulRecords = [...this.data.teamAFoulRecords]
+    const teamBFoulRecords = [...this.data.teamBFoulRecords]
+
+    if (team === 'A') {
+      teamAFoulRecords.push(foulRecord)
+    } else {
+      teamBFoulRecords.push(foulRecord)
+    }
+
+    this.recordAction({
+      type: 'teamFoul',
+      playerName: `${team}队`,
+      action: '团队犯规',
+      team,
+      foulRecord
+    })
+
+    this.setData({ teamAFoulRecords, teamBFoulRecords })
+    this.updateMatchData(this.data.players, teamAFoulRecords, teamBFoulRecords)
+
+    wx.showToast({
+      title: `${team}队团队犯规+1`,
+      icon: 'success',
+      duration: 800
+    })
+
+    this.closePlayerAction()
+  },
+
+  recordStat: function(e) {
+    const statField = e.currentTarget.dataset.stat
+    const statName = e.currentTarget.dataset.statName
+    const playerId = this.data.selectedPlayer.id
+    const players = this.data.players
+    const playerIndex = players.findIndex(p => p.id === playerId)
+
+    if (playerIndex !== -1) {
+      const timestamp = new Date().toLocaleTimeString('zh-CN', {
+        hour12: false,
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      })
+      const statRecord = {
+        type: statField,
+        time: timestamp
+      }
+
+      players[playerIndex][statField] = players[playerIndex][statField] || []
+      players[playerIndex][statField].push(statRecord)
+
+      this.recordAction({
+        type: 'stat',
+        playerName: players[playerIndex].name,
+        action: `${statName} +1`,
+        playerId: playerId,
+        statField: statField,
+        statName: statName,
+        statRecord: statRecord
+      })
+
+      this.updateMatchData(players)
+
+      wx.showToast({
+        title: `${statName}+1`,
         icon: 'success',
         duration: 800
       })
@@ -289,7 +369,7 @@ Page({
 
   recordAction: function(actionData) {
     const now = new Date()
-    const timeStr = now.toLocaleTimeString('zh-CN', { 
+    const timeStr = now.toLocaleTimeString('zh-CN', {
       hour12: false,
       hour: '2-digit',
       minute: '2-digit',
@@ -308,25 +388,44 @@ Page({
     })
   },
 
-  updateMatchData: function(players) {
+  updateMatchData: function(players, teamAFoulRecords = this.data.teamAFoulRecords, teamBFoulRecords = this.data.teamBFoulRecords) {
     const totalScore = this.calculateTotalScore(players)
-    
+    const teamStats = this.calculateTeamStats(players, teamAFoulRecords, teamBFoulRecords)
+    const matchData = wx.getStorageSync('custom_match_' + this.data.matchId) || {}
+
     this.setData({
       players: players,
-      totalScore: totalScore
+      teamAPlayers: players.filter(p => p.team === 'A'),
+      teamBPlayers: players.filter(p => p.team === 'B'),
+      totalScore: totalScore,
+      teamACount: teamStats.teamACount,
+      teamBCount: teamStats.teamBCount,
+      teamAScore: teamStats.teamAScore,
+      teamBScore: teamStats.teamBScore,
+      teamAFouls: teamStats.teamAFouls,
+      teamBFouls: teamStats.teamBFouls,
+      teamAFoulRecords,
+      teamBFoulRecords
     })
 
     try {
-      const matchData = {
+      const nextMatchData = {
+        ...matchData,
         matchId: this.data.matchId,
         players: players,
         status: 'in_progress',
         totalScore: totalScore,
+        teamAScore: teamStats.teamAScore,
+        teamBScore: teamStats.teamBScore,
+        teamAFouls: teamStats.teamAFouls,
+        teamBFouls: teamStats.teamBFouls,
+        teamAFoulRecords,
+        teamBFoulRecords,
         actionLog: this.data.actionLog
       }
 
-      wx.setStorageSync('custom_match_' + this.data.matchId, matchData)
-      wx.setStorageSync('unfinished_custom_match', matchData)
+      wx.setStorageSync('custom_match_' + this.data.matchId, nextMatchData)
+      wx.setStorageSync('unfinished_custom_match', nextMatchData)
     } catch (e) {
       console.error('保存比赛数据失败:', e)
       wx.showToast({
@@ -343,6 +442,8 @@ Page({
 
     const lastAction = this.data.actionLog[0]
     const players = this.data.players
+    let teamAFoulRecords = this.data.teamAFoulRecords
+    let teamBFoulRecords = this.data.teamBFoulRecords
 
     if (lastAction.type === 'score') {
       const playerIndex = players.findIndex(p => p.id === lastAction.playerId)
@@ -351,8 +452,19 @@ Page({
       }
     } else if (lastAction.type === 'foul') {
       const playerIndex = players.findIndex(p => p.id === lastAction.playerId)
-      if (playerIndex !== -1 && players[playerIndex][lastAction.foulType + 's']) {
-        players[playerIndex][lastAction.foulType + 's'].pop()
+      if (playerIndex !== -1 && players[playerIndex].fouls) {
+        players[playerIndex].fouls.pop()
+      }
+    } else if (lastAction.type === 'stat') {
+      const playerIndex = players.findIndex(p => p.id === lastAction.playerId)
+      if (playerIndex !== -1 && players[playerIndex][lastAction.statField]) {
+        players[playerIndex][lastAction.statField].pop()
+      }
+    } else if (lastAction.type === 'teamFoul') {
+      if (lastAction.team === 'A') {
+        teamAFoulRecords = teamAFoulRecords.slice(0, -1)
+      } else {
+        teamBFoulRecords = teamBFoulRecords.slice(0, -1)
       }
     }
 
@@ -362,7 +474,7 @@ Page({
       actionLog: newActionLog
     })
 
-    this.updateMatchData(players)
+    this.updateMatchData(players, teamAFoulRecords, teamBFoulRecords)
 
     wx.showToast({
       title: '已撤销',
@@ -379,7 +491,7 @@ Page({
 
   exitMatch: function() {
     this.stopTimer()
-    
+
     wx.showModal({
       title: '退出比赛',
       content: '是否退出比赛？未结束的比赛数据将临时保存，可从原入口恢复继续比赛',
@@ -397,7 +509,7 @@ Page({
 
   endMatch: function() {
     this.stopTimer()
-    
+
     wx.showModal({
       title: '结束比赛',
       content: `是否确认结束本场比赛？\n比赛时长：${this.data.matchTime}\n结束后将生成最终赛果与分析报告，不可修改`,
@@ -416,10 +528,16 @@ Page({
   confirmEndMatch: function() {
     try {
       const matchData = wx.getStorageSync('custom_match_' + this.data.matchId)
-      
+
       matchData.status = 'completed'
       matchData.endTime = new Date().toISOString()
       matchData.finalTotalScore = this.data.totalScore
+      matchData.teamAScore = this.data.teamAScore
+      matchData.teamBScore = this.data.teamBScore
+      matchData.teamAFouls = this.data.teamAFouls
+      matchData.teamBFouls = this.data.teamBFouls
+      matchData.teamAFoulRecords = this.data.teamAFoulRecords
+      matchData.teamBFoulRecords = this.data.teamBFoulRecords
       matchData.duration = this.data.matchTime
 
       wx.setStorageSync('custom_match_' + this.data.matchId, matchData)

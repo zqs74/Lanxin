@@ -50,13 +50,25 @@ Page({
 
   initPlayers: function() {
     const now = Date.now()
-    // A队2人 + B队2人，带默认姓名和编号
-    const defaultPlayers = [
-      { id: now, name: 'A1-张三', number: '1', avatar: '', team: 'A', nameError: '', numberError: '' },
-      { id: now + 1, name: 'A2-李四', number: '2', avatar: '', team: 'A', nameError: '', numberError: '' },
-      { id: now + 2, name: 'B1-王五', number: '1', avatar: '', team: 'B', nameError: '', numberError: '' },
-      { id: now + 3, name: 'B2-赵六', number: '2', avatar: '', team: 'B', nameError: '', numberError: '' }
-    ]
+    const teamA = Array.from({ length: 5 }, (_, index) => ({
+      id: now + index,
+      name: `A${index + 1}号`,
+      number: String(index + 1),
+      avatar: '',
+      team: 'A',
+      nameError: '',
+      numberError: ''
+    }))
+    const teamB = Array.from({ length: 5 }, (_, index) => ({
+      id: now + 5 + index,
+      name: `B${index + 1}号`,
+      number: String(index + 1),
+      avatar: '',
+      team: 'B',
+      nameError: '',
+      numberError: ''
+    }))
+    const defaultPlayers = [...teamA, ...teamB]
     
     this.setData({ 
       players: defaultPlayers 
@@ -338,19 +350,27 @@ Page({
   },
 
   confirmStartMatch: function() {
+    const initStatFields = (player) => ({
+      ...player,
+      score: 0,
+      fouls: [],
+      rebounds: [],
+      steals: [],
+      assists: [],
+      turnovers: [],
+      blocks: []
+    })
+
     const matchData = {
       matchId: this.data.matchId,
-      players: this.data.players.map(p => ({
-        ...p,
-        score: 0,
-        fouls: [],
-        warnings: [],
-        freeThrows: [],
-        violations: []
-      })),
+      players: this.data.players.map(initStatFields),
       startTime: new Date().toISOString(),
       status: 'in_progress',
       totalScore: 0,
+      teamAScore: 0,
+      teamBScore: 0,
+      teamAFouls: 0,
+      teamBFouls: 0,
       actionLog: []
     }
 

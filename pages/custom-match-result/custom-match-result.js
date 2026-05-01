@@ -19,6 +19,15 @@ Page({
     teamBRanking: [],
     teamATotalScore: 0,
     teamBTotalScore: 0,
+    winnerText: '',
+    scoreDiff: 0,
+    scoreDiffText: '平',
+    mvpPlayer: null,
+    topScorer: null,
+    topScorerMeta: '-',
+    mvpPlayerMeta: '-',
+    statLeaders: [],
+    statTotals: {},
     
     foulStats: {},
     allFouls: [],
@@ -64,25 +73,31 @@ Page({
       const matchData = wx.getStorageSync('custom_match_' + this.data.matchId)
       
       if (matchData && matchData.status === 'completed') {
-        const players = matchData.players || []
+        const players = this.normalizePlayers(matchData.players || [])
         const actionLog = matchData.actionLog || []
+        const teamAFoulRecords = matchData.teamAFoulRecords || []
+        const teamBFoulRecords = matchData.teamBFoulRecords || []
         
         // 分离A队和B队球员
-        const teamAPlayers = players.filter(p => p.team === 'A')
-        const teamBPlayers = players.filter(p => p.team === 'B')
+        const enrichedPlayers = this.enrichPlayers(players)
+        const teamAPlayers = enrichedPlayers.filter(p => p.team === 'A')
+        const teamBPlayers = enrichedPlayers.filter(p => p.team === 'B')
         
         // 计算各队总分
         const teamATotalScore = teamAPlayers.reduce((sum, p) => sum + (p.score || 0), 0)
         const teamBTotalScore = teamBPlayers.reduce((sum, p) => sum + (p.score || 0), 0)
         
         this.setData({
-          players: players,
+          players: enrichedPlayers,
           teamAPlayers: teamAPlayers,
           teamBPlayers: teamBPlayers,
           actionLog: actionLog,
           finalTotalScore: matchData.finalTotalScore || 0,
           teamATotalScore: teamATotalScore,
-          teamBTotalScore: teamBTotalScore
+          teamBTotalScore: teamBTotalScore,
+          winnerText: this.getWinnerText(teamATotalScore, teamBTotalScore),
+          scoreDiff: Math.abs(teamATotalScore - teamBTotalScore),
+          scoreDiffText: Math.abs(teamATotalScore - teamBTotalScore) === 0 ? '平' : `${Math.abs(teamATotalScore - teamBTotalScore)}分`
         })
 
         // 生成各队排行
@@ -92,7 +107,7 @@ Page({
         this.calculateMatchDuration(matchData.startTime, matchData.endTime, matchData.duration)
         
         // 生成分析数据
-        this.generateAnalysisData(players, actionLog)
+        this.generateAnalysisData(enrichedPlayers, actionLog, teamAFoulRecords, teamBFoulRecords)
       } else {
         wx.showToast({ title: '比赛数据不存在', icon: 'error' })
         setTimeout(() => { wx.navigateBack() }, 1500)
@@ -102,11 +117,57 @@ Page({
       wx.showToast({ title: '数据加载失败', icon: 'error' })
     }
   },
+
+  normalizePlayers: function(players) {
+    return players.map(player => ({
+      ...player,
+      score: player.score || 0,
+      fouls: player.fouls || [],
+      rebounds: player.rebounds || [],
+      steals: player.steals || [],
+      assists: player.assists || [],
+      turnovers: player.turnovers || [],
+      blocks: player.blocks || []
+    }))
+  },
+
+  statCount: function(player, field) {
+    return (player[field] || []).length
+  },
+
+  enrichPlayers: function(players) {
+    return players.map(player => {
+      const rebounds = this.statCount(player, 'rebounds')
+      const assists = this.statCount(player, 'assists')
+      const steals = this.statCount(player, 'steals')
+      const turnovers = this.statCount(player, 'turnovers')
+      const blocks = this.statCount(player, 'blocks')
+      const fouls = this.statCount(player, 'fouls')
+      const efficiency = (player.score || 0) + rebounds + assists + steals + blocks - turnovers - fouls
+
+      return {
+        ...player,
+        teamLabel: `${player.team}队`,
+        reboundsCount: rebounds,
+        assistsCount: assists,
+        stealsCount: steals,
+        turnoversCount: turnovers,
+        blocksCount: blocks,
+        foulsCount: fouls,
+        efficiency
+      }
+    })
+  },
+
+  getWinnerText: function(teamATotal, teamBTotal) {
+    if (teamATotal === teamBTotal) return '平局'
+    return teamATotal > teamBTotal ? 'A队获胜' : 'B队获胜'
+  },
   
   generateTeamRankings: function(teamAPlayers, teamBPlayers, teamATotal, teamBTotal) {
     // A队排行
     const teamARanking = [...teamAPlayers]
-      .sort((a, b) => (b.score || 0) - (a.score || 0))
+      .sort((a, b) => (b.score || 0) - (a.score || 0) || (b.efficiency || 0) - (a.efficiency || 0))
       .map(player => ({
         ...player,
         percentage: teamATotal > 0 ? ((player.score / teamATotal) * 100).toFixed(1) : '0.0'
@@ -114,7 +175,7 @@ Page({
     
     // B队排行
     const teamBRanking = [...teamBPlayers]
-      .sort((a, b) => (b.score || 0) - (a.score || 0))
+      .sort((a, b) => (b.score || 0) - (a.score || 0) || (b.efficiency || 0) - (a.efficiency || 0))
       .map(player => ({
         ...player,
         percentage: teamBTotal > 0 ? ((player.score / teamBTotal) * 100).toFixed(1) : '0.0'
@@ -123,17 +184,24 @@ Page({
     // 全场总排行
     const totalScore = teamATotal + teamBTotal
     const playerRanking = [...teamAPlayers, ...teamBPlayers]
-      .sort((a, b) => (b.score || 0) - (a.score || 0))
+      .sort((a, b) => (b.score || 0) - (a.score || 0) || (b.efficiency || 0) - (a.efficiency || 0))
       .map(player => ({
         ...player,
         percentage: totalScore > 0 ? ((player.score / totalScore) * 100).toFixed(1) : '0.0',
         scorePercentage: totalScore > 0 ? ((player.score / totalScore) * 100).toFixed(1) : '0.0'
       }))
     
+    const topScorer = playerRanking[0] || null
+    const mvpPlayer = [...playerRanking].sort((a, b) => (b.efficiency || 0) - (a.efficiency || 0) || (b.score || 0) - (a.score || 0))[0] || null
+
     this.setData({
       teamARanking,
       teamBRanking,
-      playerRanking
+      playerRanking,
+      topScorer,
+      mvpPlayer,
+      topScorerMeta: topScorer ? `${topScorer.team}队 · ${topScorer.score}分` : '-',
+      mvpPlayerMeta: mvpPlayer ? `${mvpPlayer.team}队 · 效率 ${mvpPlayer.efficiency}` : '-'
     })
   },
 
@@ -175,49 +243,92 @@ Page({
     }
   },
 
-  generateAnalysisData: function(players, actionLog) {
-    let foulStats = { foul: 0, warning: 0, freeThrow: 0, violation: 0 }
+  generateAnalysisData: function(players, actionLog, teamAFoulRecords = [], teamBFoulRecords = []) {
+    let foulStats = { foul: 0 }
     let allFouls = []
     let teamAFouls = 0
     let teamBFouls = 0
+    const statTotals = {
+      rebounds: 0,
+      steals: 0,
+      assists: 0,
+      turnovers: 0,
+      blocks: 0
+    }
 
     players.forEach(player => {
       const isTeamA = player.team === 'A'
-      
-      ['fouls', 'warnings', 'freeThrows', 'violations'].forEach(foulType => {
-        const typeMap = { fouls: 'foul', warnings: 'warning', freeThrows: 'freeThrow', violations: 'violation' }
-        const typeNameMap = { fouls: '犯规', warnings: '警告', freeThrows: '罚球', violations: '违例' }
-        
-        if (player[foulType] && player[foulType].length > 0) {
-          foulStats[typeMap[foulType]] += player[foulType].length
-          
-          if (isTeamA) {
-            teamAFouls += player[foulType].length
-          } else {
-            teamBFouls += player[foulType].length
-          }
-          
-          player[foulType].forEach(record => {
-            allFouls.push({
-              type: typeMap[foulType],
-              typeName: typeNameMap[foulType],
-              playerName: player.name,
-              time: record.time,
-              team: player.team
-            })
-          })
-        }
+
+      const foulCount = this.statCount(player, 'fouls')
+      foulStats.foul += foulCount
+      if (isTeamA) {
+        teamAFouls += foulCount
+      } else {
+        teamBFouls += foulCount
+      }
+
+      ;(player.fouls || []).forEach(record => {
+        allFouls.push({
+          type: 'foul',
+          typeName: '犯规',
+          playerName: player.name,
+          time: record.time,
+          team: player.team
+        })
+      })
+
+      Object.keys(statTotals).forEach(field => {
+        statTotals[field] += this.statCount(player, field)
       })
     })
 
-    allFouls.sort((a, b) => a.time.localeCompare(b.time))
+    teamAFoulRecords.forEach(record => {
+      foulStats.foul += 1
+      teamAFouls += 1
+      allFouls.push({
+        type: 'teamFoul',
+        typeName: '团队犯规',
+        playerName: 'A队',
+        time: record.time,
+        team: 'A'
+      })
+    })
 
-    const totalFouls = Object.values(foulStats).reduce((sum, count) => sum + count, 0)
+    teamBFoulRecords.forEach(record => {
+      foulStats.foul += 1
+      teamBFouls += 1
+      allFouls.push({
+        type: 'teamFoul',
+        typeName: '团队犯规',
+        playerName: 'B队',
+        time: record.time,
+        team: 'B'
+      })
+    })
+
+    const leaderConfig = [
+      { field: 'reboundsCount', label: '篮板王' },
+      { field: 'assistsCount', label: '助攻王' },
+      { field: 'stealsCount', label: '抢断王' },
+      { field: 'blocksCount', label: '盖帽王' }
+    ]
+    const statLeaders = leaderConfig.map(config => {
+      const leader = [...players].sort((a, b) => (b[config.field] || 0) - (a[config.field] || 0) || (b.score || 0) - (a.score || 0))[0]
+      return {
+        label: config.label,
+        name: leader ? leader.name : '-',
+        team: leader ? leader.team : '',
+        value: leader ? (leader[config.field] || 0) : 0
+      }
+    })
+
+    const totalFouls = foulStats.foul
+    allFouls.sort((a, b) => a.time.localeCompare(b.time))
 
     const scoreActions = actionLog.filter(log => log.type === 'score')
     const totalActions = scoreActions.length
-    const avgEfficiency = scoreActions.length > 0 
-      ? ((this.data.finalTotalScore / scoreActions.length) * 100).toFixed(1)
+    const avgEfficiency = scoreActions.length > 0
+      ? (this.data.finalTotalScore / scoreActions.length).toFixed(1)
       : '0'
 
     const keyMoments = this.extractKeyMoments(actionLog, players)
@@ -230,7 +341,9 @@ Page({
       teamBFouls,
       totalActions,
       avgEfficiency,
-      keyMoments
+      keyMoments,
+      statTotals,
+      statLeaders
     })
   },
 
@@ -238,11 +351,14 @@ Page({
     const moments = []
 
     actionLog.slice().reverse().forEach((action) => {
+      const player = players.find(p => p.id === action.playerId)
+      const teamName = player?.team === 'A' ? 'A队' : 'B队'
+
       if (action.type === 'score' && Math.abs(action.points) >= 3) {
         moments.unshift({
           time: action.time,
           type: 'score',
-          description: `${action.playerName} (${action.playerId && players.find(p=>p.id===action.playerId)?.team === 'A' ? 'A队' : 'B队'}) 高光：${action.action}`
+          description: `${action.playerName} (${teamName}) ${action.action}`
         })
       }
 
@@ -250,7 +366,23 @@ Page({
         moments.unshift({
           time: action.time,
           type: 'foul',
-          description: `${action.playerName} (${action.playerId && players.find(p=>p.id===action.playerId)?.team === 'A' ? 'A队' : 'B队'}) 判罚${action.action}`
+          description: `${action.playerName} (${teamName}) ${action.action}`
+        })
+      }
+
+      if (action.type === 'teamFoul') {
+        moments.unshift({
+          time: action.time,
+          type: 'foul',
+          description: `${action.team}队 团队犯规`
+        })
+      }
+
+      if (action.type === 'stat' && ['steals', 'blocks', 'assists'].includes(action.statField)) {
+        moments.unshift({
+          time: action.time,
+          type: 'stat',
+          description: `${action.playerName} (${teamName}) ${action.action}`
         })
       }
     })
@@ -260,14 +392,8 @@ Page({
 
   getPlayerFouls: function(player) {
     return {
-      total: (player.fouls?.length || 0) + 
-             (player.warnings?.length || 0) + 
-             (player.freeThrows?.length || 0) + 
-             (player.violations?.length || 0),
-      foul: player.fouls?.length || 0,
-      warning: player.warnings?.length || 0,
-      freeThrow: player.freeThrows?.length || 0,
-      violation: player.violations?.length || 0
+      total: this.statCount(player, 'fouls'),
+      foul: this.statCount(player, 'fouls')
     }
   },
 
@@ -314,10 +440,12 @@ Page({
     
     const shareContent = `自定义比赛赛果\n` +
       `A队: ${this.data.teamATotalScore}分 | B队: ${this.data.teamBTotalScore}分\n` +
+      `结果: ${this.data.winnerText}${this.data.scoreDiff ? `，分差${this.data.scoreDiff}分` : ''}\n` +
       `全场总分: ${this.data.finalTotalScore}分\n` +
       `比赛时长: ${this.data.matchDuration}\n` +
       `A队MVP: ${topPlayerA ? topPlayerA.name : '-'} (${topPlayerA ? topPlayerA.score : 0}分)\n` +
       `B队MVP: ${topPlayerB ? topPlayerB.name : '-'} (${topPlayerB ? topPlayerB.score : 0}分)\n` +
+      `全场MVP: ${this.data.mvpPlayer ? this.data.mvpPlayer.name : '-'}\n` +
       `来自篮球数据统计小程序`
 
     wx.setClipboardData({

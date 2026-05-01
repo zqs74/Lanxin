@@ -51,8 +51,8 @@
       </view>
 
       <view class="final-total-row">
-        <text class="final-total-label">全场总分</text>
-        <text class="final-total-value">{{finalTotalScore}}</text>
+        <text class="final-total-label">{{winnerText}}</text>
+        <text class="final-total-value">{{scoreDiffText}}</text>
       </view>
 
       <view class="match-meta">
@@ -62,163 +62,132 @@
         </view>
         <view class="meta-divider"></view>
         <view class="meta-item">
-          <text class="meta-label">操作次数</text>
+          <text class="meta-label">队伍犯规</text>
+          <text class="meta-value">A {{teamAFouls}} / B {{teamBFouls}}</text>
+        </view>
+        <view class="meta-divider"></view>
+        <view class="meta-item">
+          <text class="meta-label">记录动作</text>
           <text class="meta-value">{{actionLog.length}}次</text>
         </view>
       </view>
     </view>
 
-    <!-- A队得分排行 -->
-    <view wx:if="{{teamAPlayers.length > 0}}" class="section team-section-a">
-      <view class="section-title team-title-a">
-        <t-icon class="team-icon" name="flag" size="30rpx" color="#ff4d4f" />
-        A 队得分排行
-        <text class="team-subtotal">共 {{teamATotalScore}} 分</text>
+    <view class="section">
+      <view class="section-title icon-title">
+        <t-icon class="title-icon" name="star" size="34rpx" color="#D4AF37" />
+        关键球员
       </view>
-      <view class="ranking-list">
-        <view 
-          wx:for="{{teamARanking}}" 
-          wx:key="id"
-          class="ranking-item card team-a-item {{index === 0 ? 'top-rank' : ''}}"
-        >
-          <view class="rank-badge {{index < 3 ? 'top' + (index + 1) : ''}} rank-a">
-            <text class="rank-number">{{index + 1}}</text>
-          </view>
+      <view class="leader-grid">
+        <view class="leader-card card">
+          <view class="leader-label">全场MVP</view>
+          <view class="leader-name">{{mvpPlayer ? mvpPlayer.name : '-'}}</view>
+          <view class="leader-meta">{{mvpPlayerMeta}}</view>
+        </view>
+        <view class="leader-card card">
+          <view class="leader-label">得分王</view>
+          <view class="leader-name">{{topScorer ? topScorer.name : '-'}}</view>
+          <view class="leader-meta">{{topScorerMeta}}</view>
+        </view>
+      </view>
+      <view class="stat-leader-list">
+        <view class="stat-leader-item card" wx:for="{{statLeaders}}" wx:key="label">
+          <view class="stat-leader-label">{{item.label}}</view>
+          <view class="stat-leader-name">{{item.name}}</view>
+          <view class="stat-leader-value">{{item.value}}</view>
+        </view>
+      </view>
+    </view>
 
-          <view class="rank-avatar">
-            <image 
-              wx:if="{{item.avatar}}" 
-              src="{{item.avatar}}" 
-              class="rank-avatar-img"
-              mode="aspectFill"
-            />
-            <view wx:else class="rank-avatar-placeholder rank-avatar-a">
-              <text>{{item.number}}</text>
-            </view>
+    <view class="section">
+      <view class="section-title icon-title">
+        <t-icon class="title-icon" name="chart-column" size="34rpx" color="#D4AF37" />
+        全队技术统计
+      </view>
+      <view class="team-boxscore-grid">
+        <view class="team-boxscore card team-a-box">
+          <view class="boxscore-title">A 队</view>
+          <view class="boxscore-row">
+            <text>得分</text>
+            <text>{{teamATotalScore}}</text>
           </view>
-
-          <view class="rank-info">
-            <text class="rank-name">{{item.name}}</text>
-            <text class="rank-number">#{{item.number}}</text>
+          <view class="boxscore-row">
+            <text>犯规</text>
+            <text>{{teamAFouls}}</text>
           </view>
-
-          <view class="rank-stats">
-            <text class="rank-score rank-score-a">{{item.score}}分</text>
-            <text class="rank-percentage">{{item.percentage}}%</text>
+          <view class="boxscore-row">
+            <text>人数</text>
+            <text>{{teamAPlayers.length}}</text>
           </view>
-          
-          <view wx:if="{{index === 0}}" class="crown-icon">
-            <t-icon name="star" size="40rpx" color="#D4AF37" />
+        </view>
+        <view class="team-boxscore card team-b-box">
+          <view class="boxscore-title">B 队</view>
+          <view class="boxscore-row">
+            <text>得分</text>
+            <text>{{teamBTotalScore}}</text>
+          </view>
+          <view class="boxscore-row">
+            <text>犯规</text>
+            <text>{{teamBFouls}}</text>
+          </view>
+          <view class="boxscore-row">
+            <text>人数</text>
+            <text>{{teamBPlayers.length}}</text>
           </view>
         </view>
       </view>
     </view>
 
-    <!-- B队得分排行 -->
-    <view wx:if="{{teamBPlayers.length > 0}}" class="section team-section-b">
-      <view class="section-title team-title-b">
-        <t-icon class="team-icon" name="flag" size="30rpx" color="#1890ff" />
-        B 队得分排行
-        <text class="team-subtotal">共 {{teamBTotalScore}} 分</text>
-      </view>
-      <view class="ranking-list">
-        <view 
-          wx:for="{{teamBRanking}}" 
-          wx:key="id"
-          class="ranking-item card team-b-item {{index === 0 ? 'top-rank' : ''}}"
-        >
-          <view class="rank-badge {{index < 3 ? 'top' + (index + 1) : ''}} rank-b">
-            <text class="rank-number">{{index + 1}}</text>
-          </view>
-
-          <view class="rank-avatar">
-            <image 
-              wx:if="{{item.avatar}}" 
-              src="{{item.avatar}}" 
-              class="rank-avatar-img"
-              mode="aspectFill"
-            />
-            <view wx:else class="rank-avatar-placeholder rank-avatar-b">
-              <text>{{item.number}}</text>
-            </view>
-          </view>
-
-          <view class="rank-info">
-            <text class="rank-name">{{item.name}}</text>
-            <text class="rank-number">#{{item.number}}</text>
-          </view>
-
-          <view class="rank-stats">
-            <text class="rank-score rank-score-b">{{item.score}}分</text>
-            <text class="rank-percentage">{{item.percentage}}%</text>
-          </view>
-          
-          <view wx:if="{{index === 0}}" class="crown-icon">
-            <t-icon name="star" size="40rpx" color="#D4AF37" />
-          </view>
-        </view>
-      </view>
-    </view>
-
-    <!-- 全场总排行榜（可选） -->
+    <!-- 全场技术统计 -->
     <view class="section">
       <view class="section-title icon-title">
         <t-icon class="title-icon" name="chart-bar" size="34rpx" color="#D4AF37" />
-        全场得分总榜
+        球员数据
       </view>
-      <view class="ranking-list compact">
+      <view class="player-table card">
+        <view class="player-table-head">
+          <text>球员</text>
+          <text>分</text>
+          <text>板</text>
+          <text>助</text>
+          <text>断</text>
+          <text>帽</text>
+          <text>失</text>
+          <text>犯</text>
+        </view>
         <view 
           wx:for="{{playerRanking}}" 
           wx:key="id"
-          class="ranking-item card compact-item {{item.team === 'A' ? 'team-a-border' : 'team-b-border'}}"
+          class="player-table-row {{item.team === 'A' ? 'row-a' : 'row-b'}}"
         >
-          <view class="compact-rank">
-            <text class="compact-number">{{index + 1}}</text>
-            <text class="compact-team">{{item.team === 'A' ? 'A' : 'B'}}</text>
-          </view>
-          
-          <view class="compact-info">
+          <view class="table-player">
+            <text class="compact-team">{{item.team}}</text>
             <text class="compact-name">{{item.name}}</text>
-            <text class="compact-num">#{{item.number}}</text>
           </view>
-
-          <text class="compact-score">{{item.score}}分</text>
+          <text>{{item.score}}</text>
+          <text>{{item.reboundsCount}}</text>
+          <text>{{item.assistsCount}}</text>
+          <text>{{item.stealsCount}}</text>
+          <text>{{item.blocksCount}}</text>
+          <text>{{item.turnoversCount}}</text>
+          <text>{{item.foulsCount}}</text>
         </view>
       </view>
     </view>
 
-    <!-- 判罚记录明细 -->
+    <!-- 犯规记录明细 -->
     <view wx:if="{{totalFouls > 0}}" class="section">
-      <view class="section-title">判罚记录明细</view>
+      <view class="section-title">犯规记录</view>
       
       <!-- 按队伍分组统计 -->
       <view class="foul-team-stats">
         <view class="foul-team-stat team-a-foul">
-          <text class="foul-team-label">A队判罚</text>
+          <text class="foul-team-label">A队犯规</text>
           <text class="foul-team-count">{{teamAFouls}}</text>
         </view>
         <view class="foul-team-stat team-b-foul">
-          <text class="foul-team-label">B队判罚</text>
+          <text class="foul-team-label">B队犯规</text>
           <text class="foul-team-count">{{teamBFouls}}</text>
-        </view>
-      </view>
-
-      <view class="foul-summary">
-        <view class="foul-stat">
-          <text class="foul-count">{{foulStats.foul || 0}}</text>
-          <text class="foul-label">犯规</text>
-        </view>
-        <view class="foul-stat">
-          <text class="foul-count">{{foulStats.warning || 0}}</text>
-          <text class="foul-label">警告</text>
-        </view>
-        <view class="foul-stat">
-          <text class="foul-count">{{foulStats.freeThrow || 0}}</text>
-          <text class="foul-label">罚球</text>
-        </view>
-        <view class="foul-stat">
-          <text class="foul-count">{{foulStats.violation || 0}}</text>
-          <text class="foul-label">违例</text>
         </view>
       </view>
 
@@ -266,83 +235,6 @@
           <view class="data-item">
             <text class="data-value">{{matchDuration || '00:00'}}</text>
             <text class="data-label">比赛时长</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- 球员个人数据看板 - 按队伍分组 -->
-      <view class="analysis-card card">
-        <view class="analysis-subtitle">球员数据看板</view>
-        
-        <!-- A队球员数据 -->
-        <view wx:if="{{teamAPlayers.length > 0}}" class="team-analysis-group">
-          <view class="team-analysis-header team-a-header">
-            <t-icon class="team-icon" name="flag" size="26rpx" color="#ff4d4f" />
-            <text>A 队球员 ({{teamAPlayers.length}}人)</text>
-          </view>
-          <view class="player-analysis-list">
-            <view 
-              wx:for="{{teamAPlayers}}" 
-              wx:key="id"
-              class="player-analysis-item player-a-item"
-            >
-              <view class="pa-header">
-                <view class="pa-avatar pa-avatar-a">
-                  <image wx:if="{{item.avatar}}" src="{{item.avatar}}" class="pa-avatar-img" mode="aspectFill"/>
-                  <view wx:else class="pa-avatar-placeholder"><text>{{item.number}}</text></view>
-                </view>
-                <view class="pa-info">
-                  <text class="pa-name">{{item.name}}</text>
-                  <text class="pa-number">#{{item.number}}</text>
-                </view>
-                <view class="pa-score-main pa-score-a">
-                  <text class="pa-score">{{item.score}}分</text>
-                  <text class="pa-percent">{{item.scorePercentage}}%</text>
-                </view>
-              </view>
-              <view class="progress-bar-container progress-a">
-                <view class="progress-bar progress-bar-a" style="width: {{item.scorePercentage}}%"></view>
-              </view>
-              <view wx:if="{{getPlayerFouls(item).total > 0}}" class="pa-fouls">
-                <text class="pa-foul-text">判罚: {{getPlayerFouls(item).foul}}犯规 {{getPlayerFouls(item).warning}}警告</text>
-              </view>
-            </view>
-          </view>
-        </view>
-
-        <!-- B队球员数据 -->
-        <view wx:if="{{teamBPlayers.length > 0}}" class="team-analysis-group">
-          <view class="team-analysis-header team-b-header">
-            <t-icon class="team-icon" name="flag" size="26rpx" color="#1890ff" />
-            <text>B 队球员 ({{teamBPlayers.length}}人)</text>
-          </view>
-          <view class="player-analysis-list">
-            <view 
-              wx:for="{{teamBPlayers}}" 
-              wx:key="id"
-              class="player-analysis-item player-b-item"
-            >
-              <view class="pa-header">
-                <view class="pa-avatar pa-avatar-b">
-                  <image wx:if="{{item.avatar}}" src="{{item.avatar}}" class="pa-avatar-img" mode="aspectFill"/>
-                  <view wx:else class="pa-avatar-placeholder"><text>{{item.number}}</text></view>
-                </view>
-                <view class="pa-info">
-                  <text class="pa-name">{{item.name}}</text>
-                  <text class="pa-number">#{{item.number}}</text>
-                </view>
-                <view class="pa-score-main pa-score-b">
-                  <text class="pa-score">{{item.score}}分</text>
-                  <text class="pa-percent">{{item.scorePercentage}}%</text>
-                </view>
-              </view>
-              <view class="progress-bar-container progress-b">
-                <view class="progress-bar progress-bar-b" style="width: {{item.scorePercentage}}%"></view>
-              </view>
-              <view wx:if="{{getPlayerFouls(item).total > 0}}" class="pa-fouls">
-                <text class="pa-foul-text">判罚: {{getPlayerFouls(item).foul}}犯规 {{getPlayerFouls(item).warning}}警告</text>
-              </view>
-            </view>
           </view>
         </view>
       </view>
