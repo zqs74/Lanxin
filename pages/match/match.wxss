@@ -159,7 +159,7 @@
 
 .match-status-badge.playing {
   background: var(--gold-gradient);
-  color: #1a1a1a;
+  color: #ffffff;
   display: flex;
   align-items: center;
   gap: 8rpx;
@@ -169,7 +169,7 @@
 .status-dot {
   width: 12rpx;
   height: 12rpx;
-  background: #1a1a1a;
+  background: #faf9f9;
   border-radius: 50%;
   animation: pulse 1.5s ease-in-out infinite;
 }

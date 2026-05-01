@@ -45,6 +45,7 @@ App({
       this.globalData.userTheme = 'auto'
       this.globalData.resolvedTheme = this.resolveEffectiveTheme('auto')
     }
+    this.applyNavBarColor(this.globalData.resolvedTheme)
   },
 
   resolveEffectiveTheme(userTheme) {
@@ -67,6 +68,7 @@ App({
           const newResolved = res.theme === 'dark' ? 'dark' : 'light'
           if (newResolved !== this.globalData.resolvedTheme) {
             this.globalData.resolvedTheme = newResolved
+            this.applyNavBarColor(newResolved)
             this.notifyAllPages(newResolved)
           }
         }
@@ -74,11 +76,29 @@ App({
     }
   },
 
+  applyNavBarColor(theme) {
+    const isDark = theme === 'dark'
+    const bg = isDark ? '#0a0a0a' : '#f8f7f4'
+    wx.setNavigationBarColor({
+      frontColor: isDark ? '#ffffff' : '#000000',
+      backgroundColor: bg,
+      animation: { duration: 200, timingFunc: 'easeInOut' }
+    })
+    wx.setBackgroundColor({
+      backgroundColor: bg,
+      backgroundColorTop: bg,
+      backgroundColorBottom: bg
+    })
+  },
+
   notifyAllPages(theme) {
     const pages = getCurrentPages()
     pages.forEach(page => {
       if (page.setTheme) {
         page.setTheme(theme)
+      }
+      if (page.applyNavBarColor) {
+        page.applyNavBarColor(theme)
       }
       if (typeof page.getTabBar === 'function' && page.getTabBar()) {
         const tabBar = page.getTabBar()
@@ -92,7 +112,6 @@ App({
   setUserTheme(userTheme) {
     this.globalData.userTheme = userTheme
     const resolved = this.resolveEffectiveTheme(userTheme)
-    const changed = resolved !== this.globalData.resolvedTheme
     this.globalData.resolvedTheme = resolved
 
     try {
@@ -101,15 +120,22 @@ App({
       console.error('保存主题设置失败', e)
     }
 
-    if (changed) {
-      this.notifyAllPages(resolved)
-    }
+    this.applyNavBarColor(resolved)
+    this.notifyAllPages(resolved)
 
     return resolved
   },
 
   getTheme() {
     return this.globalData.resolvedTheme
+  },
+
+  getThemeColors() {
+    const isDark = this.globalData.resolvedTheme === 'dark'
+    return {
+      pageBg: isDark ? '#0a0a0a' : '#f8f7f4',
+      frontColor: isDark ? '#ffffff' : '#000000'
+    }
   },
 
   getUserTheme() {

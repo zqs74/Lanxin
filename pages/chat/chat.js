@@ -4,6 +4,7 @@ const app = getApp()
 Page({
   data: {
     themeClass: '',
+    pageBg: '#f8f7f4',
     userInput: '',
     messages: [],
     isLoading: false,
@@ -15,20 +16,21 @@ Page({
 
   onLoad() { this.initTheme() },
 
-  initTheme() {
-    const userTheme = app.getUserTheme()
-    this.setData({ themeClass: userTheme === 'auto' ? '' : (userTheme === 'light' ? 'theme-light' : 'theme-dark') })
+  _themeClass(ut) { return ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') },
+
+  _syncTheme() {
+    const ut = app.getUserTheme()
+    const { pageBg } = app.getThemeColors()
+    this.setData({ themeClass: this._themeClass(ut), pageBg })
+    app.applyNavBarColor(app.getTheme())
   },
 
-  setTheme(theme) {
-    const userTheme = app.getUserTheme()
-    this.setData({ themeClass: userTheme === 'auto' ? '' : (userTheme === 'light' ? 'theme-light' : 'theme-dark') })
-  },
+  initTheme() { this._syncTheme() },
+  setTheme(theme) { this._syncTheme() },
 
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) { this.getTabBar().updateSelected(2) }
-    const userTheme = app.getUserTheme()
-    this.setData({ themeClass: userTheme === 'auto' ? '' : (userTheme === 'light' ? 'theme-light' : 'theme-dark') })
+    this._syncTheme()
   },
 
   goBack() { wx.navigateBack() },

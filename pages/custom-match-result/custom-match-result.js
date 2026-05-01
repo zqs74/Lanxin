@@ -4,6 +4,7 @@ const app = getApp()
 Page({
   data: {
     themeClass: '',
+    pageBg: '#f8f7f4',
     navHeight: 0,
     matchId: null,
     players: [],
@@ -38,15 +39,16 @@ Page({
     this.loadMatchResult()
   },
 
-  initTheme: function() {
+  _syncTheme: function() {
     const ut = app.getUserTheme()
-    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+    const { pageBg } = app.getThemeColors()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark'), pageBg })
+    app.applyNavBarColor(app.getTheme())
   },
 
-  setTheme: function(theme) {
-    const ut = app.getUserTheme()
-    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
-  },
+  initTheme: function() { this._syncTheme() },
+
+  setTheme: function(theme) { this._syncTheme() },
 
   setNavHeight: function() {
     const systemInfo = wx.getSystemInfoSync()

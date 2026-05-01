@@ -1,4 +1,5 @@
 <!-- custom-match-setup.wxml -->
+<page-meta background-color="{{pageBg}}" root-background-color="{{pageBg}}" page-style="background:{{pageBg}}" />
 <view class="page-wrapper {{themeClass}}">
   <view class="page-header-gradient"></view>
 

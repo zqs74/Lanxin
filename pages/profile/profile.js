@@ -6,6 +6,7 @@ Page({
     navHeight: 0,
     userTheme: 'auto',
     themeClass: '',
+    pageBg: '#f8f7f4',
     themeLabel: '跟随系统',
     stats: {
       points: 0,
@@ -34,10 +35,10 @@ Page({
 
   initTheme() {
     const userTheme = app.getUserTheme()
-    const resolved = app.getTheme()
+    const { pageBg } = app.getThemeColors()
     const themeClass = this.getThemeClass(userTheme)
     const themeLabel = this.getThemeLabel(userTheme)
-    this.setData({ userTheme, themeClass, themeLabel })
+    this.setData({ userTheme, themeClass, themeLabel, pageBg })
   },
 
   getThemeClass(userTheme) {
@@ -52,9 +53,15 @@ Page({
 
   setTheme(theme) {
     const userTheme = app.getUserTheme()
+    const { pageBg } = app.getThemeColors()
     const themeClass = this.getThemeClass(userTheme)
     const themeLabel = this.getThemeLabel(userTheme)
-    this.setData({ themeClass, themeLabel, userTheme })
+    this.setData({ themeClass, themeLabel, userTheme, pageBg })
+    this.applyNavBarColor()
+  },
+
+  applyNavBarColor() {
+    app.applyNavBarColor(app.getTheme())
   },
 
   onShow() {
@@ -63,13 +70,18 @@ Page({
     }
     this.loadProfile()
     const userTheme = app.getUserTheme()
+    const { pageBg } = app.getThemeColors()
     if (userTheme !== this.data.userTheme) {
       this.setData({
         userTheme,
         themeClass: this.getThemeClass(userTheme),
-        themeLabel: this.getThemeLabel(userTheme)
+        themeLabel: this.getThemeLabel(userTheme),
+        pageBg
       })
+    } else {
+      this.setData({ pageBg })
     }
+    this.applyNavBarColor()
   },
 
   handleToggleTheme() {
@@ -81,11 +93,14 @@ Page({
         const selected = choices[res.tapIndex]
         const userTheme = themeMap[selected]
         app.setUserTheme(userTheme)
+        const { pageBg } = app.getThemeColors()
         this.setData({
           userTheme,
           themeClass: this.getThemeClass(userTheme),
-          themeLabel: selected
+          themeLabel: selected,
+          pageBg
         })
+        this.applyNavBarColor()
         wx.showToast({
           title: '已切换为' + selected,
           icon: 'success',

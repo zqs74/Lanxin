@@ -13,19 +13,19 @@
     "pages/custom-match-result/custom-match-result"
   ],
   "window": {
-    "backgroundTextStyle": "@bgTextStyle",
-    "navigationBarBackgroundColor": "@navBarBg",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#f8f7f4",
     "navigationBarTitleText": "",
-    "navigationBarTextStyle": "@navBarText",
-    "backgroundColor": "@bgColor",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f8f7f4",
     "navigationStyle": "custom"
   },
   "tabBar": {
     "custom": true,
-    "color": "@tabBarColor",
-    "selectedColor": "@tabBarSelectedColor",
-    "backgroundColor": "@tabBarBg",
-    "borderStyle": "@tabBarBorderStyle",
+    "color": "#888888",
+    "selectedColor": "#D4AF37",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/index/index",
@@ -45,8 +45,6 @@
       }
     ]
   },
-  "darkmode": true,
-  "themeLocation": "theme.json",
   "networkTimeout": {
     "request": 10000,
     "connectSocket": 10000,

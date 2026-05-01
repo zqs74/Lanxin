@@ -5,6 +5,7 @@ Page({
   data: {
     navHeight: 0,
     themeClass: '',
+    pageBg: '#f8f7f4',
     currentDate: '',
     careerStats: {
       points: 0, rebounds: 0, assists: 0,
@@ -36,7 +37,8 @@ Page({
 
   initTheme() {
     const userTheme = app.getUserTheme()
-    this.setData({ themeClass: this.getThemeClass(userTheme) })
+    const { pageBg } = app.getThemeColors()
+    this.setData({ themeClass: this.getThemeClass(userTheme), pageBg })
   },
 
   getThemeClass(userTheme) {
@@ -46,7 +48,13 @@ Page({
 
   setTheme(theme) {
     const userTheme = app.getUserTheme()
-    this.setData({ themeClass: this.getThemeClass(userTheme) })
+    const { pageBg } = app.getThemeColors()
+    this.setData({ themeClass: this.getThemeClass(userTheme), pageBg })
+    this.applyNavBarColor()
+  },
+
+  applyNavBarColor() {
+    app.applyNavBarColor(app.getTheme())
   },
 
   setNavHeight() {
@@ -59,7 +67,9 @@ Page({
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) { this.getTabBar().updateSelected(0) }
     const userTheme = app.getUserTheme()
-    this.setData({ themeClass: this.getThemeClass(userTheme) })
+    const { pageBg } = app.getThemeColors()
+    this.setData({ themeClass: this.getThemeClass(userTheme), pageBg })
+    this.applyNavBarColor()
   },
 
   setCurrentDate() {

@@ -4,6 +4,7 @@ const app = getApp()
 Page({
   data: {
     themeClass: '',
+    pageBg: '#f8f7f4',
     selectedCount: 0,
     clips: [
       { id: 1, time: '第一节 08:24', description: '两分跳投', type: '投篮', selected: false },
@@ -14,20 +15,20 @@ Page({
     ]
   },
 
-  onLoad() {
+  _themeClass(ut) { return ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') },
+
+  _syncTheme() {
     const ut = app.getUserTheme()
-    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+    const { pageBg } = app.getThemeColors()
+    this.setData({ themeClass: this._themeClass(ut), pageBg })
+    app.applyNavBarColor(app.getTheme())
   },
 
-  onShow() {
-    const ut = app.getUserTheme()
-    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
-  },
+  onLoad() { this._syncTheme() },
 
-  setTheme(t) {
-    const ut = app.getUserTheme()
-    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
-  },
+  onShow() { this._syncTheme() },
+
+  setTheme(t) { this._syncTheme() },
 
   goBack() {
     const pages = getCurrentPages()

@@ -1,4 +1,5 @@
 <!-- index.wxml - 现代化UI设计 -->
+<page-meta background-color="{{pageBg}}" root-background-color="{{pageBg}}" page-style="background:{{pageBg}}" />
 <view class="page-wrapper {{themeClass}}">
   <!-- 页面顶部渐变装饰 -->
   <view class="page-header-gradient"></view>

@@ -5,6 +5,7 @@ Page({
   data: {
     navHeight: 0,
     themeClass: '',
+    pageBg: '#f8f7f4',
     todayDate: '',
     overallScore: 72,
     showAddModal: false,
@@ -35,12 +36,21 @@ Page({
 
   onLoad() { this.initTheme(); this.setNavHeight(); this.setTodayDate(); this.calculateOverallScore(); this.drawRadarChart() },
 
-  initTheme() { const ut = app.getUserTheme(); this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') }) },
-  setTheme(t) { const ut = app.getUserTheme(); this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') }) },
+  initTheme() { this._syncTheme() },
+  setTheme(t) { this._syncTheme() },
+
+  _syncTheme() {
+    const ut = app.getUserTheme()
+    const { pageBg } = app.getThemeColors()
+    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark'), pageBg })
+    app.applyNavBarColor(app.getTheme())
+  },
+
+  applyNavBarColor() { app.applyNavBarColor(app.getTheme()) },
 
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) { this.getTabBar().updateSelected(2) }
-    const ut = app.getUserTheme(); this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+    this._syncTheme()
   },
 
   setNavHeight() { const s = wx.getSystemInfoSync(); this.setData({ navHeight: ((s.statusBarHeight||44)+(s.platform==='ios'?44:48))*2 }) },

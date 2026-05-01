@@ -4,6 +4,7 @@ Page({
   data: {
     navHeight: 0,
     themeClass: '',
+    pageBg: '#f8f7f4',
     activeTab: 0,
     selectedCount: 0,
     clips: [
@@ -38,19 +39,20 @@ Page({
     this.setNavHeight()
   },
 
-  initTheme() {
+  _themeClass(ut) { return ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') },
+
+  _syncTheme() {
     const ut = app.getUserTheme()
-    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+    const { pageBg } = app.getThemeColors()
+    this.setData({ themeClass: this._themeClass(ut), pageBg })
+    app.applyNavBarColor(app.getTheme())
   },
 
-  setTheme(t) {
-    const ut = app.getUserTheme()
-    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
-  },
+  initTheme() { this._syncTheme() },
+  setTheme(t) { this._syncTheme() },
 
   onShow: function() {
-    const ut = app.getUserTheme()
-    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+    this._syncTheme()
     this.drawScoreTrend()
     this.drawShootingChart()
   },
