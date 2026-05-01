@@ -13,7 +13,7 @@ const TAB_LIST = [
     ariaLabel: '赛事中心',
     pagePath: '/pages/match/match',
     icon: '/images/tabbar/no/2.png',
-    activeIcon: '/images/tabbar/yes/2.png'
+    activeIcon: '/images/tabbar/yes/2.svg'
   },
   {
     value: 'training',
@@ -35,20 +35,39 @@ const TAB_LIST = [
 
 Component({
   data: {
-    selected: 0,
+    selected: -1,
     themeClass: '',
     tabList: TAB_LIST
   },
 
   attached() {
+    const app = getApp()
     this.syncTheme()
-    this.syncSelectedByRoute()
+    if (app.registerTabBar) {
+      app.registerTabBar(this)
+    }
+  },
+
+  detached() {
+    const app = getApp()
+    if (app.unregisterTabBar) {
+      app.unregisterTabBar(this)
+    }
   },
 
   pageLifetimes: {
     show() {
-      this.syncTheme()
-      this.syncSelectedByRoute()
+      const app = getApp()
+      if (app.initTabBarSelectedByRoute && app.getTabBarSelected && app.getTabBarSelected() === -1) {
+        const pages = getCurrentPages()
+        const current = pages[pages.length - 1]
+        app.initTabBarSelectedByRoute(current && current.route)
+      }
+      if (app.registerTabBar) {
+        app.registerTabBar(this)
+      } else {
+        this.syncTheme()
+      }
     }
   },
 
@@ -71,23 +90,36 @@ Component({
       this.setData({ themeClass: this.getThemeClass(theme) })
     },
 
-    syncSelectedByRoute() {
-      const pages = getCurrentPages()
-      const current = pages[pages.length - 1]
-      if (!current || !current.route) return
+    applyGlobalTabBarState(selected, theme) {
+      const nextData = { themeClass: this.getThemeClass(theme) }
+      const normalized = this.normalizeSelected(selected)
 
-      const route = `/${current.route}`
-      const selected = this.data.tabList.findIndex(item => item.pagePath === route)
-      if (selected !== -1 && selected !== this.data.selected) {
-        this.setData({ selected })
+      if (normalized !== -1 && normalized !== this.data.selected) {
+        nextData.selected = normalized
       }
+
+      this.setData(nextData)
+    },
+
+    normalizeSelected(index) {
+      const selected = Number(index)
+      if (!Number.isInteger(selected) || selected < 0 || selected >= this.data.tabList.length) {
+        return -1
+      }
+      return selected
     },
 
     updateSelected(index) {
-      this.syncTheme()
+      const selected = this.normalizeSelected(index)
+      if (selected === -1) {
+        return
+      }
 
-      if (index !== this.data.selected) {
-        this.setData({ selected: index })
+      const app = getApp()
+      if (app.setTabBarSelected) {
+        app.setTabBarSelected(selected)
+      } else if (selected !== this.data.selected) {
+        this.setData({ selected })
       }
     },
 
@@ -97,15 +129,29 @@ Component({
 
     onTabTap(e) {
       const { index, path } = e.currentTarget.dataset
-      const selected = Number(index)
+      const selected = this.normalizeSelected(index)
+
+      if (selected === -1) {
+        return
+      }
 
       if (selected === this.data.selected) return
 
-      this.setData({ selected })
+      const previousSelected = this.data.selected
+      const app = getApp()
+      if (app.setTabBarSelected) {
+        app.setTabBarSelected(selected)
+      } else {
+        this.setData({ selected })
+      }
       wx.switchTab({
         url: path,
         fail: () => {
-          this.syncSelectedByRoute()
+          if (app.setTabBarSelected && previousSelected !== -1) {
+            app.setTabBarSelected(previousSelected)
+          } else {
+            this.setData({ selected: previousSelected })
+          }
         }
       })
     }

@@ -9,6 +9,8 @@ App({
       userInfo: null,
       userTheme: 'auto',
       resolvedTheme: 'dark',
+      tabBarSelected: -1,
+      tabBarInstances: [],
       careerStats: {
         points: 128,
         rebounds: 86,
@@ -26,6 +28,8 @@ App({
     userInfo: null,
     userTheme: 'auto',
     resolvedTheme: 'dark',
+    tabBarSelected: -1,
+    tabBarInstances: [],
     careerStats: {
       points: 128,
       rebounds: 86,
@@ -33,6 +37,75 @@ App({
       shootingPercentage: 38.7,
       totalGames: 24
     }
+  },
+
+  normalizeTabBarIndex(index) {
+    const selected = Number(index)
+    if (!Number.isInteger(selected) || selected < 0 || selected > 3) {
+      return -1
+    }
+    return selected
+  },
+
+  registerTabBar(instance) {
+    if (!instance) return
+    const instances = this.globalData.tabBarInstances || []
+    if (!instances.includes(instance)) {
+      instances.push(instance)
+      this.globalData.tabBarInstances = instances
+    }
+    if (instance.applyGlobalTabBarState) {
+      instance.applyGlobalTabBarState(this.globalData.tabBarSelected, this.globalData.resolvedTheme)
+    }
+  },
+
+  unregisterTabBar(instance) {
+    const instances = this.globalData.tabBarInstances || []
+    this.globalData.tabBarInstances = instances.filter(item => item !== instance)
+  },
+
+  getTabBarSelected() {
+    return typeof this.globalData.tabBarSelected === 'number' ? this.globalData.tabBarSelected : -1
+  },
+
+  initTabBarSelectedByRoute(route) {
+    if (this.getTabBarSelected() !== -1 || !route) {
+      return this.getTabBarSelected()
+    }
+
+    const path = route.charAt(0) === '/' ? route : `/${route}`
+    const routeMap = {
+      '/pages/index/index': 0,
+      '/pages/match/match': 1,
+      '/pages/training/training': 2,
+      '/pages/profile/profile': 3
+    }
+    const selected = routeMap[path]
+
+    if (typeof selected === 'number') {
+      this.globalData.tabBarSelected = selected
+      this.notifyTabBarInstances()
+    }
+
+    return this.getTabBarSelected()
+  },
+
+  setTabBarSelected(index) {
+    const selected = this.normalizeTabBarIndex(index)
+    if (selected === -1) return this.getTabBarSelected()
+
+    this.globalData.tabBarSelected = selected
+    this.notifyTabBarInstances()
+    return selected
+  },
+
+  notifyTabBarInstances() {
+    const instances = this.globalData.tabBarInstances || []
+    instances.forEach(instance => {
+      if (instance && instance.applyGlobalTabBarState) {
+        instance.applyGlobalTabBarState(this.globalData.tabBarSelected, this.globalData.resolvedTheme)
+      }
+    })
   },
 
   loadTheme() {
@@ -122,6 +195,7 @@ App({
 
     this.applyNavBarColor(resolved)
     this.notifyAllPages(resolved)
+    this.notifyTabBarInstances()
 
     return resolved
   },
