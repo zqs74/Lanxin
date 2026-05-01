@@ -211,7 +211,7 @@
 
 @keyframes msgSlideIn { from { opacity: 0; transform: translateY(20rpx) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-.msg-user { justify-content: flex-end; flex-direction: row-reverse; }
+.msg-user { justify-content: flex-end; flex-direction: row; }
 .msg-ai { justify-content: flex-start; }
 
 /* ===== 头像 ===== */
@@ -251,11 +251,20 @@
   overflow: hidden;
 }
 
+.msg-user .msg-bubble { max-width: 520rpx; }
+.msg-ai .msg-bubble { max-width: 604rpx; }
+
 .user-bubble {
   background: var(--gold-gradient);
   color: #1a1a1a;
   border-bottom-right-radius: 10rpx;
   box-shadow: 0 8rpx 28rpx rgba(212,175,55,0.4), 0 0 40rpx rgba(212,175,55,0.12);
+}
+
+.user-text {
+  display: block;
+  text-align: left;
+  white-space: pre-wrap;
 }
 
 .ai-bubble {
@@ -281,12 +290,15 @@
 .user-bubble .msg-content { color: #1a1a1a; font-weight: 500; }
 .ai-bubble .msg-content { color: var(--text-content); }
 
-.markdown-body { font-size: 28rpx; line-height: 1.85; }
-.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 { color: var(--gold); font-weight: 800; margin: 20rpx 0 12rpx; letter-spacing: 1rpx; }
-.markdown-body h1 { font-size: 36rpx; }
-.markdown-body h2 { font-size: 33rpx; }
+.response-area { overflow-x: auto; }
+
+.markdown-body { font-size: 28rpx; line-height: 1.82; overflow-x: auto; }
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 { color: var(--gold); font-weight: 800; margin: 18rpx 0 10rpx; letter-spacing: 0; line-height: 1.35; }
+.markdown-body h1 { font-size: 34rpx; }
+.markdown-body h2 { font-size: 32rpx; }
 .markdown-body h3 { font-size: 30rpx; }
-.markdown-body p { margin: 12rpx 0; }
+.markdown-body h4 { font-size: 28rpx; }
+.markdown-body p { margin: 10rpx 0; }
 .markdown-body strong, .markdown-body b { color: var(--gold-light); font-weight: 700; }
 .markdown-body em, .markdown-body i { color: #F4C430; font-style: italic; }
 
@@ -307,9 +319,10 @@
   padding: 24rpx;
   margin: 16rpx 0;
   overflow-x: auto;
+  white-space: pre;
 }
 
-.markdown-body pre code { background: none; border: none; padding: 0; color: var(--gold); font-size: 24rpx; }
+.markdown-body pre code { background: none; border: none; padding: 0; color: var(--gold); font-size: 24rpx; white-space: pre; }
 .markdown-body ul, .markdown-body ol { padding-left: 36rpx; margin: 12rpx 0; }
 .markdown-body li { margin: 8rpx 0; color: var(--text-markdown); }
 .markdown-body li::marker { color: var(--gold); }
@@ -326,7 +339,7 @@
 .markdown-body a { color: var(--gold-light); text-decoration: underline; }
 
 .markdown-body table {
-  width: 100%;
+  min-width: 100%;
   border-collapse: collapse;
   margin: 16rpx 0;
   border: 1.5rpx solid var(--border-card);
@@ -403,11 +416,11 @@
   display: flex;
   align-items: center;
   gap: 8rpx;
-  padding: 12rpx 16rpx;
+  padding: 10rpx 14rpx;
   margin: 16rpx 0 8rpx;
   background: var(--bg-thinking-toggle);
   border: 1.5rpx solid var(--border-thinking-toggle);
-  border-radius: 16rpx;
+  border-radius: 14rpx;
   cursor: pointer;
   transition: all 0.3s ease;
   animation: fadeInUp 0.3s ease-out;
@@ -415,7 +428,7 @@
 
 .thinking-toggle:active { background: rgba(100,149,237,0.15); transform: scale(0.98); }
 .toggle-icon { font-size: 24rpx; flex-shrink: 0; }
-.toggle-text { font-size: 24rpx; color: var(--text-status-thinking); font-weight: 600; letter-spacing: 0.5rpx; flex: 1; }
+.toggle-text { font-size: 23rpx; color: var(--text-status-thinking); font-weight: 700; letter-spacing: 0; flex: 1; }
 
 .thinking-content {
   border: 1.5rpx solid var(--border-thinking-toggle);

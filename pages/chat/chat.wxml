@@ -71,7 +71,7 @@
           <!-- 用户消息（右侧） -->
           <view class="msg-row msg-user" wx:if="{{ item.role === 'user' }}" id="msg-{{index + 1}}">
             <view class="msg-bubble user-bubble card-gradient">
-              <rich-text class="msg-content" nodes="{{ item.content }}"></rich-text>
+              <text class="msg-content user-text">{{ item.content }}</text>
               <view class="msg-time">{{ item.time }}</view>
             </view>
             <view class="avatar user-avatar"><t-icon name="user" size="34rpx" color="#1a1a1a" /></view>
@@ -83,8 +83,8 @@
             <view class="msg-bubble ai-bubble glass-effect-dark">
               
               <!-- 流式输出时的思维链展示 -->
-              <view class="thinking-box" wx:if="{{ item.isStreaming && item.thinking }}">
-                <view class="thinking-header-bar">
+              <view class="thinking-box active" wx:if="{{ item.isStreaming && item.thinking }}">
+                <view class="thinking-header-bar active">
                   <t-icon class="thinking-spin" name="chat-bubble" size="28rpx" color="#6495ED" />
                   <text class="thinking-label">正在深度思考...</text>
                   <view class="thinking-dots">
@@ -106,8 +106,8 @@
 
               <!-- 思考过程显示/隐藏按钮 -->
               <view class="thinking-toggle" wx:if="{{ item.thinking && !item.isStreaming }}" bindtap="toggleThinking" data-index="{{ index }}">
-                <t-icon class="toggle-icon" name="{{ item.showThinking ? 'edit' : 'chat-bubble' }}" size="24rpx" color="#6495ED" />
-                <text class="toggle-text">{{ item.showThinking ? '隐藏思考过程' : '查看思考过程' }}</text>
+                <t-icon class="toggle-icon" name="{{ item.showThinking ? 'chevron-up' : 'chevron-down' }}" size="24rpx" color="#6495ED" />
+                <text class="toggle-text">{{ item.showThinking ? '收起思考过程' : '展开思考过程' }}</text>
               </view>
 
               <!-- 思考过程内容 -->

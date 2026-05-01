@@ -55,56 +55,165 @@ Page({
     this.callCloudAI(message)
   },
 
+  escapeHtml(text = '') {
+    return String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  },
+
+  escapeAttr(text = '') {
+    return this.escapeHtml(text).replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+  },
+
+  parseInlineMarkdown(text = '') {
+    const codeBlocks = []
+    let html = String(text).replace(/`([^`]+)`/g, (_, code) => {
+      const token = `@@INLINE_CODE_${codeBlocks.length}@@`
+      codeBlocks.push(`<code>${this.escapeHtml(code)}</code>`)
+      return token
+    })
+
+    html = this.escapeHtml(html)
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, src) => `<img src="${this.escapeAttr(src)}" alt="${this.escapeAttr(alt)}" style="max-width:100%;border-radius:12rpx;margin:16rpx 0;"/>`)
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, href) => `<a href="${this.escapeAttr(href)}">${label}</a>`)
+    html = html.replace(/\*\*([\s\S]+?)\*\*/g, '<strong>$1</strong>')
+    html = html.replace(/__([\s\S]+?)__/g, '<strong>$1</strong>')
+    html = html.replace(/~~([\s\S]+?)~~/g, '<del>$1</del>')
+    html = html.replace(/(^|[^\*])\*([^\*\n]+)\*/g, '$1<em>$2</em>')
+    html = html.replace(/(^|[^_])_([^_\n]+)_/g, '$1<em>$2</em>')
+    codeBlocks.forEach((code, index) => { html = html.replace(`@@INLINE_CODE_${index}@@`, code) })
+    return html
+  },
+
+  parseTableRow(row = '') {
+    let cells = row.trim()
+    if (cells.startsWith('|')) cells = cells.slice(1)
+    if (cells.endsWith('|')) cells = cells.slice(0, -1)
+    return cells.split('|').map(cell => cell.trim())
+  },
+
+  isTableSeparator(line = '') {
+    return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line)
+  },
+
+  isBlockStart(line = '', nextLine = '') {
+    return /^```/.test(line) || /^(#{1,6})\s+/.test(line) || /^>\s?/.test(line) ||
+      /^(\s*)([-*+])\s+/.test(line) || /^(\s*)\d+\.\s+/.test(line) ||
+      /^(\s*)(-{3,}|\*{3,}|_{3,})\s*$/.test(line) || (line.includes('|') && this.isTableSeparator(nextLine))
+  },
+
   parseMarkdown(text) {
     if (!text) return ''
-    let html = text; html = html.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    html = html.replace(/```(\w*)\n([\s\S]*?)```/g,'<pre><code>$2</code></pre>')
-    html = html.replace(/`([^`]+)`/g,'<code>$1</code>')
-    html = html.replace(/^#### (.+)$/gm,'<h4>$1</h4>'); html = html.replace(/^### (.+)$/gm,'<h3>$1</h3>')
-    html = html.replace(/^## (.+)$/gm,'<h2>$1</h2>'); html = html.replace(/^# (.+)$/gm,'<h1>$1</h1>')
-    html = html.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>'); html = html.replace(/__(.+?)__/g,'<strong>$1</strong>')
-    html = html.replace(/\*([^*]+)\*/g,'<em>$1</em>'); html = html.replace(/_([^_]+)_/g,'<em>$1</em>')
-    html = html.replace(/~~(.+?)~~/g,'<del>$1</del>')
-    html = html.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>')
-    html = html.replace(/^[\-\*] (.+)$/gm,'<li>$1</li>'); html = html.replace(/(<li>.*<\/li>\n?)+/g,'<ul>$&</ul>')
-    html = html.replace(/^\d+\. (.+)$/gm,'<li>$1</li>'); html = html.replace(/^(-{3,}|\*{3,}|_{3,})$/gm,'<hr/>')
-    html = html.replace(/\|(.+?)\|\n\|(-+\|)+\n((?:\|.+?\|\n)*)/g, (match,headerRow,separator,contentRows) => {
-      let tableHtml='<table>\n<thead>\n<tr>'; const headers=headerRow.split('|').map(h=>h.trim()).filter(h=>h)
-      headers.forEach(header=>{tableHtml+=`<th>${header}</th>`}); tableHtml+='</tr>\n</thead>\n<tbody>'
-      const rows=contentRows.trim().split('\n'); rows.forEach(row=>{ if(row.trim()){ tableHtml+='\n<tr>'
-        const cells=row.split('|').map(cell=>cell.trim()).filter(cell=>cell); cells.forEach(cell=>{tableHtml+=`<td>${cell}</td>`})
-        tableHtml+='</tr>'}}); tableHtml+='\n</tbody>\n</table>'; return tableHtml })
-    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2">$1</a>')
-    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1" style="max-width:100%;border-radius:12rpx;margin:16rpx 0;"/>')
-    html = html.replace(/\n\n+/g,'</p><p>'); html = html.replace(/\n/g,'<br/>')
-    html = html.replace(/<p><\/p>/g,''); html = html.replace(/<p>(<h[1-6]>)/g,'$1'); html = html.replace(/(<\/h[1-6]>)<\/p>/g,'$1')
-    html = html.replace(/<p>(<ul>)/g,'$1'); html = html.replace(/(<\/ul>)<\/p>/g,'$1')
-    html = html.replace(/<p>(<blockquote>)/g,'$1'); html = html.replace(/(<\/blockquote>)<\/p>/g,'$1')
-    html = html.replace(/<p>(<pre>)/g,'$1'); html = html.replace(/(<\/pre>)<\/p>/g,'$1'); html = html.replace(/<p>(<hr\/>)<\/p>/g,'$1')
-    return html
+    const lines = String(text).replace(/\r\n/g, '\n').split('\n')
+    const html = []
+    let i = 0
+
+    while (i < lines.length) {
+      const line = lines[i]
+      const trimmed = line.trim()
+      const nextLine = lines[i + 1] || ''
+
+      if (!trimmed) { i += 1; continue }
+
+      if (/^```/.test(trimmed)) {
+        const language = trimmed.replace(/^```/, '').trim()
+        const code = []
+        i += 1
+        while (i < lines.length && !/^```/.test(lines[i].trim())) { code.push(lines[i]); i += 1 }
+        if (i < lines.length) i += 1
+        html.push(`<pre><code data-language="${this.escapeAttr(language)}">${this.escapeHtml(code.join('\n'))}</code></pre>`)
+        continue
+      }
+
+      const heading = trimmed.match(/^(#{1,6})\s+(.+)$/)
+      if (heading) {
+        const level = Math.min(heading[1].length, 4)
+        html.push(`<h${level}>${this.parseInlineMarkdown(heading[2])}</h${level}>`)
+        i += 1
+        continue
+      }
+
+      if (/^(\s*)(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) {
+        html.push('<hr/>')
+        i += 1
+        continue
+      }
+
+      if (line.includes('|') && this.isTableSeparator(nextLine)) {
+        const headers = this.parseTableRow(line)
+        i += 2
+        const rows = []
+        while (i < lines.length && lines[i].includes('|') && lines[i].trim()) {
+          rows.push(this.parseTableRow(lines[i]))
+          i += 1
+        }
+        html.push(`<table><thead><tr>${headers.map(cell => `<th>${this.parseInlineMarkdown(cell)}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(cell => `<td>${this.parseInlineMarkdown(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table>`)
+        continue
+      }
+
+      if (/^>\s?/.test(line)) {
+        const quote = []
+        while (i < lines.length && /^>\s?/.test(lines[i])) {
+          quote.push(lines[i].replace(/^>\s?/, ''))
+          i += 1
+        }
+        html.push(`<blockquote>${this.parseInlineMarkdown(quote.join('\n')).replace(/\n/g, '<br/>')}</blockquote>`)
+        continue
+      }
+
+      if (/^(\s*)([-*+])\s+/.test(line)) {
+        const items = []
+        while (i < lines.length && /^(\s*)([-*+])\s+/.test(lines[i])) {
+          items.push(lines[i].replace(/^(\s*)([-*+])\s+/, ''))
+          i += 1
+        }
+        html.push(`<ul>${items.map(item => `<li>${this.parseInlineMarkdown(item)}</li>`).join('')}</ul>`)
+        continue
+      }
+
+      if (/^(\s*)\d+\.\s+/.test(line)) {
+        const items = []
+        while (i < lines.length && /^(\s*)\d+\.\s+/.test(lines[i])) {
+          items.push(lines[i].replace(/^(\s*)\d+\.\s+/, ''))
+          i += 1
+        }
+        html.push(`<ol>${items.map(item => `<li>${this.parseInlineMarkdown(item)}</li>`).join('')}</ol>`)
+        continue
+      }
+
+      const paragraph = [line]
+      i += 1
+      while (i < lines.length && lines[i].trim() && !this.isBlockStart(lines[i], lines[i + 1] || '')) {
+        paragraph.push(lines[i])
+        i += 1
+      }
+      html.push(`<p>${this.parseInlineMarkdown(paragraph.join('\n')).replace(/\n/g, '<br/>')}</p>`)
+    }
+
+    return html.join('')
   },
 
   async callCloudAI(message) {
     try {
       const now = new Date(); const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
       const messages = [{ "role":"system","content":"你是昇梦AI助手，一位专业的篮球训练顾问。你深度了解用户的训练数据、比赛记录和技能雷达图，能够提供个性化的篮球训练建议。你的回答应该专业、实用、有针对性，并且要体现出你了解用户的具体情况。回答时可以使用Markdown格式来组织内容。" },
-        ...this.data.messages.map(msg=>({role:msg.role,content:msg.content})), {"role":"user","content":message}]
+        ...this.data.messages.map(msg=>({role:msg.role,content:msg.content}))]
       const res = await wx.cloud.extend.AI.createModel("deepseek").streamText({data:{model:"deepseek-r1-0528",messages}})
       let fullContent='';let fullThinking='';let assistantMsgIndex=this.data.messages.length
       for await(let event of res.eventStream) {
         if(event.data==="[DONE]")break
         try{const data=JSON.parse(event.data);const think=data?.choices?.[0]?.delta?.reasoning_content
-          if(think){fullThinking+=think;this.setData({currentThinking:fullThinking,isThinking:true,hasAssistantMsg:false})}
+          if(think){fullThinking+=think;const tempMessages=[...this.data.messages]
+            if(tempMessages[assistantMsgIndex]?.role==='assistant'){tempMessages[assistantMsgIndex]={...tempMessages[assistantMsgIndex],thinking:fullThinking,showThinking:true,isStreaming:true};this.setData({messages:tempMessages,currentThinking:fullThinking,isThinking:true,hasAssistantMsg:true})}
+            else{this.setData({currentThinking:fullThinking,isThinking:true,hasAssistantMsg:false})}}
           const text=data?.choices?.[0]?.delta?.content
           if(text){fullContent+=text;const renderedContent=this.parseMarkdown(fullContent);const tempMessages=[...this.data.messages]
-            if(tempMessages.length<=assistantMsgIndex||tempMessages[assistantMsgIndex]?.role!=='assistant'){tempMessages.push({role:'assistant',content:fullContent,renderedContent,time,isStreaming:true});this.setData({hasAssistantMsg:true})}
-            else{tempMessages[assistantMsgIndex]={...tempMessages[assistantMsgIndex],content:fullContent,renderedContent,isStreaming:true}}
+            if(tempMessages.length<=assistantMsgIndex||tempMessages[assistantMsgIndex]?.role!=='assistant'){tempMessages.push({role:'assistant',content:fullContent,renderedContent,thinking:fullThinking,showThinking:!!fullThinking,time,isStreaming:true});this.setData({hasAssistantMsg:true})}
+            else{tempMessages[assistantMsgIndex]={...tempMessages[assistantMsgIndex],content:fullContent,renderedContent,thinking:fullThinking,showThinking:!!fullThinking,isStreaming:true}}
             this.setData({messages:tempMessages,scrollToView:`msg-${tempMessages.length-1}`})}}
         catch(parseError){console.log('解析事件数据失败:',parseError)}}
       const finalRendered=this.parseMarkdown(fullContent);const finalMessages=[...this.data.messages]
-      if(finalMessages[assistantMsgIndex]?.role==='assistant'){finalMessages[assistantMsgIndex]={role:'assistant',content:fullContent,renderedContent:finalRendered,time,isStreaming:false}}
-      else if(fullContent){finalMessages.push({role:'assistant',content:fullContent,renderedContent:finalRendered,time,isStreaming:false})}
-      this.setData({messages:finalMessages,isLoading:false,isThinking:false,currentThinking:''});setTimeout(()=>{this.setData({scrollToView:`msg-${finalMessages.length-1}`})},150)
+      if(finalMessages[assistantMsgIndex]?.role==='assistant'){finalMessages[assistantMsgIndex]={...finalMessages[assistantMsgIndex],role:'assistant',content:fullContent,renderedContent:finalRendered,thinking:fullThinking,showThinking:false,time,isStreaming:false}}
+      else if(fullContent){finalMessages.push({role:'assistant',content:fullContent,renderedContent:finalRendered,thinking:fullThinking,showThinking:false,time,isStreaming:false})}
+      this.setData({messages:finalMessages,isLoading:false,isThinking:false,currentThinking:'',hasAssistantMsg:false});setTimeout(()=>{this.setData({scrollToView:`msg-${finalMessages.length-1}`})},150)
     }catch(error){console.error('云开发AI调用失败:',error);this.setData({isLoading:false,isThinking:false,currentThinking:''})
       wx.showToast({title:error.errMsg||'AI服务暂时不可用',icon:'none'});const now=new Date()
       this.setData({messages:[...this.data.messages,{role:'assistant',content:'抱歉，我暂时无法回答您的问题。请稍后重试。',time:`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,isError:true}]})}
