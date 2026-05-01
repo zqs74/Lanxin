@@ -1,49 +1,113 @@
+const TAB_LIST = [
+  {
+    value: 'home',
+    text: '首页',
+    ariaLabel: '首页',
+    pagePath: '/pages/index/index',
+    icon: '/images/tabbar/no/1.png',
+    activeIcon: '/images/tabbar/yes/1.png'
+  },
+  {
+    value: 'match',
+    text: '赛事中心',
+    ariaLabel: '赛事中心',
+    pagePath: '/pages/match/match',
+    icon: '/images/tabbar/no/2.png',
+    activeIcon: '/images/tabbar/yes/2.png'
+  },
+  {
+    value: 'training',
+    text: '训练中心',
+    ariaLabel: '训练中心',
+    pagePath: '/pages/training/training',
+    icon: '/images/tabbar/no/3.png',
+    activeIcon: '/images/tabbar/yes/3.png'
+  },
+  {
+    value: 'profile',
+    text: '个人中心',
+    ariaLabel: '个人中心',
+    pagePath: '/pages/profile/profile',
+    icon: '/images/tabbar/no/4.png',
+    activeIcon: '/images/tabbar/yes/4.png'
+  }
+]
+
 Component({
   data: {
     selected: 0,
     themeClass: '',
-    tabList: [
-      { value: 'home', icon: 'home', ariaLabel: '首页', pagePath: '/pages/index/index' },
-      { value: 'match', icon: 'app', ariaLabel: '赛事', pagePath: '/pages/match/match' },
-      { value: 'training', icon: 'ai-article', ariaLabel: '训练', pagePath: '/pages/training/training' },
-      { value: 'profile', icon: 'user', ariaLabel: '我的', pagePath: '/pages/profile/profile' }
-    ]
+    tabList: TAB_LIST
   },
 
   attached() {
-    const app = getApp()
-    const ut = app.getUserTheme()
-    this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+    this.syncTheme()
+    this.syncSelectedByRoute()
   },
 
   pageLifetimes: {
     show() {
-      const app = getApp()
-      const ut = app.getUserTheme()
-      this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+      this.syncTheme()
+      this.syncSelectedByRoute()
     }
   },
 
   methods: {
+    getThemeClass(theme) {
+      if (theme === 'light') return 'theme-light'
+      if (theme === 'dark') return 'theme-dark'
+
+      const app = getApp()
+      const userTheme = app.getUserTheme ? app.getUserTheme() : 'auto'
+
+      if (userTheme === 'light') return 'theme-light'
+      if (userTheme === 'dark') return 'theme-dark'
+
+      const resolvedTheme = app.getTheme ? app.getTheme() : 'light'
+      return resolvedTheme === 'dark' ? 'theme-dark' : 'theme-light'
+    },
+
+    syncTheme(theme) {
+      this.setData({ themeClass: this.getThemeClass(theme) })
+    },
+
+    syncSelectedByRoute() {
+      const pages = getCurrentPages()
+      const current = pages[pages.length - 1]
+      if (!current || !current.route) return
+
+      const route = `/${current.route}`
+      const selected = this.data.tabList.findIndex(item => item.pagePath === route)
+      if (selected !== -1 && selected !== this.data.selected) {
+        this.setData({ selected })
+      }
+    },
+
     updateSelected(index) {
-      this.setData({ selected: index })
+      this.syncTheme()
+
+      if (index !== this.data.selected) {
+        this.setData({ selected: index })
+      }
     },
 
     setTheme(theme) {
-      const ut = getApp().getUserTheme()
-      this.setData({ themeClass: ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') })
+      this.syncTheme(theme)
     },
 
-    onTabChange(e) {
-      const value = e.detail.value
-      const index = this.data.tabList.findIndex(item => item.value === value)
-      
-      if (index !== -1 && index !== this.data.selected) {
-        const pagePath = this.data.tabList[index].pagePath
-        wx.switchTab({
-          url: pagePath
-        })
-      }
+    onTabTap(e) {
+      const { index, path } = e.currentTarget.dataset
+      const selected = Number(index)
+
+      if (selected === this.data.selected) return
+
+      this.setData({ selected })
+      wx.switchTab({
+        url: path,
+        fail: () => {
+          this.syncSelectedByRoute()
+        }
+      })
     }
   }
 })

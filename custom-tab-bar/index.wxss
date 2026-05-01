@@ -1,154 +1,236 @@
-/* custom-tab-bar index.wxss - 毛玻璃金色主题 */
-
-.tab-bar-container {
-  width: 100%;
+.tabbar-host {
+  --tabbar-bg: rgba(255,255,255,0.68);
+  --tabbar-border: rgba(212,175,55,0.24);
+  --tabbar-shadow: 0 18rpx 54rpx rgba(42,34,12,0.16), 0 0 1rpx rgba(212,175,55,0.2);
+  --tabbar-highlight: rgba(255,255,255,0.74);
+  --tabbar-text: rgba(36,36,36,0.54);
+  --tabbar-text-active: #1d1a11;
+  --tabbar-pill: linear-gradient(135deg, rgba(212,175,55,0.22), rgba(255,215,0,0.1));
+  --tabbar-pill-border: rgba(212,175,55,0.28);
+  --tabbar-glow: rgba(212,175,55,0.18);
   position: fixed;
-  bottom: 28rpx;
   left: 0;
   right: 0;
+  bottom: 24rpx;
+  bottom: calc(24rpx + constant(safe-area-inset-bottom));
+  bottom: calc(24rpx + env(safe-area-inset-bottom));
   z-index: 9999;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
 }
 
-.t-tab-bar {
-  --td-tab-bar-height: 80rpx;
-  --td-tab-bar-tag-border-radius: 44rpx;
-  --td-tab-bar-tag-height: 56rpx;
-  --td-tab-bar-tag-margin: 8rpx 0;
-  --td-tab-bar-tag-padding: 0 24rpx;
-  --td-tab-bar-icon-size: 26rpx;
-  --td-tab-bar-text-font-size: 20rpx;
-
-  --td-tab-bar-color: #999 !important;
-  --td-tab-bar-active-color: #D4AF37 !important;
-  --td-tab-bar-active-bg: rgba(212,175,55,0.12) !important;
-  --td-tab-bar-bg-color: rgba(13,13,13,0.82) !important;
-  --td-tab-bar-border-color: rgba(212,175,55,0.22) !important;
-  --td-tab-bar-hover-bg-color: transparent !important;
-
-  -webkit-backdrop-filter: blur(44rpx) saturate(190%);
-  backdrop-filter: blur(44rpx) saturate(190%);
-
-  box-shadow: var(--shadow-tab);
-  border: 1rpx solid rgba(212,175,55,0.18) !important;
-
-  position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: 88% !important;
-  margin: 0 auto !important;
-  bottom: 48rpx !important;
-  z-index: 9999 !important;
-
-  border-radius: 44rpx !important;
-  padding: 6rpx 10rpx !important;
-  box-sizing: border-box !important;
+@media (prefers-color-scheme: dark) {
+  .tabbar-host {
+    --tabbar-bg: rgba(12,12,12,0.68);
+    --tabbar-border: rgba(212,175,55,0.2);
+    --tabbar-shadow: 0 20rpx 62rpx rgba(0,0,0,0.55), 0 0 1rpx rgba(255,215,0,0.14);
+    --tabbar-highlight: rgba(255,255,255,0.07);
+    --tabbar-text: rgba(255,255,255,0.48);
+    --tabbar-text-active: #f7edca;
+    --tabbar-pill: linear-gradient(135deg, rgba(212,175,55,0.18), rgba(255,215,0,0.07));
+    --tabbar-pill-border: rgba(212,175,55,0.24);
+    --tabbar-glow: rgba(212,175,55,0.15);
+  }
 }
 
-.t-tab-bar__item {
-  transition: all 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+.tabbar-host.theme-light {
+  --tabbar-bg: rgba(255,255,255,0.7);
+  --tabbar-border: rgba(212,175,55,0.24);
+  --tabbar-shadow: 0 18rpx 54rpx rgba(42,34,12,0.16), 0 0 1rpx rgba(212,175,55,0.2);
+  --tabbar-highlight: rgba(255,255,255,0.74);
+  --tabbar-text: rgba(36,36,36,0.54);
+  --tabbar-text-active: #1d1a11;
+  --tabbar-pill: linear-gradient(135deg, rgba(212,175,55,0.22), rgba(255,215,0,0.1));
+  --tabbar-pill-border: rgba(212,175,55,0.28);
+  --tabbar-glow: rgba(212,175,55,0.18);
+}
+
+.tabbar-host.theme-dark {
+  --tabbar-bg: rgba(12,12,12,0.68);
+  --tabbar-border: rgba(212,175,55,0.2);
+  --tabbar-shadow: 0 20rpx 62rpx rgba(0,0,0,0.55), 0 0 1rpx rgba(255,215,0,0.14);
+  --tabbar-highlight: rgba(255,255,255,0.07);
+  --tabbar-text: rgba(255,255,255,0.48);
+  --tabbar-text-active: #f7edca;
+  --tabbar-pill: linear-gradient(135deg, rgba(212,175,55,0.18), rgba(255,215,0,0.07));
+  --tabbar-pill-border: rgba(212,175,55,0.24);
+  --tabbar-glow: rgba(212,175,55,0.15);
+}
+
+.tabbar-shell {
   position: relative;
+  width: calc(100vw - 48rpx);
+  max-width: 720rpx;
+  padding: 10rpx;
+  box-sizing: border-box;
+  border: 1rpx solid var(--tabbar-border);
+  border-radius: 44rpx;
+  background: var(--tabbar-bg);
+  box-shadow: var(--tabbar-shadow);
+  backdrop-filter: blur(34rpx) saturate(180%);
+  -webkit-backdrop-filter: blur(34rpx) saturate(180%);
+  overflow: hidden;
+  pointer-events: auto;
+  animation: tabbarFloatIn 0.52s cubic-bezier(0.16,1,0.3,1);
 }
 
-.t-tab-bar__item--active {
-  transform: translateY(-3rpx) scale(1.04);
-  transition: all 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+.tabbar-shell::before {
+  content: '';
+  position: absolute;
+  left: 24rpx;
+  right: 24rpx;
+  top: 0;
+  height: 1rpx;
+  background: linear-gradient(90deg, transparent, var(--tabbar-highlight), transparent);
+  opacity: 0.95;
+  pointer-events: none;
 }
 
-.t-tab-bar--tag .t-tab-bar__track {
-  background: linear-gradient(
-    135deg,
-    rgba(212,175,55,0.16) 0%,
-    rgba(255,215,0,0.10) 40%,
-    rgba(212,175,55,0.14) 70%,
-    rgba(244,196,48,0.08) 100%
-  ) !important;
-  backdrop-filter: blur(22rpx);
-  -webkit-backdrop-filter: blur(22rpx);
-  border: 1.5rpx solid rgba(212,175,55,0.28) !important;
+.tabbar-glow {
+  position: absolute;
+  left: 18%;
+  right: 18%;
+  bottom: -38rpx;
+  height: 80rpx;
+  border-radius: 999rpx;
+  background: radial-gradient(ellipse at center, var(--tabbar-glow), transparent 68%);
+  filter: blur(12rpx);
+  pointer-events: none;
+}
+
+.tabbar-inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6rpx;
+  height: 96rpx;
+  z-index: 1;
+}
+
+.tabbar-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  border-radius: 34rpx;
+  color: var(--tabbar-text);
+  transform: translateY(0) scale(1);
+  transition:
+    color 0.28s ease,
+    transform 0.34s cubic-bezier(0.34,1.56,0.64,1),
+    opacity 0.28s ease;
+}
+
+.tabbar-item-hover {
+  transform: translateY(-2rpx) scale(0.98);
+}
+
+.tabbar-item.is-active {
+  color: var(--tabbar-text-active);
+  transform: translateY(-6rpx) scale(1.02);
+}
+
+.active-pill {
+  position: absolute;
+  left: 7rpx;
+  right: 7rpx;
+  top: 8rpx;
+  bottom: 6rpx;
+  border-radius: 30rpx;
+  border: 1rpx solid var(--tabbar-pill-border);
+  background: var(--tabbar-pill);
   box-shadow:
-    0 4rpx 20rpx rgba(212,175,55,0.18),
-    0 0 32rpx rgba(212,175,55,0.15),
-    0 0 56rpx rgba(212,175,55,0.08),
-    inset 0 1rpx 0 rgba(255,255,255,0.06);
-  transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+    0 8rpx 24rpx rgba(212,175,55,0.12),
+    inset 0 1rpx 0 rgba(255,255,255,0.28);
+  opacity: 0;
+  transform: scale(0.78);
+  transition:
+    opacity 0.28s ease,
+    transform 0.36s cubic-bezier(0.34,1.56,0.64,1);
+  pointer-events: none;
 }
 
-.t-tab-bar--tag .t-tab-bar__indicator {
-  width: 28rpx !important;
-  height: 5rpx !important;
-  border-radius: 3rpx !important;
-  background: linear-gradient(90deg, #D4AF37 0%, #FFD700 40%, #F4C430 65%, #FFD700 85%, #D4AF37 100%) !important;
-  box-shadow:
-    0 0 12rpx rgba(212,175,55,0.7),
-    0 0 24rpx rgba(212,175,55,0.35),
-    0 0 40rpx rgba(255,215,0,0.18);
-  transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+.tabbar-item.is-active .active-pill {
+  opacity: 1;
+  transform: scale(1);
 }
 
-.t-tab-bar__content {
-  transition: all 0.42s cubic-bezier(0.34, 1.56, 0.64, 1);
+.icon-wrap {
+  position: relative;
+  width: 42rpx;
+  height: 42rpx;
+  margin-bottom: 4rpx;
+  z-index: 1;
+  transition: transform 0.34s cubic-bezier(0.34,1.56,0.64,1);
 }
 
-/* ===== 亮色 tab-bar ===== */
-.tab-bar-container.theme-light .t-tab-bar,
-.theme-light .t-tab-bar {
-  --td-tab-bar-color: #888 !important;
-  --td-tab-bar-active-color: #D4AF37 !important;
-  --td-tab-bar-bg-color: rgba(255,255,255,0.92) !important;
-  --td-tab-bar-border-color: rgba(212,175,55,0.28) !important;
-
-  box-shadow:
-    0 2rpx 12rpx rgba(0,0,0,0.06),
-    0 0 1rpx rgba(212,175,55,0.1),
-    inset 0 1rpx 0 rgba(255,255,255,0.5) !important;
-  border: 1rpx solid rgba(212,175,55,0.22) !important;
+.tabbar-item.is-active .icon-wrap {
+  transform: translateY(-1rpx);
 }
 
-.tab-bar-container.theme-light .t-tab-bar--tag .t-tab-bar__track,
-.theme-light .t-tab-bar--tag .t-tab-bar__track {
-  background: linear-gradient(
-    135deg,
-    rgba(212,175,55,0.22) 0%,
-    rgba(255,215,0,0.14) 40%,
-    rgba(212,175,55,0.18) 70%,
-    rgba(244,196,48,0.10) 100%
-  ) !important;
-  box-shadow:
-    0 4rpx 20rpx rgba(212,175,55,0.12),
-    0 0 32rpx rgba(212,175,55,0.08),
-    inset 0 1rpx 0 rgba(255,255,255,0.5) !important;
+.tabbar-icon {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 42rpx;
+  height: 42rpx;
+  transition:
+    opacity 0.26s ease,
+    transform 0.34s cubic-bezier(0.34,1.56,0.64,1),
+    filter 0.26s ease;
 }
 
-/* ===== 暗色 tab-bar ===== */
-.tab-bar-container.theme-dark .t-tab-bar,
-.theme-dark .t-tab-bar {
-  --td-tab-bar-color: #666 !important;
-  --td-tab-bar-active-color: #D4AF37 !important;
-  --td-tab-bar-bg-color: rgba(13,13,13,0.82) !important;
-  --td-tab-bar-border-color: rgba(212,175,55,0.22) !important;
-
-  backdrop-filter: blur(44rpx) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(44rpx) saturate(190%) !important;
-
-  box-shadow:
-    0 4rpx 24rpx rgba(0,0,0,0.5),
-    0 0 1rpx rgba(255,215,0,0.12),
-    inset 0 1rpx 0 rgba(255,255,255,0.03) !important;
-  border: 1rpx solid rgba(212,175,55,0.18) !important;
+.icon-normal {
+  opacity: 0.72;
+  transform: scale(1);
 }
 
-.tab-bar-container.theme-dark .t-tab-bar--tag .t-tab-bar__track,
-.theme-dark .t-tab-bar--tag .t-tab-bar__track {
-  background: linear-gradient(
-    135deg,
-    rgba(212,175,55,0.16) 0%,
-    rgba(255,215,0,0.10) 40%,
-    rgba(212,175,55,0.14) 70%,
-    rgba(244,196,48,0.08) 100%
-  ) !important;
-  box-shadow:
-    0 4rpx 20rpx rgba(212,175,55,0.18),
-    0 0 32rpx rgba(212,175,55,0.15),
-    0 0 56rpx rgba(212,175,55,0.08),
-    inset 0 1rpx 0 rgba(255,255,255,0.06) !important;
+.icon-active {
+  opacity: 0;
+  transform: scale(0.76) rotate(-8deg);
+  filter: drop-shadow(0 4rpx 10rpx rgba(212,175,55,0.28));
+}
+
+.tabbar-item.is-active .icon-normal {
+  opacity: 0;
+  transform: scale(0.74) rotate(8deg);
+}
+
+.tabbar-item.is-active .icon-active {
+  opacity: 1;
+  transform: scale(1.08) rotate(0deg);
+}
+
+.tabbar-label {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  font-size: 20rpx;
+  line-height: 24rpx;
+  font-weight: 600;
+  white-space: nowrap;
+  transform: scale(0.92);
+  transform-origin: center;
+  transition:
+    transform 0.32s cubic-bezier(0.34,1.56,0.64,1),
+    font-weight 0.22s ease;
+}
+
+.tabbar-item.is-active .tabbar-label {
+  font-weight: 800;
+  transform: scale(1);
+}
+
+@keyframes tabbarFloatIn {
+  from {
+    opacity: 0;
+    transform: translateY(28rpx) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

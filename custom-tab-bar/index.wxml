@@ -1,20 +1,35 @@
-
-<view class="tab-bar-container {{themeClass}}">
-  <t-tab-bar 
-    t-class="t-tab-bar" 
-    value="{{tabList[selected].value}}" 
-    shape="round" 
-    theme="tag" 
-    split="{{false}}" 
-    bindchange="onTabChange"
-  > 
-    <t-tab-bar-item 
-      wx:for="{{tabList}}" 
-      wx:key="value" 
-      value="{{item.value}}" 
-      icon="{{item.icon}}" 
-      ariaLabel="{{item.ariaLabel}}"
-    > 
-    </t-tab-bar-item> 
-  </t-tab-bar>
+<view class="tabbar-host {{themeClass}}" aria-role="tablist">
+  <view class="tabbar-shell">
+    <view class="tabbar-glow"></view>
+    <view class="tabbar-inner">
+      <view
+        wx:for="{{tabList}}"
+        wx:key="value"
+        class="tabbar-item {{selected === index ? 'is-active' : ''}}"
+        data-index="{{index}}"
+        data-path="{{item.pagePath}}"
+        aria-role="tab"
+        aria-label="{{item.ariaLabel}}"
+        aria-selected="{{selected === index}}"
+        hover-class="tabbar-item-hover"
+        hover-stay-time="80"
+        bindtap="onTabTap"
+      >
+        <view class="active-pill"></view>
+        <view class="icon-wrap">
+          <image
+            class="tabbar-icon icon-normal"
+            src="{{item.icon}}"
+            mode="aspectFit"
+          />
+          <image
+            class="tabbar-icon icon-active"
+            src="{{item.activeIcon}}"
+            mode="aspectFit"
+          />
+        </view>
+        <text class="tabbar-label">{{item.text}}</text>
+      </view>
+    </view>
+  </view>
 </view>

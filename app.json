@@ -33,15 +33,15 @@
       },
       {
         "pagePath": "pages/match/match",
-        "text": "赛事"
+        "text": "赛事中心"
       },
       {
         "pagePath": "pages/training/training",
-        "text": "训练"
+        "text": "训练中心"
       },
       {
         "pagePath": "pages/profile/profile",
-        "text": "我的"
+        "text": "个人中心"
       }
     ]
   },
@@ -60,8 +60,6 @@
   "sitemapLocation": "sitemap.json",
   "usingComponents": {
     "t-pull-down-refresh": "tdesign-miniprogram/pull-down-refresh/pull-down-refresh",
-    "t-tab-bar": "tdesign-miniprogram/tab-bar/tab-bar",
-    "t-tab-bar-item": "tdesign-miniprogram/tab-bar-item/tab-bar-item",
     "nav-bar": "/components/nav-bar/nav-bar"
   }
 }
