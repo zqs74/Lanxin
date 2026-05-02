@@ -58,6 +58,9 @@ Component({
   pageLifetimes: {
     show() {
       const app = getApp()
+      if (app.refreshThemeFromSystem) {
+        app.refreshThemeFromSystem()
+      }
       if (app.initTabBarSelectedByRoute && app.getTabBarSelected && app.getTabBarSelected() === -1) {
         const pages = getCurrentPages()
         const current = pages[pages.length - 1]

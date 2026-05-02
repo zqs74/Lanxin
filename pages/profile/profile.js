@@ -53,9 +53,15 @@ Page({
   },
 
   setNavHeight() {
-    const systemInfo = wx.getSystemInfoSync()
-    const statusBarHeight = systemInfo.statusBarHeight || 44
-    const navBarHeight = systemInfo.platform === 'ios' ? 44 : 48
+    let windowInfo = {}
+    let deviceInfo = {}
+    let menuButton = null
+    try { windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : {} } catch (e) { windowInfo = {} }
+    try { deviceInfo = wx.getDeviceInfo ? wx.getDeviceInfo() : {} } catch (e) { deviceInfo = {} }
+    try { menuButton = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null } catch (e) { menuButton = null }
+
+    const statusBarHeight = windowInfo.statusBarHeight || 44
+    const navBarHeight = menuButton ? ((menuButton.top - statusBarHeight) * 2 + menuButton.height) : (deviceInfo.platform === 'ios' ? 44 : 48)
     this.setData({ navHeight: (statusBarHeight + navBarHeight) * 2 })
   },
 

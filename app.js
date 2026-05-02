@@ -25,6 +25,14 @@ App({
     this.listenSystemTheme()
   },
 
+  onShow() {
+    this.refreshThemeFromSystem()
+  },
+
+  onThemeChange(res) {
+    this.handleSystemThemeChange(res && res.theme)
+  },
+
   globalData: {
     userInfo: null,
     userTheme: 'auto',
@@ -149,32 +157,78 @@ App({
     this.applyNavBarColor(this.globalData.resolvedTheme)
   },
 
+  normalizeTheme(theme) {
+    return theme === 'dark' ? 'dark' : 'light'
+  },
+
+  getSystemTheme() {
+    const candidates = []
+
+    try {
+      if (typeof wx.getAppBaseInfo === 'function') {
+        candidates.push(wx.getAppBaseInfo())
+      }
+    } catch (e) {}
+
+    try {
+      if (typeof wx.getWindowInfo === 'function') {
+        candidates.push(wx.getWindowInfo())
+      }
+    } catch (e) {}
+
+    try {
+      if (typeof wx.getSystemSetting === 'function') {
+        candidates.push(wx.getSystemSetting())
+      }
+    } catch (e) {}
+
+    for (const info of candidates) {
+      if (info && (info.theme === 'dark' || info.theme === 'light')) {
+        return info.theme
+      }
+    }
+
+    return this.globalData && this.globalData.resolvedTheme ? this.globalData.resolvedTheme : 'light'
+  },
+
   resolveEffectiveTheme(userTheme) {
     if (userTheme === 'light') return 'light'
     if (userTheme === 'dark') return 'dark'
-    // auto mode: follow system
-    try {
-      const sysInfo = wx.getSystemInfoSync()
-      return sysInfo.theme === 'dark' ? 'dark' : 'light'
-    } catch (e) {
-      return 'dark'
+    return this.normalizeTheme(this.getSystemTheme())
+  },
+
+  applyResolvedTheme(resolvedTheme, options = {}) {
+    const nextTheme = this.normalizeTheme(resolvedTheme)
+    const changed = nextTheme !== this.globalData.resolvedTheme
+    this.globalData.resolvedTheme = nextTheme
+
+    this.applyNavBarColor(nextTheme)
+
+    if (changed || options.forceNotify) {
+      this.notifyAllPages(nextTheme)
+      this.notifyTabBarInstances()
+      this.notifyFloatAIButtons()
     }
   },
 
+  refreshThemeFromSystem() {
+    if (this.globalData.userTheme !== 'auto') return this.globalData.resolvedTheme
+    const resolved = this.resolveEffectiveTheme('auto')
+    this.applyResolvedTheme(resolved)
+    return resolved
+  },
+
+  handleSystemThemeChange(theme) {
+    if (this.globalData.userTheme !== 'auto') return
+    this.applyResolvedTheme(theme || this.getSystemTheme(), { forceNotify: true })
+  },
+
   listenSystemTheme() {
-    if (typeof wx.onThemeChange === 'function') {
-      wx.onThemeChange((res) => {
-        console.log('系统主题变化:', res.theme)
-        if (this.globalData.userTheme === 'auto') {
-          const newResolved = res.theme === 'dark' ? 'dark' : 'light'
-          if (newResolved !== this.globalData.resolvedTheme) {
-            this.globalData.resolvedTheme = newResolved
-            this.applyNavBarColor(newResolved)
-            this.notifyAllPages(newResolved)
-            this.notifyFloatAIButtons()
-          }
-        }
-      })
+    if (typeof wx.onThemeChange === 'function' && !this._themeChangeListener) {
+      this._themeChangeListener = (res) => {
+        this.handleSystemThemeChange(res && res.theme)
+      }
+      wx.onThemeChange(this._themeChangeListener)
     }
   },
 
@@ -214,7 +268,6 @@ App({
   setUserTheme(userTheme) {
     this.globalData.userTheme = userTheme
     const resolved = this.resolveEffectiveTheme(userTheme)
-    this.globalData.resolvedTheme = resolved
 
     try {
       wx.setStorageSync('app_theme', userTheme)
@@ -222,10 +275,7 @@ App({
       console.error('保存主题设置失败', e)
     }
 
-    this.applyNavBarColor(resolved)
-    this.notifyAllPages(resolved)
-    this.notifyTabBarInstances()
-    this.notifyFloatAIButtons()
+    this.applyResolvedTheme(resolved, { forceNotify: true })
 
     return resolved
   },

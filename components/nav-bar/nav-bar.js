@@ -18,10 +18,13 @@ Component({
 
   lifetimes: {
     attached() {
-      const systemInfo = wx.getSystemInfoSync()
+      let windowInfo = {}
+      let deviceInfo = {}
+      try { windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : {} } catch (e) { windowInfo = {} }
+      try { deviceInfo = wx.getDeviceInfo ? wx.getDeviceInfo() : {} } catch (e) { deviceInfo = {} }
       this.setData({
-        statusBarHeight: systemInfo.statusBarHeight || 44,
-        NavBarHeight: systemInfo.platform === 'ios' ? 44 : 48
+        statusBarHeight: windowInfo.statusBarHeight || 44,
+        NavBarHeight: deviceInfo.platform === 'ios' ? 44 : 48
       })
     }
   },

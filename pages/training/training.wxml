@@ -44,7 +44,7 @@
         <view class="radar-score">综合评分 {{ overallScore }}</view>
       </view>
       <view class="radar-container card">
-        <canvas canvas-id="radarChart" class="radar-chart"></canvas>
+        <canvas id="radarChart" type="2d" class="radar-chart"></canvas>
         <view class="radar-legend">
           <view class="legend-item" wx:for="{{ radarData.dimensions }}" wx:key="index">
             <view class="legend-dot" style="background: {{ radarData.colors[index] }}"></view>

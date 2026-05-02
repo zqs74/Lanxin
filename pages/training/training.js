@@ -75,13 +75,23 @@ Page({
     wx.createSelectorQuery()
       .in(this)
       .select('.radar-chart')
-      .boundingClientRect((rect) => {
-        if (!rect || !rect.width || !rect.height) return
+      .fields({ node: true, size: true })
+      .exec((res) => {
+        const canvasInfo = res && res[0]
+        if (!canvasInfo || !canvasInfo.node || !canvasInfo.width || !canvasInfo.height) return
 
-        const ctx = wx.createCanvasContext('radarChart')
+        const canvas = canvasInfo.node
+        const ctx = canvas.getContext('2d')
+        const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : {}
+        const dpr = windowInfo.pixelRatio || 1
         const d = this.data.radarData
-        const W = rect.width
-        const H = rect.height
+        const W = canvasInfo.width
+        const H = canvasInfo.height
+
+        canvas.width = W * dpr
+        canvas.height = H * dpr
+        ctx.scale(dpr, dpr)
+
         const isDark = app.getTheme() === 'dark'
         const cx = W / 2
         const cy = H / 2 + 4
@@ -101,9 +111,9 @@ Page({
             j === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
           })
           ctx.closePath()
-          ctx.setFillStyle(isDark ? `rgba(212,175,55,${0.07 + i * 0.008})` : `rgba(212,175,55,${0.045 + i * 0.006})`)
-          ctx.setStrokeStyle(gridStroke)
-          ctx.setLineWidth(1)
+          ctx.fillStyle = isDark ? `rgba(212,175,55,${0.07 + i * 0.008})` : `rgba(212,175,55,${0.045 + i * 0.006})`
+          ctx.strokeStyle = gridStroke
+          ctx.lineWidth = 1
           ctx.fill()
           ctx.stroke()
         }
@@ -113,8 +123,8 @@ Page({
           ctx.beginPath()
           ctx.moveTo(cx, cy)
           ctx.lineTo(cx + R * Math.cos(a), cy + R * Math.sin(a))
-          ctx.setStrokeStyle(axisStroke)
-          ctx.setLineWidth(1)
+          ctx.strokeStyle = axisStroke
+          ctx.lineWidth = 1
           ctx.stroke()
         })
 
@@ -127,25 +137,25 @@ Page({
         ctx.beginPath()
         pointList.forEach((p, i) => { i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y) })
         ctx.closePath()
-        ctx.setFillStyle(isDark ? 'rgba(212,175,55,0.26)' : 'rgba(212,175,55,0.20)')
+        ctx.fillStyle = isDark ? 'rgba(212,175,55,0.26)' : 'rgba(212,175,55,0.20)'
         ctx.fill()
-        ctx.setStrokeStyle('#D4AF37')
-        ctx.setLineWidth(3)
+        ctx.strokeStyle = '#D4AF37'
+        ctx.lineWidth = 3
         ctx.stroke()
 
         pointList.forEach((p) => {
           ctx.beginPath()
           ctx.arc(p.x, p.y, 6, 0, 2 * Math.PI)
-          ctx.setFillStyle('#FFD700')
+          ctx.fillStyle = '#FFD700'
           ctx.fill()
-          ctx.setStrokeStyle(isDark ? '#6b5415' : '#ffffff')
-          ctx.setLineWidth(2)
+          ctx.strokeStyle = isDark ? '#6b5415' : '#ffffff'
+          ctx.lineWidth = 2
           ctx.stroke()
         })
 
-        ctx.setFontSize(12)
-        ctx.setTextAlign('center')
-        ctx.setFillStyle(labelColor)
+        ctx.font = '12px sans-serif'
+        ctx.textAlign = 'center'
+        ctx.fillStyle = labelColor
         d.dimensions.forEach((label, i) => {
           const a = i * 2 * Math.PI / d.dimensions.length - Math.PI / 2
           const x = cx + (R + 30) * Math.cos(a)
@@ -155,11 +165,9 @@ Page({
 
         ctx.beginPath()
         ctx.arc(cx, cy, 3, 0, 2 * Math.PI)
-        ctx.setFillStyle('#D4AF37')
+        ctx.fillStyle = '#D4AF37'
         ctx.fill()
-        ctx.draw()
       })
-      .exec()
   },
 
   selectPlan(e) { wx.showToast({ title: `选择计划 ${e.currentTarget.dataset.id}`, icon: 'none' }) },

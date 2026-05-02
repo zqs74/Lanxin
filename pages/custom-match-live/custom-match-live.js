@@ -51,9 +51,10 @@ Page({
   setTheme: function(theme) { this._syncTheme() },
 
   setNavHeight: function() {
-    const systemInfo = wx.getSystemInfoSync()
-    const statusBarHeight = systemInfo.statusBarHeight || 44
-    const navBarHeight = systemInfo.platform === 'ios' ? 44 : 48
+    const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : {}
+    const deviceInfo = wx.getDeviceInfo ? wx.getDeviceInfo() : {}
+    const statusBarHeight = windowInfo.statusBarHeight || 44
+    const navBarHeight = deviceInfo.platform === 'ios' ? 44 : 48
     this.setData({
       navHeight: (statusBarHeight + navBarHeight) * 2
     })
