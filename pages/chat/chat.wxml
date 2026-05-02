@@ -81,28 +81,46 @@
           <view class="msg-row msg-ai" wx:if="{{ item.role === 'assistant' && !item.isError }}" id="msg-{{index + 1}}">
             <view class="avatar ai-avatar gradient-bg"><t-icon name="robot" size="34rpx" color="#0a0a0a" /></view>
             <view class="msg-bubble ai-bubble glass-effect-dark">
-              
-              <!-- 流式思考展示 -->
-              <view class="thinking-box active" wx:if="{{ item.isThinking && item.thinking }}">
-                <view class="thinking-header-bar active">
-                  <t-icon class="thinking-spin" name="chat-bubble" size="28rpx" color="#6495ED" />
-                  <text class="thinking-label">正在深度思考...</text>
-                  <view class="thinking-dots">
-                    <view class="t-dot"></view>
-                    <view class="t-dot delay-1"></view>
-                    <view class="t-dot delay-2"></view>
-                  </view>
-                </view>
-                <scroll-view class="thinking-scroll" scroll-y enhanced show-scrollbar="{{false}}" scroll-into-view="{{thinkingScrollToView}}">
-                  <text class="thinking-live">{{ item.thinking }}▌</text>
-                  <view id="thinking-bottom"></view>
-                </scroll-view>
-              </view>
-
               <!-- 回复内容（Markdown） -->
               <view class="response-area">
                 <block wx:for="{{ item.renderedBlocks }}" wx:for-item="block" wx:for-index="blockIndex" wx:key="blockIndex">
-                  <rich-text wx:if="{{ block.type === 'rich' }}" class="msg-content markdown-body" nodes="{{ block.nodes }}"></rich-text>
+                  <view wx:if="{{ block.type === 'heading' }}" class="markdown-heading markdown-h{{ block.level }}">
+                    <block wx:for="{{ block.spans }}" wx:for-item="span" wx:for-index="spanIndex" wx:key="spanIndex">
+                      <text wx:if="{{ span.type !== 'break' }}" class="md-span {{ span.type }}">{{ span.text }}</text>
+                    </block>
+                  </view>
+
+                  <view wx:elif="{{ block.type === 'paragraph' }}" class="markdown-p">
+                    <block wx:for="{{ block.spans }}" wx:for-item="span" wx:for-index="spanIndex" wx:key="spanIndex">
+                      <view wx:if="{{ span.type === 'break' }}" class="md-line-break"></view>
+                      <text wx:else class="md-span {{ span.type }}">{{ span.text }}</text>
+                    </block>
+                  </view>
+
+                  <view wx:elif="{{ block.type === 'list' }}" class="markdown-list {{ block.ordered ? 'ordered' : 'unordered' }}">
+                    <view class="markdown-list-item" wx:for="{{ block.items }}" wx:for-item="listItem" wx:for-index="listIndex" wx:key="listIndex">
+                      <text class="list-marker">{{ listItem.marker }}</text>
+                      <view class="list-content">
+                        <block wx:for="{{ listItem.spans }}" wx:for-item="span" wx:for-index="spanIndex" wx:key="spanIndex">
+                          <view wx:if="{{ span.type === 'break' }}" class="md-line-break"></view>
+                          <text wx:else class="md-span {{ span.type }}">{{ span.text }}</text>
+                        </block>
+                      </view>
+                    </view>
+                  </view>
+
+                  <view wx:elif="{{ block.type === 'quote' }}" class="markdown-quote">
+                    <block wx:for="{{ block.spans }}" wx:for-item="span" wx:for-index="spanIndex" wx:key="spanIndex">
+                      <view wx:if="{{ span.type === 'break' }}" class="md-line-break"></view>
+                      <text wx:else class="md-span {{ span.type }}">{{ span.text }}</text>
+                    </block>
+                  </view>
+
+                  <view wx:elif="{{ block.type === 'code' }}" class="markdown-code-block">
+                    <text>{{ block.text }}</text>
+                  </view>
+
+                  <view wx:elif="{{ block.type === 'divider' }}" class="markdown-divider"></view>
 
                   <view wx:elif="{{ block.type === 'table' }}" class="markdown-table-card">
                     <view class="table-row-card" wx:for="{{ block.rows }}" wx:for-item="row" wx:for-index="rowIndex" wx:key="rowIndex">
@@ -122,21 +140,7 @@
                     </view>
                   </view>
                 </block>
-                <rich-text wx:if="{{ !item.renderedBlocks }}" class="msg-content markdown-body" nodes="{{ item.renderedContent || item.content }}"></rich-text>
                 <text class="cursor-blink" wx:if="{{ item.isStreaming }}">▌</text>
-              </view>
-
-              <!-- 思考过程显示/隐藏按钮 -->
-              <view class="thinking-toggle" wx:if="{{ item.thinking && !item.isStreaming && !item.isThinking }}" bindtap="toggleThinking" data-index="{{ index }}">
-                <t-icon class="toggle-icon" name="{{ item.showThinking ? 'chevron-up' : 'chevron-down' }}" size="24rpx" color="#6495ED" />
-                <text class="toggle-text">{{ item.showThinking ? '收起思考过程' : '展开思考过程' }}</text>
-              </view>
-
-              <!-- 思考过程内容 -->
-              <view class="thinking-content" wx:if="{{ item.thinking && item.showThinking && !item.isStreaming && !item.isThinking }}">
-                <scroll-view class="thinking-scroll" scroll-y enhanced show-scrollbar="{{false}}">
-                  <text class="thinking-text">{{ item.thinking }}</text>
-                </scroll-view>
               </view>
 
               <!-- 底部信息栏 -->
@@ -165,17 +169,11 @@
 
         <!-- AI思考中状态（独立显示在底部） -->
         <view class="msg-row msg-ai thinking-state" wx:if="{{ isLoading && isThinking && currentThinking && !hasAssistantMsg }}" id="msg-loading">
-          <view class="avatar ai-avatar gradient-bg spinning"><t-icon name="robot" size="34rpx" color="#0a0a0a" /></view>
+          <view class="avatar ai-avatar gradient-bg"><t-icon name="robot" size="34rpx" color="#0a0a0a" /></view>
           <view class="msg-bubble ai-bubble glass-effect-dark">
-            <view class="thinking-box active">
-              <view class="thinking-header-bar active">
-                <t-icon class="thinking-spin spin-anim" name="chat-bubble" size="28rpx" color="#6495ED" />
-                <text class="thinking-label">正在深度思考...</text>
-              </view>
-              <scroll-view class="thinking-scroll live" scroll-y enhanced show-scrollbar="{{false}}" scroll-into-view="{{thinkingScrollToView}}">
-                <text class="thinking-live">{{ currentThinking }}▌</text>
-                <view id="thinking-bottom"></view>
-              </scroll-view>
+            <view class="thinking-shimmer">
+              <t-icon name="chat-bubble" size="28rpx" color="#D4AF37" />
+              <text class="thinking-shimmer-text">正在深度思考...</text>
             </view>
           </view>
         </view>

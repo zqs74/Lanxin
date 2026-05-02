@@ -95,8 +95,8 @@
 }
 
 .status-badge.thinking {
-  background: linear-gradient(135deg, rgba(100,149,237,0.12) 0%, rgba(123,159,245,0.08) 100%);
-  border-color: rgba(100,149,237,0.3);
+  background: linear-gradient(135deg, rgba(212,175,55,0.14) 0%, rgba(255,215,0,0.08) 100%);
+  border-color: rgba(212,175,55,0.28);
 }
 
 .status-dot {
@@ -108,7 +108,7 @@
 }
 
 .thinking .status-dot {
-  background: linear-gradient(135deg, var(--text-status-thinking) 0%, #7B9FF5 100%);
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
   animation: thinkingPulse 1s ease-in-out infinite;
 }
 
@@ -122,7 +122,7 @@
   letter-spacing: 1rpx;
 }
 
-.thinking .status-label { color: var(--text-status-thinking); }
+.thinking .status-label { color: var(--gold); }
 
 /* ===== 聊天主区域 ===== */
 .chat-body {
@@ -243,9 +243,6 @@
   box-shadow: 0 6rpx 20rpx rgba(212,175,55,0.35), 0 0 30rpx rgba(212,175,55,0.12);
 }
 
-.ai-avatar.spinning { animation: avatarSpin 3s linear infinite; }
-@keyframes avatarSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
 .user-avatar {
   background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%);
   box-shadow: 0 6rpx 20rpx rgba(250,173,20,0.3);
@@ -309,6 +306,155 @@
   overflow-x: hidden;
   max-width: 100%;
   width: 100%;
+}
+
+.markdown-heading,
+.markdown-p,
+.markdown-list,
+.markdown-quote,
+.markdown-code-block,
+.markdown-table-card,
+.flow-graph {
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.markdown-heading {
+  color: var(--gold);
+  font-weight: 800;
+  line-height: 1.42;
+  margin: 34rpx 0 18rpx;
+  letter-spacing: 0;
+  word-break: break-word;
+}
+
+.response-area > .markdown-heading:first-child {
+  margin-top: 0;
+}
+
+.markdown-h1 { font-size: 34rpx; }
+.markdown-h2 { font-size: 32rpx; }
+.markdown-h3 { font-size: 30rpx; }
+.markdown-h4 { font-size: 28rpx; }
+
+.markdown-p {
+  font-size: 28rpx;
+  line-height: 1.86;
+  color: var(--text-content);
+  margin: 14rpx 0;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.md-span {
+  max-width: 100%;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.md-span.strong {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.md-span.em {
+  color: var(--gold);
+  font-style: italic;
+}
+
+.md-span.code {
+  display: inline;
+  padding: 2rpx 10rpx;
+  margin: 0 2rpx;
+  border-radius: 8rpx;
+  color: var(--gold);
+  background: rgba(212,175,55,0.12);
+  border: 1rpx solid var(--border-code);
+  font-family: "SF Mono", Consolas, "Courier New", monospace;
+  font-size: 24rpx;
+}
+
+.md-span.delete {
+  color: var(--text-tertiary);
+  text-decoration: line-through;
+}
+
+.md-span.link {
+  color: var(--gold);
+  text-decoration: underline;
+}
+
+.md-line-break {
+  display: block;
+  height: 10rpx;
+}
+
+.markdown-list {
+  margin: 16rpx 0;
+}
+
+.markdown-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin: 10rpx 0;
+  color: var(--text-content);
+  font-size: 28rpx;
+  line-height: 1.78;
+}
+
+.list-marker {
+  min-width: 34rpx;
+  color: var(--gold);
+  font-weight: 800;
+  line-height: 1.78;
+  flex-shrink: 0;
+}
+
+.markdown-list.ordered .list-marker {
+  min-width: 44rpx;
+  text-align: right;
+}
+
+.list-content {
+  flex: 1;
+  min-width: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.markdown-quote {
+  margin: 18rpx 0;
+  padding: 16rpx 20rpx;
+  border-left: 5rpx solid var(--gold);
+  border-radius: 0 16rpx 16rpx 0;
+  background: rgba(212,175,55,0.07);
+  color: var(--text-markdown-blockquote);
+  font-size: 26rpx;
+  line-height: 1.75;
+  word-break: break-word;
+}
+
+.markdown-code-block {
+  margin: 18rpx 0;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  background: var(--bg-input);
+  border: 1rpx solid var(--border-code-block);
+  color: var(--gold);
+  font-size: 24rpx;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "SF Mono", Consolas, "Courier New", monospace;
+}
+
+.markdown-divider {
+  height: 1rpx;
+  margin: 26rpx 0;
+  background: linear-gradient(90deg, transparent, rgba(212,175,55,0.38), transparent);
 }
 
 .markdown-body {
@@ -489,80 +635,37 @@
 .s-dot.d2 { animation-delay: 0.3s; }
 @keyframes sPulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.3); } }
 
-/* ===== 思维链区域 ===== */
-.thinking-box {
-  margin-bottom: 18rpx;
-  border: 1.5rpx solid var(--border-thinking);
-  border-radius: 18rpx;
-  overflow: hidden;
-  background: var(--bg-thinking);
-  animation: thinkingFadeIn 0.4s ease-out;
-}
-
-@keyframes thinkingFadeIn { from { opacity: 0; transform: translateY(-10rpx); } to { opacity: 1; transform: translateY(0); } }
-
-.thinking-box.active {
-  border-color: var(--border-thinking-active);
-  box-shadow: 0 0 24rpx rgba(100,149,237,0.12), inset 0 0 20rpx rgba(100,149,237,0.04);
-}
-
-.thinking-header-bar {
-  display: flex;
+/* ===== 思考状态 ===== */
+.thinking-shimmer {
+  display: inline-flex;
   align-items: center;
-  gap: 10rpx;
-  padding: 14rpx 20rpx;
-  background: var(--thinking-header-bg);
-  border-bottom: 1rpx solid var(--thinking-border-bottom);
+  gap: 12rpx;
+  max-width: 100%;
+  padding: 6rpx 0;
 }
 
-.thinking-header-bar.active { background: var(--thinking-header-bg-active); animation: headerPulse 2.5s ease-in-out infinite; }
-@keyframes headerPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
-
-.thinking-spin { font-size: 28rpx; }
-.thinking-spin.spin-anim { animation: thinkSpin 2.5s linear infinite; display: inline-block; }
-@keyframes thinkSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-.thinking-label { font-size: 24rpx; color: var(--text-status-thinking); font-weight: 700; letter-spacing: 1rpx; flex: 1; }
-.thinking-dots { display: flex; gap: 5rpx; }
-.t-dot { width: 7rpx; height: 7rpx; background: var(--text-status-thinking); border-radius: 50%; animation: tDot 1.3s ease-in-out infinite; }
-.t-dot.delay-1 { animation-delay: 0.2s; }
-.t-dot.delay-2 { animation-delay: 0.4s; }
-@keyframes tDot { 0%, 100% { opacity: 0.3; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1.2); } }
-
-.thinking-scroll { max-height: 320rpx; padding: 22rpx 24rpx; box-sizing: border-box; }
-.thinking-scroll.live { max-height: 280rpx; background: var(--bg-thinking-live); }
-
-.thinking-live,
-.thinking-text { display: block; font-size: 24rpx; color: var(--text-thinking); line-height: 1.85; white-space: pre-wrap; word-break: break-word; padding: 2rpx 0; box-sizing: border-box; }
-
-.thinking-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  padding: 10rpx 14rpx;
-  margin: 16rpx 0 8rpx;
-  background: var(--bg-thinking-toggle);
-  border: 1.5rpx solid var(--border-thinking-toggle);
-  border-radius: 14rpx;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  animation: fadeInUp 0.3s ease-out;
-}
-
-.thinking-toggle:active { background: rgba(100,149,237,0.15); transform: scale(0.98); }
-.toggle-icon { font-size: 24rpx; flex-shrink: 0; }
-.toggle-text { font-size: 23rpx; color: var(--text-status-thinking); font-weight: 700; letter-spacing: 0; flex: 1; }
-
-.thinking-content {
-  border: 1.5rpx solid var(--border-thinking-toggle);
-  border-radius: 16rpx;
+.thinking-shimmer-text {
+  position: relative;
+  display: inline-block;
+  color: var(--gold);
+  font-size: 26rpx;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.6;
   overflow: hidden;
-  background: var(--bg-thinking);
-  margin: 8rpx 0 16rpx;
-  animation: fadeInUp 0.3s ease-out;
+  background: linear-gradient(90deg, #B8860B 0%, #D4AF37 28%, #FFD700 50%, #D4AF37 72%, #B8860B 100%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: thinkingShimmer 1.6s ease-in-out infinite;
 }
 
-.thinking-content .thinking-scroll { max-height: 400rpx; padding: 22rpx 24rpx; box-sizing: border-box; }
+@keyframes thinkingShimmer {
+  0% { background-position: 120% 0; opacity: 0.72; }
+  50% { opacity: 1; }
+  100% { background-position: -120% 0; opacity: 0.78; }
+}
 
 .waiting-box { display: flex; align-items: center; gap: 18rpx; padding: 8rpx 0; }
 .wait-dots { display: flex; gap: 8rpx; }
@@ -606,9 +709,12 @@
   margin-top: 0;
   box-sizing: border-box;
   flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
 }
 
 .input-box {
+  width: 100%;
   display: flex;
   align-items: center;
   gap: 16rpx;
