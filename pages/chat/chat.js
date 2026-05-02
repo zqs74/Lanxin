@@ -12,10 +12,19 @@ Page({
     thinkingScrollToView: '',
     currentThinking: '',
     isThinking: false,
-    hasAssistantMsg: false
+    hasAssistantMsg: false,
+    windowHeight: 0,
+    navHeight: 0,
+    navTop: 0,
+    chatBodyHeight: 0,
+    inputBottomInset: 0,
+    inputHeight: 116
   },
 
-  onLoad() { this.initTheme() },
+  onLoad() {
+    this.initLayout()
+    this.initTheme()
+  },
 
   _themeClass(ut) { return ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') },
 
@@ -31,7 +40,42 @@ Page({
 
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) { this.getTabBar().updateSelected(2) }
+    this.initLayout()
     this._syncTheme()
+  },
+
+  onResize() {
+    this.initLayout()
+    setTimeout(() => this.scrollToBottom(), 80)
+  },
+
+  initLayout() {
+    let windowInfo = {}
+    let deviceInfo = {}
+    let menuRect = null
+    try { windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : {} } catch (e) { windowInfo = {} }
+    try { deviceInfo = wx.getDeviceInfo ? wx.getDeviceInfo() : {} } catch (e) { deviceInfo = {} }
+    try { menuRect = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null } catch (e) { menuRect = null }
+
+    const windowHeight = windowInfo.windowHeight || 667
+    const statusBarHeight = windowInfo.statusBarHeight || 0
+    const safeArea = windowInfo.safeArea || {}
+    const safeBottom = safeArea.bottom ? Math.max(0, windowHeight - safeArea.bottom) : 0
+    const navTop = menuRect && menuRect.top ? Math.max(0, menuRect.top - statusBarHeight) : 8
+    const capsuleHeight = menuRect && menuRect.height ? menuRect.height : (deviceInfo.platform === 'ios' ? 32 : 32)
+    const navHeight = statusBarHeight + navTop * 2 + capsuleHeight
+    const inputBottomInset = Math.max(safeBottom, 12)
+    const inputHeight = 116
+    const chatBodyHeight = Math.max(260, windowHeight - navHeight - inputHeight - inputBottomInset)
+
+    this.setData({
+      windowHeight,
+      navHeight,
+      navTop,
+      inputBottomInset,
+      inputHeight,
+      chatBodyHeight
+    })
   },
 
   goBack() {
@@ -112,6 +156,58 @@ Page({
     return html
   },
 
+  parseGraphLine(line = '') {
+    const match = line.match(/^\s*([A-Za-z0-9_]+)(?:\[(.*?)\])?\s*[-=.]+>\s*([A-Za-z0-9_]+)(?:\[(.*?)\])?\s*$/)
+    if (!match) return null
+    return {
+      fromId: match[1],
+      fromLabel: (match[2] || match[1]).trim(),
+      toId: match[3],
+      toLabel: (match[4] || match[3]).trim()
+    }
+  },
+
+  parseGraphBlock(code = '', language = '') {
+    const rawLines = String(code).split('\n').map(line => line.trim()).filter(Boolean)
+    const firstLine = rawLines[0] || ''
+    const header = firstLine.match(/^(graph|flowchart)\s+(LR|RL|TD|TB|BT)$/i)
+    const direction = header ? header[2].toUpperCase() : (language || '').replace(/^(graph|flowchart)-?/i, '').toUpperCase()
+    const bodyLines = header ? rawLines.slice(1) : rawLines
+    const nodes = []
+    const nodeMap = {}
+    const edges = []
+
+    bodyLines.forEach(line => {
+      const edge = this.parseGraphLine(line)
+      if (!edge) return
+      if (!nodeMap[edge.fromId]) {
+        nodeMap[edge.fromId] = { id: edge.fromId, label: edge.fromLabel }
+        nodes.push(nodeMap[edge.fromId])
+      }
+      if (!nodeMap[edge.toId]) {
+        nodeMap[edge.toId] = { id: edge.toId, label: edge.toLabel }
+        nodes.push(nodeMap[edge.toId])
+      }
+      edges.push(edge)
+    })
+
+    return {
+      direction: ['LR', 'RL'].includes(direction) ? 'LR' : 'TD',
+      nodes,
+      edges
+    }
+  },
+
+  isGraphHeader(line = '') {
+    return /^(graph|flowchart)\s+(LR|RL|TD|TB|BT)$/i.test(String(line).trim())
+  },
+
+  isGraphBlock(language = '', code = '') {
+    const lang = String(language).trim().toLowerCase()
+    const trimmed = String(code).trim()
+    return ['mermaid', 'graph', 'flowchart'].includes(lang) || /^(graph|flowchart)\s+(LR|RL|TD|TB|BT)/i.test(trimmed)
+  },
+
   parseTableRow(row = '') {
     let cells = row.trim()
     if (cells.startsWith('|')) cells = cells.slice(1)
@@ -130,10 +226,25 @@ Page({
   },
 
   parseMarkdown(text) {
-    if (!text) return ''
+    return this.blocksToRichText(this.parseMarkdownBlocks(text))
+  },
+
+  blocksToRichText(blocks = []) {
+    return blocks.map(block => block.type === 'rich' ? block.nodes : '').join('')
+  },
+
+  parseMarkdownBlocks(text) {
+    if (!text) return []
     const lines = this.normalizeMarkdown(text).replace(/\r\n/g, '\n').split('\n')
-    const html = []
+    const blocks = []
+    let richParts = []
     let i = 0
+    const flushRich = () => {
+      if (richParts.length) {
+        blocks.push({ type: 'rich', nodes: richParts.join('') })
+        richParts = []
+      }
+    }
 
     while (i < lines.length) {
       const line = lines[i]
@@ -142,26 +253,56 @@ Page({
 
       if (!trimmed) { i += 1; continue }
 
+      if (this.isGraphHeader(trimmed)) {
+        const graphLines = [trimmed]
+        i += 1
+        while (i < lines.length && lines[i].trim()) {
+          const candidate = lines[i].trim()
+          if (!this.parseGraphLine(candidate)) break
+          graphLines.push(candidate)
+          i += 1
+        }
+        const graph = this.parseGraphBlock(graphLines.join('\n'))
+        if (graph.nodes.length) {
+          flushRich()
+          blocks.push({ type: 'graph', graph })
+          continue
+        }
+        richParts.push(`<pre><code>${this.escapeHtml(graphLines.join('\n'))}</code></pre>`)
+        continue
+      }
+
       if (/^```/.test(trimmed)) {
         const language = trimmed.replace(/^```/, '').trim()
         const code = []
         i += 1
         while (i < lines.length && !/^```/.test(lines[i].trim())) { code.push(lines[i]); i += 1 }
         if (i < lines.length) i += 1
-        html.push(`<pre><code data-language="${this.escapeAttr(language)}">${this.escapeHtml(code.join('\n'))}</code></pre>`)
+        const codeText = code.join('\n')
+        if (this.isGraphBlock(language, codeText)) {
+          const graph = this.parseGraphBlock(codeText, language)
+          if (graph.nodes.length) {
+            flushRich()
+            blocks.push({ type: 'graph', graph })
+          } else {
+            richParts.push(`<pre><code data-language="${this.escapeAttr(language)}">${this.escapeHtml(codeText)}</code></pre>`)
+          }
+        } else {
+          richParts.push(`<pre><code data-language="${this.escapeAttr(language)}">${this.escapeHtml(codeText)}</code></pre>`)
+        }
         continue
       }
 
       const heading = trimmed.match(/^(#{1,6})\s+(.+)$/)
       if (heading) {
         const level = Math.min(heading[1].length, 4)
-        html.push(`<h${level}>${this.parseInlineMarkdown(heading[2])}</h${level}>`)
+        richParts.push(`<h${level}>${this.parseInlineMarkdown(heading[2])}</h${level}>`)
         i += 1
         continue
       }
 
       if (/^(\s*)(-{3,}|\*{3,}|_{3,})\s*$/.test(line)) {
-        html.push('<hr/>')
+        richParts.push('<hr/>')
         i += 1
         continue
       }
@@ -174,7 +315,15 @@ Page({
           rows.push(this.parseTableRow(lines[i]))
           i += 1
         }
-        html.push(`<table><thead><tr>${headers.map(cell => `<th>${this.parseInlineMarkdown(cell)}</th>`).join('')}</tr></thead><tbody>${rows.map(row => `<tr>${row.map(cell => `<td>${this.parseInlineMarkdown(cell)}</td>`).join('')}</tr>`).join('')}</tbody></table>`)
+        flushRich()
+        blocks.push({
+          type: 'table',
+          headers,
+          rows: rows.map(row => headers.map((header, cellIndex) => ({
+            header,
+            value: row[cellIndex] || ''
+          })))
+        })
         continue
       }
 
@@ -184,7 +333,7 @@ Page({
           quote.push(lines[i].replace(/^>\s?/, ''))
           i += 1
         }
-        html.push(`<blockquote>${this.parseInlineMarkdown(quote.join('\n')).replace(/\n/g, '<br/>')}</blockquote>`)
+        richParts.push(`<blockquote>${this.parseInlineMarkdown(quote.join('\n')).replace(/\n/g, '<br/>')}</blockquote>`)
         continue
       }
 
@@ -194,7 +343,7 @@ Page({
           items.push(lines[i].replace(/^(\s*)([-*+])\s+/, ''))
           i += 1
         }
-        html.push(`<ul>${items.map(item => `<li>${this.parseInlineMarkdown(item)}</li>`).join('')}</ul>`)
+        richParts.push(`<ul>${items.map(item => `<li>${this.parseInlineMarkdown(item)}</li>`).join('')}</ul>`)
         continue
       }
 
@@ -204,7 +353,7 @@ Page({
           items.push(lines[i].replace(/^(\s*)\d+\.\s+/, ''))
           i += 1
         }
-        html.push(`<ol>${items.map(item => `<li>${this.parseInlineMarkdown(item)}</li>`).join('')}</ol>`)
+        richParts.push(`<ol>${items.map(item => `<li>${this.parseInlineMarkdown(item)}</li>`).join('')}</ol>`)
         continue
       }
 
@@ -214,10 +363,11 @@ Page({
         paragraph.push(lines[i])
         i += 1
       }
-      html.push(`<p>${this.parseInlineMarkdown(paragraph.join('\n')).replace(/\n/g, '<br/>')}</p>`)
+      richParts.push(`<p>${this.parseInlineMarkdown(paragraph.join('\n')).replace(/\n/g, '<br/>')}</p>`)
     }
 
-    return html.join('')
+    flushRich()
+    return blocks
   },
 
   async callCloudAI(message) {
@@ -235,15 +385,15 @@ Page({
             else{this.setData({currentThinking:fullThinking,isThinking:true,hasAssistantMsg:false})}
             this.scrollToBottom()}
           const text=data?.choices?.[0]?.delta?.content
-          if(text){fullContent+=text;const renderedContent=this.parseMarkdown(fullContent);const tempMessages=[...this.data.messages]
-            if(tempMessages.length<=assistantMsgIndex||tempMessages[assistantMsgIndex]?.role!=='assistant'){tempMessages.push({role:'assistant',content:fullContent,renderedContent,thinking:fullThinking,showThinking:false,time,isStreaming:true,isThinking:false});this.setData({hasAssistantMsg:true})}
-            else{tempMessages[assistantMsgIndex]={...tempMessages[assistantMsgIndex],content:fullContent,renderedContent,thinking:fullThinking,showThinking:false,isStreaming:true,isThinking:false}}
+          if(text){fullContent+=text;const renderedBlocks=this.parseMarkdownBlocks(fullContent);const renderedContent=this.blocksToRichText(renderedBlocks);const tempMessages=[...this.data.messages]
+            if(tempMessages.length<=assistantMsgIndex||tempMessages[assistantMsgIndex]?.role!=='assistant'){tempMessages.push({role:'assistant',content:fullContent,renderedContent,renderedBlocks,thinking:fullThinking,showThinking:false,time,isStreaming:true,isThinking:false});this.setData({hasAssistantMsg:true})}
+            else{tempMessages[assistantMsgIndex]={...tempMessages[assistantMsgIndex],content:fullContent,renderedContent,renderedBlocks,thinking:fullThinking,showThinking:false,isStreaming:true,isThinking:false}}
             this.setData({messages:tempMessages,isThinking:false,currentThinking:''})
             this.scrollToBottom()}}
         catch(parseError){console.log('解析事件数据失败:',parseError)}}
-      const finalRendered=this.parseMarkdown(fullContent);const finalMessages=[...this.data.messages]
-      if(finalMessages[assistantMsgIndex]?.role==='assistant'){finalMessages[assistantMsgIndex]={...finalMessages[assistantMsgIndex],role:'assistant',content:fullContent,renderedContent:finalRendered,thinking:fullThinking,showThinking:false,time,isStreaming:false,isThinking:false}}
-      else if(fullContent){finalMessages.push({role:'assistant',content:fullContent,renderedContent:finalRendered,thinking:fullThinking,showThinking:false,time,isStreaming:false,isThinking:false})}
+      const finalBlocks=this.parseMarkdownBlocks(fullContent);const finalRendered=this.blocksToRichText(finalBlocks);const finalMessages=[...this.data.messages]
+      if(finalMessages[assistantMsgIndex]?.role==='assistant'){finalMessages[assistantMsgIndex]={...finalMessages[assistantMsgIndex],role:'assistant',content:fullContent,renderedContent:finalRendered,renderedBlocks:finalBlocks,thinking:fullThinking,showThinking:false,time,isStreaming:false,isThinking:false}}
+      else if(fullContent){finalMessages.push({role:'assistant',content:fullContent,renderedContent:finalRendered,renderedBlocks:finalBlocks,thinking:fullThinking,showThinking:false,time,isStreaming:false,isThinking:false})}
       this.setData({messages:finalMessages,isLoading:false,isThinking:false,currentThinking:'',hasAssistantMsg:false});setTimeout(()=>this.scrollToBottom(),150)
     }catch(error){console.error('云开发AI调用失败:',error);this.setData({isLoading:false,isThinking:false,currentThinking:''})
       wx.showToast({title:error.errMsg||'AI服务暂时不可用',icon:'none'});const now=new Date()

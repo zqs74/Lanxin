@@ -45,8 +45,8 @@
           <view class="custom-title">自定义即时计分比赛</view>
           <view class="custom-desc">创建属于你的比赛，实时记录得分与判罚</view>
         </view>
-        <view class="custom-arrow">
-          <text class="arrow-icon">→</text>
+        <view class="page-forward-btn round">
+          <t-icon name="chevron-right" size="32rpx" color="#D4AF37" />
         </view>
       </view>
     </view>

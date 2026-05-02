@@ -6,6 +6,11 @@
   min-height: 100vh;
 }
 
+.chat-page {
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
 .container {
   background-color: transparent;
   min-height: 100vh;
@@ -15,13 +20,26 @@
   z-index: 1;
 }
 
+.chat-container {
+  overflow: hidden;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 /* ===== 顶部导航栏 ===== */
 .top-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24rpx 30rpx;
-  margin-bottom: 20rpx;
+  padding-left: 30rpx;
+  padding-right: 30rpx;
+  padding-bottom: 12rpx;
+  margin-bottom: 0;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 3;
+  background: var(--bg-page-flat);
 }
 
 .nav-center {
@@ -73,6 +91,7 @@
   border-radius: 30rpx;
   border: 1.5rpx solid rgba(82,196,26,0.25);
   transition: all 0.4s ease;
+  flex-shrink: 0;
 }
 
 .status-badge.thinking {
@@ -107,23 +126,23 @@
 
 /* ===== 聊天主区域 ===== */
 .chat-body {
-  flex: 1;
   display: flex;
   flex-direction: column;
   padding: 0 20rpx;
   overflow: hidden;
   box-sizing: border-box;
   width: 100%;
+  flex-shrink: 0;
 }
 
 .message-scroll {
   flex: 1;
-  height: 0;
+  min-height: 0;
   width: 100%;
   overflow-x: hidden;
   box-sizing: border-box;
 }
-.bottom-spacer { height: 40rpx; }
+.bottom-spacer { height: 12rpx; }
 
 /* ===== 欢迎卡片 ===== */
 .welcome-card {
@@ -311,12 +330,13 @@
   box-sizing: border-box;
 }
 
-.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 { color: var(--gold); font-weight: 800; margin: 18rpx 0 10rpx; letter-spacing: 0; line-height: 1.35; }
+.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 { color: var(--gold); font-weight: 800; margin: 34rpx 0 18rpx; letter-spacing: 0; line-height: 1.38; }
+.markdown-body h1:first-child, .markdown-body h2:first-child, .markdown-body h3:first-child, .markdown-body h4:first-child { margin-top: 8rpx; }
 .markdown-body h1 { font-size: 34rpx; }
 .markdown-body h2 { font-size: 32rpx; }
 .markdown-body h3 { font-size: 30rpx; }
 .markdown-body h4 { font-size: 28rpx; }
-.markdown-body p { margin: 10rpx 0; }
+.markdown-body p { margin: 14rpx 0; }
 .markdown-body strong, .markdown-body b { color: var(--gold-light); font-weight: 700; }
 .markdown-body em, .markdown-body i { color: #F4C430; font-style: italic; }
 
@@ -357,19 +377,101 @@
 
 .markdown-body a { color: var(--gold-light); text-decoration: underline; }
 
-.markdown-body table {
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  margin: 16rpx 0;
-  border: 1.5rpx solid var(--border-card);
-  border-radius: 12rpx;
-  overflow: hidden;
+.markdown-table-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  margin: 22rpx 0;
 }
 
-.markdown-body th, .markdown-body td { padding: 14rpx 10rpx; border: 1rpx solid var(--border-light); text-align: left; font-size: 24rpx; word-break: break-all; overflow-wrap: anywhere; }
-.markdown-body th { background: rgba(212,175,55,0.12); color: var(--gold); font-weight: 700; }
-.markdown-body td { color: var(--text-content); }
+.table-row-card {
+  padding: 18rpx 20rpx;
+  border-radius: 16rpx;
+  border: 1rpx solid var(--border-light);
+  background: rgba(212,175,55,0.045);
+}
+
+.table-cell-card {
+  display: grid;
+  grid-template-columns: 150rpx minmax(0, 1fr);
+  gap: 14rpx;
+  padding: 8rpx 0;
+  border-bottom: 1rpx solid var(--border-superlight);
+}
+
+.table-cell-card:last-child {
+  border-bottom: none;
+}
+
+.table-cell-label {
+  color: var(--gold);
+  font-size: 24rpx;
+  font-weight: 800;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.table-cell-value {
+  color: var(--text-content);
+  font-size: 25rpx;
+  font-weight: 600;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.flow-graph {
+  margin: 24rpx 0;
+  padding: 18rpx;
+  border-radius: 18rpx;
+  border: 1rpx solid var(--border-light);
+  background: rgba(212,175,55,0.045);
+}
+
+.flow-lr {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.flow-td {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.flow-node-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  min-width: 0;
+}
+
+.flow-td .flow-node-wrap {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.flow-node {
+  max-width: 100%;
+  padding: 14rpx 18rpx;
+  border-radius: 14rpx;
+  color: var(--text-primary);
+  font-size: 24rpx;
+  font-weight: 800;
+  line-height: 1.45;
+  background: var(--bg-card-flat);
+  border: 1rpx solid var(--border-stat);
+  box-shadow: var(--shadow-soft);
+  word-break: break-word;
+}
+
+.flow-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
 
 .markdown-body hr { border: none; height: 1.5rpx; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent); margin: 24rpx 0; }
 
@@ -427,10 +529,11 @@
 .t-dot.delay-2 { animation-delay: 0.4s; }
 @keyframes tDot { 0%, 100% { opacity: 0.3; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1.2); } }
 
-.thinking-scroll { max-height: 320rpx; padding: 18rpx 20rpx; }
+.thinking-scroll { max-height: 320rpx; padding: 22rpx 24rpx; box-sizing: border-box; }
 .thinking-scroll.live { max-height: 280rpx; background: var(--bg-thinking-live); }
 
-.thinking-text { font-size: 24rpx; color: var(--text-thinking); line-height: 1.7; white-space: pre-wrap; word-break: break-word; }
+.thinking-live,
+.thinking-text { display: block; font-size: 24rpx; color: var(--text-thinking); line-height: 1.85; white-space: pre-wrap; word-break: break-word; padding: 2rpx 0; box-sizing: border-box; }
 
 .thinking-toggle {
   display: flex;
@@ -459,8 +562,7 @@
   animation: fadeInUp 0.3s ease-out;
 }
 
-.thinking-content .thinking-scroll { max-height: 400rpx; padding: 16rpx 20rpx; }
-.thinking-content .thinking-text { font-size: 24rpx; color: var(--text-thinking); line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+.thinking-content .thinking-scroll { max-height: 400rpx; padding: 22rpx 24rpx; box-sizing: border-box; }
 
 .waiting-box { display: flex; align-items: center; gap: 18rpx; padding: 8rpx 0; }
 .wait-dots { display: flex; gap: 8rpx; }
@@ -499,7 +601,12 @@
 .chip-text { font-size: 25rpx; color: var(--gold); font-weight: 600; letter-spacing: 0.5rpx; }
 
 /* ===== 输入区域 ===== */
-.input-zone { padding: 20rpx 0 0; margin-top: auto; }
+.input-zone {
+  padding: 12rpx 0 0;
+  margin-top: 0;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
 
 .input-box {
   display: flex;

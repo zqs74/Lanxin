@@ -475,3 +475,29 @@ page {
   transform: scale(0.96);
   border-color: var(--border-card-hover);
 }
+
+.page-forward-btn {
+  width: 56rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16rpx;
+  background: var(--bg-tag);
+  border: 1rpx solid var(--border-stat);
+  box-shadow: var(--shadow-soft);
+  box-sizing: border-box;
+  flex-shrink: 0;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.page-forward-btn.round {
+  border-radius: 50%;
+  width: 64rpx;
+  height: 64rpx;
+}
+
+.page-forward-btn:active {
+  transform: scale(0.96);
+  border-color: var(--border-card-hover);
+}

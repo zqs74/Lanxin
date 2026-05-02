@@ -26,7 +26,9 @@
         <view class="create-title">记录集锦</view>
         <view class="create-subtitle">整理比赛片段与训练表现</view>
       </view>
-      <view class="create-arrow">→</view>
+      <view class="page-forward-btn">
+        <t-icon name="chevron-right" size="30rpx" color="#D4AF37" />
+      </view>
     </view>
 
     <!-- 生涯数据区 -->

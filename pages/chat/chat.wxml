@@ -1,11 +1,11 @@
 <!-- chat.wxml - 昇梦体育 DeepSeek-R1 AI对话界面 -->
 <page-meta background-color="{{pageBg}}" root-background-color="{{pageBg}}" page-style="background:{{pageBg}}" />
-<view class="page-wrapper {{themeClass}}">
+<view class="page-wrapper chat-page {{themeClass}}" style="height: {{windowHeight}}px;">
   <view class="page-header-gradient"></view>
   
-  <view class="container">
+  <view class="container chat-container" style="height: {{windowHeight}}px;">
     <!-- 顶部导航栏 -->
-    <view class="top-nav">
+    <view class="top-nav" style="height: {{navHeight}}px; padding-top: {{navTop}}px;">
       <view class="page-back-btn" bindtap="goBack">
         <t-icon name="chevron-left" size="42rpx" color="#D4AF37" />
       </view>
@@ -23,7 +23,7 @@
     </view>
 
     <!-- 聊天主区域 -->
-    <view class="chat-body">
+    <view class="chat-body" style="height: {{chatBodyHeight}}px;">
       <!-- 消息列表 -->
       <scroll-view 
         class="message-scroll" 
@@ -101,7 +101,28 @@
 
               <!-- 回复内容（Markdown） -->
               <view class="response-area">
-                <rich-text class="msg-content markdown-body" nodes="{{ item.renderedContent || item.content }}"></rich-text>
+                <block wx:for="{{ item.renderedBlocks }}" wx:for-item="block" wx:for-index="blockIndex" wx:key="blockIndex">
+                  <rich-text wx:if="{{ block.type === 'rich' }}" class="msg-content markdown-body" nodes="{{ block.nodes }}"></rich-text>
+
+                  <view wx:elif="{{ block.type === 'table' }}" class="markdown-table-card">
+                    <view class="table-row-card" wx:for="{{ block.rows }}" wx:for-item="row" wx:for-index="rowIndex" wx:key="rowIndex">
+                      <view class="table-cell-card" wx:for="{{ row }}" wx:for-item="cell" wx:for-index="cellIndex" wx:key="cellIndex">
+                        <text class="table-cell-label">{{ cell.header }}</text>
+                        <text class="table-cell-value">{{ cell.value }}</text>
+                      </view>
+                    </view>
+                  </view>
+
+                  <view wx:elif="{{ block.type === 'graph' }}" class="flow-graph {{ block.graph.direction === 'LR' ? 'flow-lr' : 'flow-td' }}">
+                    <view class="flow-node-wrap" wx:for="{{ block.graph.nodes }}" wx:for-item="node" wx:for-index="nodeIndex" wx:key="id">
+                      <view class="flow-node">{{ node.label }}</view>
+                      <view class="flow-arrow" wx:if="{{ nodeIndex < block.graph.nodes.length - 1 }}">
+                        <t-icon name="{{ block.graph.direction === 'LR' ? 'chevron-right' : 'chevron-down' }}" size="26rpx" color="#D4AF37" />
+                      </view>
+                    </view>
+                  </view>
+                </block>
+                <rich-text wx:if="{{ !item.renderedBlocks }}" class="msg-content markdown-body" nodes="{{ item.renderedContent || item.content }}"></rich-text>
                 <text class="cursor-blink" wx:if="{{ item.isStreaming }}">▌</text>
               </view>
 
@@ -174,7 +195,6 @@
           </view>
         </view>
 
-        <!-- 底部占位 -->
         <view id="msg-bottom" class="bottom-spacer"></view>
 
       </scroll-view>
@@ -203,7 +223,7 @@
       </view>
 
       <!-- 输入区域 -->
-      <view class="input-zone">
+      <view class="input-zone" style="height: {{inputHeight}}px; padding-bottom: {{inputBottomInset}}px;">
         <view class="input-box card">
           <input 
             type="text"

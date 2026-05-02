@@ -395,23 +395,3 @@
 .custom-match-content { flex: 1; display: flex; flex-direction: column; gap: 8rpx; }
 .custom-title { font-size: 30rpx; font-weight: 800; color: var(--text-primary); letter-spacing: 1rpx; }
 .custom-desc { font-size: 22rpx; color: var(--text-secondary); line-height: 1.5; font-weight: 500; }
-
-.custom-arrow {
-  width: 64rpx; height: 64rpx;
-  border-radius: 50%;
-  background: var(--bg-vs-divider);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border: 2rpx solid rgba(212,175,55,0.3);
-  transition: all 0.3s ease;
-}
-
-.custom-match-card:hover .custom-arrow {
-  transform: translateX(8rpx);
-  border-color: var(--gold);
-  background: linear-gradient(135deg, rgba(212,175,55,0.25) 0%, rgba(255,215,0,0.18) 100%);
-}
-
-.arrow-icon { font-size: 32rpx; color: var(--gold); font-weight: bold; }
