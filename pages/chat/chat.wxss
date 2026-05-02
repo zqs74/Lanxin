@@ -642,6 +642,7 @@
   gap: 12rpx;
   max-width: 100%;
   padding: 6rpx 0;
+  overflow: hidden;
 }
 
 .thinking-shimmer-text {
@@ -652,19 +653,27 @@
   font-weight: 800;
   letter-spacing: 0;
   line-height: 1.6;
-  overflow: hidden;
-  background: linear-gradient(90deg, #B8860B 0%, #D4AF37 28%, #FFD700 50%, #D4AF37 72%, #B8860B 100%);
-  background-size: 220% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: thinkingShimmer 1.6s ease-in-out infinite;
+  white-space: nowrap;
+}
+
+.thinking-shimmer-text::after {
+  content: '';
+  position: absolute;
+  top: 8rpx;
+  bottom: 8rpx;
+  left: -45%;
+  width: 40%;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.72) 50%, transparent 100%);
+  opacity: 0.55;
+  transform: skewX(-18deg);
+  animation: thinkingShimmer 1.8s ease-in-out infinite;
+  pointer-events: none;
 }
 
 @keyframes thinkingShimmer {
-  0% { background-position: 120% 0; opacity: 0.72; }
-  50% { opacity: 1; }
-  100% { background-position: -120% 0; opacity: 0.78; }
+  0% { left: -45%; }
+  55%, 100% { left: 105%; }
 }
 
 .waiting-box { display: flex; align-items: center; gap: 18rpx; padding: 8rpx 0; }

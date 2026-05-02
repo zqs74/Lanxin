@@ -100,9 +100,10 @@
               <text class="meta-item"><t-icon name="activity" size="22rpx" color="#D4AF37" /> {{ item.intensity }}</text>
             </view>
             <view class="record-highlights">
-              <text class="highlight-tag" wx:for="{{ item.highlights }}" wx:key="index" wx:for-item="highlight">
-                {{ highlight }}
-              </text>
+              <view class="highlight-tag" wx:for="{{ item.highlights }}" wx:key="index" wx:for-item="highlight">
+                <t-icon class="highlight-icon" name="check-circle" size="20rpx" color="#D4AF37" />
+                <text class="highlight-text">{{ highlight }}</text>
+              </view>
             </view>
           </view>
         </view>

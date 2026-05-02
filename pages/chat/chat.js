@@ -211,6 +211,24 @@ Page({
     return ['mermaid', 'graph', 'flowchart'].includes(lang) || /^(graph|flowchart)\s+(LR|RL|TD|TB|BT)/i.test(trimmed)
   },
 
+  isMarkdownLikeCodeBlock(language = '', code = '') {
+    const lang = String(language).trim().toLowerCase()
+    const text = String(code).trim()
+    if (!text) return false
+    if (['markdown', 'md', 'mdown', 'text'].includes(lang)) return true
+    if (lang && !['txt'].includes(lang)) return false
+
+    const markdownSignals = [
+      /^#{1,6}\s+/m,
+      /^\s*\d+\.\s+/m,
+      /^\s*[-*+]\s+/m,
+      /\*\*[^*\n][\s\S]*?\*\*/,
+      /\|[^\n]+\|\s*\n\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?/,
+      /^>\s+/m
+    ]
+    return markdownSignals.some(pattern => pattern.test(text))
+  },
+
   parseTableRow(row = '') {
     let cells = row.trim()
     if (cells.startsWith('|')) cells = cells.slice(1)
@@ -219,7 +237,8 @@ Page({
   },
 
   isTableSeparator(line = '') {
-    return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line)
+    return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line) ||
+      /^\s*\|?[\s\-:|]+\|?\s*$/.test(line)
   },
 
   isBlockStart(line = '', nextLine = '') {
@@ -322,6 +341,8 @@ Page({
           } else {
             blocks.push({ type: 'code', text: codeText, language })
           }
+        } else if (this.isMarkdownLikeCodeBlock(language, codeText)) {
+          blocks.push(...this.parseMarkdownBlocks(codeText))
         } else {
           blocks.push({ type: 'code', text: codeText, language })
         }
@@ -412,7 +433,7 @@ Page({
   async callCloudAI(message) {
     try {
       const now = new Date(); const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
-      const messages = [{ "role":"system","content":"你是昇梦AI助手，一位专业的篮球训练顾问。你深度了解用户的训练数据、比赛记录和技能雷达图，能够提供个性化的篮球训练建议。你的回答应该专业、实用、有针对性，并且要体现出你了解用户的具体情况。回答时可以使用Markdown格式来组织内容。" },
+      const messages = [{ "role":"system","content":"你是昇梦AI助手，一位专业的篮球训练顾问。你深度了解用户的训练数据、比赛记录和技能雷达图，能够提供个性化的篮球训练建议。回答要专业、实用、有针对性。可以使用 Markdown 标题、列表、表格来组织内容，但不要把整段回答包进 ``` 代码块，不要输出 emoji。" },
         ...this.data.messages.map(msg=>({role:msg.role,content:msg.content}))]
       const res = await wx.cloud.extend.AI.createModel("deepseek").streamText({data:{model:"deepseek-r1-0528",messages}})
       let fullContent='';let fullThinking='';let assistantMsgIndex=this.data.messages.length

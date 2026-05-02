@@ -52,16 +52,30 @@ Component({
       this.setData({ themeClass: this.getThemeClass(theme) })
     },
 
+    getWindowMetrics() {
+      let windowInfo = {}
+      try {
+        windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : {}
+      } catch (e) {
+        windowInfo = {}
+      }
+
+      return {
+        windowWidth: windowInfo.windowWidth || 375,
+        windowHeight: windowInfo.windowHeight || 667
+      }
+    },
+
     initPosition() {
-      const systemInfo = wx.getSystemInfoSync()
-      const pxToRpx = systemInfo.windowWidth / 750
+      const windowInfo = this.getWindowMetrics()
+      const pxToRpx = windowInfo.windowWidth / 750
       
       const btnSize = Math.round(110 * pxToRpx)
       const rightMargin = Math.round(24 * pxToRpx)
       const bottomMargin = Math.round(180 * pxToRpx)
       
-      const x = systemInfo.windowWidth - btnSize - rightMargin
-      const y = systemInfo.windowHeight - btnSize - bottomMargin
+      const x = windowInfo.windowWidth - btnSize - rightMargin
+      const y = windowInfo.windowHeight - btnSize - bottomMargin
       
       this.setData({ x, y })
     },
@@ -78,8 +92,8 @@ Component({
       if (!this.data.isDragging) return
       
       const touch = e.touches[0]
-      const systemInfo = wx.getSystemInfoSync()
-      const pxToRpx = systemInfo.windowWidth / 750
+      const windowInfo = this.getWindowMetrics()
+      const pxToRpx = windowInfo.windowWidth / 750
       
       const btnSize = Math.round(110 * pxToRpx)
       const edgeMargin = Math.round(16 * pxToRpx)
@@ -88,8 +102,8 @@ Component({
       let x = touch.clientX - btnSize / 2
       let y = touch.clientY - btnSize / 2
       
-      const maxX = systemInfo.windowWidth - btnSize - edgeMargin
-      const maxY = systemInfo.windowHeight - btnSize - bottomSafeArea
+      const maxX = windowInfo.windowWidth - btnSize - edgeMargin
+      const maxY = windowInfo.windowHeight - btnSize - bottomSafeArea
       
       x = Math.max(edgeMargin, Math.min(x, maxX))
       y = Math.max(edgeMargin, Math.min(y, maxY))
@@ -98,8 +112,8 @@ Component({
     },
 
     onTouchEnd(e) {
-      const systemInfo = wx.getSystemInfoSync()
-      const pxToRpx = systemInfo.windowWidth / 750
+      const windowInfo = this.getWindowMetrics()
+      const pxToRpx = windowInfo.windowWidth / 750
       
       const deltaX = Math.abs(e.changedTouches[0].clientX - this.data.startX)
       const deltaY = Math.abs(e.changedTouches[0].clientY - this.data.startY)
@@ -112,11 +126,11 @@ Component({
       
       this.setData({ isDragging: false })
       
-      const centerX = systemInfo.windowWidth / 2
+      const centerX = windowInfo.windowWidth / 2
       const btnSize = Math.round(110 * pxToRpx)
       const edgeMargin = Math.round(20 * pxToRpx)
       const bottomSafeArea = Math.round(200 * pxToRpx)
-      const maxY = systemInfo.windowHeight - btnSize - bottomSafeArea
+      const maxY = windowInfo.windowHeight - btnSize - bottomSafeArea
       
       let x = this.data.x
       let y = this.data.y
@@ -124,7 +138,7 @@ Component({
       if (x < centerX) {
         x = edgeMargin
       } else {
-        x = systemInfo.windowWidth - btnSize - edgeMargin
+        x = windowInfo.windowWidth - btnSize - edgeMargin
       }
       
       y = Math.max(edgeMargin, Math.min(y, maxY))

@@ -338,19 +338,37 @@
 .record-highlights {
   display: flex;
   flex-wrap: wrap;
-  gap: 10rpx;
+  gap: 8rpx;
 }
 
 .highlight-tag {
-  padding: 6rpx 12rpx;
-  background: var(--bg-tag);
+  display: inline-flex;
+  align-items: center;
+  gap: 6rpx;
+  min-width: 0;
+  padding: 6rpx 10rpx;
+  background: rgba(212,175,55,0.055);
   color: var(--text-secondary);
   font-size: 20rpx;
-  border-radius: 999rpx;
-  border: 1rpx solid var(--border-stat);
-  font-weight: 500;
+  line-height: 1.25;
+  border-radius: 10rpx;
+  border: 1rpx solid var(--border-superlight);
+  font-weight: 600;
   max-width: 100%;
   box-sizing: border-box;
+}
+
+.highlight-icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.highlight-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .quick-train-grid {
