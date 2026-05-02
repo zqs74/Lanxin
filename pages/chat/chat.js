@@ -236,9 +236,125 @@ Page({
     return cells.split('|').map(cell => cell.trim())
   },
 
+  normalizeMarkdownLines(text = '') {
+    const rawLines = this.normalizeMarkdown(text).replace(/\r\n/g, '\n').split('\n')
+    const lines = []
+
+    rawLines.forEach((line) => {
+      const current = line.trim()
+      const prev = lines[lines.length - 1] || ''
+      const prevPipeCount = (prev.match(/\|/g) || []).length
+      const currentPipeCount = (current.match(/\|/g) || []).length
+
+      if (
+        lines.length &&
+        current &&
+        prev.includes('|') &&
+        current.includes('|') &&
+        prevPipeCount < 4 &&
+        currentPipeCount <= 2 &&
+        !this.isTableSeparator(prev) &&
+        !/^#{1,6}\s+/.test(current) &&
+        !/^(\s*)([-*+]|\d+\.)\s+/.test(current)
+      ) {
+        lines[lines.length - 1] = `${prev} ${current}`
+        return
+      }
+
+      lines.push(line)
+    })
+
+    return lines
+  },
+
   isTableSeparator(line = '') {
     return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line) ||
       /^\s*\|?[\s\-:|]+\|?\s*$/.test(line)
+  },
+
+  isTableCandidate(line = '') {
+    const pipeCount = (String(line).match(/\|/g) || []).length
+    return pipeCount >= 2 && !this.isTableSeparator(line)
+  },
+
+  findNextContentLine(lines = [], start = 0) {
+    let index = start
+    while (index < lines.length && !String(lines[index]).trim()) {
+      index += 1
+    }
+    return index
+  },
+
+  shouldContinueTableLine(line = '') {
+    const text = String(line).trim()
+    if (!text) return false
+    if (/^#{1,6}\s+/.test(text) || /^```/.test(text) || /^>\s?/.test(text)) return false
+    if (/^(\s*)([-*+]|\d+\.)\s+/.test(text)) return false
+    return text.includes('|') || this.isTableSeparator(text)
+  },
+
+  consumeTableBlock(lines = [], start = 0) {
+    const header = this.parseTableRow(lines[start])
+    const rows = []
+    let index = start + 1
+    let currentLine = ''
+
+    while (index < lines.length && !String(lines[index]).trim()) {
+      index += 1
+    }
+
+    while (index < lines.length && this.isTableSeparator(lines[index])) {
+      index += 1
+    }
+
+    while (index < lines.length) {
+      const line = lines[index]
+      const trimmed = String(line).trim()
+
+      if (!trimmed) {
+        if (currentLine) {
+          rows.push(this.parseTableRow(currentLine))
+          currentLine = ''
+        }
+        index += 1
+        break
+      }
+
+      if (!this.shouldContinueTableLine(line)) break
+
+      if (this.isTableSeparator(line)) {
+        index += 1
+        continue
+      }
+
+      currentLine = currentLine ? `${currentLine} ${trimmed}` : trimmed
+      const expectedPipes = header.length + 1
+      const pipeCount = (currentLine.match(/\|/g) || []).length
+
+      if (pipeCount >= expectedPipes || (currentLine.startsWith('|') && currentLine.endsWith('|') && pipeCount >= header.length - 1)) {
+        rows.push(this.parseTableRow(currentLine))
+        currentLine = ''
+      }
+
+      index += 1
+    }
+
+    if (currentLine) {
+      rows.push(this.parseTableRow(currentLine))
+    }
+
+    return {
+      nextIndex: index,
+      block: {
+        type: 'table',
+        headers: header,
+        rows: rows.map(row => header.map((cellHeader, cellIndex) => ({
+          header: cellHeader,
+          value: row[cellIndex] || '',
+          spans: this.parseInlineSpans(row[cellIndex] || '')
+        })))
+      }
+    }
   },
 
   isBlockStart(line = '', nextLine = '') {
@@ -262,7 +378,7 @@ Page({
 
   parseMarkdownBlocks(text) {
     if (!text) return []
-    const lines = this.normalizeMarkdown(text).replace(/\r\n/g, '\n').split('\n')
+    const lines = this.normalizeMarkdownLines(text)
     const blocks = []
     let i = 0
 
@@ -279,7 +395,7 @@ Page({
         /^(#{1,6})\s+/.test(trimmedLine) || /^>\s?/.test(line) ||
         /^(\s*)([-*+])\s+/.test(line) || /^(\s*)\d+\.\s+/.test(line) ||
         /^(\s*)(-{3,}|\*{3,}|_{3,})\s*$/.test(line) ||
-        (line.includes('|') && this.isTableSeparator(nextLine))
+        this.isTableCandidate(line)
     }
 
     const collectListItemTail = (allowNestedBullets = false) => {
@@ -363,23 +479,15 @@ Page({
         continue
       }
 
-      if (line.includes('|') && this.isTableSeparator(nextLine)) {
-        const headers = this.parseTableRow(line)
-        i += 2
-        const rows = []
-        while (i < lines.length && lines[i].includes('|') && lines[i].trim()) {
-          rows.push(this.parseTableRow(lines[i]))
-          i += 1
+      if (this.isTableCandidate(line)) {
+        const nextContentIndex = this.findNextContentLine(lines, i + 1)
+        const nextContentLine = lines[nextContentIndex] || ''
+        if (this.isTableSeparator(nextContentLine) || this.isTableCandidate(nextContentLine)) {
+          const result = this.consumeTableBlock(lines, i)
+          blocks.push(result.block)
+          i = result.nextIndex
+          continue
         }
-        blocks.push({
-          type: 'table',
-          headers,
-          rows: rows.map(row => headers.map((header, cellIndex) => ({
-            header,
-            value: row[cellIndex] || ''
-          })))
-        })
-        continue
       }
 
       if (/^>\s?/.test(line)) {

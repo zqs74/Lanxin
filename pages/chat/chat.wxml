@@ -126,7 +126,12 @@
                     <view class="table-row-card" wx:for="{{ block.rows }}" wx:for-item="row" wx:for-index="rowIndex" wx:key="rowIndex">
                       <view class="table-cell-card" wx:for="{{ row }}" wx:for-item="cell" wx:for-index="cellIndex" wx:key="cellIndex">
                         <text class="table-cell-label">{{ cell.header }}</text>
-                        <text class="table-cell-value">{{ cell.value }}</text>
+                        <view class="table-cell-value">
+                          <block wx:for="{{ cell.spans }}" wx:for-item="span" wx:for-index="spanIndex" wx:key="spanIndex">
+                            <view wx:if="{{ span.type === 'break' }}" class="md-line-break"></view>
+                            <text wx:else class="md-span {{ span.type }}">{{ span.text }}</text>
+                          </block>
+                        </view>
                       </view>
                     </view>
                   </view>
