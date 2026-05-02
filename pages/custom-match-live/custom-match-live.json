@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "比赛中",
-  "usingComponents": {}
+  "usingComponents": {
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
 }

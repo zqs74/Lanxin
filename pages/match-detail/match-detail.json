@@ -2,5 +2,8 @@
   "navigationBarTitleText": "",
   "navigationBarTextStyle": "black",
   "navigationBarBackgroundColor": "#f5f5f5",
-  "navigationStyle": "custom"
+  "navigationStyle": "custom",
+  "usingComponents": {
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
 }

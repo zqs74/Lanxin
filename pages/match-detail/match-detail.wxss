@@ -20,17 +20,6 @@
   margin-bottom: 24rpx;
 }
 
-.back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16rpx;
-  transition: all 0.3s ease;
-}
-
-.back-btn:hover { transform: translateX(-4rpx); }
-.back-icon { width: 48rpx; height: 48rpx; }
-
 .nav-title {
   font-size: 36rpx;
   font-weight: 800;

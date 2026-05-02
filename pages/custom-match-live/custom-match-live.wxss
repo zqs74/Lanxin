@@ -9,9 +9,6 @@
 
 .top-status-bar { padding: 18rpx 22rpx; border-radius: 24rpx; display: flex; align-items: center; justify-content: space-between; margin-bottom: 18rpx; gap: 16rpx; }
 .status-left { display: flex; align-items: center; gap: 20rpx; flex-shrink: 0; }
-.exit-btn { display: flex; align-items: center; justify-content: center; padding: 16rpx; transition: all 0.3s ease; }
-.exit-btn:hover { transform: translateX(-4rpx); }
-.exit-icon { width: 48rpx; height: 48rpx; }
 .match-info { display: flex; flex-direction: column; gap: 6rpx; }
 .match-title { font-size: 28rpx; font-weight: 700; color: var(--text-primary); }
 .status-badge { display: flex; align-items: center; gap: 8rpx; padding: 6rpx 14rpx; border-radius: 18rpx; }

@@ -9,6 +9,7 @@ Page({
     messages: [],
     isLoading: false,
     scrollToView: '',
+    thinkingScrollToView: '',
     currentThinking: '',
     isThinking: false,
     hasAssistantMsg: false
@@ -33,7 +34,14 @@ Page({
     this._syncTheme()
   },
 
-  goBack() { wx.navigateBack() },
+  goBack() {
+    const pages = getCurrentPages()
+    if (pages.length > 1) {
+      wx.navigateBack()
+      return
+    }
+    wx.switchTab({ url: '/pages/profile/profile' })
+  },
 
   toggleThinking(e) {
     const index = e.currentTarget.dataset.index
@@ -45,13 +53,26 @@ Page({
 
   sendQuickQuestion(e) { this.setData({ userInput: e.currentTarget.dataset.question }); this.sendMessage() },
 
+  scrollToBottom() {
+    this.setData({
+      scrollToView: '',
+      thinkingScrollToView: ''
+    })
+    setTimeout(() => {
+      this.setData({
+        scrollToView: 'msg-bottom',
+        thinkingScrollToView: 'thinking-bottom'
+      })
+    }, 20)
+  },
+
   sendMessage() {
     const message = this.data.userInput.trim()
     if (!message) { wx.showToast({ title: '请输入消息', icon: 'none' }); return }
     const now = new Date(); const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
     const newMessages = [...this.data.messages, { role: 'user', content: message, time }]
-    this.setData({ messages: newMessages, userInput: '', isLoading: true, isThinking: true, currentThinking: '', hasAssistantMsg: false, scrollToView: 'msg-loading' })
-    setTimeout(() => { this.setData({ scrollToView: `msg-${newMessages.length}` }) }, 100)
+    this.setData({ messages: newMessages, userInput: '', isLoading: true, isThinking: true, currentThinking: '', hasAssistantMsg: false, scrollToView: 'msg-bottom' })
+    setTimeout(() => this.scrollToBottom(), 80)
     this.callCloudAI(message)
   },
 
@@ -63,9 +84,17 @@ Page({
     return this.escapeHtml(text).replace(/"/g, '&quot;').replace(/'/g, '&#39;')
   },
 
+  normalizeMarkdown(text = '') {
+    return String(text)
+      .replace(/\\([*_`~\[\]()#+\-.!|>])/g, '$1')
+      .replace(/[✅☑️]/g, '- ')
+      .replace(/^\s*[•·]\s+/gm, '- ')
+      .replace(/^\s*-\s+/gm, '- ')
+  },
+
   parseInlineMarkdown(text = '') {
     const codeBlocks = []
-    let html = String(text).replace(/`([^`]+)`/g, (_, code) => {
+    let html = this.normalizeMarkdown(text).replace(/`([^`]+)`/g, (_, code) => {
       const token = `@@INLINE_CODE_${codeBlocks.length}@@`
       codeBlocks.push(`<code>${this.escapeHtml(code)}</code>`)
       return token
@@ -102,7 +131,7 @@ Page({
 
   parseMarkdown(text) {
     if (!text) return ''
-    const lines = String(text).replace(/\r\n/g, '\n').split('\n')
+    const lines = this.normalizeMarkdown(text).replace(/\r\n/g, '\n').split('\n')
     const html = []
     let i = 0
 
@@ -202,18 +231,20 @@ Page({
         if(event.data==="[DONE]")break
         try{const data=JSON.parse(event.data);const think=data?.choices?.[0]?.delta?.reasoning_content
           if(think){fullThinking+=think;const tempMessages=[...this.data.messages]
-            if(tempMessages[assistantMsgIndex]?.role==='assistant'){tempMessages[assistantMsgIndex]={...tempMessages[assistantMsgIndex],thinking:fullThinking,showThinking:true,isStreaming:true};this.setData({messages:tempMessages,currentThinking:fullThinking,isThinking:true,hasAssistantMsg:true})}
-            else{this.setData({currentThinking:fullThinking,isThinking:true,hasAssistantMsg:false})}}
+            if(tempMessages[assistantMsgIndex]?.role==='assistant'){tempMessages[assistantMsgIndex]={...tempMessages[assistantMsgIndex],thinking:fullThinking,showThinking:false,isStreaming:true,isThinking:true};this.setData({messages:tempMessages,currentThinking:fullThinking,isThinking:true,hasAssistantMsg:true})}
+            else{this.setData({currentThinking:fullThinking,isThinking:true,hasAssistantMsg:false})}
+            this.scrollToBottom()}
           const text=data?.choices?.[0]?.delta?.content
           if(text){fullContent+=text;const renderedContent=this.parseMarkdown(fullContent);const tempMessages=[...this.data.messages]
-            if(tempMessages.length<=assistantMsgIndex||tempMessages[assistantMsgIndex]?.role!=='assistant'){tempMessages.push({role:'assistant',content:fullContent,renderedContent,thinking:fullThinking,showThinking:!!fullThinking,time,isStreaming:true});this.setData({hasAssistantMsg:true})}
-            else{tempMessages[assistantMsgIndex]={...tempMessages[assistantMsgIndex],content:fullContent,renderedContent,thinking:fullThinking,showThinking:!!fullThinking,isStreaming:true}}
-            this.setData({messages:tempMessages,scrollToView:`msg-${tempMessages.length-1}`})}}
+            if(tempMessages.length<=assistantMsgIndex||tempMessages[assistantMsgIndex]?.role!=='assistant'){tempMessages.push({role:'assistant',content:fullContent,renderedContent,thinking:fullThinking,showThinking:false,time,isStreaming:true,isThinking:false});this.setData({hasAssistantMsg:true})}
+            else{tempMessages[assistantMsgIndex]={...tempMessages[assistantMsgIndex],content:fullContent,renderedContent,thinking:fullThinking,showThinking:false,isStreaming:true,isThinking:false}}
+            this.setData({messages:tempMessages,isThinking:false,currentThinking:''})
+            this.scrollToBottom()}}
         catch(parseError){console.log('解析事件数据失败:',parseError)}}
       const finalRendered=this.parseMarkdown(fullContent);const finalMessages=[...this.data.messages]
-      if(finalMessages[assistantMsgIndex]?.role==='assistant'){finalMessages[assistantMsgIndex]={...finalMessages[assistantMsgIndex],role:'assistant',content:fullContent,renderedContent:finalRendered,thinking:fullThinking,showThinking:false,time,isStreaming:false}}
-      else if(fullContent){finalMessages.push({role:'assistant',content:fullContent,renderedContent:finalRendered,thinking:fullThinking,showThinking:false,time,isStreaming:false})}
-      this.setData({messages:finalMessages,isLoading:false,isThinking:false,currentThinking:'',hasAssistantMsg:false});setTimeout(()=>{this.setData({scrollToView:`msg-${finalMessages.length-1}`})},150)
+      if(finalMessages[assistantMsgIndex]?.role==='assistant'){finalMessages[assistantMsgIndex]={...finalMessages[assistantMsgIndex],role:'assistant',content:fullContent,renderedContent:finalRendered,thinking:fullThinking,showThinking:false,time,isStreaming:false,isThinking:false}}
+      else if(fullContent){finalMessages.push({role:'assistant',content:fullContent,renderedContent:finalRendered,thinking:fullThinking,showThinking:false,time,isStreaming:false,isThinking:false})}
+      this.setData({messages:finalMessages,isLoading:false,isThinking:false,currentThinking:'',hasAssistantMsg:false});setTimeout(()=>this.scrollToBottom(),150)
     }catch(error){console.error('云开发AI调用失败:',error);this.setData({isLoading:false,isThinking:false,currentThinking:''})
       wx.showToast({title:error.errMsg||'AI服务暂时不可用',icon:'none'});const now=new Date()
       this.setData({messages:[...this.data.messages,{role:'assistant',content:'抱歉，我暂时无法回答您的问题。请稍后重试。',time:`${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`,isError:true}]})}

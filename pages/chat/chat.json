@@ -1,6 +1,8 @@
 {
-  "usingComponents": {},
-  "navigationBarTitleText": "AI智能体",
+  "usingComponents": {
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  },
+  "navigationBarTitleText": "训练顾问",
   "navigationBarTextStyle": "black",
   "navigationBarBackgroundColor": "#f5f5f5",
   "backgroundColor": "#f5f5f5",

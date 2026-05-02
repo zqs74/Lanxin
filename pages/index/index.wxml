@@ -13,7 +13,7 @@
       </view>
       <view class="app-title">
         <text class="title-main">昇梦</text>
-        <text class="title-highlight">AI</text>
+        <text class="title-highlight">篮球</text>
       </view>
     </view>
 
@@ -23,8 +23,8 @@
         <t-icon name="pen-ball" size="56rpx" color="#0a0a0a" />
       </view>
       <view class="create-info">
-        <view class="create-title">AI创作</view>
-        <view class="create-subtitle">自动记录你的精彩瞬间</view>
+        <view class="create-title">记录集锦</view>
+        <view class="create-subtitle">整理比赛片段与训练表现</view>
       </view>
       <view class="create-arrow">→</view>
     </view>
@@ -58,7 +58,7 @@
           <t-icon name="movie-clapper" size="104rpx" color="#D4AF37" />
         </view>
         <view class="no-data-text">暂无创作集锦</view>
-        <view class="hint-text">点击上方"开始创作"录制你的第一个精彩瞬间</view>
+        <view class="hint-text">点击上方"记录集锦"创作你的第一个精彩瞬间</view>
       </view>
       <view wx:else class="no-videos card {{ contentAnimClass }}">
         <view class="film-icon float-animation">

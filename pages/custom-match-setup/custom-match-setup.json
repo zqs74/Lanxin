@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "自定义比赛",
-  "usingComponents": {}
+  "usingComponents": {
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
 }

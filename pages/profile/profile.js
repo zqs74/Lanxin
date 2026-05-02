@@ -1,5 +1,16 @@
-// profile.js - 昇梦体育 个人中心
+// profile.js
 const app = getApp()
+
+const DEFAULT_PROFILE = {
+  name: '',
+  position: '',
+  age: '',
+  height: '',
+  weight: '',
+  yearsOfPlay: '',
+  skillFeature: '',
+  avatar: ''
+}
 
 Page({
   data: {
@@ -14,16 +25,31 @@ Page({
       shootingPercentage: 0
     },
     profile: {
-      name: '未填写名称',
-      position: '未填',
-      height: '0cm',
-      weight: '0kg'
+      name: '篮球爱好者',
+      position: '未设置',
+      height: '未设置',
+      weight: '未设置',
+      age: '',
+      yearsOfPlay: '',
+      skillFeature: '',
+      avatar: ''
     }
   },
 
   onLoad() {
     this.setNavHeight()
     this.initTheme()
+  },
+
+  onShow() {
+    const tabBar = typeof this.getTabBar === 'function' && this.getTabBar()
+    if (tabBar) tabBar.updateSelected(3)
+    this.loadProfile()
+    this.syncTheme()
+  },
+
+  setTheme() {
+    this.syncTheme()
   },
 
   setNavHeight() {
@@ -34,11 +60,7 @@ Page({
   },
 
   initTheme() {
-    const userTheme = app.getUserTheme()
-    const { pageBg } = app.getThemeColors()
-    const themeClass = this.getThemeClass(userTheme)
-    const themeLabel = this.getThemeLabel(userTheme)
-    this.setData({ userTheme, themeClass, themeLabel, pageBg })
+    this.syncTheme()
   },
 
   getThemeClass(userTheme) {
@@ -51,37 +73,16 @@ Page({
     return userTheme === 'light' ? '浅色模式' : '深色模式'
   },
 
-  setTheme(theme) {
+  syncTheme() {
     const userTheme = app.getUserTheme()
     const { pageBg } = app.getThemeColors()
-    const themeClass = this.getThemeClass(userTheme)
-    const themeLabel = this.getThemeLabel(userTheme)
-    this.setData({ themeClass, themeLabel, userTheme, pageBg })
-    this.applyNavBarColor()
-  },
-
-  applyNavBarColor() {
+    this.setData({
+      userTheme,
+      themeClass: this.getThemeClass(userTheme),
+      themeLabel: this.getThemeLabel(userTheme),
+      pageBg
+    })
     app.applyNavBarColor(app.getTheme())
-  },
-
-  onShow() {
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().updateSelected(3)
-    }
-    this.loadProfile()
-    const userTheme = app.getUserTheme()
-    const { pageBg } = app.getThemeColors()
-    if (userTheme !== this.data.userTheme) {
-      this.setData({
-        userTheme,
-        themeClass: this.getThemeClass(userTheme),
-        themeLabel: this.getThemeLabel(userTheme),
-        pageBg
-      })
-    } else {
-      this.setData({ pageBg })
-    }
-    this.applyNavBarColor()
   },
 
   handleToggleTheme() {
@@ -93,34 +94,30 @@ Page({
         const selected = choices[res.tapIndex]
         const userTheme = themeMap[selected]
         app.setUserTheme(userTheme)
-        const { pageBg } = app.getThemeColors()
-        this.setData({
-          userTheme,
-          themeClass: this.getThemeClass(userTheme),
-          themeLabel: selected,
-          pageBg
-        })
-        this.applyNavBarColor()
+        this.syncTheme()
         wx.showToast({
-          title: '已切换为' + selected,
+          title: `已切换为${selected}`,
           icon: 'success',
-          duration: 1500
+          duration: 1400
         })
       }
     })
   },
 
+  normalizeProfile(profile = {}) {
+    const source = { ...DEFAULT_PROFILE, ...profile }
+    return {
+      ...source,
+      name: source.name || '篮球爱好者',
+      position: source.position || '未设置',
+      height: source.height ? `${source.height}cm` : '未设置',
+      weight: source.weight ? `${source.weight}kg` : '未设置'
+    }
+  },
+
   loadProfile() {
     const profile = wx.getStorageSync('profile')
-    if (profile) {
-      const displayProfile = {
-        name: profile.name || '未填写名称',
-        position: profile.position || '未填',
-        height: profile.height ? `${profile.height}cm` : '0cm',
-        weight: profile.weight ? `${profile.weight}kg` : '0kg'
-      }
-      this.setData({ profile: displayProfile })
-    }
+    this.setData({ profile: this.normalizeProfile(profile || DEFAULT_PROFILE) })
   },
 
   editProfile() {

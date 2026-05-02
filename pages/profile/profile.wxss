@@ -5,19 +5,19 @@
 }
 
 .container {
-  padding: 148rpx 30rpx 20rpx;
+  padding: 136rpx 28rpx 24rpx;
   min-height: 100vh;
   position: relative;
   z-index: 1;
 }
 
 .page-header {
-  margin-bottom: 40rpx;
+  margin-bottom: 28rpx;
   padding-top: 20rpx;
 }
 
 .page-title {
-  font-size: 40rpx;
+  font-size: 38rpx;
   font-weight: 800;
   color: var(--text-primary);
   margin-bottom: 8rpx;
@@ -41,7 +41,7 @@
 
 .section-title {
   font-size: 32rpx;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--text-primary);
   position: relative;
 }
@@ -51,17 +51,17 @@
   position: absolute;
   left: 0;
   bottom: -8rpx;
-  width: 48rpx;
-  height: 6rpx;
-  background: linear-gradient(90deg, #D4AF37 0%, #FFD700 100%);
-  border-radius: 3rpx;
+  width: 44rpx;
+  height: 4rpx;
+  background: var(--gold);
+  border-radius: 2rpx;
 }
 
 .data-badge {
   padding: 8rpx 20rpx;
   background: var(--bg-tag);
   color: var(--gold);
-  border-radius: 30rpx;
+  border-radius: 12rpx;
   font-size: 20rpx;
   font-weight: 600;
   border: 2rpx solid var(--border-stat);
@@ -74,14 +74,7 @@
 }
 
 .profile-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(212,175,55,0.04) 0%, rgba(255,215,0,0.03) 100%);
-  pointer-events: none;
+  display: none;
 }
 
 .profile-header {
@@ -103,12 +96,18 @@
 .avatar {
   width: 100rpx;
   height: 100rpx;
-  border-radius: 28rpx;
+  border-radius: 20rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 48rpx;
   box-shadow: var(--shadow-avatar);
+  overflow: hidden;
+}
+
+.avatar-image {
+  width: 100%;
+  height: 100%;
 }
 
 .profile-basic {
@@ -124,11 +123,11 @@
 
 .profile-tag {
   font-size: 24rpx;
-  color: var(--gold);
+  color: var(--text-secondary);
   font-weight: 500;
-  background: rgba(212,175,55,0.1);
+  background: var(--bg-tag);
   padding: 6rpx 16rpx;
-  border-radius: 20rpx;
+  border-radius: 12rpx;
   display: inline-block;
 }
 
@@ -146,20 +145,19 @@
 .stat-card {
   flex: 1;
   background: var(--bg-stat-card);
-  border-radius: 20rpx;
+  border-radius: 16rpx;
   padding: 24rpx 16rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8rpx;
-  border: 2rpx solid var(--border-stat);
+  border: 1rpx solid var(--border-stat);
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.stat-card:hover {
-  transform: translateY(-4rpx);
+.stat-card:active {
+  transform: scale(0.985);
   border-color: rgba(212,175,55,0.3);
-  box-shadow: 0 8rpx 20rpx rgba(212,175,55,0.15);
 }
 
 .stat-icon {
@@ -186,14 +184,7 @@
 }
 
 .stats-section::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(212,175,55,0.03) 0%, rgba(255,215,0,0.02) 100%);
-  pointer-events: none;
+  display: none;
 }
 
 .stats-grid {
@@ -208,15 +199,14 @@
   text-align: center;
   padding: 28rpx 16rpx;
   background: var(--bg-stat-card);
-  border-radius: 20rpx;
-  border: 2rpx solid var(--border-stat);
+  border-radius: 16rpx;
+  border: 1rpx solid var(--border-stat);
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.stat-item:hover {
-  transform: translateY(-4rpx);
+.stat-item:active {
+  transform: scale(0.985);
   border-color: rgba(212,175,55,0.3);
-  box-shadow: 0 8rpx 20rpx rgba(212,175,55,0.15);
 }
 
 .stat-value {
@@ -232,38 +222,31 @@
   font-weight: 500;
 }
 
-/* ===== 设置列表 ===== */
-.settings-list {
-  padding: 8rpx;
+.settings-card {
+  padding: 10rpx;
   position: relative;
   overflow: hidden;
 }
 
-.settings-list::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(212,175,55,0.02) 0%, rgba(255,215,0,0.01) 100%);
-  pointer-events: none;
+.settings-card::before {
+  display: none;
 }
 
 .setting-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24rpx 20rpx;
+  padding: 24rpx;
   border-radius: 16rpx;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   position: relative;
   z-index: 1;
+  gap: 20rpx;
 }
 
-.setting-item:hover {
+.setting-item:active {
   background: rgba(212,175,55,0.05);
-  transform: translateX(4rpx);
+  transform: scale(0.99);
 }
 
 .setting-item + .setting-item {
@@ -274,34 +257,46 @@
   display: flex;
   align-items: center;
   gap: 16rpx;
+  min-width: 0;
+  flex: 1;
 }
 
 .setting-icon {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 20rpx;
+  width: 68rpx;
+  height: 68rpx;
+  border-radius: 16rpx;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.25);
+  box-shadow: none;
+  background: var(--bg-tag);
+  border: 1rpx solid var(--border-stat);
+  flex-shrink: 0;
+}
+
+.setting-copy {
+  min-width: 0;
+  flex: 1;
 }
 
 .setting-text {
   font-size: 28rpx;
   color: var(--text-content);
-  font-weight: 500;
+  font-weight: 700;
+  margin-bottom: 6rpx;
 }
 
-.setting-arrow {
-  font-size: 28rpx;
+.setting-desc {
+  font-size: 22rpx;
   color: var(--text-tertiary);
-  font-weight: bold;
-  transition: transform 0.3s ease;
+  line-height: 1.35;
 }
 
-.setting-item:hover .setting-arrow {
-  transform: translateX(4rpx);
-  color: var(--gold);
+.setting-right {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  flex-shrink: 0;
 }
 
 /* ===== 主题切换行（点击弹出选择器） ===== */
@@ -309,5 +304,5 @@
   font-size: 24rpx;
   color: var(--gold);
   font-weight: 600;
-  margin-right: 16rpx;
+  white-space: nowrap;
 }

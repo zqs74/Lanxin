@@ -67,10 +67,10 @@ Page({
       wx.showToast({ title: '请选择至少一个精彩片段', icon: 'none' })
       return
     }
-    wx.showLoading({ title: 'AI生成中...' })
+    wx.showLoading({ title: '生成中...' })
     setTimeout(() => {
       wx.hideLoading()
-      wx.showToast({ title: 'AI集锦生成成功！', icon: 'success' })
+      wx.showToast({ title: '集锦生成成功', icon: 'success' })
     }, 2000)
   }
 })

@@ -7,8 +7,8 @@
     <!-- 顶部状态栏 -->
     <view class="top-status-bar glass-effect">
       <view class="status-left">
-        <view class="exit-btn" bindtap="exitMatch">
-          <image class="exit-icon" src="/images/return.svg" mode="aspectFit"></image>
+        <view class="page-back-btn" bindtap="exitMatch">
+          <t-icon name="chevron-left" size="42rpx" color="#D4AF37" />
         </view>
         <view class="match-info">
           <text class="match-title">自定义比赛</text>

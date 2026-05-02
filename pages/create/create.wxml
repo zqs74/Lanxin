@@ -1,29 +1,32 @@
-<!-- create.wxml - 现代化UI设计 -->
+<!-- create.wxml -->
 <page-meta background-color="{{pageBg}}" root-background-color="{{pageBg}}" page-style="background:{{pageBg}}" />
 <view class="page-wrapper {{themeClass}}">
   <view class="page-header-gradient"></view>
   
   <view class="container slide-up">
-    <!-- 顶部导航栏 -->
     <view class="top-nav">
       <view class="nav-header">
-        <view class="back-btn" bindtap="goBack">
-          <image class="back-icon" src="/images/return.svg" mode="aspectFit"></image>
+        <view class="page-back-btn" bindtap="goBack">
+          <t-icon name="chevron-left" size="42rpx" color="#D4AF37" />
         </view>
-        <view class="nav-title">AI创作</view>
+        <view class="nav-title">集锦创作</view>
         <view class="nav-placeholder"></view>
       </view>
     </view>
 
-    <!-- 页面标题 -->
-    <view class="page-header">
-      <view class="page-subtitle">智能剪辑你的精彩瞬间</view>
+    <view class="create-summary card">
+      <view class="summary-icon gradient-bg">
+        <t-icon name="movie-clapper" size="48rpx" color="#0a0a0a" />
+      </view>
+      <view class="summary-copy">
+        <view class="summary-title">整理比赛片段</view>
+        <view class="summary-desc">选择视频和关键回合，生成一份更干净的篮球集锦</view>
+      </view>
     </view>
 
-    <!-- 视频预览区域 -->
     <view class="section">
       <view class="section-header">
-        <view class="section-title">视频预览</view>
+        <view class="section-title">视频素材</view>
         <view class="video-info-badge">
           <t-icon class="video-icon" name="video-camera" size="24rpx" color="#D4AF37" />
           选择视频
@@ -35,30 +38,28 @@
           <view class="preview-icon">
             <t-icon name="movie-clapper" size="80rpx" color="#D4AF37" />
           </view>
-          <view class="preview-text">点击上传或选择视频</view>
-          <view class="preview-hint">支持本地视频和云端视频</view>
+          <view class="preview-text">暂无视频素材</view>
+          <view class="preview-hint">可从本地相册或云端素材库选择</view>
         </view>
       </view>
     </view>
 
-    <!-- 功能按钮 -->
     <view class="action-buttons">
-      <button class="btn btn-primary" bindtap="uploadLocalVideo">
-        <t-icon class="btn-icon" name="save" size="28rpx" color="#0a0a0a" />
-        上传本地视频
+      <button class="action-btn" bindtap="uploadLocalVideo">
+        <t-icon class="btn-icon" name="video-camera" size="28rpx" color="#D4AF37" />
+        本地视频
       </button>
-      <button class="btn btn-success" bindtap="useCloudVideo">
-        <t-icon class="btn-icon" name="cloud-upload" size="28rpx" color="#0a0a0a" />
-        使用云端视频
+      <button class="action-btn" bindtap="useCloudVideo">
+        <t-icon class="btn-icon" name="cloud-upload" size="28rpx" color="#D4AF37" />
+        云端素材
       </button>
     </view>
 
-    <!-- 精彩片段选择 -->
     <view class="section">
       <view class="section-header">
-        <view class="section-title">精彩片段选择</view>
+        <view class="section-title">关键片段</view>
         <view class="selected-tag">
-          <t-icon class="selected-icon" name="check" size="20rpx" color="#ffffff" />
+          <t-icon class="selected-icon" name="check" size="20rpx" color="#D4AF37" />
           已选择 {{ selectedCount }} 个
         </view>
       </view>
@@ -83,13 +84,12 @@
       </view>
     </view>
 
-    <!-- AI生成按钮 -->
     <view class="create-action-section">
-      <button class="btn btn-primary btn-large create-btn" bindtap="generateWithAI">
-        <t-icon class="create-icon" name="flashlight" size="32rpx" color="#0a0a0a" />
-        AI智能生成集锦
+      <button class="create-btn" bindtap="generateWithAI">
+        <t-icon class="create-icon" name="flashlight" size="32rpx" color="#D4AF37" />
+        生成集锦
       </button>
-      <view class="create-hint">AI将自动剪辑最精彩的瞬间</view>
+      <view class="create-hint">将根据已选片段整理成完整集锦</view>
     </view>
   </view>
 </view>

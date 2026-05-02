@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "赛果报告",
-  "usingComponents": {}
+  "usingComponents": {
+    "t-icon": "tdesign-miniprogram/icon/icon"
+  }
 }

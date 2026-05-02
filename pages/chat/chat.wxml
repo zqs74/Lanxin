@@ -6,8 +6,8 @@
   <view class="container">
     <!-- 顶部导航栏 -->
     <view class="top-nav">
-      <view class="back-btn" bindtap="goBack">
-        <text class="back-icon">←</text>
+      <view class="page-back-btn" bindtap="goBack">
+        <t-icon name="chevron-left" size="42rpx" color="#D4AF37" />
       </view>
       <view class="nav-center">
         <view class="nav-title-row">
@@ -41,8 +41,8 @@
           </view>
           
           <view class="welcome-text">
-            <view class="welcome-title">你好！我是昇梦赛事AI</view>
-            <view class="welcome-desc">基于 DeepSeek-R1 深度思考模型，为你提供专业的篮球训练建议</view>
+            <view class="welcome-title">训练顾问</view>
+            <view class="welcome-desc">围绕比赛表现、技能雷达和训练记录，给出可执行的篮球建议</view>
           </view>
           
           <view class="feature-grid">
@@ -78,12 +78,12 @@
           </view>
 
           <!-- AI消息（左侧） -->
-          <view class="msg-row msg-ai" wx:if="{{ item.role === 'assistant' && !item.isError }}" id="msg-{{index + 1 }}">
+          <view class="msg-row msg-ai" wx:if="{{ item.role === 'assistant' && !item.isError }}" id="msg-{{index + 1}}">
             <view class="avatar ai-avatar gradient-bg"><t-icon name="robot" size="34rpx" color="#0a0a0a" /></view>
             <view class="msg-bubble ai-bubble glass-effect-dark">
               
-              <!-- 流式输出时的思维链展示 -->
-              <view class="thinking-box active" wx:if="{{ item.isStreaming && item.thinking }}">
+              <!-- 流式思考展示 -->
+              <view class="thinking-box active" wx:if="{{ item.isThinking && item.thinking }}">
                 <view class="thinking-header-bar active">
                   <t-icon class="thinking-spin" name="chat-bubble" size="28rpx" color="#6495ED" />
                   <text class="thinking-label">正在深度思考...</text>
@@ -93,8 +93,9 @@
                     <view class="t-dot delay-2"></view>
                   </view>
                 </view>
-                <scroll-view class="thinking-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+                <scroll-view class="thinking-scroll" scroll-y enhanced show-scrollbar="{{false}}" scroll-into-view="{{thinkingScrollToView}}">
                   <text class="thinking-live">{{ item.thinking }}▌</text>
+                  <view id="thinking-bottom"></view>
                 </scroll-view>
               </view>
 
@@ -105,13 +106,13 @@
               </view>
 
               <!-- 思考过程显示/隐藏按钮 -->
-              <view class="thinking-toggle" wx:if="{{ item.thinking && !item.isStreaming }}" bindtap="toggleThinking" data-index="{{ index }}">
+              <view class="thinking-toggle" wx:if="{{ item.thinking && !item.isStreaming && !item.isThinking }}" bindtap="toggleThinking" data-index="{{ index }}">
                 <t-icon class="toggle-icon" name="{{ item.showThinking ? 'chevron-up' : 'chevron-down' }}" size="24rpx" color="#6495ED" />
                 <text class="toggle-text">{{ item.showThinking ? '收起思考过程' : '展开思考过程' }}</text>
               </view>
 
               <!-- 思考过程内容 -->
-              <view class="thinking-content" wx:if="{{ item.thinking && item.showThinking && !item.isStreaming }}">
+              <view class="thinking-content" wx:if="{{ item.thinking && item.showThinking && !item.isStreaming && !item.isThinking }}">
                 <scroll-view class="thinking-scroll" scroll-y enhanced show-scrollbar="{{false}}">
                   <text class="thinking-text">{{ item.thinking }}</text>
                 </scroll-view>
@@ -131,7 +132,7 @@
           </view>
 
           <!-- 错误消息 -->
-          <view class="msg-row msg-ai" wx:if="{{ item.role === 'assistant' && item.isError }}" id="msg-{{index + 1 }}">
+          <view class="msg-row msg-ai" wx:if="{{ item.role === 'assistant' && item.isError }}" id="msg-{{index + 1}}">
             <view class="avatar ai-avatar gradient-bg"><t-icon name="error-triangle" size="34rpx" color="#0a0a0a" /></view>
             <view class="msg-bubble error-bubble">
               <text class="error-msg">{{ item.content }}</text>
@@ -150,8 +151,9 @@
                 <t-icon class="thinking-spin spin-anim" name="chat-bubble" size="28rpx" color="#6495ED" />
                 <text class="thinking-label">正在深度思考...</text>
               </view>
-              <scroll-view class="thinking-scroll live" scroll-y enhanced show-scrollbar="{{false}}">
+              <scroll-view class="thinking-scroll live" scroll-y enhanced show-scrollbar="{{false}}" scroll-into-view="{{thinkingScrollToView}}">
                 <text class="thinking-live">{{ currentThinking }}▌</text>
+                <view id="thinking-bottom"></view>
               </scroll-view>
             </view>
           </view>
@@ -173,7 +175,7 @@
         </view>
 
         <!-- 底部占位 -->
-        <view class="bottom-spacer"></view>
+        <view id="msg-bottom" class="bottom-spacer"></view>
 
       </scroll-view>
 
