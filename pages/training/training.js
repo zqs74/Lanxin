@@ -34,10 +34,16 @@ Page({
     ]
   },
 
-  onLoad() { this.initTheme(); this.setNavHeight(); this.setTodayDate(); this.calculateOverallScore(); this.drawRadarChart() },
+  onLoad() {
+    this.initTheme()
+    this.setNavHeight()
+    this.setTodayDate()
+    this.calculateOverallScore()
+    wx.nextTick(() => this.drawRadarChart())
+  },
 
   initTheme() { this._syncTheme() },
-  setTheme(t) { this._syncTheme() },
+  setTheme(t) { this._syncTheme(); wx.nextTick(() => this.drawRadarChart()) },
 
   _syncTheme() {
     const ut = app.getUserTheme()
@@ -51,36 +57,109 @@ Page({
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) { this.getTabBar().updateSelected(2) }
     this._syncTheme()
+    wx.nextTick(() => this.drawRadarChart())
   },
 
-  setNavHeight() { const s = wx.getSystemInfoSync(); this.setData({ navHeight: ((s.statusBarHeight||44)+(s.platform==='ios'?44:48))*2 }) },
+  setNavHeight() {
+    const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : {}
+    const deviceInfo = wx.getDeviceInfo ? wx.getDeviceInfo() : {}
+    const statusBarHeight = windowInfo.statusBarHeight || 44
+    const menuButton = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null
+    const navBarHeight = menuButton ? ((menuButton.top - statusBarHeight) * 2 + menuButton.height) : (deviceInfo.platform === 'ios' ? 44 : 48)
+    this.setData({ navHeight: (statusBarHeight + navBarHeight) * 2 })
+  },
   setTodayDate() { const n = new Date(); this.setData({ todayDate: `${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}` }) },
   calculateOverallScore() { const v = this.data.radarData.values; this.setData({ overallScore: Math.round(v.reduce((a,b)=>a+b,0)/v.length) }) },
 
   drawRadarChart() {
-    const ctx=wx.createCanvasContext('radarChart'); const d=this.data.radarData; const s=wx.getSystemInfoSync()
-    const W=s.windowWidth-60,H=400,cx=W/2,cy=H/2,R=Math.min(W,H)/2-50; ctx.clearRect(0,0,W,H)
-    for(let i=5;i>=1;i--){const r=R*i/5;ctx.beginPath()
-      for(let j=0;j<d.dimensions.length;j++){const a=j*2*Math.PI/d.dimensions.length-Math.PI/2
-        const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a);j===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}
-      ctx.closePath();ctx.setFillStyle(`rgba(212,175,55,${0.12-(i-1)*0.02})`);ctx.setStrokeStyle(`rgba(212,175,55,${0.15-(i-1)*0.025})`);ctx.setLineWidth(1);ctx.fill();ctx.stroke()}
-    for(let i=0;i<d.dimensions.length;i++){const a=i*2*Math.PI/d.dimensions.length-Math.PI/2
-      ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+R*Math.cos(a),cy+R*Math.sin(a));ctx.setStrokeStyle('rgba(212,175,55,0.25)');ctx.setLineWidth(1.5);ctx.stroke()}
-    ctx.beginPath();for(let i=0;i<d.dimensions.length;i++){const a=i*2*Math.PI/d.dimensions.length-Math.PI/2
-      const r=R*d.values[i]/100;i===0?ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a))}ctx.closePath()
-    ctx.setFillStyle('rgba(212,175,55,0.3)');ctx.fill();ctx.setStrokeStyle('#FFD700');ctx.setLineWidth(3);ctx.stroke()
-    ctx.beginPath();for(let i=0;i<d.dimensions.length;i++){const a=i*2*Math.PI/d.dimensions.length-Math.PI/2
-      const r=R*d.values[i]/100;i===0?ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a))}ctx.closePath()
-    ctx.setStrokeStyle('rgba(255,215,0,0.3)');ctx.setLineWidth(6);ctx.stroke()
-    for(let i=0;i<d.dimensions.length;i++){const a=i*2*Math.PI/d.dimensions.length-Math.PI/2;const r=R*d.values[i]/100
-      const x=cx+r*Math.cos(a),y=cy+r*Math.sin(a)
-      ctx.beginPath();ctx.arc(x,y,10,0,2*Math.PI);ctx.setFillStyle(`rgba(255,215,0,${0.15+d.values[i]/100*0.15})`);ctx.fill()
-      ctx.beginPath();ctx.arc(x,y,7,0,2*Math.PI);ctx.setFillStyle(`rgba(212,175,55,${0.3+d.values[i]/100*0.2})`);ctx.fill()
-      ctx.beginPath();ctx.arc(x,y,5,0,2*Math.PI);ctx.setFillStyle('#FFD700');ctx.fill();ctx.setStrokeStyle('#B8860B');ctx.setLineWidth(2);ctx.stroke()}
-    ctx.setFontSize(12);ctx.setTextAlign('center')
-    for(let i=0;i<d.dimensions.length;i++){const a=i*2*Math.PI/d.dimensions.length-Math.PI/2
-      const x=cx+(R+30)*Math.cos(a);let y=cy+(R+30)*Math.sin(a)+4;ctx.setFillStyle('#E0E0E0');ctx.fillText(d.dimensions[i],x,y)}
-    ctx.beginPath();ctx.arc(cx,cy,4,0,2*Math.PI);ctx.setFillStyle('#FFD700');ctx.fill();ctx.draw()
+    wx.createSelectorQuery()
+      .in(this)
+      .select('.radar-chart')
+      .boundingClientRect((rect) => {
+        if (!rect || !rect.width || !rect.height) return
+
+        const ctx = wx.createCanvasContext('radarChart')
+        const d = this.data.radarData
+        const W = rect.width
+        const H = rect.height
+        const isDark = app.getTheme() === 'dark'
+        const cx = W / 2
+        const cy = H / 2 + 4
+        const R = Math.min(W, H) / 2 - 52
+        const gridStroke = isDark ? 'rgba(212,175,55,0.20)' : 'rgba(184,134,11,0.20)'
+        const axisStroke = isDark ? 'rgba(255,215,0,0.20)' : 'rgba(184,134,11,0.22)'
+        const labelColor = isDark ? '#d8d1bd' : '#4f4a3f'
+
+        ctx.clearRect(0, 0, W, H)
+        for (let i = 5; i >= 1; i--) {
+          const r = R * i / 5
+          ctx.beginPath()
+          d.dimensions.forEach((_, j) => {
+            const a = j * 2 * Math.PI / d.dimensions.length - Math.PI / 2
+            const x = cx + r * Math.cos(a)
+            const y = cy + r * Math.sin(a)
+            j === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
+          })
+          ctx.closePath()
+          ctx.setFillStyle(isDark ? `rgba(212,175,55,${0.07 + i * 0.008})` : `rgba(212,175,55,${0.045 + i * 0.006})`)
+          ctx.setStrokeStyle(gridStroke)
+          ctx.setLineWidth(1)
+          ctx.fill()
+          ctx.stroke()
+        }
+
+        d.dimensions.forEach((_, i) => {
+          const a = i * 2 * Math.PI / d.dimensions.length - Math.PI / 2
+          ctx.beginPath()
+          ctx.moveTo(cx, cy)
+          ctx.lineTo(cx + R * Math.cos(a), cy + R * Math.sin(a))
+          ctx.setStrokeStyle(axisStroke)
+          ctx.setLineWidth(1)
+          ctx.stroke()
+        })
+
+        const pointList = d.values.map((value, i) => {
+          const a = i * 2 * Math.PI / d.dimensions.length - Math.PI / 2
+          const r = R * value / 100
+          return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a), value }
+        })
+
+        ctx.beginPath()
+        pointList.forEach((p, i) => { i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y) })
+        ctx.closePath()
+        ctx.setFillStyle(isDark ? 'rgba(212,175,55,0.26)' : 'rgba(212,175,55,0.20)')
+        ctx.fill()
+        ctx.setStrokeStyle('#D4AF37')
+        ctx.setLineWidth(3)
+        ctx.stroke()
+
+        pointList.forEach((p) => {
+          ctx.beginPath()
+          ctx.arc(p.x, p.y, 6, 0, 2 * Math.PI)
+          ctx.setFillStyle('#FFD700')
+          ctx.fill()
+          ctx.setStrokeStyle(isDark ? '#6b5415' : '#ffffff')
+          ctx.setLineWidth(2)
+          ctx.stroke()
+        })
+
+        ctx.setFontSize(12)
+        ctx.setTextAlign('center')
+        ctx.setFillStyle(labelColor)
+        d.dimensions.forEach((label, i) => {
+          const a = i * 2 * Math.PI / d.dimensions.length - Math.PI / 2
+          const x = cx + (R + 30) * Math.cos(a)
+          const y = cy + (R + 30) * Math.sin(a) + 4
+          ctx.fillText(label, x, y)
+        })
+
+        ctx.beginPath()
+        ctx.arc(cx, cy, 3, 0, 2 * Math.PI)
+        ctx.setFillStyle('#D4AF37')
+        ctx.fill()
+        ctx.draw()
+      })
+      .exec()
   },
 
   selectPlan(e) { wx.showToast({ title: `选择计划 ${e.currentTarget.dataset.id}`, icon: 'none' }) },

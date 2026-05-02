@@ -43,8 +43,8 @@
         <view class="section-title">技能雷达图</view>
         <view class="radar-score">综合评分 {{ overallScore }}</view>
       </view>
-      <view class="radar-container card" style="position: relative; left: 0rpx; top: 3rpx">
-        <canvas canvas-id="radarChart" class="radar-chart" style="position: relative; left: 0rpx; top: -93rpx; width: 642rpx; height: 663rpx; display: block; box-sizing: border-box"></canvas>
+      <view class="radar-container card">
+        <canvas canvas-id="radarChart" class="radar-chart"></canvas>
         <view class="radar-legend">
           <view class="legend-item" wx:for="{{ radarData.dimensions }}" wx:key="index">
             <view class="legend-dot" style="background: {{ radarData.colors[index] }}"></view>

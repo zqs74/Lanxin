@@ -107,7 +107,7 @@
         <view class="section">
           <view class="section-title">比分走势</view>
           <view class="chart-container card">
-            <canvas canvas-id="scoreTrendCanvas" class="chart"></canvas>
+            <canvas canvas-id="scoreTrendCanvas" class="chart score-trend-chart"></canvas>
           </view>
           <view class="legend">
             <view class="legend-item">
@@ -166,10 +166,10 @@
               <text class="stats-text">个片段</text>
             </view>
             <button 
-              class="btn {{selectedCount > 0 ? 'btn-primary' : 'btn-ghost'}}" 
+              class="clip-action-btn {{selectedCount > 0 ? 'active' : 'disabled'}}"
               bindtap="startEdit"
             >
-              <t-icon class="btn-icon" name="cut" size="28rpx" color="#0a0a0a" />
+              <t-icon class="btn-icon" name="cut" size="28rpx" color="{{selectedCount > 0 ? '#0a0a0a' : '#D4AF37'}}" />
               开始剪辑
             </button>
           </view>
@@ -228,7 +228,7 @@
         <view class="section">
           <view class="section-title">投篮分布</view>
           <view class="chart-container card">
-            <canvas canvas-id="shootingChartCanvas" class="chart"></canvas>
+            <canvas canvas-id="shootingChartCanvas" class="chart shooting-chart"></canvas>
           </view>
           <view class="legend">
             <view class="legend-item">

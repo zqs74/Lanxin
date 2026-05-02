@@ -53,20 +53,25 @@ Page({
 
   onShow: function() {
     this._syncTheme()
-    this.drawScoreTrend()
-    this.drawShootingChart()
+    wx.nextTick(() => this.drawActiveCharts())
   },
 
   setNavHeight: function() {
-    const s = wx.getSystemInfoSync()
-    const sh = s.statusBarHeight || 44
-    const nh = s.platform === 'ios' ? 44 : 48
+    const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : {}
+    const deviceInfo = wx.getDeviceInfo ? wx.getDeviceInfo() : {}
+    const sh = windowInfo.statusBarHeight || 44
+    const menuButton = wx.getMenuButtonBoundingClientRect ? wx.getMenuButtonBoundingClientRect() : null
+    const nh = menuButton ? ((menuButton.top - sh) * 2 + menuButton.height) : (deviceInfo.platform === 'ios' ? 44 : 48)
     this.setData({ navHeight: (sh + nh) * 2 })
   },
 
   goBack: function() { wx.navigateBack() },
 
-  switchTab: function(e) { this.setData({ activeTab: Number(e.currentTarget.dataset.index) }) },
+  switchTab: function(e) {
+    this.setData({ activeTab: Number(e.currentTarget.dataset.index) }, () => {
+      wx.nextTick(() => this.drawActiveCharts())
+    })
+  },
 
   playVideo: function() { console.log('播放视频') },
 
@@ -85,23 +90,197 @@ Page({
     wx.navigateTo({ url: `/pages/custom-match-setup/custom-match-setup?matchId=custom_${Date.now()}` })
   },
 
+  drawActiveCharts: function() {
+    if (this.data.activeTab === 0) this.drawScoreTrend()
+    if (this.data.activeTab === 2) this.drawShootingChart()
+  },
+
+  getChartRect: function(selector, callback) {
+    wx.createSelectorQuery()
+      .in(this)
+      .select(selector)
+      .boundingClientRect((rect) => {
+        if (!rect || !rect.width || !rect.height) return
+        callback(rect)
+      })
+      .exec()
+  },
+
+  drawSmoothLine: function(ctx, points) {
+    ctx.beginPath()
+    points.forEach((p, i) => {
+      if (i === 0) {
+        ctx.moveTo(p.x, p.y)
+        return
+      }
+      const prev = points[i - 1]
+      const midX = (prev.x + p.x) / 2
+      ctx.quadraticCurveTo(prev.x, prev.y, midX, (prev.y + p.y) / 2)
+      ctx.quadraticCurveTo(midX, (prev.y + p.y) / 2, p.x, p.y)
+    })
+    ctx.stroke()
+  },
+
+  drawRoundRect: function(ctx, x, y, width, height, radius) {
+    const r = Math.min(radius, width / 2, Math.abs(height) / 2)
+    const top = height >= 0 ? y : y + height
+    const h = Math.abs(height)
+    ctx.beginPath()
+    ctx.moveTo(x + r, top)
+    ctx.lineTo(x + width - r, top)
+    ctx.quadraticCurveTo(x + width, top, x + width, top + r)
+    ctx.lineTo(x + width, top + h - r)
+    ctx.quadraticCurveTo(x + width, top + h, x + width - r, top + h)
+    ctx.lineTo(x + r, top + h)
+    ctx.quadraticCurveTo(x, top + h, x, top + h - r)
+    ctx.lineTo(x, top + r)
+    ctx.quadraticCurveTo(x, top, x + r, top)
+    ctx.closePath()
+    ctx.fill()
+  },
+
   drawScoreTrend: function() {
-    const ctx=wx.createCanvasContext('scoreTrendCanvas'); const d=this.data.scoreTrend
-    const W=343,H=200,P=40; ctx.clearRect(0,0,W,H)
-    for(let i=0;i<=6;i++){const y=P+(H-2*P)/6*i;ctx.beginPath();ctx.moveTo(P,y);ctx.lineTo(W-P,y);ctx.stroke()}
-    for(let i=0;i<d.quarters.length;i++){const x=P+(W-2*P)/(d.quarters.length-1)*i;ctx.beginPath();ctx.moveTo(x,P);ctx.lineTo(x,H-P);ctx.stroke()}
-    ctx.setStrokeStyle('#D4AF37');ctx.setLineWidth(2);ctx.beginPath()
-    for(let i=0;i<d.redTeam.length;i++){const x=P+(W-2*P)/(d.redTeam.length-1)*i;const y=H-P-(d.redTeam[i]/120)*(H-2*P);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke()
-    ctx.setStrokeStyle('#1890ff');ctx.setLineWidth(2);ctx.beginPath()
-    for(let i=0;i<d.blueTeam.length;i++){const x=P+(W-2*P)/(d.blueTeam.length-1)*i;const y=H-P-(d.blueTeam[i]/120)*(H-2*P);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)}ctx.stroke();ctx.draw()
+    this.getChartRect('.score-trend-chart', (rect) => {
+      const ctx = wx.createCanvasContext('scoreTrendCanvas')
+      const d = this.data.scoreTrend
+      const W = rect.width
+      const H = rect.height
+      const isDark = app.getTheme() === 'dark'
+      const padding = { left: 36, right: 28, top: 26, bottom: 36 }
+      const chartW = W - padding.left - padding.right
+      const chartH = H - padding.top - padding.bottom
+      const allScores = d.redTeam.concat(d.blueTeam)
+      const maxScore = Math.ceil(Math.max(...allScores, 100) / 20) * 20
+      const gridColor = isDark ? 'rgba(212,175,55,0.14)' : 'rgba(184,134,11,0.14)'
+      const labelColor = isDark ? '#9f9684' : '#746d60'
+      const redColor = '#D4AF37'
+      const blueColor = '#4da3ff'
+      const getX = (i) => padding.left + chartW / (d.quarters.length - 1) * i
+      const getY = (score) => padding.top + chartH - score / maxScore * chartH
+
+      ctx.clearRect(0, 0, W, H)
+      ctx.setFontSize(10)
+      ctx.setTextAlign('right')
+      ctx.setFillStyle(labelColor)
+      ctx.setStrokeStyle(gridColor)
+      ctx.setLineWidth(1)
+
+      for (let i = 0; i <= 4; i++) {
+        const value = Math.round(maxScore / 4 * i)
+        const y = padding.top + chartH - chartH / 4 * i
+        ctx.beginPath()
+        ctx.moveTo(padding.left, y)
+        ctx.lineTo(W - padding.right, y)
+        ctx.stroke()
+        ctx.fillText(String(value), padding.left - 8, y + 3)
+      }
+
+      ctx.setTextAlign('center')
+      d.quarters.forEach((quarter, i) => {
+        const x = getX(i)
+        ctx.beginPath()
+        ctx.moveTo(x, padding.top)
+        ctx.lineTo(x, padding.top + chartH)
+        ctx.stroke()
+        ctx.setFillStyle(labelColor)
+        ctx.fillText(quarter.replace('第', 'Q').replace('节', ''), x, H - 12)
+      })
+
+      const redPoints = d.redTeam.map((score, i) => ({ x: getX(i), y: getY(score), score }))
+      const bluePoints = d.blueTeam.map((score, i) => ({ x: getX(i), y: getY(score), score }))
+
+      ctx.setStrokeStyle('rgba(212,175,55,0.18)')
+      ctx.setLineWidth(8)
+      this.drawSmoothLine(ctx, redPoints)
+      ctx.setStrokeStyle(redColor)
+      ctx.setLineWidth(3)
+      this.drawSmoothLine(ctx, redPoints)
+
+      ctx.setStrokeStyle('rgba(77,163,255,0.16)')
+      ctx.setLineWidth(8)
+      this.drawSmoothLine(ctx, bluePoints)
+      ctx.setStrokeStyle(blueColor)
+      ctx.setLineWidth(3)
+      this.drawSmoothLine(ctx, bluePoints)
+
+      redPoints.concat(bluePoints).forEach((p, index) => {
+        const color = index < redPoints.length ? redColor : blueColor
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI)
+        ctx.setFillStyle(color)
+        ctx.fill()
+        ctx.setStrokeStyle(isDark ? '#161616' : '#ffffff')
+        ctx.setLineWidth(2)
+        ctx.stroke()
+      })
+
+      ctx.setTextAlign('center')
+      ctx.setFontSize(11)
+      ;[redPoints[redPoints.length - 1], bluePoints[bluePoints.length - 1]].forEach((p, i) => {
+        ctx.setFillStyle(i === 0 ? redColor : blueColor)
+        ctx.fillText(String(p.score), p.x, p.y - 10)
+      })
+      ctx.draw()
+    })
   },
 
   drawShootingChart: function() {
-    const ctx=wx.createCanvasContext('shootingChartCanvas');const d=this.data.shootingData
-    const W=343,H=200,P=40;ctx.clearRect(0,0,W,H)
-    for(let i=0;i<=5;i++){const y=P+(H-2*P)/5*i;ctx.beginPath();ctx.moveTo(P,y);ctx.lineTo(W-P,y);ctx.stroke()}
-    const bW=(W-2*P)/(d.quarters.length*2+d.quarters.length-1)
-    for(let i=0;i<d.quarters.length;i++){const madeX=P+(bW*3)*i;const mH=(d.made[i]/10)*(H-2*P);ctx.setFillStyle('#D4AF37');ctx.fillRect(madeX,H-P-mH,bW,mH)
-      const aX=P+(bW*3)*i+bW*2;const aH=(d.attempted[i]/10)*(H-2*P);ctx.setFillStyle('#faad14');ctx.fillRect(aX,H-P-aH,bW,aH)};ctx.draw()
+    this.getChartRect('.shooting-chart', (rect) => {
+      const ctx = wx.createCanvasContext('shootingChartCanvas')
+      const d = this.data.shootingData
+      const W = rect.width
+      const H = rect.height
+      const isDark = app.getTheme() === 'dark'
+      const padding = { left: 34, right: 22, top: 28, bottom: 38 }
+      const chartW = W - padding.left - padding.right
+      const chartH = H - padding.top - padding.bottom
+      const maxValue = Math.ceil(Math.max(...d.attempted, 10) / 2) * 2
+      const gridColor = isDark ? 'rgba(212,175,55,0.14)' : 'rgba(184,134,11,0.14)'
+      const labelColor = isDark ? '#9f9684' : '#746d60'
+      const madeColor = '#D4AF37'
+      const attemptedColor = isDark ? '#4fc17b' : '#2f9e55'
+      const groupWidth = chartW / d.quarters.length
+      const barWidth = Math.min(18, groupWidth * 0.22)
+
+      ctx.clearRect(0, 0, W, H)
+      ctx.setFontSize(10)
+      ctx.setTextAlign('right')
+      ctx.setFillStyle(labelColor)
+      ctx.setStrokeStyle(gridColor)
+      ctx.setLineWidth(1)
+
+      for (let i = 0; i <= 4; i++) {
+        const value = Math.round(maxValue / 4 * i)
+        const y = padding.top + chartH - chartH / 4 * i
+        ctx.beginPath()
+        ctx.moveTo(padding.left, y)
+        ctx.lineTo(W - padding.right, y)
+        ctx.stroke()
+        ctx.fillText(String(value), padding.left - 8, y + 3)
+      }
+
+      ctx.setTextAlign('center')
+      d.quarters.forEach((quarter, i) => {
+        const centerX = padding.left + groupWidth * i + groupWidth / 2
+        const madeH = d.made[i] / maxValue * chartH
+        const attemptedH = d.attempted[i] / maxValue * chartH
+        const baseY = padding.top + chartH
+        const madeX = centerX - barWidth - 5
+        const attemptedX = centerX + 5
+
+        ctx.setFillStyle(madeColor)
+        this.drawRoundRect(ctx, madeX, baseY - madeH, barWidth, madeH, 5)
+        ctx.setFillStyle(attemptedColor)
+        this.drawRoundRect(ctx, attemptedX, baseY - attemptedH, barWidth, attemptedH, 5)
+
+        ctx.setFontSize(10)
+        ctx.setFillStyle(labelColor)
+        ctx.fillText(String(d.made[i]), madeX + barWidth / 2, baseY - madeH - 8)
+        ctx.fillText(String(d.attempted[i]), attemptedX + barWidth / 2, baseY - attemptedH - 8)
+        ctx.fillText(quarter.replace('第', 'Q').replace('节', ''), centerX, H - 12)
+      })
+
+      ctx.draw()
+    })
   }
 })
