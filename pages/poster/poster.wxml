@@ -7,17 +7,47 @@
       <view class="poster-score">{{poster.matchScore}} 分匹配</view>
     </view>
 
-    <view class="poster-card">
-      <view class="poster-row">
-        <view class="poster-row-label">推荐场馆</view>
-        <view class="poster-row-main">{{poster.venue}}</view>
+    <view class="poster-cover-card">
+      <image class="poster-cover-image" src="{{poster.venueCover}}" mode="aspectFill"></image>
+      <view class="poster-cover-mask"></view>
+      <view class="poster-cover-body">
+        <view class="poster-row-label poster-row-label--light">推荐场馆</view>
+        <view class="poster-cover-title">{{poster.venue}}</view>
+        <view class="poster-cover-note">{{poster.planTone}}</view>
+        <view class="poster-tags">
+          <text wx:for="{{poster.tags}}" wx:key="*this" class="poster-tag poster-tag--light">{{item}}</text>
+        </view>
       </view>
-      <view class="poster-tags">
-        <text wx:for="{{poster.tags}}" wx:key="*this" class="poster-tag">{{item}}</text>
+    </view>
+
+    <view class="poster-card">
+      <view class="poster-row-label">方案摘要</view>
+      <view class="poster-summary-line">
+        <text class="poster-summary-accent">{{poster.summaryLead}}</text>
+        <text class="poster-summary-body">{{poster.summaryTail}}</text>
+      </view>
+      <view class="poster-summary-note">{{poster.summaryNote}}</view>
+    </view>
+
+    <view class="poster-card">
+      <view class="poster-row-label">方案重点</view>
+      <view class="poster-focus-list">
+        <view wx:for="{{poster.highlightPoints}}" wx:key="label" class="poster-focus-item">
+          <view class="poster-focus-label">{{item.label}}</view>
+          <view class="poster-focus-value">{{item.value}}</view>
+        </view>
       </view>
     </view>
 
     <view class="poster-grid">
+      <view class="poster-mini-card">
+        <view class="poster-mini-label">预算落点</view>
+        <view class="poster-mini-value">{{poster.budgetFocus}}</view>
+      </view>
+      <view class="poster-mini-card">
+        <view class="poster-mini-label">预算参考</view>
+        <view class="poster-mini-value">{{poster.budgetHint}}</view>
+      </view>
       <view class="poster-mini-card" wx:if="{{poster.refereeLine}}">
         <view class="poster-mini-label">裁判配置</view>
         <view class="poster-mini-value">{{poster.refereeLine}}</view>
@@ -38,15 +68,11 @@
         <view class="poster-mini-label">媒体</view>
         <view class="poster-mini-value">{{poster.mediaLine}}</view>
       </view>
-      <view class="poster-mini-card">
-        <view class="poster-mini-label">预算参考</view>
-        <view class="poster-mini-value">{{poster.budgetHint}}</view>
-      </view>
     </view>
 
     <view class="poster-bottom-card">
-      <view class="poster-bottom-title">一句话篮球约战</view>
-      <view class="poster-bottom-summary">{{poster.summary}}</view>
+      <view class="poster-bottom-title">打开小程序可继续查看完整方案</view>
+      <view class="poster-bottom-sub">场馆、裁判、物料、预约入口已同步准备好</view>
     </view>
   </view>
 

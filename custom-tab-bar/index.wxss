@@ -3,10 +3,18 @@
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 999;
+  z-index: 320;
   padding: 0 24rpx calc(18rpx + env(safe-area-inset-bottom));
   background: linear-gradient(180deg, rgba(244, 247, 252, 0) 0%, rgba(244, 247, 252, 0.72) 28%, rgba(244, 247, 252, 0.96) 100%);
   pointer-events: none;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 220ms ease, transform 220ms ease;
+}
+
+.glass-tabbar-shell--hidden {
+  opacity: 0;
+  transform: translateY(36rpx);
 }
 
 .glass-tabbar {

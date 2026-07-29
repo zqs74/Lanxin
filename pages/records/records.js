@@ -40,58 +40,77 @@ function buildList(list = [], type) {
     });
 }
 
+function pickFilterOptions(list, key) {
+  const values = Array.from(new Set(list.map((item) => item[key]).filter(Boolean)));
+  return ["全部"].concat(values);
+}
+
+function applyFilters(list, filters) {
+  return list.filter((item) => {
+    const townMatch = filters.town === "全部" || item.town === filters.town;
+    const dateMatch = filters.date === "全部" || item.date === filters.date;
+    return townMatch && dateMatch;
+  });
+}
+
 Page({
   data: {
-    recommendations: [],
-    bookings: [],
-    previewRecommendations: [],
-    previewBookings: [],
+    type: "recommendation",
+    title: "推荐记录",
+    list: [],
+    filteredList: [],
+    filters: {
+      town: "全部",
+      date: "全部",
+    },
+    townOptions: ["全部"],
+    dateOptions: ["全部"],
+  },
+
+  onLoad(query) {
+    const type = query.type === "booking" ? "booking" : "recommendation";
+    this.setData({
+      type,
+      title: type === "booking" ? "预约记录" : "推荐记录",
+    });
+
+    wx.setNavigationBarTitle({
+      title: type === "booking" ? "预约记录" : "推荐记录",
+    });
   },
 
   onShow() {
-    if (typeof this.getTabBar === "function" && this.getTabBar()) {
-      this.getTabBar().setData({
-        active: "history",
-        hidden: false,
-      });
-    }
-
-    const recommendations = buildList(getRecommendations(), "recommendation");
-    const bookings = buildList(getBookings(), "booking");
+    const source = this.data.type === "booking"
+      ? buildList(getBookings(), "booking")
+      : buildList(getRecommendations(), "recommendation");
 
     this.setData({
-      recommendations,
-      bookings,
-      previewRecommendations: recommendations.slice(0, 4),
-      previewBookings: bookings.slice(0, 4),
+      list: source,
+      filteredList: source,
+      filters: {
+        town: "全部",
+        date: "全部",
+      },
+      townOptions: pickFilterOptions(source, "town"),
+      dateOptions: pickFilterOptions(source, "date"),
     });
   },
 
-  openRecommendationRecords() {
-    wx.navigateTo({
-      url: "/pages/records/records?type=recommendation",
-    });
+  selectFilter(event) {
+    const { key, value } = event.currentTarget.dataset;
+    this.setData(
+      {
+        [`filters.${key}`]: value,
+      },
+      () => {
+        this.setData({
+          filteredList: applyFilters(this.data.list, this.data.filters),
+        });
+      }
+    );
   },
 
-  openBookingRecords() {
-    wx.navigateTo({
-      url: "/pages/records/records?type=booking",
-    });
-  },
-
-  reopenRecommendation(event) {
-    const { payload } = event.currentTarget.dataset;
-    if (!payload || !payload.demand) {
-      return;
-    }
-
-    const encoded = encodePayload(payload.demand);
-    wx.navigateTo({
-      url: `/pages/result/result?payload=${encoded}`,
-    });
-  },
-
-  reopenBooking(event) {
+  reopenItem(event) {
     const { payload } = event.currentTarget.dataset;
     if (!payload || !payload.demand) {
       return;

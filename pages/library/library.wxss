@@ -1,5 +1,5 @@
 .page-shell {
-  padding-bottom: 220rpx;
+  padding-bottom: 240rpx;
 }
 
 .compact-hero {
@@ -41,6 +41,7 @@
 .town-scroll {
   margin-top: 22rpx;
   white-space: nowrap;
+  padding-bottom: 8rpx;
 }
 
 .category-row {
@@ -69,7 +70,7 @@
   position: relative;
   overflow: hidden;
   margin-top: 24rpx;
-  height: 340rpx;
+  height: 360rpx;
   border-radius: 34rpx;
   box-shadow: 0 22rpx 52rpx rgba(16, 56, 138, 0.14);
 }
@@ -83,7 +84,7 @@
 .library-feature-mask {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(15, 28, 62, 0.08) 0%, rgba(15, 28, 62, 0.58) 100%);
+  background: linear-gradient(180deg, rgba(15, 28, 62, 0.08) 0%, rgba(15, 28, 62, 0.68) 100%);
 }
 
 .library-feature-body {
@@ -120,6 +121,13 @@
   font-size: 40rpx;
   line-height: 1.25;
   font-weight: 700;
+}
+
+.library-feature-desc {
+  margin-top: 14rpx;
+  font-size: 22rpx;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.84);
 }
 
 .library-feature-tags {

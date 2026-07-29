@@ -1,6 +1,7 @@
 Component({
   data: {
     active: "home",
+    hidden: false,
     switchingKey: "",
     tabs: [
       { key: "history", label: "历史方案" },
@@ -23,8 +24,8 @@ Component({
       };
 
       this.setData({
-        switchingKey: key,
         active: key,
+        switchingKey: key,
       });
 
       wx.switchTab({
@@ -34,7 +35,7 @@ Component({
             this.setData({
               switchingKey: "",
             });
-          }, 120);
+          }, 180);
         },
       });
     },

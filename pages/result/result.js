@@ -2,7 +2,6 @@ const {
   APP_MODE,
   BUDGET_OPTIONS,
   DATE_OPTIONS,
-  VENUE_OPTIONS,
   TOWN_OPTIONS,
 } = require("../../utils/constants");
 const { decodePayload, encodePayload } = require("../../utils/share");
@@ -37,7 +36,6 @@ Page({
     result: null,
     budgetOptions: BUDGET_OPTIONS,
     dateOptions: DATE_OPTIONS,
-    venueOptions: VENUE_OPTIONS,
     townOptions: TOWN_OPTIONS,
     tuneVisible: false,
     bookingVisible: false,
@@ -76,15 +74,35 @@ Page({
   },
 
   openTunePanel() {
-    this.setData({
-      tuneVisible: true,
-    });
+    this.setData(
+      {
+        tuneVisible: true,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({
+            hidden: true,
+          });
+        }
+      }
+    );
   },
 
   closeTunePanel() {
-    this.setData({
-      tuneVisible: false,
-    });
+    this.setData(
+      {
+        tuneVisible: false,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({
+            hidden: false,
+          });
+        }
+      }
+    );
   },
 
   selectTuneValue(event) {
@@ -119,10 +137,20 @@ Page({
     saveRecommendation(record);
     getApp().setLatestSharePayload(result.sharePayload);
 
-    this.setData({
-      result,
-      tuneVisible: false,
-    });
+    this.setData(
+      {
+        result,
+        tuneVisible: false,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({
+            hidden: false,
+          });
+        }
+      }
+    );
 
     wx.showToast({
       title: "已重新匹配",
@@ -138,15 +166,35 @@ Page({
   },
 
   openBooking() {
-    this.setData({
-      bookingVisible: true,
-    });
+    this.setData(
+      {
+        bookingVisible: true,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({
+            hidden: true,
+          });
+        }
+      }
+    );
   },
 
   closeBooking() {
-    this.setData({
-      bookingVisible: false,
-    });
+    this.setData(
+      {
+        bookingVisible: false,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({
+            hidden: false,
+          });
+        }
+      }
+    );
   },
 
   updateBookingField(event) {
@@ -186,9 +234,19 @@ Page({
       },
     });
 
-    this.setData({
-      bookingVisible: false,
-    });
+    this.setData(
+      {
+        bookingVisible: false,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({
+            hidden: false,
+          });
+        }
+      }
+    );
 
     wx.showToast({
       title: "已记录预约意向",

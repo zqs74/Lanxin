@@ -1,0 +1,68 @@
+<view class="app-shell page-shell">
+  <view class="page-hero compact-hero">
+    <view class="hero-city">更多记录</view>
+    <view class="hero-title">{{title}}</view>
+  </view>
+
+  <view class="section-card">
+    <view class="accent-heading">{{title}}</view>
+
+    <view class="filter-panel" wx:if="{{list.length}}">
+      <view class="filter-group">
+        <view class="filter-label">地点</view>
+        <scroll-view scroll-x class="filter-scroll" show-scrollbar="{{false}}">
+          <view class="filter-row">
+            <view
+              wx:for="{{townOptions}}"
+              wx:key="*this"
+              class="filter-chip {{filters.town === item ? 'filter-chip--active' : ''}}"
+              data-key="town"
+              data-value="{{item}}"
+              bindtap="selectFilter"
+            >
+              {{item}}
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <view class="filter-group">
+        <view class="filter-label">日期</view>
+        <scroll-view scroll-x class="filter-scroll" show-scrollbar="{{false}}">
+          <view class="filter-row">
+            <view
+              wx:for="{{dateOptions}}"
+              wx:key="*this"
+              class="filter-chip {{filters.date === item ? 'filter-chip--active' : ''}}"
+              data-key="date"
+              data-value="{{item}}"
+              bindtap="selectFilter"
+            >
+              {{item}}
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+    </view>
+
+    <block wx:if="{{filteredList.length}}">
+      <view
+        wx:for="{{filteredList}}"
+        wx:key="id"
+        class="record-card"
+        data-payload="{{item.payload}}"
+        bindtap="reopenItem"
+      >
+        <view class="record-top">
+          <view class="record-title">{{item.title}}</view>
+          <view class="record-time">{{item.meta}}</view>
+        </view>
+        <view class="record-brief">{{item.brief}}</view>
+        <view class="record-highlight">{{item.highlight}}</view>
+      </view>
+    </block>
+
+    <view wx:elif="{{list.length}}" class="record-empty-inline">当前筛选下暂无记录</view>
+    <van-empty wx:else image="search" description="还没有记录" />
+  </view>
+</view>

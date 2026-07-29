@@ -70,9 +70,7 @@ Page({
     sentence: "",
     examples: [],
     modeOptions: MODE_OPTIONS,
-    activeTab: "home",
     popupVisible: false,
-    missingFields: [],
     missingPrompts: [],
     pendingDemand: null,
     formValues: {
@@ -100,6 +98,7 @@ Page({
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
       this.getTabBar().setData({
         active: "home",
+        hidden: this.data.popupVisible,
       });
     }
   },
@@ -135,6 +134,7 @@ Page({
 
   handlePrimaryAction() {
     const sentence = (this.data.sentence || "").trim();
+
     if (!this.data.mode) {
       wx.showToast({
         title: "先选一个约战模式",
@@ -153,24 +153,32 @@ Page({
 
     const demand = parseDemand(this.data.mode, sentence);
     const missingFields = getMissingFields(demand);
-
     saveLatestDemand(demand);
 
     if (missingFields.length) {
-      this.setData({
-        popupVisible: true,
-        pendingDemand: demand,
-        missingFields,
-        missingPrompts: buildMissingConfig(missingFields),
-        formValues: {
-          town: demand.town || "",
-          playDate: demand.playDate || "",
-          venuePreference: demand.venuePreference || "",
-          budgetLevel: demand.budgetLevel || "",
-          peopleCount: demand.peopleCount || "",
-          teamCount: demand.teamCount || "",
+      this.setData(
+        {
+          popupVisible: true,
+          pendingDemand: demand,
+          missingPrompts: buildMissingConfig(missingFields),
+          formValues: {
+            town: demand.town || "",
+            playDate: demand.playDate || "",
+            venuePreference: demand.venuePreference || "",
+            budgetLevel: demand.budgetLevel || "",
+            peopleCount: demand.peopleCount || "",
+            teamCount: demand.teamCount || "",
+          },
         },
-      });
+        () => {
+          const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+          if (tabBar) {
+            tabBar.setData({
+              hidden: true,
+            });
+          }
+        }
+      );
       return;
     }
 
@@ -178,9 +186,19 @@ Page({
   },
 
   closePopup() {
-    this.setData({
-      popupVisible: false,
-    });
+    this.setData(
+      {
+        popupVisible: false,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({
+            hidden: false,
+          });
+        }
+      }
+    );
   },
 
   selectPromptOption(event) {
@@ -209,9 +227,19 @@ Page({
       return;
     }
 
-    this.setData({
-      popupVisible: false,
-    });
+    this.setData(
+      {
+        popupVisible: false,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({
+            hidden: false,
+          });
+        }
+      }
+    );
 
     this.generateResult(demand);
   },

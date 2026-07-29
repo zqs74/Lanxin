@@ -173,6 +173,33 @@ function buildBudgetHint(demand, venue) {
   return `预计约 ${base} 元起，更适合轻量组局。`;
 }
 
+function buildBudgetFocus(demand) {
+  if (demand.mode === APP_MODE.PRO_EVENT) {
+    if (demand.budgetLevel === "high") {
+      return "高配赛事落地";
+    }
+    if (demand.budgetLevel === "mid") {
+      return "标准赛事执行";
+    }
+    return "精简赛事方案";
+  }
+
+  if (demand.budgetLevel === "high") {
+    return "舒适升级约球";
+  }
+  if (demand.budgetLevel === "mid") {
+    return "标准成局配置";
+  }
+  return "轻量组局配置";
+}
+
+function buildPlanTone(demand, venue) {
+  const venueType = venue.indoor ? "室内馆" : "室外场";
+  return demand.mode === APP_MODE.PRO_EVENT
+    ? `${venueType} + 正式赛事链路`
+    : `${venueType} + 快速成局体验`;
+}
+
 function buildAlternatives(candidates) {
   return candidates.slice(1, 3).map((item) => ({
     id: item.id,
@@ -193,6 +220,12 @@ function buildEmptyResult(demand) {
     topReason: "",
     reasonLines: [],
     budgetHint: "",
+    budgetFocus: "",
+    planTone: "",
+    summaryLead: "",
+    summaryTail: "",
+    summaryNote: "",
+    highlightPoints: [],
     posterPayload: null,
     sharePayload: {
       city: demand.city,
@@ -219,6 +252,44 @@ function joinItemNames(items, limit) {
     .join(" / ");
 }
 
+function buildHighlightPoints(demand, venue, pickedRefs, pickedMaterials, pickedRentals) {
+  const points = [
+    {
+      label: "主场馆",
+      value: `${venue.town} · ${venue.name}`,
+    },
+    {
+      label: "预算落点",
+      value: buildBudgetFocus(demand),
+    },
+  ];
+
+  if (pickedRefs.length) {
+    points.push({
+      label: "裁判配置",
+      value: joinItemNames(pickedRefs, demand.mode === APP_MODE.PRO_EVENT ? 2 : 1),
+    });
+  }
+
+  const supportLine = [joinItemNames(pickedMaterials, 1), joinItemNames(pickedRentals, 1)]
+    .filter(Boolean)
+    .join(" · ");
+
+  if (supportLine) {
+    points.push({
+      label: "配套重点",
+      value: supportLine,
+    });
+  }
+
+  return points.slice(0, 4);
+}
+
+function getSectionItems(sections, key) {
+  const target = sections.find((section) => section.key === key);
+  return target ? target.items : [];
+}
+
 function createRecommendation(demand) {
   const venueCandidates = getVenueCandidates(demand);
   const venue = venueCandidates[0];
@@ -234,6 +305,10 @@ function createRecommendation(demand) {
   const pickedMedia = pickMedia(demand);
   const summary = buildSummary(demand, venue);
   const alternatives = buildAlternatives(venueCandidates);
+  const highlightPoints = buildHighlightPoints(demand, venue, pickedRefs, pickedMaterials, pickedRentals);
+  const budgetHint = buildBudgetHint(demand, venue);
+  const budgetFocus = buildBudgetFocus(demand);
+  const planTone = buildPlanTone(demand, venue);
 
   const sections = [
     {
@@ -276,21 +351,37 @@ function createRecommendation(demand) {
   }
 
   const reasonLines = [
-    `${venue.name} 和你的镇区、预算、人数更接近，整体匹配度最高。`,
-    `${getVenueLabel(demand.venuePreference)}的需求已经优先纳入匹配。`,
+    `${venue.name} 更贴合你当前的镇区、预算和人数。`,
+    `${getVenueLabel(demand.venuePreference)}和${getBudgetLabel(demand.budgetLevel)}已优先纳入筛选。`,
     demand.mode === APP_MODE.PRO_EVENT
-      ? "这套方案已经把场馆、裁判、物料和执行链路一起补齐，适合直接推进落地。"
-      : "这套方案更偏轻量和快速组局，不会给约球增加太多负担。",
+      ? "场馆、裁判、物料和执行链路已经补齐，可直接推进落地。"
+      : "场馆、裁判和基础物料已经补齐，适合快速成局。",
   ];
+
+  const summaryLead = venue.name;
+  const summaryTail = demand.mode === APP_MODE.PRO_EVENT
+    ? "更适合这次赛事落地。"
+    : "更适合这次约球成局。";
+  const summaryNote = demand.mode === APP_MODE.PRO_EVENT
+    ? "主馆、裁判、物料和执行建议已经一并收齐。"
+    : "主馆、裁判和基础配套已经一起补齐。";
+  const matchScore = Math.min(98, Math.round(venue.score / 2));
 
   return {
     mode: demand.mode,
     summary,
     town: venue.town,
-    matchScore: Math.min(98, Math.round(venue.score / 2)),
+    matchScore,
     topReason: reasonLines[0],
+    summaryLead,
+    summaryTail,
+    summaryNote,
     reasonLines,
-    budgetHint: buildBudgetHint(demand, venue),
+    strategyLine: reasonLines[1],
+    highlightPoints,
+    budgetHint,
+    budgetFocus,
+    planTone,
     sections,
     alternatives,
     fallbackMessage: "",
@@ -298,17 +389,26 @@ function createRecommendation(demand) {
       title: demand.mode === APP_MODE.PRO_EVENT ? "东莞赛事方案已生成" : "东莞约球方案已生成",
       modeLabel: demand.mode === APP_MODE.PRO_EVENT ? "半专业赛事" : "野球约球",
       summary,
+      summaryLead,
+      summaryTail,
+      strategyLine: reasonLines[1],
+      summaryNote,
       date: demand.playDate,
       town: venue.town,
-      matchScore: Math.min(98, Math.round(venue.score / 2)),
+      matchScore,
       venue: venue.name,
-      budgetHint: buildBudgetHint(demand, venue),
+      venueCover: venue.cover,
+      budgetHint,
+      budgetFocus,
+      planTone,
       tags: venue.tags.slice(0, 3),
       refereeLine: joinItemNames(pickedRefs, demand.mode === APP_MODE.PRO_EVENT ? 2 : 1),
       materialLine: joinItemNames(pickedMaterials, 2),
       rentalLine: joinItemNames(pickedRentals, 2),
       supplierLine: joinItemNames(pickedSuppliers, 1),
       mediaLine: joinItemNames(pickedMedia, 1),
+      highlightPoints,
+      venueSection: getSectionItems(sections, "venue"),
     },
     sharePayload: {
       city: demand.city,

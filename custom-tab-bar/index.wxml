@@ -1,4 +1,4 @@
-<view class="glass-tabbar-shell">
+<view class="glass-tabbar-shell {{hidden ? 'glass-tabbar-shell--hidden' : ''}}">
   <view class="glass-tabbar">
     <view
       wx:for="{{tabs}}"

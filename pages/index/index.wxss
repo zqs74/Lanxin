@@ -18,10 +18,10 @@
 
 .hero-slogan {
   margin-top: 16rpx;
-  max-width: 460rpx;
-  font-size: 54rpx;
-  line-height: 1.12;
+  font-size: 46rpx;
+  line-height: 1.14;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .hero-pill-row {
@@ -191,10 +191,11 @@
 
 .demand-title {
   margin-top: 18rpx;
-  font-size: 58rpx;
+  font-size: 54rpx;
   line-height: 1.08;
   font-weight: 700;
   color: #1c2b49;
+  white-space: nowrap;
 }
 
 .demand-search {
@@ -241,15 +242,22 @@
 }
 
 .prompt-popup {
-  max-height: 72vh;
+  height: 78vh;
+  display: flex;
+  flex-direction: column;
   padding: 32rpx 24rpx 0;
-  overflow-y: auto;
 }
 
 .prompt-title {
   font-size: 36rpx;
   font-weight: 700;
   color: #1d2c49;
+}
+
+.prompt-scroll {
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 12rpx;
 }
 
 .prompt-block {
@@ -295,13 +303,8 @@
 }
 
 .popup-cta-bar {
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: 24rpx -24rpx 0;
-  padding: 24rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(244, 247, 252, 0.94) 18%, #f4f7fc 100%);
+  margin-top: 18rpx;
+  padding-bottom: calc(56rpx + env(safe-area-inset-bottom));
 }
 
 @keyframes demandRise {

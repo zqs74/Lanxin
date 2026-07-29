@@ -4,7 +4,7 @@
       <view class="hero-main">
         <view class="hero-city">{{mode === 'pro_event' ? '半专业赛事方案' : '野球约球方案'}}</view>
         <view class="hero-title">{{result.summary}}</view>
-        <view class="hero-brief">{{result.reasonLines[1]}}</view>
+        <view class="hero-brief">{{result.strategyLine}}</view>
       </view>
       <view class="score-card">
         <text class="score-value">{{result.matchScore}}</text>
@@ -24,26 +24,31 @@
       <button class="primary-btn rematch-btn rematch-btn--inline" bindtap="openTunePanel">重新匹配需求</button>
     </view>
 
-    <view class="summary-top">
-      <view class="summary-main">
-        <view class="summary-label">方案摘要</view>
-        <view class="summary-copy">{{result.topReason}}</view>
-      </view>
+    <view class="summary-copy">
+      <text class="summary-copy--accent">{{result.summaryLead}}</text>
+      <text class="summary-copy--body">{{result.summaryTail}}</text>
     </view>
+
+    <view class="summary-note">{{result.summaryNote}}</view>
 
     <view class="summary-metrics">
       <view class="metric-block">
-        <view class="metric-label">预算参考</view>
-        <view class="metric-value">{{result.budgetHint}}</view>
+        <view class="metric-label">预算落点</view>
+        <view class="metric-value">{{result.budgetFocus}}</view>
+        <view class="metric-desc">{{result.budgetHint}}</view>
       </view>
       <view class="metric-block">
-        <view class="metric-label">主推荐</view>
-        <view class="metric-value">{{result.sections[0].items[0].name}}</view>
+        <view class="metric-label">方案调性</view>
+        <view class="metric-value">{{result.planTone}}</view>
+        <view class="metric-desc">{{result.sections[0].items[0].name}}</view>
       </view>
     </view>
 
-    <view class="reason-list">
-      <view wx:for="{{result.reasonLines}}" wx:key="*this" class="reason-item">{{item}}</view>
+    <view class="summary-focus-list">
+      <view wx:for="{{result.highlightPoints}}" wx:key="label" class="summary-focus-item">
+        <view class="summary-focus-label">{{item.label}}</view>
+        <view class="summary-focus-value">{{item.value}}</view>
+      </view>
     </view>
   </view>
 
@@ -89,7 +94,7 @@
     <button class="primary-btn cta-btn" bindtap="openBooking">填写信息帮忙预约</button>
   </view>
 
-  <van-popup show="{{tuneVisible}}" round position="bottom" custom-style="height: 76vh;" bind:close="closeTunePanel">
+  <van-popup show="{{tuneVisible}}" round position="bottom" custom-style="height: 78vh; z-index: 5200;" bind:close="closeTunePanel">
     <view class="popup-panel">
       <view class="prompt-title">重新匹配需求</view>
 
@@ -143,22 +148,6 @@
         </view>
 
         <view class="tune-card">
-          <view class="prompt-label">场地偏好</view>
-          <view class="chip-group">
-            <view
-              wx:for="{{venueOptions}}"
-              wx:key="value"
-              class="chip {{demand.venuePreference === item.value ? 'chip--active' : ''}}"
-              data-key="venuePreference"
-              data-value="{{item.value}}"
-              bindtap="selectTuneValue"
-            >
-              {{item.label}}
-            </view>
-          </view>
-        </view>
-
-        <view class="tune-card">
           <view class="prompt-label">参加人数</view>
           <view class="number-wrap">
             <van-field
@@ -179,24 +168,28 @@
     </view>
   </van-popup>
 
-  <van-popup show="{{bookingVisible}}" round position="bottom" custom-style="height: 78vh;" bind:close="closeBooking">
+  <van-popup show="{{bookingVisible}}" round position="bottom" custom-style="height: 72vh; z-index: 5200;" bind:close="closeBooking">
     <view class="popup-panel">
       <view class="prompt-title">填写信息帮忙预约</view>
 
-      <view class="form-stack">
-        <van-field label="联系人" value="{{bookingForm.contactName}}" data-key="contactName" placeholder="怎么称呼你" bind:change="updateBookingField" />
-        <van-field label="手机号" type="number" value="{{bookingForm.phone}}" data-key="phone" placeholder="方便联系的手机号" bind:change="updateBookingField" />
-        <van-field label="微信号" value="{{bookingForm.wechat}}" data-key="wechat" placeholder="选填，方便后续沟通" bind:change="updateBookingField" />
-        <van-field label="日期" value="{{bookingForm.expectedDate}}" data-key="expectedDate" placeholder="希望日期" bind:change="updateBookingField" />
-        <van-field label="备注" value="{{bookingForm.remark}}" data-key="remark" type="textarea" autosize placeholder="比如保留室内馆、加主持、加直播等" bind:change="updateBookingField" />
-      </view>
-
-      <view class="fallback-row" bindtap="toggleAcceptFallback">
-        <view>
-          <view class="fallback-title">可接受同档位替代方案</view>
+      <scroll-view scroll-y class="popup-scroll">
+        <view class="form-stack">
+          <van-field label="联系人" value="{{bookingForm.contactName}}" data-key="contactName" placeholder="怎么称呼你" bind:change="updateBookingField" />
+          <van-field label="手机号" type="number" value="{{bookingForm.phone}}" data-key="phone" placeholder="方便联系的手机号" bind:change="updateBookingField" />
+          <van-field label="微信号" value="{{bookingForm.wechat}}" data-key="wechat" placeholder="选填，方便后续沟通" bind:change="updateBookingField" />
+          <van-field label="日期" value="{{bookingForm.expectedDate}}" data-key="expectedDate" placeholder="希望日期" bind:change="updateBookingField" />
+          <van-field label="备注" value="{{bookingForm.remark}}" data-key="remark" type="textarea" autosize placeholder="比如保留室内馆、加主持、加直播等" bind:change="updateBookingField" />
         </view>
-        <view class="fallback-check {{bookingForm.acceptFallback ? 'fallback-check--active' : ''}}"></view>
-      </view>
+
+        <view class="fallback-row" bindtap="toggleAcceptFallback">
+          <view>
+            <view class="fallback-title">可接受同档位替代方案</view>
+          </view>
+          <view class="fallback-check {{bookingForm.acceptFallback ? 'fallback-check--active' : ''}}">
+            <view class="fallback-check-mark"></view>
+          </view>
+        </view>
+      </scroll-view>
 
       <view class="cta-bar popup-bottom-bar">
         <button class="secondary-btn popup-btn" bindtap="closeBooking">暂不预约</button>

@@ -4,6 +4,7 @@
     "pages/result/result",
     "pages/library/library",
     "pages/history/history",
+    "pages/records/records",
     "pages/poster/poster"
   ],
   "tabBar": {
@@ -28,7 +29,7 @@
   },
   "window": {
     "navigationBarTextStyle": "white",
-    "navigationBarTitleText": "东莞篮球约战",
+    "navigationBarTitleText": "一句话篮球约战",
     "navigationBarBackgroundColor": "#1d5dff",
     "backgroundTextStyle": "light",
     "backgroundColor": "#f3f7ff"

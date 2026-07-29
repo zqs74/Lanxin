@@ -21,8 +21,8 @@ Page({
   data: {
     categories: libraryCategories,
     activeCategory: "venues",
-    list: venues.slice(1),
     featuredItem: venues[0],
+    list: venues.slice(1),
     resourceCount: venues.length,
     activeCategoryLabel: "场馆",
     townFilter: "全部",
@@ -38,6 +38,7 @@ Page({
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
       this.getTabBar().setData({
         active: "library",
+        hidden: false,
       });
     }
   },
@@ -68,25 +69,23 @@ Page({
 
   refreshList() {
     const raw = sourceMap[this.data.activeCategory] || [];
-    const sourceList =
-      this.data.townFilter === "全部"
-        ? raw
-        : raw.filter((item) => !item.town || item.town === this.data.townFilter);
+    const sourceList = this.data.townFilter === "全部"
+      ? raw
+      : raw.filter((item) => !item.town || item.town === this.data.townFilter);
     const featuredItem = sourceList[0] || null;
     const list = featuredItem ? sourceList.slice(1) : [];
     const currentCategory = this.data.categories.find((item) => item.key === this.data.activeCategory);
 
     let emptyText = "";
     if (!sourceList.length) {
-      emptyText =
-        this.data.activeCategory === "venues"
-          ? "当前镇区暂无匹配场馆，可以试试周边镇区"
-          : "当前镇区暂无这类资源，可以换个筛选试试";
+      emptyText = this.data.activeCategory === "venues"
+        ? "当前镇区暂无匹配场馆，可以试试周边镇区"
+        : "当前镇区暂无这类资源，可以换个筛选试试";
     }
 
     this.setData({
-      list,
       featuredItem,
+      list,
       resourceCount: sourceList.length,
       activeCategoryLabel: currentCategory ? currentCategory.label : "资源",
       emptyText,

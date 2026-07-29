@@ -69,39 +69,41 @@
     <button class="primary-btn demand-btn" bindtap="handlePrimaryAction">立即匹配方案</button>
   </view>
 
-  <van-popup show="{{popupVisible}}" round position="bottom" custom-style="max-height: 72vh;" bind:close="closePopup">
+  <van-popup show="{{popupVisible}}" round position="bottom" custom-style="height: 78vh; z-index: 5200;" bind:close="closePopup">
     <view class="prompt-popup">
       <view class="prompt-title">补齐这几项</view>
 
-      <block wx:for="{{missingPrompts}}" wx:key="key" wx:for-item="prompt">
-        <view class="prompt-block">
-          <view class="prompt-label">{{prompt.label}}</view>
+      <scroll-view scroll-y class="prompt-scroll">
+        <block wx:for="{{missingPrompts}}" wx:key="key" wx:for-item="prompt">
+          <view class="prompt-block">
+            <view class="prompt-label">{{prompt.label}}</view>
 
-          <view wx:if="{{prompt.type === 'chips'}}" class="chip-group">
-            <view
-              wx:for="{{prompt.options}}"
-              wx:key="value"
-              wx:for-item="option"
-              class="chip {{formValues[prompt.key] === (option.value || option) ? 'chip--active' : ''}}"
-              data-key="{{prompt.key}}"
-              data-value="{{option.value || option}}"
-              bindtap="selectPromptOption"
-            >
-              {{option.label || option}}
+            <view wx:if="{{prompt.type === 'chips'}}" class="chip-group">
+              <view
+                wx:for="{{prompt.options}}"
+                wx:key="value"
+                wx:for-item="option"
+                class="chip {{formValues[prompt.key] === (option.value || option) ? 'chip--active' : ''}}"
+                data-key="{{prompt.key}}"
+                data-value="{{option.value || option}}"
+                bindtap="selectPromptOption"
+              >
+                {{option.label || option}}
+              </view>
+            </view>
+
+            <view wx:if="{{prompt.type === 'number'}}" class="number-wrap">
+              <van-field
+                type="number"
+                value="{{formValues[prompt.key]}}"
+                placeholder="请输入"
+                data-key="{{prompt.key}}"
+                bind:change="onNumberChange"
+              />
             </view>
           </view>
-
-          <view wx:if="{{prompt.type === 'number'}}" class="number-wrap">
-            <van-field
-              type="number"
-              value="{{formValues[prompt.key]}}"
-              placeholder="请输入"
-              data-key="{{prompt.key}}"
-              bind:change="onNumberChange"
-            />
-          </view>
-        </view>
-      </block>
+        </block>
+      </scroll-view>
 
       <view class="cta-bar popup-cta-bar">
         <button class="secondary-btn popup-btn" bindtap="closePopup">稍后再说</button>

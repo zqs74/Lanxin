@@ -2,18 +2,8 @@
   padding-bottom: 220rpx;
 }
 
-.history-head {
-  align-items: center;
-}
-
-.history-more-btn {
-  font-size: 24rpx;
-  font-weight: 700;
-  color: #2b6dff;
-}
-
 .filter-panel {
-  margin-top: 24rpx;
+  margin-top: 26rpx;
   padding: 24rpx;
   border-radius: 24rpx;
   background: linear-gradient(180deg, #f7faff 0%, #f3f7ff 100%);
@@ -56,35 +46,35 @@
   color: #ffffff;
 }
 
-.history-card {
+.record-card {
   padding: 24rpx 0;
 }
 
-.history-card + .history-card {
+.record-card + .record-card {
   border-top: 2rpx solid #eef3fb;
 }
 
-.history-top {
+.record-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16rpx;
 }
 
-.history-title {
+.record-title {
   flex: 1;
   font-size: 28rpx;
   font-weight: 700;
   color: #1c2b49;
 }
 
-.history-time {
+.record-time {
   flex-shrink: 0;
   font-size: 22rpx;
   color: #7c8ba8;
 }
 
-.history-brief {
+.record-brief {
   margin-top: 14rpx;
   font-size: 26rpx;
   line-height: 1.45;
@@ -92,15 +82,15 @@
   color: #243556;
 }
 
-.history-highlight {
+.record-highlight {
   margin-top: 10rpx;
   font-size: 23rpx;
   line-height: 1.6;
   color: #63779c;
 }
 
-.history-empty-inline {
-  padding: 28rpx 0 6rpx;
+.record-empty-inline {
+  padding: 34rpx 0 10rpx;
   font-size: 24rpx;
   color: #7c8ba8;
 }

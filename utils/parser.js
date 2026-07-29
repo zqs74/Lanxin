@@ -146,9 +146,6 @@ function getMissingFields(demand) {
   if (!demand.playDate) {
     fields.push("playDate");
   }
-  if (!demand.venuePreference) {
-    fields.push("venuePreference");
-  }
   if (!demand.budgetLevel) {
     fields.push("budgetLevel");
   }

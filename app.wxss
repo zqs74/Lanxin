@@ -16,6 +16,11 @@ swiper-item {
   box-sizing: border-box;
 }
 
+button {
+  padding: 0;
+  line-height: 1;
+}
+
 .app-shell {
   min-height: 100vh;
   padding: 32rpx 24rpx 48rpx;
@@ -136,4 +141,36 @@ swiper-item {
 .tiny-text {
   font-size: 22rpx;
   color: #7d8cae;
+}
+
+.accent-heading {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding-left: 28rpx;
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #1d2c49;
+}
+
+.accent-heading::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10rpx;
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: #2b8fff;
+}
+
+.accent-heading::after {
+  content: "";
+  position: absolute;
+  left: 18rpx;
+  bottom: -8rpx;
+  width: 132rpx;
+  height: 10rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #2b8fff 0%, rgba(43, 143, 255, 0.12) 100%);
 }

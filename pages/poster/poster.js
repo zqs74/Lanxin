@@ -25,7 +25,7 @@ Page({
   },
 
   savePoster() {
-    if (this.data.saving) {
+    if (this.data.saving || !this.data.poster) {
       return;
     }
 
@@ -34,100 +34,26 @@ Page({
     });
 
     const query = wx.createSelectorQuery().in(this);
-    query.select("#poster-canvas").fields({ node: true, size: true }).exec((res) => {
+    query.select("#poster-canvas").fields({ node: true, size: true }).exec(async (res) => {
       const canvasInfo = res && res[0];
       if (!canvasInfo || !canvasInfo.node) {
-        this.setData({ saving: false });
-        wx.showToast({
-          title: "海报画布初始化失败",
-          icon: "none",
-        });
+        this.finishSaving("海报画布初始化失败");
         return;
       }
 
       const { node, width, height } = canvasInfo;
       const ctx = node.getContext("2d");
-      const dpr = wx.getWindowInfo().pixelRatio || 2;
+      const dpr = Math.max(3, wx.getWindowInfo().pixelRatio || 2);
       node.width = width * dpr;
       node.height = height * dpr;
       ctx.scale(dpr, dpr);
 
-      const poster = this.data.poster;
-      ctx.fillStyle = "#f4f7fc";
-      ctx.fillRect(0, 0, width, height);
-
-      const gradient = ctx.createLinearGradient(0, 0, width, 360);
-      gradient.addColorStop(0, "#145bff");
-      gradient.addColorStop(1, "#4d8dff");
-      ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, width, 360);
-
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "18px sans-serif";
-      ctx.fillText("东莞篮球约战", 24, 40);
-      ctx.font = "bold 28px sans-serif";
-      wrapText(ctx, poster.title, 24, 86, width - 48, 38, 2);
-      ctx.font = "16px sans-serif";
-      wrapText(ctx, `${poster.modeLabel} · ${poster.town} · ${poster.date}`, 24, 154, width - 48, 28, 2);
-      roundRect(ctx, 24, 192, 126, 36, 18, "rgba(255,255,255,0.16)");
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 14px sans-serif";
-      ctx.fillText(`${poster.matchScore} 分匹配`, 42, 215);
-
-      roundRect(ctx, 20, 268, width - 40, 146, 24, "#ffffff");
-      ctx.fillStyle = "#7d8cb1";
-      ctx.font = "15px sans-serif";
-      ctx.fillText("推荐场馆", 40, 304);
-      ctx.fillStyle = "#20304b";
-      ctx.font = "bold 24px sans-serif";
-      wrapText(ctx, poster.venue, 40, 340, width - 80, 34, 2);
-
-      let tagX = 40;
-      const tagY = 376;
-      (poster.tags || []).forEach((tag) => {
-        const tagWidth = Math.max(66, tag.length * 16 + 24);
-        roundRect(ctx, tagX, tagY, tagWidth, 28, 14, "rgba(29,93,255,0.08)");
-        ctx.fillStyle = "#1d5dff";
-        ctx.font = "13px sans-serif";
-        ctx.fillText(tag, tagX + 12, tagY + 18);
-        tagX += tagWidth + 10;
-      });
-
-      const infoCards = [
-        ["裁判配置", poster.refereeLine],
-        ["物料建议", poster.materialLine],
-        ["租赁建议", poster.rentalLine],
-        ["供应商", poster.supplierLine],
-        ["媒体", poster.mediaLine],
-        ["预算参考", poster.budgetHint],
-      ].filter((item) => item[1]);
-
-      const cardWidth = (width - 56) / 2;
-      const cardHeight = 122;
-      const gridStartY = 434;
-
-      infoCards.forEach((entry, index) => {
-        const row = Math.floor(index / 2);
-        const col = index % 2;
-        const x = 20 + col * (cardWidth + 16);
-        const y = gridStartY + row * (cardHeight + 16);
-
-        roundRect(ctx, x, y, cardWidth, cardHeight, 22, "#ffffff");
-        ctx.fillStyle = "#7d8cb1";
-        ctx.font = "14px sans-serif";
-        ctx.fillText(entry[0], x + 18, y + 28);
-        ctx.fillStyle = "#20304b";
-        ctx.font = "bold 16px sans-serif";
-        wrapText(ctx, entry[1], x + 18, y + 58, cardWidth - 36, 24, 2);
-      });
-
-      const bottomY = gridStartY + Math.ceil(infoCards.length / 2) * (cardHeight + 16) + 4;
-      roundRect(ctx, 20, bottomY, width - 40, 118, 24, "#1658ef");
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "15px sans-serif";
-      ctx.fillText("一句话篮球约战", 40, bottomY + 30);
-      ctx.font = "bold 20px sans-serif";
-      wrapText(ctx, poster.summary, 40, bottomY + 68, width - 80, 28, 2);
+      try {
+        await renderPoster(ctx, node, width, height, this.data.poster);
+      } catch (error) {
+        this.finishSaving("海报导出失败");
+        return;
+      }
 
       wx.canvasToTempFilePath(
         {
@@ -151,21 +77,24 @@ Page({
             });
           },
           fail: () => {
-            this.setData({ saving: false });
-            wx.showToast({
-              title: "海报导出失败",
-              icon: "none",
-            });
+            this.finishSaving("海报导出失败");
           },
         },
         this
       );
     });
   },
+
+  finishSaving(title) {
+    this.setData({ saving: false });
+    wx.showToast({
+      title,
+      icon: "none",
+    });
+  },
 });
 
-function roundRect(ctx, x, y, width, height, radius, fillStyle) {
-  ctx.save();
+function roundRectPath(ctx, x, y, width, height, radius) {
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
   ctx.lineTo(x + width - radius, y);
@@ -177,9 +106,201 @@ function roundRect(ctx, x, y, width, height, radius, fillStyle) {
   ctx.lineTo(x, y + radius);
   ctx.quadraticCurveTo(x, y, x + radius, y);
   ctx.closePath();
+}
+
+function fillRoundRect(ctx, x, y, width, height, radius, fillStyle) {
+  ctx.save();
+  roundRectPath(ctx, x, y, width, height, radius);
   ctx.fillStyle = fillStyle;
   ctx.fill();
   ctx.restore();
+}
+
+async function renderPoster(ctx, node, width, height, poster) {
+  ctx.clearRect(0, 0, width, height);
+  ctx.fillStyle = "#eef4ff";
+  ctx.fillRect(0, 0, width, height);
+
+  const heroGradient = ctx.createLinearGradient(0, 0, width, 460);
+  heroGradient.addColorStop(0, "#115cff");
+  heroGradient.addColorStop(1, "#5b9cff");
+  ctx.fillStyle = heroGradient;
+  ctx.fillRect(0, 0, width, 420);
+
+  ctx.fillStyle = "rgba(255,255,255,0.14)";
+  ctx.beginPath();
+  ctx.arc(width - 62, 66, 76, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "18px sans-serif";
+  ctx.fillText("东莞篮球约战", 42, 58);
+  ctx.font = "bold 38px sans-serif";
+  wrapText(ctx, poster.title, 42, 112, width - 84, 46, 2);
+  ctx.font = "18px sans-serif";
+  wrapText(ctx, `${poster.modeLabel} · ${poster.town} · ${poster.date}`, 42, 210, width - 84, 30, 2);
+
+  fillRoundRect(ctx, 42, 248, 170, 48, 24, "rgba(255,255,255,0.16)");
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 18px sans-serif";
+  ctx.fillText(`${poster.matchScore} 分匹配`, 62, 279);
+
+  const coverImage = poster.venueCover ? await loadCanvasImage(node, poster.venueCover) : null;
+  drawCoverCard(ctx, poster, width, coverImage);
+  drawSummaryCard(ctx, poster, width);
+  drawHighlightCard(ctx, poster, width);
+  drawInfoGrid(ctx, poster, width);
+}
+
+async function loadCanvasImage(node, src) {
+  const localSrc = await new Promise((resolve) => {
+    wx.getImageInfo({
+      src,
+      success: (res) => resolve(res.path),
+      fail: () => resolve(src),
+    });
+  });
+
+  return new Promise((resolve, reject) => {
+    const image = node.createImage();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = localSrc;
+  });
+}
+
+function drawCoverCard(ctx, poster, width, coverImage) {
+  const cardX = 30;
+  const cardY = 324;
+  const cardW = width - 60;
+  const cardH = 298;
+
+  fillRoundRect(ctx, cardX, cardY, cardW, cardH, 30, "#dce8ff");
+
+  if (coverImage) {
+    ctx.save();
+    roundRectPath(ctx, cardX, cardY, cardW, cardH, 30);
+    ctx.clip();
+    ctx.drawImage(coverImage, cardX, cardY, cardW, cardH);
+    ctx.restore();
+  }
+
+  const mask = ctx.createLinearGradient(cardX, cardY, cardX, cardY + cardH);
+  mask.addColorStop(0, "rgba(18,41,89,0.04)");
+  mask.addColorStop(1, "rgba(18,41,89,0.78)");
+  ctx.save();
+  roundRectPath(ctx, cardX, cardY, cardW, cardH, 30);
+  ctx.fillStyle = mask;
+  ctx.fill();
+  ctx.restore();
+
+  ctx.fillStyle = "rgba(255,255,255,0.9)";
+  ctx.font = "14px sans-serif";
+  ctx.fillText("推荐场馆", cardX + 24, cardY + 38);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 30px sans-serif";
+  wrapText(ctx, poster.venue, cardX + 24, cardY + 92, cardW - 48, 38, 3);
+  ctx.font = "15px sans-serif";
+  wrapText(ctx, poster.planTone, cardX + 24, cardY + 214, cardW - 48, 26, 2);
+
+  let tagX = cardX + 24;
+  const tagY = cardY + cardH - 44;
+  (poster.tags || []).forEach((tag) => {
+    const tagWidth = Math.max(88, tag.length * 18 + 30);
+    fillRoundRect(ctx, tagX, tagY, tagWidth, 34, 17, "rgba(255,255,255,0.16)");
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "13px sans-serif";
+    ctx.fillText(tag, tagX + 14, tagY + 22);
+    tagX += tagWidth + 10;
+  });
+}
+
+function drawSummaryCard(ctx, poster, width) {
+  const cardX = 30;
+  const cardY = 646;
+  const cardW = width - 60;
+  const cardH = 186;
+
+  fillRoundRect(ctx, cardX, cardY, cardW, cardH, 28, "#ffffff");
+
+  ctx.fillStyle = "#7d8cb1";
+  ctx.font = "15px sans-serif";
+  ctx.fillText("方案摘要", cardX + 24, cardY + 36);
+
+  ctx.fillStyle = "#1d5dff";
+  ctx.font = "bold 28px sans-serif";
+  const leadWidth = Math.min(ctx.measureText(poster.summaryLead || "").width, cardW - 48);
+  ctx.fillText(poster.summaryLead || "", cardX + 24, cardY + 84);
+
+  ctx.fillStyle = "#21324f";
+  ctx.font = "bold 24px sans-serif";
+  wrapText(ctx, poster.summaryTail || "", cardX + 24 + leadWidth + 10, cardY + 84, cardW - 58 - leadWidth, 30, 1);
+
+  ctx.fillStyle = "#64789c";
+  ctx.font = "15px sans-serif";
+  wrapText(ctx, poster.summaryNote || poster.strategyLine || "", cardX + 24, cardY + 126, cardW - 48, 26, 2);
+}
+
+function drawHighlightCard(ctx, poster, width) {
+  const cardX = 30;
+  const cardY = 854;
+  const cardW = width - 60;
+  const cardH = 242;
+  fillRoundRect(ctx, cardX, cardY, cardW, cardH, 28, "#ffffff");
+
+  ctx.fillStyle = "#7d8cb1";
+  ctx.font = "15px sans-serif";
+  ctx.fillText("方案重点", cardX + 24, cardY + 36);
+
+  const points = poster.highlightPoints || [];
+  points.forEach((item, index) => {
+    const itemY = cardY + 76 + index * 42;
+    ctx.fillStyle = "#5b7ed6";
+    ctx.font = "bold 14px sans-serif";
+    ctx.fillText(item.label, cardX + 24, itemY);
+    ctx.fillStyle = "#21324f";
+    ctx.font = "bold 16px sans-serif";
+    wrapText(ctx, item.value, cardX + 126, itemY, cardW - 150, 24, 1);
+  });
+}
+
+function drawInfoGrid(ctx, poster, width) {
+  const infoCards = [
+    ["预算落点", poster.budgetFocus],
+    ["预算参考", poster.budgetHint],
+    ["裁判配置", poster.refereeLine],
+    ["物料建议", poster.materialLine],
+    ["租赁建议", poster.rentalLine],
+    ["供应商", poster.supplierLine],
+    ["媒体", poster.mediaLine],
+  ].filter((item) => item[1]);
+
+  const cardWidth = (width - 76) / 2;
+  const cardHeight = 138;
+  const startY = 1120;
+
+  infoCards.forEach((entry, index) => {
+    const row = Math.floor(index / 2);
+    const col = index % 2;
+    const x = 30 + col * (cardWidth + 16);
+    const y = startY + row * (cardHeight + 16);
+
+    fillRoundRect(ctx, x, y, cardWidth, cardHeight, 24, "#ffffff");
+    ctx.fillStyle = "#7d8cb1";
+    ctx.font = "14px sans-serif";
+    ctx.fillText(entry[0], x + 18, y + 30);
+    ctx.fillStyle = "#20304b";
+    ctx.font = "bold 18px sans-serif";
+    wrapText(ctx, entry[1], x + 18, y + 64, cardWidth - 36, 26, 3);
+  });
+
+  const bottomY = startY + Math.ceil(infoCards.length / 2) * (cardHeight + 16) + 8;
+  fillRoundRect(ctx, 30, bottomY, width - 60, 126, 28, "#1658ef");
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "15px sans-serif";
+  ctx.fillText("打开小程序可继续查看完整方案", 54, bottomY + 44);
+  ctx.font = "bold 18px sans-serif";
+  ctx.fillText("场馆、裁判、物料、预约入口已同步准备好", 54, bottomY + 84);
 }
 
 function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
@@ -190,6 +311,7 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
   let line = "";
   let lines = 0;
   let renderedLength = 0;
+
   for (let i = 0; i < text.length; i += 1) {
     const testLine = line + text[i];
     if (ctx.measureText(testLine).width > maxWidth && line) {
@@ -206,7 +328,9 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
   }
 
   if (line && lines < maxLines) {
-    const finalText = lines === maxLines - 1 && text.length > renderedLength + line.length ? `${line}...` : line;
+    const finalText = lines === maxLines - 1 && text.length > renderedLength + line.length
+      ? `${line}...`
+      : line;
     ctx.fillText(finalText, x, y + lineHeight * lines);
   }
 }
