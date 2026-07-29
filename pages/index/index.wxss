@@ -1,0 +1,225 @@
+.home-shell {
+  padding-bottom: 220rpx;
+}
+
+.home-stage {
+  min-height: 56vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transform: translateY(84rpx);
+  transition: transform 280ms ease, min-height 280ms ease;
+}
+
+.home-stage--selected {
+  min-height: auto;
+  transform: translateY(0);
+}
+
+.home-title {
+  font-size: 52rpx;
+  font-weight: 700;
+  line-height: 1.15;
+  color: #1c2b49;
+  text-align: center;
+}
+
+.mode-grid {
+  display: flex;
+  gap: 18rpx;
+  margin-top: 32rpx;
+}
+
+.mode-entry {
+  flex: 1;
+  position: relative;
+  min-height: 248rpx;
+  padding: 34rpx 26rpx;
+  border-radius: 30rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+  border: 2rpx solid transparent;
+  transform: translateY(0) scale(1);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
+}
+
+.mode-entry--hover {
+  transform: translateY(-4rpx) scale(0.985);
+}
+
+.mode-entry--active {
+  border-color: rgba(21, 91, 255, 0.2);
+  background: linear-gradient(180deg, rgba(21, 91, 255, 0.16) 0%, rgba(21, 91, 255, 0.06) 100%);
+  box-shadow: 0 20rpx 42rpx rgba(21, 91, 255, 0.12);
+}
+
+.mode-entry-mark {
+  position: absolute;
+  top: 22rpx;
+  right: 22rpx;
+  min-width: 64rpx;
+  height: 36rpx;
+  padding: 0 14rpx;
+  border-radius: 999rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(21, 91, 255, 0.12);
+  color: #155bff;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.mode-entry-title {
+  font-size: 42rpx;
+  font-weight: 700;
+  color: #1d2c49;
+  text-align: center;
+}
+
+.demand-panel {
+  margin-top: 24rpx;
+  padding: 32rpx 28rpx 30rpx;
+  opacity: 0;
+  transform: translateY(28rpx);
+}
+
+.demand-panel--show {
+  opacity: 1;
+  transform: translateY(0);
+  animation: demandRise 260ms ease;
+}
+
+.demand-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 44rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  background: rgba(21, 91, 255, 0.1);
+  color: #155bff;
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.demand-title {
+  margin-top: 18rpx;
+  font-size: 52rpx;
+  line-height: 1.08;
+  font-weight: 700;
+  color: #1c2b49;
+}
+
+.demand-search {
+  margin-top: 24rpx;
+  padding: 12rpx 10rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(180deg, #f6faff 0%, #edf4ff 100%);
+  box-shadow: inset 0 0 0 2rpx rgba(21, 91, 255, 0.06);
+}
+
+.example-list {
+  margin-top: 20rpx;
+}
+
+.example-card {
+  padding: 22rpx 24rpx;
+  border-radius: 24rpx;
+  background: #f7faff;
+  color: #304266;
+  font-size: 24rpx;
+  line-height: 1.65;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.example-card + .example-card {
+  margin-top: 14rpx;
+}
+
+.example-card--hover {
+  transform: scale(0.99);
+}
+
+.demand-btn {
+  margin-top: 24rpx;
+  width: 100%;
+}
+
+.prompt-popup {
+  max-height: 72vh;
+  padding: 32rpx 24rpx 0;
+  overflow-y: auto;
+}
+
+.prompt-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1d2c49;
+}
+
+.prompt-block {
+  margin-top: 28rpx;
+}
+
+.prompt-label {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #243453;
+}
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 16rpx;
+}
+
+.chip {
+  padding: 14rpx 22rpx;
+  border-radius: 999rpx;
+  background: #f2f7ff;
+  color: #56709f;
+  font-size: 24rpx;
+}
+
+.chip--active {
+  background: linear-gradient(135deg, #155bff 0%, #4d8dff 100%);
+  color: #ffffff;
+  box-shadow: 0 12rpx 24rpx rgba(21, 91, 255, 0.16);
+}
+
+.number-wrap {
+  margin-top: 14rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+  background: #f8fbff;
+}
+
+.popup-btn {
+  flex: 1;
+}
+
+.popup-cta-bar {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: 24rpx -24rpx 0;
+  padding: 24rpx 24rpx calc(24rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(244, 247, 252, 0.94) 18%, #f4f7fc 100%);
+}
+
+@keyframes demandRise {
+  0% {
+    opacity: 0;
+    transform: translateY(16rpx) scale(0.98);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

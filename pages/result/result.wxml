@@ -1,0 +1,179 @@
+<view class="app-shell" wx:if="{{result}}">
+  <view class="page-hero result-hero">
+    <view class="hero-row">
+      <view>
+        <view class="hero-city">{{mode === 'pro_event' ? '半专业赛事方案' : '野球约球方案'}}</view>
+        <view class="hero-title">{{result.summary}}</view>
+      </view>
+      <view class="score-card">
+        <text class="score-value">{{result.matchScore}}</text>
+        <text class="score-label">匹配分</text>
+      </view>
+    </view>
+    <view class="hero-meta">
+      <view class="pill-tag hero-pill">{{demand.town || result.town}}</view>
+      <view class="pill-tag hero-pill">{{result.demandMeta.venueLabel}}</view>
+      <view class="pill-tag hero-pill">{{result.demandMeta.budgetLabel}}</view>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <button class="primary-btn rematch-btn" bindtap="openTunePanel">重新匹配需求</button>
+    <view class="budget-box budget-box--tight">
+      <view class="budget-title">预算参考</view>
+      <view class="budget-copy">{{result.budgetHint}}</view>
+    </view>
+  </view>
+
+  <block wx:if="{{result.sections.length}}">
+    <view wx:for="{{result.sections}}" wx:key="key" class="section-card">
+      <view class="section-title">{{item.title}}</view>
+      <view class="resource-list">
+        <view wx:for="{{item.items}}" wx:key="id" class="resource-card">
+          <image class="resource-cover" src="{{item.cover || item.avatar || item.image}}" mode="aspectFill"></image>
+          <view class="resource-body">
+            <view class="resource-name">{{item.name}}</view>
+            <view class="resource-tags">
+              <text wx:for="{{item.tags}}" wx:key="*this" class="resource-tag">{{item}}</text>
+            </view>
+            <view class="resource-desc">{{item.description}}</view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view class="section-card" wx:if="{{result.alternatives.length}}">
+    <view class="section-title">备选方向</view>
+    <view wx:for="{{result.alternatives}}" wx:key="id" class="alt-card">
+      <view class="alt-title">{{item.title}}</view>
+      <view class="alt-subtitle">{{item.subtitle}}</view>
+      <view class="tiny-text">{{item.reason}}</view>
+    </view>
+  </view>
+
+  <view class="section-card" wx:if="{{result.fallbackMessage}}">
+    <van-empty image="search" description="{{result.fallbackMessage}}" />
+  </view>
+
+  <view class="cta-bar">
+    <button class="secondary-btn cta-btn" bindtap="openPoster">生成分享海报</button>
+    <button class="primary-btn cta-btn" bindtap="openBooking">填写信息帮忙预约</button>
+  </view>
+
+  <van-popup show="{{tuneVisible}}" round position="bottom" custom-style="height: 76vh;" bind:close="closeTunePanel">
+    <view class="popup-panel">
+      <view class="prompt-title">重新匹配需求</view>
+
+      <scroll-view scroll-y class="popup-scroll">
+        <view class="tune-card">
+          <view class="prompt-label">镇区</view>
+          <view class="chip-group">
+            <view
+              wx:for="{{townOptions}}"
+              wx:key="*this"
+              class="chip {{demand.town === item ? 'chip--active' : ''}}"
+              data-key="town"
+              data-value="{{item}}"
+              bindtap="selectTuneValue"
+            >
+              {{item}}
+            </view>
+          </view>
+        </view>
+
+        <view class="tune-card">
+          <view class="prompt-label">日期</view>
+          <view class="chip-group">
+            <view
+              wx:for="{{dateOptions}}"
+              wx:key="value"
+              class="chip {{demand.playDate === item.value ? 'chip--active' : ''}}"
+              data-key="playDate"
+              data-value="{{item.value}}"
+              bindtap="selectTuneValue"
+            >
+              {{item.label}}
+            </view>
+          </view>
+        </view>
+
+        <view class="tune-card">
+          <view class="prompt-label">预算</view>
+          <view class="chip-group">
+            <view
+              wx:for="{{budgetOptions}}"
+              wx:key="value"
+              class="chip {{demand.budgetLevel === item.value ? 'chip--active' : ''}}"
+              data-key="budgetLevel"
+              data-value="{{item.value}}"
+              bindtap="selectTuneValue"
+            >
+              {{item.label}}
+            </view>
+          </view>
+        </view>
+
+        <view class="tune-card">
+          <view class="prompt-label">场地偏好</view>
+          <view class="chip-group">
+            <view
+              wx:for="{{venueOptions}}"
+              wx:key="value"
+              class="chip {{demand.venuePreference === item.value ? 'chip--active' : ''}}"
+              data-key="venuePreference"
+              data-value="{{item.value}}"
+              bindtap="selectTuneValue"
+            >
+              {{item.label}}
+            </view>
+          </view>
+        </view>
+
+        <view class="tune-card">
+          <view class="prompt-label">参加人数</view>
+          <view class="number-wrap">
+            <van-field
+              type="number"
+              value="{{demand.peopleCount}}"
+              data-key="peopleCount"
+              placeholder="请输入人数"
+              bind:change="onTuneNumberChange"
+            />
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="cta-bar popup-bottom-bar">
+        <button class="secondary-btn popup-btn" bindtap="closeTunePanel">取消</button>
+        <button class="primary-btn popup-btn" bindtap="rematchResult">重新匹配</button>
+      </view>
+    </view>
+  </van-popup>
+
+  <van-popup show="{{bookingVisible}}" round position="bottom" custom-style="height: 78vh;" bind:close="closeBooking">
+    <view class="popup-panel">
+      <view class="prompt-title">填写信息帮忙预约</view>
+
+      <view class="form-stack">
+        <van-field label="联系人" value="{{bookingForm.contactName}}" data-key="contactName" placeholder="怎么称呼你" bind:change="updateBookingField" />
+        <van-field label="手机号" type="number" value="{{bookingForm.phone}}" data-key="phone" placeholder="方便联系的手机号" bind:change="updateBookingField" />
+        <van-field label="微信号" value="{{bookingForm.wechat}}" data-key="wechat" placeholder="选填，方便后续沟通" bind:change="updateBookingField" />
+        <van-field label="日期" value="{{bookingForm.expectedDate}}" data-key="expectedDate" placeholder="希望日期" bind:change="updateBookingField" />
+        <van-field label="备注" value="{{bookingForm.remark}}" data-key="remark" type="textarea" autosize placeholder="比如保留室内馆、加主持、加直播等" bind:change="updateBookingField" />
+      </view>
+
+      <view class="fallback-row" bindtap="toggleAcceptFallback">
+        <view>
+          <view class="fallback-title">可接受同档位替代方案</view>
+        </view>
+        <view class="fallback-check {{bookingForm.acceptFallback ? 'fallback-check--active' : ''}}"></view>
+      </view>
+
+      <view class="cta-bar popup-bottom-bar">
+        <button class="secondary-btn popup-btn" bindtap="closeBooking">暂不预约</button>
+        <button class="primary-btn popup-btn" bindtap="submitBooking">提交预约意向</button>
+      </view>
+    </view>
+  </van-popup>
+</view>

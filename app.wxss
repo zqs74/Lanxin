@@ -1,0 +1,139 @@
+page {
+  min-height: 100%;
+  background: linear-gradient(180deg, #eef5ff 0%, #f7faff 180rpx, #f4f7fc 100%);
+  color: #15213a;
+  font-family: "PingFang SC", "Helvetica Neue", sans-serif;
+}
+
+view,
+text,
+button,
+input,
+textarea,
+scroll-view,
+swiper,
+swiper-item {
+  box-sizing: border-box;
+}
+
+.app-shell {
+  min-height: 100vh;
+  padding: 32rpx 24rpx 48rpx;
+}
+
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 36rpx 32rpx 40rpx;
+  border-radius: 36rpx;
+  background: linear-gradient(135deg, #0d5eff 0%, #4d8dff 55%, #8fc4ff 100%);
+  color: #ffffff;
+  box-shadow: 0 28rpx 60rpx rgba(28, 94, 255, 0.18);
+}
+
+.page-hero::after {
+  content: "";
+  position: absolute;
+  right: -40rpx;
+  top: -60rpx;
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.glass-card {
+  border-radius: 32rpx;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 20rpx 50rpx rgba(20, 54, 122, 0.08);
+}
+
+.section-card {
+  margin-top: 24rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #ffffff;
+  box-shadow: 0 18rpx 44rpx rgba(18, 46, 99, 0.06);
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1c2b49;
+}
+
+.section-subtitle {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #6c7da3;
+}
+
+.pill-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(29, 93, 255, 0.1);
+  color: #1d5dff;
+  font-size: 22rpx;
+  line-height: 1;
+}
+
+.cta-bar {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 18rpx;
+  padding: 24rpx 0 calc(24rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(244, 247, 252, 0) 0%, rgba(244, 247, 252, 0.92) 20%, #f4f7fc 100%);
+}
+
+.primary-btn {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #1d5dff 0%, #3d7cff 100%);
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  box-shadow: 0 20rpx 40rpx rgba(29, 93, 255, 0.2);
+}
+
+.secondary-btn {
+  height: 88rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid rgba(29, 93, 255, 0.18);
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.94);
+  color: #1d5dff;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.primary-btn::after,
+.secondary-btn::after {
+  border: none;
+}
+
+.muted-text {
+  color: #7383a8;
+}
+
+.tiny-text {
+  font-size: 22rpx;
+  color: #7d8cae;
+}

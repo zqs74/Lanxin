@@ -1,0 +1,269 @@
+.result-hero {
+  padding-bottom: 34rpx;
+}
+
+.hero-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.hero-city {
+  font-size: 24rpx;
+  opacity: 0.86;
+}
+
+.hero-title {
+  margin-top: 10rpx;
+  font-size: 42rpx;
+  line-height: 1.18;
+  font-weight: 700;
+}
+
+.score-card {
+  min-width: 136rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 26rpx;
+  background: rgba(255, 255, 255, 0.16);
+  text-align: center;
+}
+
+.score-value {
+  display: block;
+  font-size: 44rpx;
+  font-weight: 700;
+}
+
+.score-label {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 24rpx;
+}
+
+.hero-pill {
+  background: rgba(255, 255, 255, 0.16);
+  color: #ffffff;
+}
+
+.rematch-btn {
+  width: 100%;
+  margin-bottom: 20rpx;
+}
+
+.budget-box {
+  padding: 22rpx 24rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(180deg, #edf5ff 0%, #f7fbff 100%);
+}
+
+.budget-box--tight {
+  margin-top: 0;
+}
+
+.budget-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #1f3156;
+}
+
+.budget-copy {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: #59709a;
+}
+
+.resource-list {
+  margin-top: 18rpx;
+}
+
+.resource-card {
+  display: flex;
+  gap: 18rpx;
+  padding: 18rpx;
+  border-radius: 24rpx;
+  background: #f8fbff;
+}
+
+.resource-card + .resource-card {
+  margin-top: 16rpx;
+}
+
+.resource-cover {
+  width: 176rpx;
+  height: 176rpx;
+  border-radius: 20rpx;
+  background: #dfe8f8;
+  flex-shrink: 0;
+}
+
+.resource-body {
+  flex: 1;
+}
+
+.resource-name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1f3153;
+}
+
+.resource-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 12rpx;
+}
+
+.resource-tag {
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(29, 93, 255, 0.08);
+  color: #1d5dff;
+  font-size: 20rpx;
+}
+
+.resource-desc {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  line-height: 1.7;
+  color: #7282a4;
+}
+
+.alt-card {
+  margin-top: 16rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 24rpx;
+  background: #f8fbff;
+}
+
+.alt-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #22324f;
+}
+
+.alt-subtitle {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #506587;
+}
+
+.cta-btn {
+  flex: 1;
+}
+
+.popup-panel {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 32rpx 24rpx 0;
+}
+
+.popup-scroll {
+  flex: 1;
+  min-height: 0;
+  padding-bottom: 24rpx;
+}
+
+.prompt-title {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #1c2b49;
+}
+
+.tune-card {
+  margin-top: 22rpx;
+  padding: 24rpx;
+  border-radius: 24rpx;
+  background: #f8fbff;
+}
+
+.prompt-label {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #22324f;
+}
+
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14rpx;
+  margin-top: 18rpx;
+}
+
+.chip {
+  min-width: 112rpx;
+  padding: 16rpx 22rpx;
+  border-radius: 999rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #edf4ff;
+  color: #57709d;
+  font-size: 24rpx;
+  text-align: center;
+}
+
+.chip--active {
+  background: linear-gradient(135deg, #155bff 0%, #4d8dff 100%);
+  color: #ffffff;
+  box-shadow: 0 12rpx 24rpx rgba(21, 91, 255, 0.16);
+}
+
+.number-wrap {
+  margin-top: 18rpx;
+  border-radius: 22rpx;
+  overflow: hidden;
+  background: #ffffff;
+}
+
+.form-stack {
+  margin-top: 20rpx;
+  border-radius: 24rpx;
+  overflow: hidden;
+  background: #f9fbff;
+}
+
+.fallback-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 18rpx;
+  align-items: center;
+  margin-top: 24rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 24rpx;
+  background: #f8fbff;
+}
+
+.fallback-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #20304c;
+}
+
+.fallback-check {
+  width: 38rpx;
+  height: 38rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(29, 93, 255, 0.28);
+}
+
+.fallback-check--active {
+  background: #1d5dff;
+  box-shadow: inset 0 0 0 8rpx #ffffff;
+}
+
+.popup-btn {
+  flex: 1;
+}
+
+.popup-bottom-bar {
+  margin-top: 16rpx;
+}

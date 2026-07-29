@@ -1,0 +1,53 @@
+<view class="app-shell page-shell">
+  <view class="page-hero compact-hero">
+    <view class="hero-city">资源库</view>
+    <view class="hero-title">东莞资源</view>
+  </view>
+
+  <scroll-view scroll-x class="category-scroll">
+    <view class="category-row">
+      <view
+        wx:for="{{categories}}"
+        wx:key="key"
+        class="category-chip {{activeCategory === item.key ? 'category-chip--active' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="selectCategory"
+      >
+        {{item.label}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <scroll-view scroll-x class="town-scroll">
+    <view class="category-row">
+      <view
+        wx:for="{{towns}}"
+        wx:key="*this"
+        class="filter-chip {{townFilter === item ? 'filter-chip--active' : ''}}"
+        data-town="{{item}}"
+        bindtap="selectTown"
+      >
+        {{item}}
+      </view>
+    </view>
+  </scroll-view>
+
+  <block wx:if="{{list.length}}">
+    <view wx:for="{{list}}" wx:key="id" class="section-card library-card">
+      <image class="library-cover" src="{{item.cover || item.avatar || item.image}}" mode="aspectFill"></image>
+      <view class="library-body">
+        <view class="library-name">{{item.name}}</view>
+        <view class="library-town">{{item.town || '东莞'}}</view>
+        <view class="library-tags">
+          <text wx:for="{{item.tags}}" wx:key="*this" class="library-tag">{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view class="section-card" wx:else>
+    <van-empty image="search" description="{{emptyText}}" />
+  </view>
+
+  <glass-tabbar active="{{activeTab}}" />
+</view>

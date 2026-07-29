@@ -1,0 +1,77 @@
+.page-shell {
+  padding-bottom: 160rpx;
+}
+
+.compact-hero {
+  padding-top: 30rpx;
+  padding-bottom: 30rpx;
+}
+
+.category-scroll,
+.town-scroll {
+  margin-top: 22rpx;
+  white-space: nowrap;
+}
+
+.category-row {
+  display: inline-flex;
+  gap: 14rpx;
+  padding-right: 24rpx;
+}
+
+.category-chip,
+.filter-chip {
+  padding: 16rpx 24rpx;
+  border-radius: 999rpx;
+  background: #eef4ff;
+  color: #56709f;
+  font-size: 24rpx;
+}
+
+.category-chip--active,
+.filter-chip--active {
+  background: #1d5dff;
+  color: #ffffff;
+}
+
+.library-card {
+  padding: 0;
+  overflow: hidden;
+}
+
+.library-cover {
+  width: 100%;
+  height: 320rpx;
+  background: #dfe8f8;
+}
+
+.library-body {
+  padding: 26rpx 28rpx 30rpx;
+}
+
+.library-name {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #1d2d4a;
+}
+
+.library-town {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #1d5dff;
+}
+
+.library-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 14rpx;
+}
+
+.library-tag {
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: rgba(29, 93, 255, 0.08);
+  color: #1d5dff;
+  font-size: 20rpx;
+}

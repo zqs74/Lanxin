@@ -1,0 +1,95 @@
+<view class="app-shell home-shell">
+  <view class="home-stage {{mode ? 'home-stage--selected' : ''}}">
+    <view class="home-title">请选择约战方式</view>
+    <view class="mode-grid">
+      <view
+        wx:for="{{modeOptions}}"
+        wx:key="value"
+        class="mode-entry {{mode === item.value ? 'mode-entry--active' : ''}}"
+        data-mode="{{item.value}}"
+        bindtap="switchMode"
+        hover-class="mode-entry--hover"
+        hover-stay-time="90"
+      >
+        <view class="mode-entry-mark">{{mode === item.value ? '已选' : ''}}</view>
+        <view class="mode-entry-title">{{item.label}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{mode}}" class="section-card demand-panel demand-panel--show">
+    <view class="demand-mode-pill">{{mode === 'pro_event' ? '半专业赛事' : '野球约球'}}</view>
+    <view class="demand-title">一句话匹配需求</view>
+
+    <view class="demand-search">
+      <van-search
+        value="{{sentence}}"
+        placeholder="{{mode === 'pro_event' ? '比如：南城本周六 8 支企业赛，预算 1 万，要室内馆和裁判' : '比如：周日下午东城打 4v4 半场，室内场，不用裁判'}}"
+        shape="round"
+        background="transparent"
+        input-align="left"
+        show-action="{{false}}"
+        bind:change="onSentenceChange"
+      />
+    </view>
+
+    <view class="example-list">
+      <view
+        wx:for="{{examples}}"
+        wx:key="*this"
+        class="example-card"
+        data-example="{{item}}"
+        bindtap="applyExample"
+        hover-class="example-card--hover"
+        hover-stay-time="80"
+      >
+        {{item}}
+      </view>
+    </view>
+
+    <button class="primary-btn demand-btn" bindtap="handlePrimaryAction">立即匹配方案</button>
+  </view>
+
+  <glass-tabbar active="{{activeTab}}" />
+
+  <van-popup show="{{popupVisible}}" round position="bottom" custom-style="max-height: 72vh;" bind:close="closePopup">
+    <view class="prompt-popup">
+      <view class="prompt-title">补齐这几项</view>
+
+      <block wx:for="{{missingPrompts}}" wx:key="key" wx:for-item="prompt">
+        <view class="prompt-block">
+          <view class="prompt-label">{{prompt.label}}</view>
+
+          <view wx:if="{{prompt.type === 'chips'}}" class="chip-group">
+            <view
+              wx:for="{{prompt.options}}"
+              wx:key="value"
+              wx:for-item="option"
+              class="chip {{formValues[prompt.key] === (option.value || option) ? 'chip--active' : ''}}"
+              data-key="{{prompt.key}}"
+              data-value="{{option.value || option}}"
+              bindtap="selectPromptOption"
+            >
+              {{option.label || option}}
+            </view>
+          </view>
+
+          <view wx:if="{{prompt.type === 'number'}}" class="number-wrap">
+            <van-field
+              type="number"
+              value="{{formValues[prompt.key]}}"
+              placeholder="请输入"
+              data-key="{{prompt.key}}"
+              bind:change="onNumberChange"
+            />
+          </view>
+        </view>
+      </block>
+
+      <view class="cta-bar popup-cta-bar">
+        <button class="secondary-btn popup-btn" bindtap="closePopup">稍后再说</button>
+        <button class="primary-btn popup-btn" bindtap="confirmPrompt">继续匹配</button>
+      </view>
+    </view>
+  </van-popup>
+</view>

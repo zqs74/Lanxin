@@ -1,0 +1,20 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/result/result",
+    "pages/library/library",
+    "pages/history/history",
+    "pages/poster/poster"
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "东莞篮球约战",
+    "navigationBarBackgroundColor": "#1d5dff",
+    "backgroundTextStyle": "light",
+    "backgroundColor": "#f3f7ff"
+  },
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

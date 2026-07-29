@@ -1,0 +1,29 @@
+.page-shell {
+  padding-bottom: 160rpx;
+}
+
+.history-card {
+  padding: 26rpx 0;
+}
+
+.history-card + .history-card {
+  border-top: 2rpx solid #eef3fb;
+}
+
+.history-top {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.history-title {
+  flex: 1;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1c2b49;
+}
+
+.history-time {
+  font-size: 24rpx;
+  color: #7c8ba8;
+}

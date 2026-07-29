@@ -1,0 +1,132 @@
+.poster-shell {
+  overflow: hidden;
+  border-radius: 40rpx;
+  background: linear-gradient(180deg, #145bff 0%, #4d8dff 32%, #eef4ff 32%, #f7faff 100%);
+  box-shadow: 0 28rpx 70rpx rgba(17, 97, 255, 0.18);
+}
+
+.poster-top {
+  padding: 42rpx 34rpx 110rpx;
+  color: #ffffff;
+}
+
+.poster-kicker {
+  font-size: 24rpx;
+  opacity: 0.88;
+}
+
+.poster-title {
+  margin-top: 16rpx;
+  font-size: 46rpx;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.poster-summary {
+  margin-top: 18rpx;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.poster-score {
+  margin-top: 24rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 52rpx;
+  padding: 0 20rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.18);
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.poster-card {
+  margin: -60rpx 24rpx 0;
+  padding: 30rpx;
+  border-radius: 30rpx;
+  background: #ffffff;
+  box-shadow: 0 20rpx 44rpx rgba(24, 76, 170, 0.08);
+}
+
+.poster-row-label {
+  font-size: 22rpx;
+  color: #7d8cb1;
+}
+
+.poster-row-main {
+  margin-top: 12rpx;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #20304b;
+}
+
+.poster-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 20rpx;
+}
+
+.poster-tag {
+  padding: 10rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(29, 93, 255, 0.08);
+  color: #1d5dff;
+  font-size: 20rpx;
+}
+
+.poster-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  padding: 18rpx 24rpx 0;
+}
+
+.poster-mini-card {
+  min-height: 138rpx;
+  padding: 24rpx 22rpx;
+  border-radius: 26rpx;
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.poster-mini-label {
+  font-size: 22rpx;
+  color: #7c8cab;
+}
+
+.poster-mini-value {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  font-weight: 700;
+  color: #21324f;
+}
+
+.poster-bottom-card {
+  margin: 18rpx 24rpx 26rpx;
+  padding: 28rpx 30rpx;
+  border-radius: 30rpx;
+  background: linear-gradient(135deg, #0f49c7 0%, #2b73ff 100%);
+  color: #ffffff;
+}
+
+.poster-bottom-title {
+  font-size: 24rpx;
+  opacity: 0.86;
+}
+
+.poster-bottom-summary {
+  margin-top: 12rpx;
+  font-size: 30rpx;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.poster-canvas {
+  position: fixed;
+  left: -9999rpx;
+  top: -9999rpx;
+  width: 640rpx;
+  height: 1220rpx;
+}

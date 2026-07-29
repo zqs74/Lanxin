@@ -1,0 +1,59 @@
+<view class="app-shell" wx:if="{{poster}}">
+  <view class="poster-shell">
+    <view class="poster-top">
+      <view class="poster-kicker">东莞篮球约战</view>
+      <view class="poster-title">{{poster.title}}</view>
+      <view class="poster-summary">{{poster.modeLabel}} · {{poster.town}} · {{poster.date}}</view>
+      <view class="poster-score">{{poster.matchScore}} 分匹配</view>
+    </view>
+
+    <view class="poster-card">
+      <view class="poster-row">
+        <view class="poster-row-label">推荐场馆</view>
+        <view class="poster-row-main">{{poster.venue}}</view>
+      </view>
+      <view class="poster-tags">
+        <text wx:for="{{poster.tags}}" wx:key="*this" class="poster-tag">{{item}}</text>
+      </view>
+    </view>
+
+    <view class="poster-grid">
+      <view class="poster-mini-card" wx:if="{{poster.refereeLine}}">
+        <view class="poster-mini-label">裁判配置</view>
+        <view class="poster-mini-value">{{poster.refereeLine}}</view>
+      </view>
+      <view class="poster-mini-card" wx:if="{{poster.materialLine}}">
+        <view class="poster-mini-label">物料建议</view>
+        <view class="poster-mini-value">{{poster.materialLine}}</view>
+      </view>
+      <view class="poster-mini-card" wx:if="{{poster.rentalLine}}">
+        <view class="poster-mini-label">租赁建议</view>
+        <view class="poster-mini-value">{{poster.rentalLine}}</view>
+      </view>
+      <view class="poster-mini-card" wx:if="{{poster.supplierLine}}">
+        <view class="poster-mini-label">供应商</view>
+        <view class="poster-mini-value">{{poster.supplierLine}}</view>
+      </view>
+      <view class="poster-mini-card" wx:if="{{poster.mediaLine}}">
+        <view class="poster-mini-label">媒体</view>
+        <view class="poster-mini-value">{{poster.mediaLine}}</view>
+      </view>
+      <view class="poster-mini-card">
+        <view class="poster-mini-label">预算参考</view>
+        <view class="poster-mini-value">{{poster.budgetHint}}</view>
+      </view>
+    </view>
+
+    <view class="poster-bottom-card">
+      <view class="poster-bottom-title">一句话篮球约战</view>
+      <view class="poster-bottom-summary">{{poster.summary}}</view>
+    </view>
+  </view>
+
+  <view class="cta-bar">
+    <button class="secondary-btn cta-btn" open-type="share">小程序转发</button>
+    <button class="primary-btn cta-btn" bindtap="savePoster">{{saving ? '导出中...' : '保存海报'}}</button>
+  </view>
+
+  <canvas id="poster-canvas" type="2d" class="poster-canvas"></canvas>
+</view>

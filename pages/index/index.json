@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "一句话篮球约战",
+  "usingComponents": {
+    "van-search": "/miniprogram_npm/@vant/weapp/search/index",
+    "van-field": "/miniprogram_npm/@vant/weapp/field/index",
+    "van-popup": "/miniprogram_npm/@vant/weapp/popup/index",
+    "glass-tabbar": "/components/glass-tabbar/glass-tabbar"
+  }
+}
