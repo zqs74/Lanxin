@@ -3,6 +3,22 @@ const refBase = "../../assets/resources/referees";
 const materialBase = "../../assets/resources/materials";
 const supplierBase = "../../assets/resources/suppliers";
 const mediaBase = "../../assets/resources/media";
+const remoteVenue = {
+  premium: "https://bee-reg-ab.imagency.cn/p/e54477e4c53e51ca95cad0027964343f.jpg",
+  standard: "https://bee-reg-ab.imagency.cn/p/c8ed1553dd0a2695c7f40a55bd005fab.jpg",
+  dalang: "https://bee-reg-ab.imagency.cn/p/343e9975a1f0c142ca3a4435d1194505.png",
+  huangjiang: "https://bee-reg-ab.imagency.cn/p/38035a5cc200d667f8e005298d074e28.png",
+  jianbo: "https://bee-reg-ab.imagency.cn/p/86a5f019746a07a7728f599d957245cf.png",
+};
+const remoteReferee = {
+  panrongyuan: "https://bee-reg-ab.imagency.cn/p/0ef942acaf047b2a0a9ce930f919e479.png",
+  liucun: "https://bee-reg-ab.imagency.cn/p/a04be34bfeae49841bba8907334aa12f.png",
+  huolimian: "https://bee-reg-ab.imagency.cn/p/caf96aaedc461506500bfebc24d3b14a.png",
+  linguangyu: "https://bee-reg-ab.imagency.cn/p/d20d324f11509d6972d17a1831b3de82.png",
+  yangjiongen: "https://bee-reg-ab.imagency.cn/p/2addff5ad222bed9afe7f072580a2d26.png",
+  zhangjiahao: "https://bee-reg-ab.imagency.cn/p/d4470cd4d1b54e6e157820eebee6d18b.png",
+  zhangming: "https://bee-reg-ab.imagency.cn/p/3a604e10bb4165b28f2ec6a4c7e6244d.png",
+};
 
 const venues = [
   {
@@ -17,7 +33,7 @@ const venues = [
     indoor: true,
     tags: ["室内馆", "赛事感强", "主屏齐全"],
     priority: 92,
-    cover: `${venueBase}/dgcenter-real.jpg`,
+    cover: remoteVenue.premium,
     description: "适合品牌赛、企业赛和决赛夜，场地规格高，视觉效果也最稳。",
     fallbackHint: "如果你更想压预算，可以改看东城或黄江的馆。",
   },
@@ -33,7 +49,7 @@ const venues = [
     indoor: true,
     tags: ["室内馆", "校区馆", "空间开阔"],
     priority: 96,
-    cover: `${venueBase}/dgut-real.jpg`,
+    cover: remoteVenue.standard,
     description: "适合园区赛、校企赛和年轻感更强的赛事活动，场地干净，通透感好。",
     fallbackHint: "如果预算收紧，可以切到南城或大朗。",
   },
@@ -49,7 +65,7 @@ const venues = [
     indoor: true,
     tags: ["室内馆", "性价比高", "档期灵活"],
     priority: 88,
-    cover: `${venueBase}/dalang-real.png`,
+    cover: remoteVenue.dalang,
     description: "适合中等预算的赛事和活动，整体稳定，适配度高。",
     fallbackHint: "如果你更靠近市区，可以优先看南城。",
   },
@@ -65,7 +81,7 @@ const venues = [
     indoor: true,
     tags: ["室内馆", "城市馆", "通勤方便"],
     priority: 86,
-    cover: `${venueBase}/dgcity-real.png`,
+    cover: remoteVenue.standard,
     description: "适合朋友组局和城市通勤型约球，位置好找，整体体验轻松。",
     fallbackHint: "如果想要全场正式一点的体验，可以改去南城。",
   },
@@ -81,7 +97,7 @@ const venues = [
     indoor: true,
     tags: ["室内馆", "5v5", "东部片区"],
     priority: 84,
-    cover: `${venueBase}/huangjiang-real.png`,
+    cover: remoteVenue.huangjiang,
     description: "适合东部片区球队和中小规模活动，性价比不错。",
     fallbackHint: "如果想更靠近中心城区，可以看东城或南城。",
   },
@@ -97,7 +113,7 @@ const venues = [
     indoor: false,
     tags: ["训练馆", "轻松组局", "低预算"],
     priority: 72,
-    cover: `${venueBase}/jianbo-real.png`,
+    cover: remoteVenue.jianbo,
     description: "适合轻量组局和临时约战，落位快，整体更偏训练和日常使用。",
     fallbackHint: "如果担心天气，建议切到东城室内馆。",
   },
@@ -113,7 +129,7 @@ const referees = [
     budgetLevel: "high",
     priority: 95,
     tags: ["主裁", "企业赛", "决赛经验"],
-    avatar: `${refBase}/ref-panrongyuan.png`,
+    avatar: remoteReferee.panrongyuan,
     description: "适合决赛夜、企业联赛和对控场稳定性要求高的正式活动。",
   },
   {
@@ -125,7 +141,7 @@ const referees = [
     budgetLevel: "mid",
     priority: 90,
     tags: ["主裁", "园区赛", "沟通顺畅"],
-    avatar: `${refBase}/ref-liucun.png`,
+    avatar: remoteReferee.liucun,
     description: "兼顾专业度和体验感，适合企业赛和高质量约球。",
   },
   {
@@ -137,7 +153,7 @@ const referees = [
     budgetLevel: "low",
     priority: 82,
     tags: ["轻量约球", "4v4", "节奏快"],
-    avatar: `${refBase}/ref-zhangming.png`,
+    avatar: remoteReferee.zhangming,
     description: "适合半场、散场局和朋友约球，不会把氛围搞得太重。",
   },
   {
@@ -149,7 +165,7 @@ const referees = [
     budgetLevel: "mid",
     priority: 85,
     tags: ["边裁", "执行稳", "东部片区"],
-    avatar: `${refBase}/ref-linguangyu.png`,
+    avatar: remoteReferee.linguangyu,
     description: "适合黄江、大朗一带活动，执行节奏稳定。",
   },
   {
@@ -161,7 +177,7 @@ const referees = [
     budgetLevel: "mid",
     priority: 84,
     tags: ["主裁", "全场赛事", "虎门片区"],
-    avatar: `${refBase}/ref-yangjiongen.png`,
+    avatar: remoteReferee.yangjiongen,
     description: "适合虎门、厚街一带的全场比赛，临场沟通和节奏控制都比较稳。",
   },
   {
@@ -173,7 +189,7 @@ const referees = [
     budgetLevel: "high",
     priority: 91,
     tags: ["主裁", "女裁判", "正式赛事"],
-    avatar: `${refBase}/ref-huolimian.png`,
+    avatar: remoteReferee.huolimian,
     description: "适合标准化程度更高的正式赛事，对流程感和控场感要求更高时会更合适。",
   },
   {
@@ -185,7 +201,7 @@ const referees = [
     budgetLevel: "low",
     priority: 79,
     tags: ["半场局", "轻量执裁", "朋友约球"],
-    avatar: `${refBase}/ref-zhangjiahao.png`,
+    avatar: remoteReferee.zhangjiahao,
     description: "适合节奏轻快的约球局，能把比赛感带起来，但不会显得太重。",
   },
 ];

@@ -3,13 +3,24 @@
 }
 
 .history-head {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  gap: 18rpx;
+}
+
+.history-head .accent-heading {
+  flex-shrink: 0;
 }
 
 .history-more-btn {
+  flex-shrink: 0;
+  margin-left: auto;
   font-size: 24rpx;
   font-weight: 700;
   color: #2b6dff;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .filter-panel {

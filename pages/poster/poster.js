@@ -1,10 +1,18 @@
 const { decodePayload, encodePayload } = require("../../utils/share");
 const { createRecommendation } = require("../../utils/recommender");
 
+const POSTER_WIDTH = 720;
+const GRID_CARD_HEIGHT = 138;
+const GRID_CARD_GAP = 16;
+const GRID_START_Y = 1120;
+const BOTTOM_CARD_HEIGHT = 126;
+const BOTTOM_CARD_MARGIN = 48;
+
 Page({
   data: {
     poster: null,
     saving: false,
+    canvasHeight: 1880,
   },
 
   onLoad(query) {
@@ -12,6 +20,7 @@ Page({
     const result = createRecommendation(payload || {});
     this.setData({
       poster: result.posterPayload,
+      canvasHeight: getPosterCanvasHeight(result.posterPayload),
     });
   },
 
@@ -41,47 +50,53 @@ Page({
         return;
       }
 
-      const { node, width, height } = canvasInfo;
+      const { node } = canvasInfo;
+      const width = POSTER_WIDTH;
+      const height = this.data.canvasHeight || getPosterCanvasHeight(this.data.poster);
       const ctx = node.getContext("2d");
-      const dpr = Math.max(3, wx.getWindowInfo().pixelRatio || 2);
+      const dpr = Math.max(2, wx.getWindowInfo().pixelRatio || 2);
+
       node.width = width * dpr;
       node.height = height * dpr;
-      ctx.scale(dpr, dpr);
+
+      if (typeof ctx.setTransform === "function") {
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      } else if (typeof ctx.scale === "function") {
+        ctx.scale(dpr, dpr);
+      }
 
       try {
         await renderPoster(ctx, node, width, height, this.data.poster);
+        await waitForCanvasFlush();
       } catch (error) {
+        console.error("renderPoster failed", error);
         this.finishSaving("海报导出失败");
         return;
       }
 
-      wx.canvasToTempFilePath(
-        {
-          canvas: node,
-          success: ({ tempFilePath }) => {
-            wx.saveImageToPhotosAlbum({
-              filePath: tempFilePath,
-              success: () => {
-                this.setData({ saving: false });
-                wx.showToast({
-                  title: "海报已保存",
-                  icon: "success",
-                });
-              },
-              fail: () => {
-                this.setData({ saving: false });
-                wx.previewImage({
-                  urls: [tempFilePath],
-                });
-              },
+      try {
+        const tempFilePath = await exportCanvas(node, width, height, dpr, this);
+        wx.saveImageToPhotosAlbum({
+          filePath: tempFilePath,
+          success: () => {
+            this.setData({ saving: false });
+            wx.showToast({
+              title: "海报已保存",
+              icon: "success",
             });
           },
-          fail: () => {
-            this.finishSaving("海报导出失败");
+          fail: (error) => {
+            console.warn("saveImageToPhotosAlbum failed", error);
+            this.setData({ saving: false });
+            wx.previewImage({
+              urls: [tempFilePath],
+            });
           },
-        },
-        this
-      );
+        });
+      } catch (error) {
+        console.error("exportCanvas failed", error);
+        this.finishSaving("海报导出失败");
+      }
     });
   },
 
@@ -93,6 +108,53 @@ Page({
     });
   },
 });
+
+function waitForCanvasFlush() {
+  return new Promise((resolve) => {
+    setTimeout(resolve, 80);
+  });
+}
+
+function exportCanvas(node, width, height, dpr, component) {
+  return new Promise((resolve, reject) => {
+    wx.canvasToTempFilePath(
+      {
+        canvas: node,
+        x: 0,
+        y: 0,
+        width,
+        height,
+        destWidth: width * dpr,
+        destHeight: height * dpr,
+        success: ({ tempFilePath }) => resolve(tempFilePath),
+        fail: (error) => reject(error),
+      },
+      component
+    );
+  });
+}
+
+function getPosterInfoCards(poster) {
+  if (!poster) {
+    return [];
+  }
+
+  return [
+    ["预算落点", poster.budgetFocus],
+    ["预算参考", poster.budgetHint],
+    ["裁判配置", poster.refereeLine],
+    ["物料建议", poster.materialLine],
+    ["租赁建议", poster.rentalLine],
+    ["供应商", poster.supplierLine],
+    ["媒体", poster.mediaLine],
+  ].filter((item) => item[1]);
+}
+
+function getPosterCanvasHeight(poster) {
+  const rows = Math.max(1, Math.ceil(getPosterInfoCards(poster).length / 2));
+  const bottomY = GRID_START_Y + rows * (GRID_CARD_HEIGHT + GRID_CARD_GAP) + 8;
+  return bottomY + BOTTOM_CARD_HEIGHT + BOTTOM_CARD_MARGIN;
+}
 
 function roundRectPath(ctx, x, y, width, height, radius) {
   ctx.beginPath();
@@ -153,20 +215,25 @@ async function renderPoster(ctx, node, width, height, poster) {
 }
 
 async function loadCanvasImage(node, src) {
-  const localSrc = await new Promise((resolve) => {
-    wx.getImageInfo({
-      src,
-      success: (res) => resolve(res.path),
-      fail: () => resolve(src),
+  try {
+    const localSrc = await new Promise((resolve, reject) => {
+      wx.getImageInfo({
+        src,
+        success: (res) => resolve(res.path),
+        fail: (error) => reject(error),
+      });
     });
-  });
 
-  return new Promise((resolve, reject) => {
-    const image = node.createImage();
-    image.onload = () => resolve(image);
-    image.onerror = reject;
-    image.src = localSrc;
-  });
+    return await new Promise((resolve, reject) => {
+      const image = node.createImage();
+      image.onload = () => resolve(image);
+      image.onerror = (error) => reject(error);
+      image.src = localSrc;
+    });
+  } catch (error) {
+    console.warn("loadCanvasImage failed", src, error);
+    return null;
+  }
 }
 
 function drawCoverCard(ctx, poster, width, coverImage) {
@@ -265,27 +332,16 @@ function drawHighlightCard(ctx, poster, width) {
 }
 
 function drawInfoGrid(ctx, poster, width) {
-  const infoCards = [
-    ["预算落点", poster.budgetFocus],
-    ["预算参考", poster.budgetHint],
-    ["裁判配置", poster.refereeLine],
-    ["物料建议", poster.materialLine],
-    ["租赁建议", poster.rentalLine],
-    ["供应商", poster.supplierLine],
-    ["媒体", poster.mediaLine],
-  ].filter((item) => item[1]);
-
+  const infoCards = getPosterInfoCards(poster);
   const cardWidth = (width - 76) / 2;
-  const cardHeight = 138;
-  const startY = 1120;
 
   infoCards.forEach((entry, index) => {
     const row = Math.floor(index / 2);
     const col = index % 2;
     const x = 30 + col * (cardWidth + 16);
-    const y = startY + row * (cardHeight + 16);
+    const y = GRID_START_Y + row * (GRID_CARD_HEIGHT + GRID_CARD_GAP);
 
-    fillRoundRect(ctx, x, y, cardWidth, cardHeight, 24, "#ffffff");
+    fillRoundRect(ctx, x, y, cardWidth, GRID_CARD_HEIGHT, 24, "#ffffff");
     ctx.fillStyle = "#7d8cb1";
     ctx.font = "14px sans-serif";
     ctx.fillText(entry[0], x + 18, y + 30);
@@ -294,8 +350,9 @@ function drawInfoGrid(ctx, poster, width) {
     wrapText(ctx, entry[1], x + 18, y + 64, cardWidth - 36, 26, 3);
   });
 
-  const bottomY = startY + Math.ceil(infoCards.length / 2) * (cardHeight + 16) + 8;
-  fillRoundRect(ctx, 30, bottomY, width - 60, 126, 28, "#1658ef");
+  const rows = Math.max(1, Math.ceil(infoCards.length / 2));
+  const bottomY = GRID_START_Y + rows * (GRID_CARD_HEIGHT + GRID_CARD_GAP) + 8;
+  fillRoundRect(ctx, 30, bottomY, width - 60, BOTTOM_CARD_HEIGHT, 28, "#1658ef");
   ctx.fillStyle = "#ffffff";
   ctx.font = "15px sans-serif";
   ctx.fillText("打开小程序可继续查看完整方案", 54, bottomY + 44);

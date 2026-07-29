@@ -8,6 +8,8 @@ const { decodePayload, encodePayload } = require("../../utils/share");
 const { createRecommendation } = require("../../utils/recommender");
 const { saveRecommendation, saveBooking } = require("../../utils/storage");
 
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
+
 function normalizeDemand(payload) {
   return Object.assign(
     {
@@ -29,6 +31,52 @@ function normalizeDemand(payload) {
   );
 }
 
+function getTodayTimestamp() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return today.getTime();
+}
+
+function getBookingCalendarMaxDate() {
+  const maxDate = new Date(getTodayTimestamp());
+  maxDate.setMonth(maxDate.getMonth() + 6);
+  return maxDate.getTime();
+}
+
+function parseDateValue(value) {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === "number") {
+    return value;
+  }
+
+  if (value instanceof Date) {
+    return value.getTime();
+  }
+
+  if (typeof value === "string") {
+    const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (match) {
+      return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])).getTime();
+    }
+  }
+
+  const parsed = new Date(value).getTime();
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+function formatDateValue(value) {
+  const timestamp = parseDateValue(value);
+  const safeTimestamp = timestamp || getTodayTimestamp();
+  const date = new Date(safeTimestamp);
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 Page({
   data: {
     mode: APP_MODE.PRO_EVENT,
@@ -39,6 +87,10 @@ Page({
     townOptions: TOWN_OPTIONS,
     tuneVisible: false,
     bookingVisible: false,
+    bookingDateCalendarVisible: false,
+    bookingCalendarDefaultDate: getTodayTimestamp() + DAY_IN_MS,
+    bookingCalendarMinDate: getTodayTimestamp(),
+    bookingCalendarMaxDate: getBookingCalendarMaxDate(),
     bookingForm: {
       contactName: "",
       phone: "",
@@ -53,12 +105,14 @@ Page({
     const payload = decodePayload(query.payload || "") || getApp().globalData.latestSharePayload;
     const demand = normalizeDemand(payload);
     const result = createRecommendation(demand);
+    const initialBookingDate = formatDateValue(demand.playDate);
 
     this.setData({
       mode: demand.mode,
       demand,
       result,
-      "bookingForm.expectedDate": demand.playDate,
+      "bookingForm.expectedDate": initialBookingDate,
+      bookingCalendarDefaultDate: parseDateValue(initialBookingDate) || getTodayTimestamp(),
     });
 
     getApp().setLatestSharePayload(result.sharePayload);
@@ -166,9 +220,11 @@ Page({
   },
 
   openBooking() {
+    const currentBookingDate = this.data.bookingForm.expectedDate || this.data.demand.playDate;
     this.setData(
       {
         bookingVisible: true,
+        bookingCalendarDefaultDate: parseDateValue(currentBookingDate) || getTodayTimestamp(),
       },
       () => {
         const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
@@ -185,6 +241,7 @@ Page({
     this.setData(
       {
         bookingVisible: false,
+        bookingDateCalendarVisible: false,
       },
       () => {
         const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
@@ -201,6 +258,29 @@ Page({
     const { key } = event.currentTarget.dataset;
     this.setData({
       [`bookingForm.${key}`]: event.detail,
+    });
+  },
+
+  openBookingDateCalendar() {
+    const currentBookingDate = this.data.bookingForm.expectedDate || this.data.demand.playDate;
+    this.setData({
+      bookingDateCalendarVisible: true,
+      bookingCalendarDefaultDate: parseDateValue(currentBookingDate) || getTodayTimestamp(),
+    });
+  },
+
+  closeBookingDateCalendar() {
+    this.setData({
+      bookingDateCalendarVisible: false,
+    });
+  },
+
+  confirmBookingDate(event) {
+    const selectedDate = formatDateValue(event.detail);
+    this.setData({
+      bookingDateCalendarVisible: false,
+      bookingCalendarDefaultDate: parseDateValue(selectedDate) || getTodayTimestamp(),
+      "bookingForm.expectedDate": selectedDate,
     });
   },
 

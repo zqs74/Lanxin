@@ -345,6 +345,37 @@
   background: #f9fbff;
 }
 
+.calendar-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  min-height: 96rpx;
+  padding: 0 32rpx;
+  background: #ffffff;
+  border-bottom: 2rpx solid #ebf1fb;
+}
+
+.calendar-field__label {
+  flex-shrink: 0;
+  width: 6em;
+  font-size: 28rpx;
+  color: #323233;
+}
+
+.calendar-field__value {
+  flex: 1;
+  text-align: right;
+  font-size: 28rpx;
+  color: #323233;
+  font-weight: 600;
+}
+
+.calendar-field__value--placeholder {
+  font-weight: 400;
+  color: #c8c9cc;
+}
+
 .fallback-row {
   display: flex;
   justify-content: space-between;

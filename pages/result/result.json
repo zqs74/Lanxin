@@ -3,6 +3,7 @@
   "usingComponents": {
     "van-popup": "/miniprogram_npm/@vant/weapp/popup/index",
     "van-field": "/miniprogram_npm/@vant/weapp/field/index",
-    "van-empty": "/miniprogram_npm/@vant/weapp/empty/index"
+    "van-empty": "/miniprogram_npm/@vant/weapp/empty/index",
+    "van-calendar": "/miniprogram_npm/@vant/weapp/calendar/index"
   }
 }

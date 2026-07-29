@@ -177,7 +177,12 @@
           <van-field label="联系人" value="{{bookingForm.contactName}}" data-key="contactName" placeholder="怎么称呼你" bind:change="updateBookingField" />
           <van-field label="手机号" type="number" value="{{bookingForm.phone}}" data-key="phone" placeholder="方便联系的手机号" bind:change="updateBookingField" />
           <van-field label="微信号" value="{{bookingForm.wechat}}" data-key="wechat" placeholder="选填，方便后续沟通" bind:change="updateBookingField" />
-          <van-field label="日期" value="{{bookingForm.expectedDate}}" data-key="expectedDate" placeholder="希望日期" bind:change="updateBookingField" />
+          <view class="calendar-field" bindtap="openBookingDateCalendar">
+            <view class="calendar-field__label">日期</view>
+            <view class="calendar-field__value {{bookingForm.expectedDate ? '' : 'calendar-field__value--placeholder'}}">
+              {{bookingForm.expectedDate || '请选择预约日期'}}
+            </view>
+          </view>
           <van-field label="备注" value="{{bookingForm.remark}}" data-key="remark" type="textarea" autosize placeholder="比如保留室内馆、加主持、加直播等" bind:change="updateBookingField" />
         </view>
 
@@ -196,5 +201,26 @@
         <button class="primary-btn popup-btn" bindtap="submitBooking">提交预约意向</button>
       </view>
     </view>
+  </van-popup>
+
+  <van-popup
+    show="{{bookingDateCalendarVisible}}"
+    round
+    position="bottom"
+    z-index="6200"
+    custom-style="height: 76vh;"
+    bind:close="closeBookingDateCalendar"
+  >
+    <van-calendar
+      poppable="{{false}}"
+      title="选择预约日期"
+      color="#1d5dff"
+      type="single"
+      min-date="{{bookingCalendarMinDate}}"
+      max-date="{{bookingCalendarMaxDate}}"
+      default-date="{{bookingCalendarDefaultDate}}"
+      bind:close="closeBookingDateCalendar"
+      bind:confirm="confirmBookingDate"
+    />
   </van-popup>
 </view>
