@@ -6,6 +6,26 @@
     "pages/history/history",
     "pages/poster/poster"
   ],
+  "tabBar": {
+    "custom": true,
+    "color": "#7b89a7",
+    "selectedColor": "#1d5dff",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/history/history",
+        "text": "历史方案"
+      },
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/library/library",
+        "text": "资源库"
+      }
+    ]
+  },
   "window": {
     "navigationBarTextStyle": "white",
     "navigationBarTitleText": "东莞篮球约战",

@@ -96,6 +96,14 @@ Page({
     }
   },
 
+  onShow() {
+    if (typeof this.getTabBar === "function" && this.getTabBar()) {
+      this.getTabBar().setData({
+        active: "home",
+      });
+    }
+  },
+
   onShareAppMessage() {
     return {
       title: this.data.sentence || "一句话生成东莞篮球约战方案",

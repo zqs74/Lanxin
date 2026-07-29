@@ -1,0 +1,19 @@
+<view class="glass-tabbar-shell">
+  <view class="glass-tabbar">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="key"
+      class="glass-tab {{active === item.key ? 'glass-tab--active' : ''}} {{item.center ? 'glass-tab--center' : ''}} {{switchingKey === item.key ? 'glass-tab--switching' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="handleTap"
+      hover-class="glass-tab--hover"
+      hover-stay-time="90"
+    >
+      <view class="glass-tab-icon glass-tab-icon--{{item.key}}">
+        <view class="glass-tab-icon-core"></view>
+      </view>
+      <view class="glass-tab-label">{{item.label}}</view>
+      <view class="glass-tab-glow"></view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,190 @@
+.glass-tabbar-shell {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  padding: 0 24rpx calc(18rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(244, 247, 252, 0) 0%, rgba(244, 247, 252, 0.72) 28%, rgba(244, 247, 252, 0.96) 100%);
+  pointer-events: none;
+}
+
+.glass-tabbar {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 14rpx;
+  padding: 14rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(28rpx);
+  box-shadow: 0 18rpx 44rpx rgba(17, 48, 109, 0.14);
+  border: 2rpx solid rgba(255, 255, 255, 0.46);
+}
+
+.glass-tab {
+  position: relative;
+  flex: 1;
+  min-height: 96rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  border-radius: 999rpx;
+  color: #7082a5;
+  overflow: hidden;
+  transform: translateY(0) scale(1);
+  transition: transform 220ms ease, color 220ms ease, background-color 220ms ease, box-shadow 220ms ease;
+}
+
+.glass-tab--hover {
+  transform: translateY(-4rpx) scale(0.985);
+}
+
+.glass-tab--switching {
+  transform: translateY(-6rpx) scale(0.97);
+}
+
+.glass-tab--active {
+  color: #1457ef;
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: inset 0 0 0 2rpx rgba(255, 255, 255, 0.18);
+}
+
+.glass-tab--center {
+  min-height: 114rpx;
+  margin-top: -18rpx;
+}
+
+.glass-tab--center.glass-tab--active {
+  color: #ffffff;
+  background: linear-gradient(135deg, #155bff 0%, #4d8dff 100%);
+  box-shadow: 0 18rpx 38rpx rgba(25, 90, 255, 0.28);
+  animation: homeFloat 1.8s ease-in-out infinite;
+}
+
+.glass-tab-icon {
+  position: relative;
+  width: 42rpx;
+  height: 42rpx;
+  border-radius: 50%;
+  background: rgba(21, 91, 255, 0.08);
+}
+
+.glass-tab--active .glass-tab-icon {
+  background: rgba(21, 91, 255, 0.12);
+}
+
+.glass-tab--center.glass-tab--active .glass-tab-icon {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.glass-tab-icon-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.glass-tab-icon--history .glass-tab-icon-core::before,
+.glass-tab-icon--library .glass-tab-icon-core::before,
+.glass-tab-icon--home .glass-tab-icon-core::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.glass-tab-icon--history .glass-tab-icon-core {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 6rpx;
+}
+
+.glass-tab-icon--history .glass-tab-icon-core::before {
+  width: 18rpx;
+  height: 4rpx;
+  background: rgba(255, 255, 255, 0.32);
+  border-radius: 999rpx;
+  box-shadow: 0 -8rpx 0 rgba(255, 255, 255, 0.32), 0 8rpx 0 rgba(255, 255, 255, 0.32);
+}
+
+.glass-tab-icon--home .glass-tab-icon-core {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+}
+
+.glass-tab-icon--home .glass-tab-icon-core::before {
+  width: 26rpx;
+  height: 10rpx;
+  border-radius: 999rpx 999rpx 0 0;
+  border: 4rpx solid currentColor;
+  border-bottom: none;
+  top: 2rpx;
+}
+
+.glass-tab-icon--library .glass-tab-icon-core {
+  width: 20rpx;
+  height: 16rpx;
+  border-radius: 4rpx;
+}
+
+.glass-tab-icon--library .glass-tab-icon-core::before {
+  width: 24rpx;
+  height: 4rpx;
+  border-radius: 999rpx;
+  top: -4rpx;
+  background: currentColor;
+}
+
+.glass-tab-label {
+  position: relative;
+  z-index: 2;
+  font-size: 22rpx;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+}
+
+.glass-tab-glow {
+  position: absolute;
+  left: 50%;
+  bottom: 10rpx;
+  width: 64rpx;
+  height: 10rpx;
+  border-radius: 999rpx;
+  background: rgba(21, 91, 255, 0.14);
+  transform: translateX(-50%) scaleX(0);
+  transition: transform 220ms ease, opacity 220ms ease;
+  opacity: 0;
+}
+
+.glass-tab--active .glass-tab-glow {
+  transform: translateX(-50%) scaleX(1);
+  opacity: 1;
+}
+
+.glass-tab--center.glass-tab--active .glass-tab-glow {
+  display: none;
+}
+
+@keyframes homeFloat {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-4rpx);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}

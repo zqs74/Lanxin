@@ -30,12 +30,17 @@ function formatCompactList(list = []) {
 
 Page({
   data: {
-    activeTab: "history",
     recommendations: [],
     bookings: [],
   },
 
   onShow() {
+    if (typeof this.getTabBar === "function" && this.getTabBar()) {
+      this.getTabBar().setData({
+        active: "history",
+      });
+    }
+
     this.setData({
       recommendations: formatCompactList(getRecommendations()).slice(0, 8),
       bookings: formatCompactList(getBookings()).slice(0, 8),

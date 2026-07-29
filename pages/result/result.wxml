@@ -1,9 +1,10 @@
 <view class="app-shell" wx:if="{{result}}">
   <view class="page-hero result-hero">
     <view class="hero-row">
-      <view>
+      <view class="hero-main">
         <view class="hero-city">{{mode === 'pro_event' ? '半专业赛事方案' : '野球约球方案'}}</view>
         <view class="hero-title">{{result.summary}}</view>
+        <view class="hero-brief">{{result.reasonLines[1]}}</view>
       </view>
       <view class="score-card">
         <text class="score-value">{{result.matchScore}}</text>
@@ -17,22 +18,49 @@
     </view>
   </view>
 
-  <view class="section-card">
-    <button class="primary-btn rematch-btn" bindtap="openTunePanel">重新匹配需求</button>
-    <view class="budget-box budget-box--tight">
-      <view class="budget-title">预算参考</view>
-      <view class="budget-copy">{{result.budgetHint}}</view>
+  <view class="section-card summary-card">
+    <view class="summary-badge-row">
+      <view class="summary-badge">主方案</view>
+      <button class="primary-btn rematch-btn rematch-btn--inline" bindtap="openTunePanel">重新匹配需求</button>
+    </view>
+
+    <view class="summary-top">
+      <view class="summary-main">
+        <view class="summary-label">方案摘要</view>
+        <view class="summary-copy">{{result.topReason}}</view>
+      </view>
+    </view>
+
+    <view class="summary-metrics">
+      <view class="metric-block">
+        <view class="metric-label">预算参考</view>
+        <view class="metric-value">{{result.budgetHint}}</view>
+      </view>
+      <view class="metric-block">
+        <view class="metric-label">主推荐</view>
+        <view class="metric-value">{{result.sections[0].items[0].name}}</view>
+      </view>
+    </view>
+
+    <view class="reason-list">
+      <view wx:for="{{result.reasonLines}}" wx:key="*this" class="reason-item">{{item}}</view>
     </view>
   </view>
 
   <block wx:if="{{result.sections.length}}">
     <view wx:for="{{result.sections}}" wx:key="key" class="section-card">
-      <view class="section-title">{{item.title}}</view>
+      <view class="section-head">
+        <view>
+          <view class="section-title">{{item.title}}</view>
+          <view class="section-subtitle">{{item.items.length > 1 ? '按当前需求优先级排序' : '当前主推荐配置'}}</view>
+        </view>
+      </view>
       <view class="resource-list">
         <view wx:for="{{item.items}}" wx:key="id" class="resource-card">
           <image class="resource-cover" src="{{item.cover || item.avatar || item.image}}" mode="aspectFill"></image>
           <view class="resource-body">
             <view class="resource-name">{{item.name}}</view>
+            <view class="resource-meta">{{item.town || demand.town || '东莞'}} · {{item.level || item.capacity || '推荐配置'}}</view>
             <view class="resource-tags">
               <text wx:for="{{item.tags}}" wx:key="*this" class="resource-tag">{{item}}</text>
             </view>

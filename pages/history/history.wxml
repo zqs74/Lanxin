@@ -1,4 +1,9 @@
 <view class="app-shell page-shell">
+  <view class="page-hero compact-hero">
+    <view class="hero-city">历史方案</view>
+    <view class="hero-title">方案记录</view>
+  </view>
+
   <view class="section-card">
     <view class="section-title">推荐记录</view>
     <block wx:if="{{recommendations.length}}">
@@ -13,6 +18,7 @@
           <view class="history-title">{{item.title}}</view>
           <view class="history-time">{{item.meta}}</view>
         </view>
+        <view class="history-summary">{{item.summary}}</view>
       </view>
     </block>
     <van-empty wx:else image="search" description="还没有历史方案" />
@@ -26,10 +32,9 @@
           <view class="history-title">{{item.title}}</view>
           <view class="history-time">{{item.meta}}</view>
         </view>
+        <view class="history-summary">{{item.summary}}</view>
       </view>
     </block>
     <van-empty wx:else image="search" description="还没有预约记录" />
   </view>
-
-  <glass-tabbar active="{{activeTab}}" />
 </view>

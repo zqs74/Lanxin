@@ -1,7 +1,12 @@
 <view class="app-shell page-shell">
-  <view class="page-hero compact-hero">
+  <view class="page-hero compact-hero library-hero">
     <view class="hero-city">资源库</view>
-    <view class="hero-title">东莞资源</view>
+    <view class="hero-title">东莞篮球资源档案</view>
+    <view class="library-hero-stats">
+      <view class="library-hero-stat">{{resourceCount}}</view>
+      <view class="library-hero-divider"></view>
+      <view class="library-hero-label">{{activeCategoryLabel}}</view>
+    </view>
   </view>
 
   <scroll-view scroll-x class="category-scroll">
@@ -32,22 +37,40 @@
     </view>
   </scroll-view>
 
-  <block wx:if="{{list.length}}">
-    <view wx:for="{{list}}" wx:key="id" class="section-card library-card">
-      <image class="library-cover" src="{{item.cover || item.avatar || item.image}}" mode="aspectFill"></image>
-      <view class="library-body">
-        <view class="library-name">{{item.name}}</view>
-        <view class="library-town">{{item.town || '东莞'}}</view>
-        <view class="library-tags">
-          <text wx:for="{{item.tags}}" wx:key="*this" class="library-tag">{{item}}</text>
+  <block wx:if="{{featuredItem}}">
+    <view class="library-feature-card">
+      <image class="library-feature-cover" src="{{featuredItem.cover || featuredItem.avatar || featuredItem.image}}" mode="aspectFill"></image>
+      <view class="library-feature-mask"></view>
+      <view class="library-feature-body">
+        <view class="library-feature-top">
+          <view class="library-feature-badge">主推资源</view>
+          <view class="library-feature-town">{{featuredItem.town || '东莞'}}</view>
+        </view>
+        <view class="library-feature-name">{{featuredItem.name}}</view>
+        <view class="library-feature-tags">
+          <text wx:for="{{featuredItem.tags}}" wx:key="*this" class="library-feature-tag">{{item}}</text>
         </view>
       </view>
     </view>
   </block>
 
-  <view class="section-card" wx:else>
+  <block wx:if="{{list.length}}">
+    <view wx:for="{{list}}" wx:key="id" class="section-card library-card">
+      <image class="library-cover" src="{{item.cover || item.avatar || item.image}}" mode="aspectFill"></image>
+      <view class="library-body">
+        <view class="library-head">
+          <view class="library-name">{{item.name}}</view>
+          <view class="library-town">{{item.town || '东莞'}}</view>
+        </view>
+        <view class="library-tags">
+          <text wx:for="{{item.tags}}" wx:key="*this" class="library-tag">{{item}}</text>
+        </view>
+        <view class="library-desc">{{item.description}}</view>
+      </view>
+    </view>
+  </block>
+
+  <view class="section-card" wx:if="{{!resourceCount}}">
     <van-empty image="search" description="{{emptyText}}" />
   </view>
-
-  <glass-tabbar active="{{activeTab}}" />
 </view>

@@ -1,4 +1,15 @@
 <view class="app-shell home-shell">
+  <view class="home-hero-board">
+    <view class="hero-kicker">东莞篮球约战</view>
+    <view class="hero-slogan">一句话匹配整套方案</view>
+    <view class="hero-pill-row">
+      <view class="hero-pill">场馆</view>
+      <view class="hero-pill">裁判</view>
+      <view class="hero-pill">物料</view>
+      <view class="hero-pill">预约</view>
+    </view>
+  </view>
+
   <view class="home-stage {{mode ? 'home-stage--selected' : ''}}">
     <view class="home-title">请选择约战方式</view>
     <view class="mode-grid">
@@ -12,13 +23,20 @@
         hover-stay-time="90"
       >
         <view class="mode-entry-mark">{{mode === item.value ? '已选' : ''}}</view>
-        <view class="mode-entry-title">{{item.label}}</view>
+        <view class="mode-entry-inner">
+          <view class="mode-entry-title">{{item.label}}</view>
+          <view class="mode-entry-accent">{{item.accent}}</view>
+          <view class="mode-entry-subtitle">{{item.subtitle}}</view>
+        </view>
       </view>
     </view>
   </view>
 
   <view wx:if="{{mode}}" class="section-card demand-panel demand-panel--show">
-    <view class="demand-mode-pill">{{mode === 'pro_event' ? '半专业赛事' : '野球约球'}}</view>
+    <view class="demand-top">
+      <view class="demand-mode-pill">{{mode === 'pro_event' ? '半专业赛事' : '野球约球'}}</view>
+      <view class="demand-mini-mark">主功能</view>
+    </view>
     <view class="demand-title">一句话匹配需求</view>
 
     <view class="demand-search">
@@ -33,6 +51,7 @@
       />
     </view>
 
+    <view class="example-head">示例需求</view>
     <view class="example-list">
       <view
         wx:for="{{examples}}"
@@ -49,8 +68,6 @@
 
     <button class="primary-btn demand-btn" bindtap="handlePrimaryAction">立即匹配方案</button>
   </view>
-
-  <glass-tabbar active="{{activeTab}}" />
 
   <van-popup show="{{popupVisible}}" round position="bottom" custom-style="max-height: 72vh;" bind:close="closePopup">
     <view class="prompt-popup">

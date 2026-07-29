@@ -1,7 +1,6 @@
 {
   "navigationBarTitleText": "资源库",
   "usingComponents": {
-    "van-empty": "/miniprogram_npm/@vant/weapp/empty/index",
-    "glass-tabbar": "/components/glass-tabbar/glass-tabbar"
+    "van-empty": "/miniprogram_npm/@vant/weapp/empty/index"
   }
 }
