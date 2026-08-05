@@ -14,7 +14,7 @@
           <text class="nav-main">昇梦</text>
           <text class="nav-highlight">AI</text>
         </view>
-        <text class="nav-sub">DeepSeek-R1 智能训练顾问</text>
+        <text class="nav-sub">MCBA 赛事方案规划助手</text>
       </view>
       <view class="status-badge {{ isLoading ? 'thinking' : '' }}">
         <view class="status-dot"></view>
@@ -41,26 +41,26 @@
           </view>
           
           <view class="welcome-text">
-            <view class="welcome-title">训练顾问</view>
-            <view class="welcome-desc">围绕比赛表现、技能雷达和训练记录，给出可执行的篮球建议</view>
+            <view class="welcome-title">赛事规划助手</view>
+            <view class="welcome-desc">2026 赛季安踏小篮球联赛（MCBA）官方认证，一站式生成完整可执行的承办与参赛方案</view>
           </view>
           
           <view class="feature-grid">
             <view class="feature-item">
               <t-icon class="feature-icon" name="lightbulb" size="36rpx" color="#D4AF37" />
-              <text class="feature-name">深度思考</text>
+              <text class="feature-name">方案定制</text>
             </view>
             <view class="feature-item">
               <t-icon class="feature-icon" name="flashlight" size="36rpx" color="#D4AF37" />
-              <text class="feature-name">流式响应</text>
+              <text class="feature-name">实时响应</text>
             </view>
             <view class="feature-item">
-              <t-icon class="feature-icon" name="chart-radar" size="36rpx" color="#D4AF37" />
-              <text class="feature-name">个性定制</text>
+              <t-icon class="feature-icon" name="chart-pie" size="36rpx" color="#D4AF37" />
+              <text class="feature-name">费用明细</text>
             </view>
             <view class="feature-item">
-              <t-icon class="feature-icon" name="lightbulb-circle" size="36rpx" color="#D4AF37" />
-              <text class="feature-name">专业建议</text>
+              <t-icon class="feature-icon" name="shield" size="36rpx" color="#D4AF37" />
+              <text class="feature-name">风险预案</text>
             </view>
           </view>
         </view>
@@ -206,21 +206,21 @@
       <view class="quick-panel" wx:if="{{!isLoading && messages.length === 0}}">
         <view class="quick-title">你可以问我：</view>
         <view class="quick-list">
-          <view class="quick-chip card" bindtap="sendQuickQuestion" data-question="分析我的投篮能力，给出改进建议">
-            <t-icon class="chip-icon" name="chart-radar" size="32rpx" color="#D4AF37" />
-            <text class="chip-text">分析我的投篮</text>
+          <view class="quick-chip card" bindtap="sendQuickQuestion" data-question="帮我预定一个联赛方案，日期 2026-06-14，预计 24 支队伍">
+            <t-icon class="chip-icon" name="calendar" size="32rpx" color="#D4AF37" />
+            <text class="chip-text">预定联赛方案</text>
           </view>
-          <view class="quick-chip card" bindtap="sendQuickQuestion" data-question="根据我的技能雷达图，推荐今天的训练计划">
-            <t-icon class="chip-icon" name="view-list" size="32rpx" color="#D4AF37" />
-            <text class="chip-text">推荐训练计划</text>
+          <view class="quick-chip card" bindtap="sendQuickQuestion" data-question="U10 组单场赛事的费用明细大概是多少？">
+            <t-icon class="chip-icon" name="rmb" size="32rpx" color="#D4AF37" />
+            <text class="chip-text">查看费用明细</text>
           </view>
-          <view class="quick-chip card" bindtap="sendQuickQuestion" data-question="如何提高我的防守能力？">
-            <t-icon class="chip-icon" name="shield-error" size="32rpx" color="#D4AF37" />
-            <text class="chip-text">提高防守能力</text>
+          <view class="quick-chip card" bindtap="sendQuickQuestion" data-question="赞助商安踏和冠途分别能提供哪些权益？">
+            <t-icon class="chip-icon" name="gift" size="32rpx" color="#D4AF37" />
+            <text class="chip-text">赞助商权益说明</text>
           </view>
-          <view class="quick-chip card" bindtap="sendQuickQuestion" data-question="帮我分析最近的训练记录">
-            <t-icon class="chip-icon" name="chart-bar" size="32rpx" color="#D4AF37" />
-            <text class="chip-text">分析训练记录</text>
+          <view class="quick-chip card" bindtap="sendQuickQuestion" data-question="国贸室内篮球场单日最多能安排多少场比赛？">
+            <t-icon class="chip-icon" name="map-pin" size="32rpx" color="#D4AF37" />
+            <text class="chip-text">场馆承载量查询</text>
           </view>
         </view>
       </view>

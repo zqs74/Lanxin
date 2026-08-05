@@ -7,12 +7,12 @@ Page({
     themeClass: '',
     pageBg: '#f8f7f4',
     todayDate: '',
-    overallScore: 72,
+    overallScore: 80,
     showAddModal: false,
     newRecord: { title: '', duration: '', intensity: '中等强度', highlightsText: '' },
     radarData: {
       dimensions: ['投篮','身体素质','突破/上篮','组织','控球/运球','防守'],
-      values: [75, 65, 80, 70, 85, 60],
+      values: [78, 85, 82, 72, 80, 83],
       colors: ['rgba(212,175,55,0.9)','rgba(255,215,0,0.9)','rgba(244,196,48,0.9)','rgba(218,165,32,0.9)','rgba(184,134,11,0.85)','rgba(255,193,37,0.9)']
     },
     weeklyPlans: [
