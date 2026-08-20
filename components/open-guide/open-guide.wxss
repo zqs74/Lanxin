@@ -20,43 +20,9 @@
   box-shadow: 0 24rpx 48rpx rgba(29, 93, 255, 0.28);
 }
 
-/* CSS 锁图标（替代 emoji，更专业） */
-.og-lock {
-  position: relative;
-  width: 56rpx;
-  height: 46rpx;
-}
-
-.og-lock-shackle {
-  position: absolute;
-  left: 14rpx;
-  top: 0;
-  width: 28rpx;
-  height: 24rpx;
-  border: 7rpx solid #ffffff;
-  border-bottom: none;
-  border-radius: 14rpx 14rpx 0 0;
-}
-
-.og-lock-body {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 30rpx;
-  border-radius: 8rpx;
-  background: #ffffff;
-}
-
-.og-lock-keyhole {
-  position: absolute;
-  left: 50%;
-  bottom: 6rpx;
-  width: 10rpx;
-  height: 14rpx;
-  margin-left: -5rpx;
-  border-radius: 999rpx 999rpx 6rpx 6rpx;
-  background: #1d5dff;
+.og-icon-img {
+  width: 68rpx;
+  height: 68rpx;
 }
 
 .og-title {

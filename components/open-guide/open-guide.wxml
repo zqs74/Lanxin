@@ -8,11 +8,7 @@
 >
   <view class="og-panel">
     <view class="og-icon-wrap">
-      <view class="og-lock">
-        <view class="og-lock-shackle"></view>
-        <view class="og-lock-body"></view>
-        <view class="og-lock-keyhole"></view>
-      </view>
+      <image class="og-icon-img" src="/assets/contact-service.svg" mode="aspectFit"></image>
     </view>
     <view class="og-title">查看详情需开通内部账号</view>
     <view class="og-subtitle">资源详情、联系方式与档期仅对合作办赛方开放</view>
