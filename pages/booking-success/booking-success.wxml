@@ -1,0 +1,62 @@
+<view class="app-shell" wx:if="{{record}}">
+  <view class="page-hero bs-hero">
+    <view class="bs-hero-badge">
+      <view class="bs-hero-check"></view>
+    </view>
+    <view class="bs-hero-kicker">篮芯办赛</view>
+    <view class="bs-hero-title">预约成功</view>
+    <view class="bs-hero-sub">已提交场地预约，客户经理将尽快与您联系确认档期</view>
+  </view>
+
+  <view class="section-card bs-venue-card" wx:if="{{venue}}">
+    <image class="bs-venue-cover" src="{{venue.cover}}" mode="aspectFill"></image>
+    <view class="bs-venue-body">
+      <view class="bs-venue-tag">预约场馆</view>
+      <view class="bs-venue-name">{{venue.name}}</view>
+      <view class="bs-venue-meta">{{venue.town}} · {{venue.priceLevel || '价格面议'}}</view>
+    </view>
+  </view>
+
+  <view class="section-card">
+    <view class="section-title">预约信息</view>
+    <view class="bs-info-list">
+      <view class="bs-info-row">
+        <view class="bs-info-label">办赛模式</view>
+        <view class="bs-info-value">{{modeLabel}}</view>
+      </view>
+      <view class="bs-info-row">
+        <view class="bs-info-label">办赛日期</view>
+        <view class="bs-info-value">{{form.expectedDate || '待定'}}</view>
+      </view>
+      <view class="bs-info-row">
+        <view class="bs-info-label">办赛时段</view>
+        <view class="bs-info-value">{{form.timeSlot === 'morning' ? '上午 08:00-12:00' : form.timeSlot === 'afternoon' ? '下午 12:00-18:00' : form.timeSlot === 'evening' ? '晚上 18:00-22:00' : '待定'}}</view>
+      </view>
+      <view class="bs-info-row">
+        <view class="bs-info-label">联系人</view>
+        <view class="bs-info-value">{{form.contactName || '—'}}</view>
+      </view>
+      <view class="bs-info-row">
+        <view class="bs-info-label">手机号</view>
+        <view class="bs-info-value">{{form.phone || '—'}}</view>
+      </view>
+      <view class="bs-info-row">
+        <view class="bs-info-label">微信号</view>
+        <view class="bs-info-value">{{form.wechat || '—'}}</view>
+      </view>
+      <view class="bs-info-row" wx:if="{{form.remark}}">
+        <view class="bs-info-label">备注</view>
+        <view class="bs-info-value">{{form.remark}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="bs-back-link" bindtap="goHome">返回首页继续办赛</view>
+
+  <view class="cta-bar">
+    <button class="secondary-btn cta-btn" open-type="share">转发好友</button>
+    <button class="primary-btn cta-btn" bindtap="saveImage">{{saving ? '导出中...' : '保存预约图片'}}</button>
+  </view>
+
+  <canvas id="booking-canvas" type="2d" class="bs-canvas"></canvas>
+</view>

@@ -372,8 +372,10 @@ Page({
       priceLevel: bookingVenue ? bookingVenue.priceLevel : "",
     });
 
+    const recordId = `book_${Date.now()}`;
+
     saveBooking({
-      id: `book_${Date.now()}`,
+      id: recordId,
       type: "booking",
       mode: demand.mode,
       createdAt: new Date().toISOString(),
@@ -399,9 +401,8 @@ Page({
       }
     );
 
-    wx.showToast({
-      title: "场地预约已提交",
-      icon: "success",
+    wx.navigateTo({
+      url: `/pages/booking-success/booking-success?id=${recordId}`,
     });
   },
 });
