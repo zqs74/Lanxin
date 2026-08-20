@@ -2,11 +2,10 @@
 
 .og-panel {
   width: 620rpx;
-  padding: 40rpx 40rpx 36rpx;
+  padding: 48rpx 40rpx 44rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
-  transform: translateY(-40rpx);
 }
 
 .og-icon-wrap {
@@ -203,47 +202,4 @@
 
 .og-btn::after {
   border: none;
-}
-
-/* 底部圆形关闭按钮 */
-.og-close {
-  margin-top: 36rpx;
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 50%;
-  background: #eef2fb;
-  border: 2rpx solid rgba(29, 93, 255, 0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.og-close--hover {
-  background: #e0e8f7;
-}
-
-.og-close-icon {
-  position: relative;
-  width: 28rpx;
-  height: 28rpx;
-}
-
-.og-close-icon::before,
-.og-close-icon::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 28rpx;
-  height: 4rpx;
-  border-radius: 999rpx;
-  background: #6c7da3;
-}
-
-.og-close-icon::before {
-  transform: translate(-50%, -50%) rotate(45deg);
-}
-
-.og-close-icon::after {
-  transform: translate(-50%, -50%) rotate(-45deg);
 }

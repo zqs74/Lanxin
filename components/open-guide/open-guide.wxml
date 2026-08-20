@@ -45,9 +45,5 @@
     </view>
 
     <button class="og-btn" bindtap="copyWechat">联系客户经理开通</button>
-
-    <view class="og-close" bindtap="close" hover-class="og-close--hover">
-      <view class="og-close-icon"></view>
-    </view>
   </view>
 </van-popup>

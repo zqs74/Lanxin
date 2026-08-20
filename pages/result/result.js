@@ -227,11 +227,31 @@ Page({
   },
 
   showGuide() {
-    this.setData({ guideVisible: true });
+    this.setData(
+      {
+        guideVisible: true,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({ hidden: true });
+        }
+      }
+    );
   },
 
   closeGuide() {
-    this.setData({ guideVisible: false });
+    this.setData(
+      {
+        guideVisible: false,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({ hidden: false });
+        }
+      }
+    );
   },
 
   openBooking() {
