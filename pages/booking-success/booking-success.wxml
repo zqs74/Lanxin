@@ -62,5 +62,5 @@
     <button class="primary-btn cta-btn" bindtap="saveImage">{{saving ? '导出中...' : '保存预约图片'}}</button>
   </view>
 
-  <canvas id="booking-canvas" type="2d" class="bs-canvas" style="width: 720rpx; height: {{canvasHeight}}rpx;"></canvas>
+  <painter palette="{{palette}}" bind:imgOK="onImgOK" bind:imgErr="onImgErr" class="bs-painter" />
 </view>

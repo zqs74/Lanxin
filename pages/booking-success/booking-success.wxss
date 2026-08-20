@@ -146,10 +146,10 @@
   background: rgba(29, 93, 255, 0.2);
 }
 
-.bs-canvas {
+/* painter 组件离屏渲染（导出用，不参与页面布局） */
+.bs-painter {
   position: fixed;
   left: -9999rpx;
   top: -9999rpx;
-  width: 720rpx;
-  height: 1450rpx;
+  width: 654rpx;
 }

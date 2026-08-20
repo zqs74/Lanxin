@@ -1,4 +1,4 @@
-// booking-success.js - 场地预约成功页（展示预约信息 + Canvas 导出预约图片）
+// booking-success.js - 场地预约成功页（展示预约信息 + Painter 生成预约图片导出）
 const { getBookings } = require("../../utils/storage");
 const { encodePayload, decodePayload } = require("../../utils/share");
 const { createRecommendation } = require("../../utils/recommender");
@@ -31,12 +31,6 @@ function normalizeDemand(payload) {
   );
 }
 
-const POSTER_WIDTH = 720;
-const INFO_GRID_START_Y = 884;
-const INFO_ROW_HEIGHT = 96;
-const BOTTOM_CARD_HEIGHT = 140;
-const BOTTOM_CARD_MARGIN = 48;
-
 Page({
   data: {
     record: null,
@@ -46,7 +40,7 @@ Page({
     modeLabel: "",
     summary: "",
     saving: false,
-    canvasHeight: 1400,
+    palette: null,
   },
 
   onLoad(query) {
@@ -89,8 +83,6 @@ Page({
       cover: (venueItem && (venueItem.cover || venueItem.avatar || venueItem.image)) || "",
     };
 
-    const infoRows = this.buildInfoRows(bookingForm);
-
     this.setData({
       record,
       demand,
@@ -98,7 +90,6 @@ Page({
       venue,
       modeLabel: demand.mode === "pro_event" ? "半专业赛事" : "野球约球",
       summary: (record && record.summary) || result.summary || "",
-      canvasHeight: this.getCanvasHeight(infoRows.length),
     });
   },
 
@@ -151,64 +142,41 @@ Page({
     };
   },
 
+  // —— Painter 导出：设置 palette 触发组件渲染，imgOK 回调拿图片路径 ——
   saveImage() {
     if (this.data.saving) {
       return;
     }
-
-    this.setData({ saving: true });
-
-    const query = wx.createSelectorQuery().in(this);
-    query.select("#booking-canvas").fields({ node: true, size: true }).exec(async (res) => {
-      const canvasInfo = res && res[0];
-      if (!canvasInfo || !canvasInfo.node) {
-        this.finishSaving("画布初始化失败");
-        return;
-      }
-
-      const { node } = canvasInfo;
-      const width = POSTER_WIDTH;
-      const height = this.data.canvasHeight;
-      const ctx = node.getContext("2d");
-      const dpr = Math.max(2, wx.getWindowInfo().pixelRatio || 2);
-
-      node.width = width * dpr;
-      node.height = height * dpr;
-
-      if (typeof ctx.setTransform === "function") {
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      } else if (typeof ctx.scale === "function") {
-        ctx.scale(dpr, dpr);
-      }
-
-      try {
-        await renderBookingCard(ctx, node, width, height, this.data, this.getSlotLabel.bind(this));
-        await waitForCanvasFlush();
-      } catch (error) {
-        console.error("renderBookingCard failed", error);
-        this.finishSaving("图片导出失败");
-        return;
-      }
-
-      try {
-        const tempFilePath = await exportCanvas(node, width, height, dpr, this);
-        wx.saveImageToPhotosAlbum({
-          filePath: tempFilePath,
-          success: () => {
-            this.setData({ saving: false });
-            wx.showToast({ title: "已保存到相册", icon: "success" });
-          },
-          fail: (error) => {
-            console.warn("saveImageToPhotosAlbum failed", error);
-            this.setData({ saving: false });
-            wx.previewImage({ urls: [tempFilePath] });
-          },
-        });
-      } catch (error) {
-        console.error("exportCanvas failed", error);
-        this.finishSaving("图片导出失败");
-      }
+    this.setData({
+      saving: true,
+      palette: this.buildPalette(),
     });
+  },
+
+  onImgOK(event) {
+    const path = event.detail && event.detail.path;
+    if (!path) {
+      this.finishSaving("图片生成失败");
+      return;
+    }
+
+    this.setData({ saving: false });
+
+    wx.saveImageToPhotosAlbum({
+      filePath: path,
+      success: () => {
+        wx.showToast({ title: "已保存到相册", icon: "success" });
+      },
+      fail: (error) => {
+        console.warn("saveImageToPhotosAlbum failed", error);
+        wx.previewImage({ urls: [path] });
+      },
+    });
+  },
+
+  onImgErr(event) {
+    console.warn("painter imgErr", event.detail);
+    this.finishSaving("图片生成失败");
   },
 
   finishSaving(title) {
@@ -216,255 +184,117 @@ Page({
     wx.showToast({ title, icon: "none" });
   },
 
-  getCanvasHeight(infoCount) {
-    const rows = Math.max(1, Math.ceil(infoCount / 2));
-    const gridH = 76 + rows * INFO_ROW_HEIGHT;
-    const bottomY = INFO_GRID_START_Y + gridH + 10;
-    return bottomY + BOTTOM_CARD_HEIGHT + BOTTOM_CARD_MARGIN;
-  },
-});
+  // 预约卡片 palette（Painter JSON 布局）
+  buildPalette() {
+    const { form, venue, modeLabel, summary } = this.data;
+    const date = form.expectedDate || "日期待定";
+    const slotLabel = this.getSlotLabel(form.timeSlot) || "时段待定";
+    const views = [];
 
-function waitForCanvasFlush() {
-  return new Promise((resolve) => {
-    setTimeout(resolve, 80);
-  });
-}
-
-function exportCanvas(node, width, height, dpr, component) {
-  return new Promise((resolve, reject) => {
-    wx.canvasToTempFilePath(
-      {
-        canvas: node,
-        x: 0,
-        y: 0,
-        width,
-        height,
-        destWidth: width * dpr,
-        destHeight: height * dpr,
-        success: ({ tempFilePath }) => resolve(tempFilePath),
-        fail: (error) => reject(error),
+    // —— hero 渐变区 ——
+    views.push({
+      type: "rect",
+      css: {
+        left: "0rpx", top: "0rpx", width: "654rpx", height: "240rpx",
+        color: "linear-gradient(135deg, #115cff 0%, #5b9cff 100%)",
       },
-      component
-    );
-  });
-}
+    });
+    views.push({ type: "text", text: "篮芯办赛", css: { left: "40rpx", top: "36rpx", fontSize: "22rpx", color: "#ffffff" } });
+    views.push({ type: "text", text: "场地预约成功", css: { left: "40rpx", top: "84rpx", fontSize: "46rpx", fontWeight: "bold", color: "#ffffff" } });
+    views.push({
+      type: "text",
+      text: `${modeLabel} · ${venue.town} · ${date} · ${slotLabel}`,
+      css: { left: "40rpx", top: "164rpx", width: "500rpx", fontSize: "24rpx", color: "rgba(255,255,255,0.92)" },
+    });
+    // 对勾圆 + ✓
+    views.push({
+      type: "rect",
+      css: { right: "40rpx", top: "52rpx", width: "92rpx", height: "92rpx", borderRadius: "100%", color: "rgba(255,255,255,0.18)" },
+    });
+    views.push({
+      type: "text",
+      text: "✓",
+      css: { right: "40rpx", top: "66rpx", width: "92rpx", textAlign: "center", fontSize: "52rpx", fontWeight: "bold", color: "#ffffff" },
+    });
 
-function roundRectPath(ctx, x, y, width, height, radius) {
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
-}
+    // —— 场馆卡 ——
+    const hasCover = !!venue.cover;
+    const textLeft = hasCover ? "200rpx" : "50rpx";
+    views.push({
+      type: "rect",
+      css: { left: "30rpx", top: "260rpx", width: "594rpx", height: "170rpx", borderRadius: "24rpx", color: "#ffffff" },
+    });
+    if (hasCover) {
+      views.push({
+        type: "image",
+        url: venue.cover,
+        css: { left: "50rpx", top: "280rpx", width: "130rpx", height: "130rpx", borderRadius: "18rpx" },
+      });
+    }
+    views.push({ type: "text", text: "预约场馆", css: { left: textLeft, top: "288rpx", fontSize: "20rpx", color: "#1d5dff" } });
+    views.push({
+      type: "text",
+      text: venue.name,
+      css: { left: textLeft, top: "322rpx", width: "400rpx", fontSize: "30rpx", fontWeight: "bold", color: "#20304b", maxLines: 1 },
+    });
+    views.push({
+      type: "text",
+      text: `${venue.town} · ${venue.priceLevel || "价格面议"}`,
+      css: { left: textLeft, top: "368rpx", width: "400rpx", fontSize: "22rpx", color: "#7d8cb1", maxLines: 1 },
+    });
 
-function fillRoundRect(ctx, x, y, width, height, radius, fillStyle) {
-  ctx.save();
-  roundRectPath(ctx, x, y, width, height, radius);
-  ctx.fillStyle = fillStyle;
-  ctx.fill();
-  ctx.restore();
-}
+    // —— 预约信息卡（两列网格） ——
+    const infoRows = this.buildInfoRows(form);
+    const infoColumns = Math.max(1, Math.ceil(infoRows.length / 2));
+    const infoCardH = 84 + infoColumns * 88;
+    const infoTop = 450;
+    views.push({
+      type: "rect",
+      css: { left: "30rpx", top: `${infoTop}rpx`, width: "594rpx", height: `${infoCardH}rpx`, borderRadius: "24rpx", color: "#ffffff" },
+    });
+    views.push({ type: "text", text: "预约信息", css: { left: "50rpx", top: `${infoTop + 22}rpx`, fontSize: "22rpx", color: "#7d8cb1" } });
 
-async function loadCanvasImage(node, src) {
-  try {
-    const localSrc = await new Promise((resolve, reject) => {
-      wx.getImageInfo({
-        src,
-        success: (res) => resolve(res.path),
-        fail: (error) => reject(error),
+    const colX = [50, 330];
+    infoRows.forEach((row, index) => {
+      const col = index % 2;
+      const rowIndex = Math.floor(index / 2);
+      const x = colX[col];
+      const y = infoTop + 76 + rowIndex * 88;
+      views.push({
+        type: "text",
+        text: row[0],
+        css: { left: `${x}rpx`, top: `${y}rpx`, fontSize: "20rpx", color: "#9aa8c4" },
+      });
+      views.push({
+        type: "text",
+        text: row[1],
+        css: { left: `${x}rpx`, top: `${y + 34}rpx`, width: "274rpx", fontSize: "26rpx", fontWeight: "bold", color: "#20304b", maxLines: 2 },
       });
     });
 
-    return await new Promise((resolve, reject) => {
-      const image = node.createImage();
-      image.onload = () => resolve(image);
-      image.onerror = (error) => reject(error);
-      image.src = localSrc;
+    // —— 底部引导卡 ——
+    const bottomTop = infoTop + infoCardH + 16;
+    views.push({
+      type: "rect",
+      css: { left: "30rpx", top: `${bottomTop}rpx`, width: "594rpx", height: "116rpx", borderRadius: "24rpx", color: "#1658ef" },
     });
-  } catch (error) {
-    console.warn("loadCanvasImage failed", src, error);
-    return null;
-  }
-}
+    views.push({
+      type: "text",
+      text: "场地预约已提交",
+      css: { left: "50rpx", top: `${bottomTop + 28}rpx`, fontSize: "26rpx", fontWeight: "bold", color: "#ffffff" },
+    });
+    views.push({
+      type: "text",
+      text: summary || "客户经理将尽快与您联系，确认档期与细节",
+      css: { left: "50rpx", top: `${bottomTop + 72}rpx`, width: "540rpx", fontSize: "20rpx", color: "rgba(255,255,255,0.9)", maxLines: 2 },
+    });
 
-async function renderBookingCard(ctx, node, width, height, data, getSlotLabel) {
-  const { form, venue, modeLabel, summary } = data;
-  const date = form.expectedDate || "日期待定";
-  const slotLabel = getSlotLabel(form.timeSlot) || "时段待定";
-
-  ctx.clearRect(0, 0, width, height);
-  ctx.fillStyle = "#eef4ff";
-  ctx.fillRect(0, 0, width, height);
-
-  // —— hero 渐变 ——
-  const heroGradient = ctx.createLinearGradient(0, 0, width, 460);
-  heroGradient.addColorStop(0, "#115cff");
-  heroGradient.addColorStop(1, "#5b9cff");
-  ctx.fillStyle = heroGradient;
-  ctx.fillRect(0, 0, width, 420);
-
-  ctx.fillStyle = "rgba(255,255,255,0.14)";
-  ctx.beginPath();
-  ctx.arc(width - 62, 66, 76, 0, Math.PI * 2);
-  ctx.fill();
-
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "22px sans-serif";
-  ctx.fillText("篮芯办赛", 42, 58);
-
-  // 成功对勾
-  drawSuccessBadge(ctx, 42, 108);
-
-  ctx.font = "bold 52px sans-serif";
-  ctx.fillText("场地预约成功", 136, 134);
-
-  ctx.font = "24px sans-serif";
-  wrapText(ctx, `${modeLabel} · ${venue.town} · ${date} · ${slotLabel}`, 136, 184, width - 184, 34, 2);
-
-  // —— 场馆卡 ——
-  const coverImage = venue.cover ? await loadCanvasImage(node, venue.cover) : null;
-  drawVenueCard(ctx, venue, width, coverImage);
-
-  // —— 预约信息卡 ——
-  const infoRows = [
-    ["办赛日期", date],
-    ["办赛时段", slotLabel],
-    ["联系人", form.contactName || "—"],
-    ["手机号", form.phone || "—"],
-    ["微信号", form.wechat || "—"],
-    ["备注", form.remark || "—"],
-  ].filter((row) => row[1] && row[1] !== "—");
-
-  const gridRows = Math.max(1, Math.ceil(infoRows.length / 2));
-  const gridH = 76 + gridRows * INFO_ROW_HEIGHT;
-  drawInfoCard(ctx, width, infoRows);
-
-  // —— 底部 ——
-  const bottomY = INFO_GRID_START_Y + gridH + 10;
-  fillRoundRect(ctx, 30, bottomY, width - 60, BOTTOM_CARD_HEIGHT, 28, "#1658ef");
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 26px sans-serif";
-  ctx.fillText("场地预约已提交", 54, bottomY + 52);
-  ctx.font = "20px sans-serif";
-  wrapText(ctx, summary || "客户经理将尽快与您联系，确认档期与细节", 54, bottomY + 98, width - 108, 30, 2);
-}
-
-function drawSuccessBadge(ctx, x, y) {
-  // 白色圆环 + 对勾
-  ctx.save();
-  ctx.beginPath();
-  ctx.arc(x + 48, y, 48, 0, Math.PI * 2);
-  ctx.fillStyle = "rgba(255,255,255,0.16)";
-  ctx.fill();
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 8;
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  ctx.beginPath();
-  ctx.moveTo(x + 26, y + 2);
-  ctx.lineTo(x + 43, y + 19);
-  ctx.lineTo(x + 72, y - 14);
-  ctx.stroke();
-  ctx.restore();
-}
-
-function drawVenueCard(ctx, venue, width, coverImage) {
-  const cardX = 30;
-  const cardY = 324;
-  const cardW = width - 60;
-  const cardH = 298;
-
-  fillRoundRect(ctx, cardX, cardY, cardW, cardH, 30, "#dce8ff");
-
-  if (coverImage) {
-    ctx.save();
-    roundRectPath(ctx, cardX, cardY, cardW, cardH, 30);
-    ctx.clip();
-    ctx.drawImage(coverImage, cardX, cardY, cardW, cardH);
-    ctx.restore();
-  }
-
-  const mask = ctx.createLinearGradient(cardX, cardY, cardX, cardY + cardH);
-  mask.addColorStop(0, "rgba(18,41,89,0.04)");
-  mask.addColorStop(1, "rgba(18,41,89,0.78)");
-  ctx.save();
-  roundRectPath(ctx, cardX, cardY, cardW, cardH, 30);
-  ctx.fillStyle = mask;
-  ctx.fill();
-  ctx.restore();
-
-  ctx.fillStyle = "rgba(255,255,255,0.9)";
-  ctx.font = "18px sans-serif";
-  ctx.fillText("预约场馆", cardX + 24, cardY + 42);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 40px sans-serif";
-  wrapText(ctx, venue.name, cardX + 24, cardY + 108, cardW - 48, 46, 3);
-  ctx.font = "22px sans-serif";
-  wrapText(ctx, `${venue.town} · ${venue.priceLevel || "价格面议"}`, cardX + 24, cardY + 236, cardW - 48, 30, 2);
-}
-
-function drawInfoCard(ctx, width, infoRows) {
-  const cardX = 30;
-  const cardY = INFO_GRID_START_Y;
-  const cardW = width - 60;
-  const gridRows = Math.max(1, Math.ceil(infoRows.length / 2));
-  const gridH = 76 + gridRows * INFO_ROW_HEIGHT;
-
-  fillRoundRect(ctx, cardX, cardY, cardW, gridH, 28, "#ffffff");
-  ctx.fillStyle = "#7d8cb1";
-  ctx.font = "20px sans-serif";
-  ctx.fillText("预约信息", cardX + 24, cardY + 42);
-
-  const cellW = (cardW - 40) / 2;
-  infoRows.forEach((entry, index) => {
-    const row = Math.floor(index / 2);
-    const col = index % 2;
-    const x = cardX + 20 + col * (cellW + 0);
-    const y = cardY + 76 + row * INFO_ROW_HEIGHT;
-
-    ctx.fillStyle = "#7d8cb1";
-    ctx.font = "18px sans-serif";
-    ctx.fillText(entry[0], x, y + 24);
-    ctx.fillStyle = "#20304b";
-    ctx.font = "bold 26px sans-serif";
-    wrapText(ctx, entry[1], x, y + 66, cellW - 20, 32, 2);
-  });
-}
-
-function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines) {
-  if (!text) {
-    return;
-  }
-
-  let line = "";
-  let lines = 0;
-  let renderedLength = 0;
-
-  for (let i = 0; i < text.length; i += 1) {
-    const testLine = line + text[i];
-    if (ctx.measureText(testLine).width > maxWidth && line) {
-      ctx.fillText(line, x, y + lineHeight * lines);
-      renderedLength += line.length;
-      lines += 1;
-      line = text[i];
-      if (lines >= maxLines - 1) {
-        break;
-      }
-    } else {
-      line = testLine;
-    }
-  }
-
-  if (line && lines < maxLines) {
-    const finalText = lines === maxLines - 1 && text.length > renderedLength + line.length
-      ? `${line}...`
-      : line;
-    ctx.fillText(finalText, x, y + lineHeight * lines);
-  }
-}
+    const height = bottomTop + 116 + 24;
+    return {
+      width: "654rpx",
+      height: `${height}rpx`,
+      background: "#eef4ff",
+      views,
+    };
+  },
+});
