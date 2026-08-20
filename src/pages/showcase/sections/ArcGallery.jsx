@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { galleryImages } from '../data/showcaseData';
 
+const TOTAL = galleryImages.length;
+const WINDOW = 3;
+
+const wrapIndex = (i) => ((i % TOTAL) + TOTAL) % TOTAL;
+
 export default function ArcGallery() {
-  const [centerIndex, setCenterIndex] = useState(0);
+  const [virtualIndex, setVirtualIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const trackRef = useRef(null);
 
@@ -13,19 +18,21 @@ export default function ArcGallery() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // 无缝循环：virtualIndex 单调递增，不再回跳，最后一张后直接续接第一张
   useEffect(() => {
     if (isMobile) return;
     const timer = setInterval(() => {
-      setCenterIndex((prev) => (prev + 1) % galleryImages.length);
+      setVirtualIndex((prev) => prev + 1);
     }, 4000);
     return () => clearInterval(timer);
   }, [isMobile]);
 
-  const getItemStyle = (index) => {
-    const offset = index - centerIndex;
+  const activeImgIndex = wrapIndex(virtualIndex);
+
+  const getItemStyle = (offset) => {
     const absOffset = Math.abs(offset);
 
-    if (absOffset > 3) return { display: 'none' };
+    if (absOffset > WINDOW) return { display: 'none' };
 
     const baseWidth = isMobile ? 280 : 380;
     const baseHeight = isMobile ? 180 : 240;
@@ -44,13 +51,29 @@ export default function ArcGallery() {
     };
   };
 
-  const handleClick = (index) => {
-    if (index === centerIndex) {
+  const moveToCenter = (imgIndex) => {
+    setVirtualIndex((prev) => {
+      const cur = wrapIndex(prev);
+      let delta = imgIndex - cur;
+      const half = Math.floor(TOTAL / 2);
+      if (delta > half) delta -= TOTAL;
+      if (delta < -half) delta += TOTAL;
+      return prev + delta;
+    });
+  };
+
+  const handleClick = (offset, imgIndex) => {
+    if (offset === 0) {
       document.getElementById('cases')?.scrollIntoView({ behavior: 'smooth' });
     } else {
-      setCenterIndex(index);
+      moveToCenter(imgIndex);
     }
   };
+
+  const windowItems = [];
+  for (let i = virtualIndex - WINDOW; i <= virtualIndex + WINDOW; i++) {
+    windowItems.push({ offset: i - virtualIndex, imgIndex: wrapIndex(i) });
+  }
 
   return (
     <section id="arc-gallery" className="relative w-full py-20 overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
@@ -71,7 +94,7 @@ export default function ArcGallery() {
                 key={i}
                 className="flex-shrink-0 w-72 rounded-2xl overflow-hidden snap-center cursor-pointer group"
                 style={{ border: '1px solid var(--border)', boxShadow: '0 8px 30px var(--shadow)' }}
-                onClick={() => handleClick(i)}
+                onClick={() => document.getElementById('cases')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <div className="relative h-48 overflow-hidden">
                   <img src={img.src} alt={img.alt} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
@@ -89,33 +112,36 @@ export default function ArcGallery() {
               className="relative flex items-center justify-center"
               style={{ transformStyle: 'preserve-3d', height: '420px' }}
             >
-              {galleryImages.map((img, i) => (
-                <div
-                  key={i}
-                  className="absolute rounded-2xl overflow-hidden cursor-pointer transition-all duration-700 ease-out"
-                  style={{
-                    ...getItemStyle(i),
-                    boxShadow: i === centerIndex
-                      ? '0 20px 60px rgba(0,0,0,0.4), 0 0 0 2px var(--accent)'
-                      : '0 10px 40px rgba(0,0,0,0.3)',
-                    left: '50%',
-                    top: '50%',
-                    marginLeft: '-190px',
-                    marginTop: '-120px',
-                  }}
-                  onClick={() => handleClick(i)}
-                >
-                  <img src={img.src} alt={img.alt} className="w-full h-full object-cover" />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-                    <p className="text-white text-base font-bold">{img.caption}</p>
-                  </div>
-                  {i === centerIndex && (
-                    <div className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold text-black" style={{ background: 'var(--accent)' }}>
-                      点击查看详情
+              {windowItems.map(({ offset, imgIndex }) => {
+                const img = galleryImages[imgIndex];
+                return (
+                  <div
+                    key={imgIndex}
+                    className="absolute rounded-2xl overflow-hidden cursor-pointer transition-all duration-700 ease-out"
+                    style={{
+                      ...getItemStyle(offset),
+                      boxShadow: offset === 0
+                        ? '0 20px 60px rgba(0,0,0,0.4), 0 0 0 2px var(--accent)'
+                        : '0 10px 40px rgba(0,0,0,0.3)',
+                      left: '50%',
+                      top: '50%',
+                      marginLeft: '-190px',
+                      marginTop: '-120px',
+                    }}
+                    onClick={() => handleClick(offset, imgIndex)}
+                  >
+                    <img src={img.src} alt={img.alt} className="w-full h-full object-cover" />
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                      <p className="text-white text-base font-bold">{img.caption}</p>
                     </div>
-                  )}
-                </div>
-              ))}
+                    {offset === 0 && (
+                      <div className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold text-black" style={{ background: 'var(--accent)' }}>
+                        点击查看详情
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
 
             <div style={{
@@ -135,9 +161,9 @@ export default function ArcGallery() {
           {galleryImages.map((_, i) => (
             <button
               key={i}
-              onClick={() => setCenterIndex(i)}
-              className={`rounded-full transition-all duration-300 ${i === centerIndex ? 'w-8 h-2' : 'w-2 h-2'}`}
-              style={{ background: i === centerIndex ? 'var(--accent)' : 'var(--border)' }}
+              onClick={() => moveToCenter(i)}
+              className={`rounded-full transition-all duration-300 ${i === activeImgIndex ? 'w-8 h-2' : 'w-2 h-2'}`}
+              style={{ background: i === activeImgIndex ? 'var(--accent)' : 'var(--border)' }}
             />
           ))}
         </div>
