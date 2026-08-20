@@ -109,29 +109,29 @@ function buildPosterPalette(poster) {
   const textLeft = hasCover ? "210rpx" : "50rpx";
   views.push({
     type: "rect",
-    css: { left: "30rpx", top: `${venueCardTop}rpx`, width: "594rpx", height: "300rpx", borderRadius: "24rpx", color: "#ffffff" },
+    css: { left: "30rpx", top: `${venueCardTop}rpx`, width: "594rpx", height: "260rpx", borderRadius: "24rpx", color: "#ffffff" },
   });
   if (hasCover) {
     views.push({
       type: "image",
       url: poster.venueCover,
-      css: { left: "50rpx", top: `${venueCardTop + 20}rpx`, width: "140rpx", height: "140rpx", borderRadius: "20rpx" },
+      css: { left: "50rpx", top: `${venueCardTop + 18}rpx`, width: "140rpx", height: "140rpx", borderRadius: "20rpx" },
     });
   }
   views.push({ type: "text", text: "推荐场馆", css: { left: textLeft, top: `${venueCardTop + 24}rpx`, fontSize: "20rpx", color: "#1d5dff" } });
   views.push({
     type: "text",
     text: poster.venue,
-    css: { left: textLeft, top: `${venueCardTop + 58}rpx`, width: "384rpx", fontSize: "32rpx", fontWeight: "bold", color: "#20304b", maxLines: 2 },
+    css: { left: textLeft, top: `${venueCardTop + 54}rpx`, width: "384rpx", fontSize: "32rpx", fontWeight: "bold", color: "#20304b", maxLines: 2 },
   });
   views.push({
     type: "text",
     text: poster.planTone,
-    css: { left: textLeft, top: `${venueCardTop + 150}rpx`, width: "384rpx", fontSize: "22rpx", color: "#7d8cb1", maxLines: 1 },
+    css: { left: textLeft, top: `${venueCardTop + 132}rpx`, width: "384rpx", fontSize: "22rpx", color: "#7d8cb1", maxLines: 1 },
   });
   // 场馆标签（横向排）
   let tagX = 50;
-  const tagY = venueCardTop + 250;
+  const tagY = venueCardTop + 196;
   (poster.tags || []).slice(0, 3).forEach((tag) => {
     const tagWidth = Math.max(80, tag.length * 16 + 28);
     views.push({
@@ -147,7 +147,7 @@ function buildPosterPalette(poster) {
   });
 
   // —— 方案摘要卡 ——
-  const summaryTop = venueCardTop + 300 + 24;
+  const summaryTop = venueCardTop + 260 + 24;
   views.push({
     type: "rect",
     css: { left: "30rpx", top: `${summaryTop}rpx`, width: "594rpx", height: "220rpx", borderRadius: "24rpx", color: "#ffffff" },
