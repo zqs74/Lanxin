@@ -91,9 +91,37 @@
 
 .history-title {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.history-title-text {
   font-size: 28rpx;
   font-weight: 700;
   color: #1c2b49;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 模式圆点：半专业=蓝，野球=橙 */
+.mode-dot {
+  flex-shrink: 0;
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+}
+
+.mode-dot--pro {
+  background: #2b8fff;
+  box-shadow: 0 0 10rpx rgba(43, 143, 255, 0.55);
+}
+
+.mode-dot--casual {
+  background: #ff8a2a;
+  box-shadow: 0 0 10rpx rgba(255, 138, 42, 0.55);
 }
 
 .history-time {
@@ -110,16 +138,10 @@
   color: #243556;
 }
 
-/* 重点信息：蓝色胶囊高亮 */
+/* 重点信息：当时输入的一句话，小号灰字 */
 .history-highlight {
-  margin-top: 14rpx;
-  display: inline-flex;
-  align-items: center;
-  padding: 8rpx 18rpx;
-  border-radius: 999rpx;
-  background: rgba(29, 93, 255, 0.08);
-  color: #1d5dff;
+  margin-top: 10rpx;
   font-size: 22rpx;
-  font-weight: 600;
-  line-height: 1.5;
+  line-height: 1.6;
+  color: #7c8ba8;
 }

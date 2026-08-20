@@ -59,7 +59,7 @@ function buildList(list = [], type) {
           ? ((bookingForm.venueName && bookingForm.timeSlot)
               ? `${bookingForm.venueName} · ${getSlotLabel(bookingForm.timeSlot) || "时段待定"}`
               : (bookingForm.remark || (bookingForm.acceptFallback ? "接受同档位替代方案" : "仅接受当前方案")))
-          : buildRecommendationHighlight(result),
+          : (demand.sentence || buildRecommendationHighlight(result)),
       });
     });
 }

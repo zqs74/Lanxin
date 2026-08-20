@@ -19,7 +19,10 @@
         hover-stay-time="80"
       >
         <view class="history-top">
-          <view class="history-title">{{item.title}}</view>
+          <view class="history-title">
+            <view class="mode-dot mode-dot--{{item.mode === 'pro_event' ? 'pro' : 'casual'}}"></view>
+            <text class="history-title-text">{{item.title}}</text>
+          </view>
           <view class="history-time">{{item.meta}}</view>
         </view>
         <view class="history-brief">{{item.brief}}</view>
@@ -49,7 +52,10 @@
         hover-stay-time="80"
       >
         <view class="history-top">
-          <view class="history-title">{{item.title}}</view>
+          <view class="history-title">
+            <view class="mode-dot mode-dot--{{item.mode === 'pro_event' ? 'pro' : 'casual'}}"></view>
+            <text class="history-title-text">{{item.title}}</text>
+          </view>
           <view class="history-time">{{item.meta}}</view>
         </view>
         <view class="history-brief">{{item.brief}}</view>

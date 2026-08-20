@@ -46,12 +46,68 @@
   color: #ffffff;
 }
 
+.record-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18rpx;
+}
+
+/* 科技感分类标签（与历史页同款） */
+.record-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14rpx;
+  padding: 10rpx 22rpx 10rpx 34rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, rgba(29, 93, 255, 0.14) 0%, rgba(77, 141, 255, 0.05) 100%);
+  border: 2rpx solid rgba(29, 93, 255, 0.2);
+}
+
+.record-tag::before {
+  content: "";
+  position: absolute;
+  left: 16rpx;
+  top: 50%;
+  width: 10rpx;
+  height: 10rpx;
+  margin-top: -5rpx;
+  border-radius: 50%;
+  background: #2b8fff;
+  box-shadow: 0 0 14rpx 3rpx rgba(43, 143, 255, 0.55);
+}
+
+.record-tag-text {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1d5dff;
+  letter-spacing: 3rpx;
+}
+
+.record-tag-count {
+  min-width: 40rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #1d5dff 0%, #4d8dff 100%);
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.4;
+  box-shadow: 0 6rpx 14rpx rgba(29, 93, 255, 0.3);
+}
+
 .record-card {
   padding: 24rpx 0;
 }
 
 .record-card + .record-card {
   border-top: 2rpx solid #eef3fb;
+}
+
+.record-card--hover {
+  opacity: 0.92;
 }
 
 .record-top {
@@ -63,9 +119,37 @@
 
 .record-title {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.record-title-text {
   font-size: 28rpx;
   font-weight: 700;
   color: #1c2b49;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 模式圆点：半专业=蓝，野球=橙 */
+.mode-dot {
+  flex-shrink: 0;
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+}
+
+.mode-dot--pro {
+  background: #2b8fff;
+  box-shadow: 0 0 10rpx rgba(43, 143, 255, 0.55);
+}
+
+.mode-dot--casual {
+  background: #ff8a2a;
+  box-shadow: 0 0 10rpx rgba(255, 138, 42, 0.55);
 }
 
 .record-time {
@@ -82,11 +166,12 @@
   color: #243556;
 }
 
+/* 重点信息：当时输入的一句话，小号灰字 */
 .record-highlight {
   margin-top: 10rpx;
-  font-size: 23rpx;
+  font-size: 22rpx;
   line-height: 1.6;
-  color: #63779c;
+  color: #7c8ba8;
 }
 
 .record-empty-inline {

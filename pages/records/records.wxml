@@ -1,11 +1,11 @@
 <view class="app-shell page-shell">
-  <view class="page-hero compact-hero">
-    <view class="hero-city">更多记录</view>
-    <view class="hero-title">{{title}}</view>
-  </view>
-
   <view class="section-card">
-    <view class="accent-heading">{{title}}</view>
+    <view class="record-head">
+      <view class="record-tag">
+        <view class="record-tag-text">{{title}}</view>
+        <view class="record-tag-count">{{filteredList.length}}</view>
+      </view>
+    </view>
 
     <view class="filter-panel" wx:if="{{list.length}}">
       <view class="filter-group">
@@ -50,11 +50,18 @@
         wx:for="{{filteredList}}"
         wx:key="id"
         class="record-card"
+        data-type="{{type}}"
+        data-id="{{item.id}}"
         data-payload="{{item.payload}}"
         bindtap="reopenItem"
+        hover-class="record-card--hover"
+        hover-stay-time="80"
       >
         <view class="record-top">
-          <view class="record-title">{{item.title}}</view>
+          <view class="record-title">
+            <view class="mode-dot mode-dot--{{item.mode === 'pro_event' ? 'pro' : 'casual'}}"></view>
+            <text class="record-title-text">{{item.title}}</text>
+          </view>
           <view class="record-time">{{item.meta}}</view>
         </view>
         <view class="record-brief">{{item.brief}}</view>

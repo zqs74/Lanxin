@@ -15,6 +15,18 @@ function getSlotLabel(value) {
   return TIME_SLOT_LABELS[value] || "";
 }
 
+// 推荐记录重点兜底：预算落点 + 方案调性（优先展示当时输入的一句话）
+function buildRecommendationHighlight(result) {
+  const parts = [];
+  if (result.budgetFocus) {
+    parts.push(`预算落点 ${result.budgetFocus}`);
+  }
+  if (result.planTone) {
+    parts.push(result.planTone);
+  }
+  return parts.join(" · ") || result.strategyLine || "";
+}
+
 function buildList(list = [], type) {
   const seen = new Set();
 
@@ -47,7 +59,7 @@ function buildList(list = [], type) {
           ? ((bookingForm.venueName && bookingForm.timeSlot)
               ? `${bookingForm.venueName} · ${getSlotLabel(bookingForm.timeSlot) || "时段待定"}`
               : (bookingForm.remark || (bookingForm.acceptFallback ? "接受同档位替代方案" : "仅接受当前方案")))
-          : (result.summaryNote || result.strategyLine || ""),
+          : (demand.sentence || buildRecommendationHighlight(result)),
       });
     });
 }
@@ -123,7 +135,18 @@ Page({
   },
 
   reopenItem(event) {
-    const { payload } = event.currentTarget.dataset;
+    const { id, payload, type } = event.currentTarget.dataset;
+
+    // 预约记录 → 预约成功页；推荐记录 → 对应方案页
+    if (type === "booking") {
+      if (id) {
+        wx.navigateTo({
+          url: `/pages/booking-success/booking-success?id=${id}`,
+        });
+      }
+      return;
+    }
+
     if (!payload || !payload.demand) {
       return;
     }
