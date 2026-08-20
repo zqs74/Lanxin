@@ -431,3 +431,28 @@
   padding-top: 18rpx;
   padding-bottom: calc(28rpx + env(safe-area-inset-bottom));
 }
+
+/* —— A1：资源卡详情守卫 —— */
+
+.resource-card--hover {
+  opacity: 0.92;
+  transform: scale(0.99);
+}
+
+.resource-card-cta {
+  margin-top: 16rpx;
+  padding-top: 14rpx;
+  border-top: 2rpx solid rgba(29, 93, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  font-size: 22rpx;
+  color: #1d5dff;
+}
+
+.resource-card-cta-arrow {
+  font-size: 30rpx;
+  color: #7d8cae;
+  line-height: 1;
+}

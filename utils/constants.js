@@ -10,6 +10,15 @@ const STORAGE_KEYS = {
   LATEST_RESULT: "lx_latest_result",
 };
 
+// 客服与开通引导配置（A1/A2）
+// 上线前请替换为真实客服信息：qrCode 指向客服微信二维码本地图片，phone/wechat 为真实联系方式
+const CONTACT = {
+  name: "蓝心办赛·客户经理",
+  qrCode: "/assets/contact-qr.png",
+  phone: "",
+  wechat: "lankexin-bansai",
+};
+
 const MODE_OPTIONS = [
   {
     value: APP_MODE.PRO_EVENT,
@@ -74,6 +83,7 @@ const DATE_OPTIONS = [
 module.exports = {
   APP_MODE,
   STORAGE_KEYS,
+  CONTACT,
   MODE_OPTIONS,
   MODE_EXAMPLES,
   TOWN_OPTIONS,

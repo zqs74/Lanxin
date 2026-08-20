@@ -1,0 +1,61 @@
+// open-guide.js - 开通引导弹窗组件（A1 详情访问控制 + A2 客服入口）
+// 需求：办赛方端"只能看展示内容；点击详情 → 居中弹窗展示客服二维码/联系方式"
+const { CONTACT } = require("../../utils/constants");
+
+Component({
+  properties: {
+    visible: {
+      type: Boolean,
+      value: false,
+    },
+  },
+
+  data: {
+    contact: CONTACT,
+  },
+
+  methods: {
+    noop() {},
+
+    close() {
+      this.triggerEvent("close");
+    },
+
+    previewQr() {
+      const { qrCode } = CONTACT;
+      if (!qrCode) return;
+      wx.previewImage({
+        current: qrCode,
+        urls: [qrCode],
+      });
+    },
+
+    copyWechat() {
+      const { wechat } = CONTACT;
+      if (!wechat) {
+        wx.showToast({ title: "客服微信待配置", icon: "none" });
+        return;
+      }
+      wx.setClipboardData({
+        data: wechat,
+        success: () => {
+          wx.showToast({ title: "微信号已复制", icon: "none" });
+        },
+      });
+    },
+
+    callPhone() {
+      const { phone } = CONTACT;
+      if (!phone) {
+        wx.showToast({ title: "请添加客服微信联系", icon: "none" });
+        return;
+      }
+      wx.makePhoneCall({
+        phoneNumber: phone,
+        fail: () => {
+          wx.showToast({ title: "无法拨号，请直接添加微信", icon: "none" });
+        },
+      });
+    },
+  },
+});

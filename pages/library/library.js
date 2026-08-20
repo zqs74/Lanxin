@@ -28,6 +28,8 @@ Page({
     townFilter: "全部",
     emptyText: "",
     towns: ["全部", "南城", "东城", "松山湖", "大朗", "黄江", "虎门"],
+    // A1 详情访问控制：点击详情 → 居中弹窗展示客服二维码
+    guideVisible: false,
   },
 
   onLoad() {
@@ -90,5 +92,44 @@ Page({
       activeCategoryLabel: currentCategory ? currentCategory.label : "资源",
       emptyText,
     });
+  },
+
+  // —— A1：详情访问控制（点击详情 → 居中弹窗展示客服二维码，详情不对外展示）——
+
+  onResourceTap() {
+    this.showGuide();
+  },
+
+  showGuide() {
+    this.setData(
+      {
+        guideVisible: true,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({ hidden: true });
+        }
+      }
+    );
+  },
+
+  closeGuide() {
+    this.setData(
+      {
+        guideVisible: false,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({ hidden: false });
+        }
+      }
+    );
+  },
+
+  // —— A2：联系客服入口（独立打开开通引导弹窗）——
+  openContact() {
+    this.showGuide();
   },
 });

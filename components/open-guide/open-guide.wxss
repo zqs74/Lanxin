@@ -1,0 +1,154 @@
+/* open-guide.wxss - 开通引导弹窗样式（组件自包含，复刻全局蓝白设计语言） */
+
+.og-panel {
+  width: 620rpx;
+  padding: 48rpx 40rpx 44rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.og-icon-wrap {
+  margin-top: 36rpx;
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 40rpx;
+  background: linear-gradient(135deg, #0d5eff 0%, #4d8dff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 24rpx 48rpx rgba(29, 93, 255, 0.28);
+}
+
+.og-icon {
+  font-size: 60rpx;
+  line-height: 1;
+}
+
+.og-title {
+  margin-top: 30rpx;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1c2b49;
+  text-align: center;
+}
+
+.og-subtitle {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: #6c7da3;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.og-contact-card {
+  width: 100%;
+  margin-top: 36rpx;
+  padding: 28rpx;
+  border-radius: 28rpx;
+  background: #f2f6ff;
+  display: flex;
+  gap: 24rpx;
+  align-items: center;
+}
+
+.og-qr {
+  flex-shrink: 0;
+  width: 168rpx;
+  height: 168rpx;
+  border-radius: 20rpx;
+  background: #ffffff;
+  display: block;
+}
+
+.og-qr--placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx dashed rgba(29, 93, 255, 0.25);
+}
+
+.og-qr-logo {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #1d5dff 0%, #4d8dff 100%);
+  color: #ffffff;
+  font-size: 36rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.og-qr-tip {
+  margin-top: 12rpx;
+  font-size: 20rpx;
+  color: #7d8cae;
+}
+
+.og-contact-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.og-contact-name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1c2b49;
+}
+
+.og-contact-row {
+  margin-top: 18rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.og-contact-label {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: #6c7da3;
+}
+
+.og-contact-value {
+  flex: 1;
+  min-width: 0;
+  font-size: 24rpx;
+  color: #1d2d4a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.og-contact-copy {
+  flex-shrink: 0;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(29, 93, 255, 0.1);
+  color: #1d5dff;
+  font-size: 20rpx;
+  line-height: 1;
+}
+
+.og-btn {
+  width: 100%;
+  height: 88rpx;
+  margin-top: 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #1d5dff 0%, #3d7cff 100%);
+  color: #ffffff;
+  font-size: 28rpx;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 20rpx 40rpx rgba(29, 93, 255, 0.2);
+}
+
+.og-btn::after {
+  border: none;
+}

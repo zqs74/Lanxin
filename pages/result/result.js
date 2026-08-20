@@ -99,6 +99,8 @@ Page({
       remark: "",
       acceptFallback: true,
     },
+    // A1 详情访问控制：点击方案资源卡 → 居中弹窗展示客服二维码
+    guideVisible: false,
   },
 
   onLoad(query) {
@@ -217,6 +219,39 @@ Page({
     wx.navigateTo({
       url: `/pages/poster/poster?payload=${encoded}`,
     });
+  },
+
+  // —— A1：方案资源卡详情守卫（点击 → 居中弹窗展示客服二维码，详情不对外展示）——
+  onResourceTap() {
+    this.showGuide();
+  },
+
+  showGuide() {
+    this.setData(
+      {
+        guideVisible: true,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({ hidden: true });
+        }
+      }
+    );
+  },
+
+  closeGuide() {
+    this.setData(
+      {
+        guideVisible: false,
+      },
+      () => {
+        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+        if (tabBar) {
+          tabBar.setData({ hidden: false });
+        }
+      }
+    );
   },
 
   openBooking() {
