@@ -27,20 +27,33 @@ Component({
         history: "/pages/history/history",
         library: "/pages/library/library",
       };
+      const pages = getCurrentPages();
+      const currentRoute = pages.length ? `/${pages[pages.length - 1].route}` : "";
 
       this.setData({
         switchingKey: key,
       });
 
-      setTimeout(() => {
-        this.setData({
-          switchingKey: "",
-        });
-
-        wx.reLaunch({
+      if (currentRoute === routes.home || currentRoute === routes.history || currentRoute === routes.library) {
+        wx.switchTab({
           url: routes[key],
+          complete: () => {
+            this.setData({
+              switchingKey: "",
+            });
+          },
         });
-      }, 140);
+        return;
+      }
+
+      wx.redirectTo({
+        url: routes[key],
+        complete: () => {
+          this.setData({
+            switchingKey: "",
+          });
+        },
+      });
     },
   },
 });

@@ -1,15 +1,15 @@
 {
   "compileType": "miniprogram",
-  "libVersion": "trial",
+  "libVersion": "3.17.0",
   "packOptions": {
     "ignore": [
       {
-        "type": "folder",
-        "value": "四库"
+        "value": "四库",
+        "type": "folder"
       },
       {
-        "type": "folder",
-        "value": "node_modules"
+        "value": "node_modules",
+        "type": "folder"
       }
     ],
     "include": []
@@ -34,7 +34,7 @@
     "minifyWXSS": true,
     "minifyWXML": true,
     "localPlugins": false,
-    "condition": false,
+    "condition": true,
     "swc": false,
     "disableSWC": true,
     "disableUseStrict": false,
@@ -45,6 +45,6 @@
     "tabIndent": "auto",
     "tabSize": 2
   },
-  "appid": "wx913f36c951ffc973",
+  "appid": "touristappid",
   "simulatorPluginLibVersion": {}
 }
