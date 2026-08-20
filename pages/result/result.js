@@ -96,9 +96,17 @@ Page({
       phone: "",
       wechat: "",
       expectedDate: "",
+      timeSlot: "",
       remark: "",
       acceptFallback: true,
     },
+    // A3 场地预约：时段选项与预约场馆（锁定主推馆）
+    timeSlots: [
+      { label: "上午 08:00-12:00", value: "morning" },
+      { label: "下午 12:00-18:00", value: "afternoon" },
+      { label: "晚上 18:00-22:00", value: "evening" },
+    ],
+    bookingVenue: null,
     // A1 详情访问控制：点击方案资源卡 → 居中弹窗展示客服二维码
     guideVisible: false,
   },
@@ -109,10 +117,15 @@ Page({
     const result = createRecommendation(demand);
     const initialBookingDate = formatDateValue(demand.playDate);
 
+    // A3：预约场馆锁定主推馆（方案 venue 段第一项）
+    const venueSection = (result.sections || []).find((section) => section.key === "venue");
+    const bookingVenue = (venueSection && venueSection.items[0]) || null;
+
     this.setData({
       mode: demand.mode,
       demand,
       result,
+      bookingVenue,
       "bookingForm.expectedDate": initialBookingDate,
       bookingCalendarDefaultDate: parseDateValue(initialBookingDate) || getTodayTimestamp(),
     });
@@ -325,8 +338,16 @@ Page({
     });
   },
 
+  // A3：选择办赛时段
+  selectTimeSlot(event) {
+    const { value } = event.currentTarget.dataset;
+    this.setData({
+      "bookingForm.timeSlot": value,
+    });
+  },
+
   submitBooking() {
-    const { bookingForm, demand, result } = this.data;
+    const { bookingForm, demand, result, bookingVenue } = this.data;
 
     if (!bookingForm.contactName || !bookingForm.phone) {
       wx.showToast({
@@ -335,6 +356,21 @@ Page({
       });
       return;
     }
+
+    if (!bookingForm.timeSlot) {
+      wx.showToast({
+        title: "请选择办赛时段",
+        icon: "none",
+      });
+      return;
+    }
+
+    // A3：提交时自动带出场馆信息
+    const submitForm = Object.assign({}, bookingForm, {
+      venueName: bookingVenue ? bookingVenue.name : "",
+      venueTown: bookingVenue ? bookingVenue.town : "",
+      priceLevel: bookingVenue ? bookingVenue.priceLevel : "",
+    });
 
     saveBooking({
       id: `book_${Date.now()}`,
@@ -345,7 +381,7 @@ Page({
       payload: {
         demand,
         result,
-        bookingForm,
+        bookingForm: submitForm,
       },
     });
 
@@ -364,7 +400,7 @@ Page({
     );
 
     wx.showToast({
-      title: "已记录预约意向",
+      title: "场地预约已提交",
       icon: "success",
     });
   },
