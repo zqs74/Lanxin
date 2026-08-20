@@ -199,12 +199,18 @@ Page({
         color: "linear-gradient(135deg, #115cff 0%, #5b9cff 100%)",
       },
     });
-    views.push({ type: "text", text: "篮芯办赛", css: { left: "40rpx", top: "36rpx", fontSize: "22rpx", color: "#ffffff" } });
-    views.push({ type: "text", text: "场地预约成功", css: { left: "40rpx", top: "84rpx", fontSize: "46rpx", fontWeight: "bold", color: "#ffffff" } });
+    views.push({ type: "text", text: "篮芯办赛", css: { left: "40rpx", top: "32rpx", fontSize: "22rpx", color: "#ffffff" } });
+    views.push({ type: "text", text: "场地预约成功", css: { left: "40rpx", top: "76rpx", fontSize: "46rpx", fontWeight: "bold", color: "#ffffff" } });
+    // 模式/镇区 与 日期/时段 分两行展示
     views.push({
       type: "text",
-      text: `${modeLabel} · ${venue.town} · ${date} · ${slotLabel}`,
-      css: { left: "40rpx", top: "164rpx", width: "500rpx", fontSize: "24rpx", color: "rgba(255,255,255,0.92)" },
+      text: `${modeLabel} · ${venue.town}`,
+      css: { left: "40rpx", top: "156rpx", width: "500rpx", fontSize: "24rpx", color: "rgba(255,255,255,0.92)" },
+    });
+    views.push({
+      type: "text",
+      text: `${date} · ${slotLabel}`,
+      css: { left: "40rpx", top: "190rpx", width: "500rpx", fontSize: "24rpx", color: "rgba(255,255,255,0.92)" },
     });
     // 对勾圆 + ✓
     views.push({

@@ -81,5 +81,5 @@
     <button class="primary-btn cta-btn" bindtap="savePoster">{{saving ? '导出中...' : '保存海报'}}</button>
   </view>
 
-  <canvas id="poster-canvas" type="2d" class="poster-canvas"></canvas>
+  <painter palette="{{palette}}" widthPixels="{{2000}}" bind:imgOK="onImgOK" bind:imgErr="onImgErr" class="poster-painter" />
 </view>

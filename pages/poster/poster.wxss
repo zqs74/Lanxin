@@ -221,10 +221,10 @@
   flex: 1;
 }
 
-.poster-canvas {
+/* painter 组件离屏渲染（导出用，不参与页面布局） */
+.poster-painter {
   position: fixed;
   left: -9999rpx;
   top: -9999rpx;
-  width: 720rpx;
-  height: 2200rpx;
+  width: 654rpx;
 }
