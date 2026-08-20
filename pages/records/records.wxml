@@ -5,9 +5,10 @@
         <view class="record-tag-text">{{title}}</view>
         <view class="record-tag-count">{{filteredList.length}}</view>
       </view>
+      <view wx:if="{{list.length}}" class="record-manage-btn" bindtap="toggleManage">{{manageMode ? '完成' : '管理'}}</view>
     </view>
 
-    <view class="filter-panel" wx:if="{{list.length}}">
+    <view class="filter-panel" wx:if="{{list.length && !manageMode}}">
       <view class="filter-group">
         <view class="filter-label">地点</view>
         <scroll-view scroll-x class="filter-scroll" show-scrollbar="{{false}}">
@@ -49,27 +50,43 @@
       <view
         wx:for="{{filteredList}}"
         wx:key="id"
-        class="record-card"
+        class="record-card {{manageMode ? 'record-card--manage' : ''}} {{selectedMap[item.id] ? 'record-card--selected' : ''}}"
         data-type="{{type}}"
         data-id="{{item.id}}"
         data-payload="{{item.payload}}"
-        bindtap="reopenItem"
+        bindtap="onCardTap"
         hover-class="record-card--hover"
         hover-stay-time="80"
       >
-        <view class="record-top">
-          <view class="record-title">
-            <view class="mode-dot mode-dot--{{item.mode === 'pro_event' ? 'pro' : 'casual'}}"></view>
-            <text class="record-title-text">{{item.title}}</text>
-          </view>
-          <view class="record-time">{{item.meta}}</view>
+        <view wx:if="{{manageMode}}" class="record-check {{selectedMap[item.id] ? 'record-check--on' : ''}}">
+          <view class="record-check-mark"></view>
         </view>
-        <view class="record-brief">{{item.brief}}</view>
-        <view class="record-highlight">{{item.highlight}}</view>
+        <view class="record-main">
+          <view class="record-top">
+            <view class="record-title">
+              <view class="mode-dot mode-dot--{{item.mode === 'pro_event' ? 'pro' : 'casual'}}"></view>
+              <text class="record-title-text">{{item.title}}</text>
+            </view>
+            <view class="record-time">{{item.meta}}</view>
+          </view>
+          <view class="record-brief">{{item.brief}}</view>
+          <view class="record-highlight">{{item.highlight}}</view>
+        </view>
       </view>
     </block>
 
     <view wx:elif="{{list.length}}" class="record-empty-inline">当前筛选下暂无记录</view>
     <van-empty wx:else image="search" description="还没有记录" />
+  </view>
+
+  <view class="record-manage-bar" wx:if="{{manageMode}}">
+    <view class="record-manage-all" bindtap="toggleSelectAll">
+      <view class="record-check {{allSelected ? 'record-check--on' : ''}}">
+        <view class="record-check-mark"></view>
+      </view>
+      <text class="record-manage-all-text">全选</text>
+    </view>
+    <view class="record-manage-count">已选 {{selectedIds.length}} 条</view>
+    <button class="record-manage-del {{selectedIds.length ? '' : 'record-manage-del--disabled'}}" bindtap="deleteSelected">删除所选</button>
   </view>
 </view>

@@ -179,3 +179,124 @@
   font-size: 24rpx;
   color: #7c8ba8;
 }
+
+/* —— 多选删除管理 —— */
+
+.record-manage-btn {
+  flex-shrink: 0;
+  padding: 10rpx 26rpx;
+  border-radius: 999rpx;
+  background: rgba(29, 93, 255, 0.1);
+  color: #1d5dff;
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.record-card {
+  display: flex;
+  align-items: flex-start;
+}
+
+.record-card--selected {
+  border-radius: 20rpx;
+  background: rgba(29, 93, 255, 0.06);
+  padding-left: 16rpx;
+  padding-right: 16rpx;
+}
+
+.record-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 圆形复选框 */
+.record-check {
+  flex-shrink: 0;
+  width: 40rpx;
+  height: 40rpx;
+  margin-top: 22rpx;
+  margin-right: 18rpx;
+  border-radius: 50%;
+  border: 3rpx solid rgba(29, 93, 255, 0.35);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.record-check--on {
+  background: #1d5dff;
+  border-color: #1d5dff;
+}
+
+.record-check-mark {
+  width: 18rpx;
+  height: 10rpx;
+  border-left: 4rpx solid transparent;
+  border-bottom: 4rpx solid transparent;
+  transform: rotate(-45deg) translateY(-2rpx);
+}
+
+.record-check--on .record-check-mark {
+  border-left-color: #ffffff;
+  border-bottom-color: #ffffff;
+}
+
+/* 底部管理操作栏 */
+.record-manage-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  padding: 20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 -10rpx 30rpx rgba(18, 46, 99, 0.08);
+}
+
+.record-manage-all {
+  display: flex;
+  align-items: center;
+}
+
+.record-manage-all .record-check {
+  margin-top: 0;
+  margin-right: 10rpx;
+}
+
+.record-manage-all-text {
+  font-size: 24rpx;
+  color: #33466b;
+}
+
+.record-manage-count {
+  flex: 1;
+  text-align: center;
+  font-size: 24rpx;
+  color: #7c8ba8;
+}
+
+.record-manage-del {
+  flex-shrink: 0;
+  height: 72rpx;
+  padding: 0 36rpx;
+  border: none;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #fa5151 0%, #ff7a5c 100%);
+  color: #ffffff;
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 72rpx;
+}
+
+.record-manage-del::after {
+  border: none;
+}
+
+.record-manage-del--disabled {
+  opacity: 0.4;
+}

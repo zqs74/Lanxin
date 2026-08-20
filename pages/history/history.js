@@ -1,4 +1,4 @@
-const { getRecommendations, getBookings } = require("../../utils/storage");
+const { getRecommendations, getBookings, removeRecordsByType } = require("../../utils/storage");
 const { encodePayload } = require("../../utils/share");
 
 const TIME_SLOT_LABELS = {
@@ -80,6 +80,10 @@ Page({
       });
     }
 
+    this.refresh();
+  },
+
+  refresh() {
     const recommendations = buildList(getRecommendations(), "recommendation");
     const bookings = buildList(getBookings(), "booking");
 
@@ -88,6 +92,28 @@ Page({
       bookings,
       previewRecommendations: recommendations.slice(0, 4),
       previewBookings: bookings.slice(0, 4),
+    });
+  },
+
+  // 单条删除（推荐/预约记录）
+  deleteItem(event) {
+    const { id, type } = event.currentTarget.dataset;
+    if (!id || !type) {
+      return;
+    }
+
+    wx.showModal({
+      title: "删除记录",
+      content: "确定删除这条记录吗？删除后不可恢复",
+      confirmColor: "#fa5151",
+      success: (res) => {
+        if (!res.confirm) {
+          return;
+        }
+        removeRecordsByType(type, [id]);
+        wx.showToast({ title: "已删除", icon: "success" });
+        this.refresh();
+      },
     });
   },
 

@@ -53,6 +53,19 @@ function getLatestResult() {
   return safeRead(STORAGE_KEYS.LATEST_RESULT, null);
 }
 
+// 按 id 删除推荐或预约记录（type: "recommendation" | "booking"）
+function removeRecordsByType(type, ids) {
+  const key = type === "booking" ? STORAGE_KEYS.BOOKINGS : STORAGE_KEYS.RECOMMENDATIONS;
+  const list = safeRead(key, []);
+  const idSet = new Set(ids || []);
+  if (!idSet.size) {
+    return list;
+  }
+  const next = list.filter((item) => !idSet.has(item.id));
+  safeWrite(key, next);
+  return next;
+}
+
 module.exports = {
   saveRecommendation,
   saveLatestDemand,
@@ -61,4 +74,5 @@ module.exports = {
   getBookings,
   getLatestDemand,
   getLatestResult,
+  removeRecordsByType,
 };

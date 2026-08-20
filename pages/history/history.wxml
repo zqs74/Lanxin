@@ -27,6 +27,7 @@
         </view>
         <view class="history-brief">{{item.brief}}</view>
         <view class="history-highlight">{{item.highlight}}</view>
+        <view class="history-del" data-id="{{item.id}}" data-type="recommendation" catchtap="deleteItem">删除</view>
       </view>
     </block>
     <van-empty wx:else image="search" description="还没有历史推荐" />
@@ -60,6 +61,7 @@
         </view>
         <view class="history-brief">{{item.brief}}</view>
         <view class="history-highlight">{{item.highlight}}</view>
+        <view class="history-del" data-id="{{item.id}}" data-type="booking" catchtap="deleteItem">删除</view>
       </view>
     </block>
     <van-empty wx:else image="search" description="还没有预约记录" />

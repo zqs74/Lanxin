@@ -1,4 +1,4 @@
-const { getRecommendations, getBookings } = require("../../utils/storage");
+const { getRecommendations, getBookings, removeRecordsByType } = require("../../utils/storage");
 const { encodePayload } = require("../../utils/share");
 
 const TIME_SLOT_LABELS = {
@@ -89,6 +89,11 @@ Page({
     },
     townOptions: ["全部"],
     dateOptions: ["全部"],
+    // 多选删除管理模式
+    manageMode: false,
+    selectedIds: [],
+    selectedMap: {},
+    allSelected: false,
   },
 
   onLoad(query) {
@@ -117,6 +122,10 @@ Page({
       },
       townOptions: pickFilterOptions(source, "town"),
       dateOptions: pickFilterOptions(source, "date"),
+      manageMode: false,
+      selectedIds: [],
+      selectedMap: {},
+      allSelected: false,
     });
   },
 
@@ -132,6 +141,96 @@ Page({
         });
       }
     );
+  },
+
+  // —— 多选删除 ——
+
+  onCardTap(event) {
+    if (this.data.manageMode) {
+      this.toggleSelect(event);
+      return;
+    }
+    this.reopenItem(event);
+  },
+
+  toggleManage() {
+    this.setData({
+      manageMode: !this.data.manageMode,
+      selectedIds: [],
+      selectedMap: {},
+      allSelected: false,
+    });
+  },
+
+  toggleSelect(event) {
+    const { id } = event.currentTarget.dataset;
+    if (!id) {
+      return;
+    }
+    const selectedMap = Object.assign({}, this.data.selectedMap);
+    if (selectedMap[id]) {
+      delete selectedMap[id];
+    } else {
+      selectedMap[id] = true;
+    }
+    const selectedIds = Object.keys(selectedMap);
+    this.setData({
+      selectedIds,
+      selectedMap,
+      allSelected: selectedIds.length > 0 && selectedIds.length === this.data.filteredList.length,
+    });
+  },
+
+  toggleSelectAll() {
+    if (this.data.allSelected) {
+      this.setData({ selectedIds: [], selectedMap: {}, allSelected: false });
+      return;
+    }
+    const selectedMap = {};
+    this.data.filteredList.forEach((item) => {
+      selectedMap[item.id] = true;
+    });
+    this.setData({
+      selectedIds: this.data.filteredList.map((item) => item.id),
+      selectedMap,
+      allSelected: true,
+    });
+  },
+
+  deleteSelected() {
+    const { selectedIds, type } = this.data;
+    if (!selectedIds.length) {
+      wx.showToast({ title: "请先选择要删除的记录", icon: "none" });
+      return;
+    }
+
+    wx.showModal({
+      title: "删除所选",
+      content: `确定删除选中的 ${selectedIds.length} 条记录吗？删除后不可恢复`,
+      confirmColor: "#fa5151",
+      success: (res) => {
+        if (!res.confirm) {
+          return;
+        }
+        removeRecordsByType(type, selectedIds);
+        wx.showToast({ title: "已删除", icon: "success" });
+
+        const source = type === "booking"
+          ? buildList(getBookings(), "booking")
+          : buildList(getRecommendations(), "recommendation");
+
+        this.setData({
+          list: source,
+          filteredList: source,
+          townOptions: pickFilterOptions(source, "town"),
+          dateOptions: pickFilterOptions(source, "date"),
+          manageMode: false,
+          selectedIds: [],
+          selectedMap: {},
+          allSelected: false,
+        });
+      },
+    });
   },
 
   reopenItem(event) {

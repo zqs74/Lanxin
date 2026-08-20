@@ -145,3 +145,16 @@
   line-height: 1.6;
   color: #7c8ba8;
 }
+
+/* 单条删除按钮 */
+.history-del {
+  margin-top: 16rpx;
+  align-self: flex-end;
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  background: rgba(250, 81, 81, 0.08);
+  color: #fa5151;
+  font-size: 22rpx;
+  font-weight: 600;
+  line-height: 1;
+}
