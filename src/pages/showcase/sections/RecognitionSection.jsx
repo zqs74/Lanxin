@@ -2,9 +2,10 @@ import { recognitionData, mediaData } from '../data/showcaseData';
 
 export default function RecognitionSection() {
   return (
-    <section id="recognition" className="w-full py-20" style={{ background: 'var(--bg-primary)' }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-16">
+    <>
+      {/* 行业认可 */}
+      <section id="recognition" className="w-full py-20" style={{ background: 'var(--bg-secondary)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3" style={{ color: 'var(--text-primary)' }}>
               行业 <span className="gold-shine">认可</span>
@@ -38,8 +39,11 @@ export default function RecognitionSection() {
             <img src={recognitionData.image} alt={recognitionData.imageAlt} className="w-full h-64 sm:h-80 object-cover" />
           </div>
         </div>
+      </section>
 
-        <div>
+      {/* 主流媒体报道 */}
+      <section id="media-coverage" className="w-full py-20" style={{ background: 'var(--bg-primary)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3" style={{ color: 'var(--text-primary)' }}>
               主流媒体 <span className="gold-shine">报道</span>
@@ -70,7 +74,7 @@ export default function RecognitionSection() {
             </ul>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

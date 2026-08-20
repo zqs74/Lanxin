@@ -53,7 +53,7 @@ export default function ArcGallery() {
   };
 
   return (
-    <section id="arc-gallery" className="relative w-full py-20 overflow-hidden" style={{ background: 'var(--page-bg)' }}>
+    <section id="arc-gallery" className="relative w-full py-20 overflow-hidden" style={{ background: 'var(--bg-secondary)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3" style={{ color: 'var(--text-primary)' }}>
@@ -120,12 +120,12 @@ export default function ArcGallery() {
 
             <div style={{
               position: 'absolute', top: 0, bottom: 0, left: 0, width: '18%',
-              background: 'linear-gradient(to right, var(--bg-primary), transparent)',
+              background: 'linear-gradient(to right, var(--bg-secondary), transparent)',
               pointerEvents: 'none', zIndex: 200,
             }} />
             <div style={{
               position: 'absolute', top: 0, bottom: 0, right: 0, width: '18%',
-              background: 'linear-gradient(to left, var(--bg-primary), transparent)',
+              background: 'linear-gradient(to left, var(--bg-secondary), transparent)',
               pointerEvents: 'none', zIndex: 200,
             }} />
           </div>

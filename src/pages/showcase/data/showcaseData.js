@@ -18,6 +18,8 @@ export const galleryImages = [
   { src: '/images/showcase/case-brand-sandknit.png', alt: '森耐特品牌合作', caption: '品牌合作' },
   { src: '/images/showcase/case-youth-championship.jpeg', alt: '青少年冠军赛', caption: '青少年冠军赛' },
   { src: '/images/showcase/case-serbia-trip.jpeg', alt: '塞尔维亚国际交流', caption: '国际交流' },
+  { src: '/images/showcase/case-brand-36.png', alt: '全国36城轻量化服务', caption: '全国36城' },
+  { src: '/images/showcase/case-brand-zhang.png', alt: '张宇辰球员成长案例', caption: '张宇辰成长案例' },
 ];
 
 export const businesses = [
@@ -208,6 +210,8 @@ export const cases = [
   {
     id: 'national-coverage',
     title: '全国36城轻量化服务',
+    image: '/images/showcase/case-brand-36.png',
+    imageAlt: '全国36城轻量化服务',
     description: '七年时间业务落地全国36座城市',
     highlights: [
       '3日定制合同 · 7天派遣落地',
@@ -219,6 +223,8 @@ export const cases = [
   {
     id: 'zhang-yuchen',
     title: '张宇辰球员成长案例',
+    image: '/images/showcase/case-brand-zhang.png',
+    imageAlt: '张宇辰球员成长案例',
     description: 'CHBL男子组最有价值成员',
     highlights: [
       '2019青协杯AI筛选锁定',
