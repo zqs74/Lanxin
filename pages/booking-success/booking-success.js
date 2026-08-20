@@ -33,8 +33,8 @@ function normalizeDemand(payload) {
 
 const POSTER_WIDTH = 720;
 const INFO_GRID_START_Y = 884;
-const INFO_ROW_HEIGHT = 86;
-const BOTTOM_CARD_HEIGHT = 126;
+const INFO_ROW_HEIGHT = 96;
+const BOTTOM_CARD_HEIGHT = 140;
 const BOTTOM_CARD_MARGIN = 48;
 
 Page({
@@ -315,17 +315,17 @@ async function renderBookingCard(ctx, node, width, height, data, getSlotLabel) {
   ctx.fill();
 
   ctx.fillStyle = "#ffffff";
-  ctx.font = "18px sans-serif";
+  ctx.font = "22px sans-serif";
   ctx.fillText("篮芯办赛", 42, 58);
 
   // 成功对勾
   drawSuccessBadge(ctx, 42, 108);
 
-  ctx.font = "bold 40px sans-serif";
-  ctx.fillText("场地预约成功", 128, 132);
+  ctx.font = "bold 52px sans-serif";
+  ctx.fillText("场地预约成功", 136, 134);
 
-  ctx.font = "18px sans-serif";
-  wrapText(ctx, `${modeLabel} · ${venue.town} · ${date} · ${slotLabel}`, 128, 176, width - 170, 28, 2);
+  ctx.font = "24px sans-serif";
+  wrapText(ctx, `${modeLabel} · ${venue.town} · ${date} · ${slotLabel}`, 136, 184, width - 184, 34, 2);
 
   // —— 场馆卡 ——
   const coverImage = venue.cover ? await loadCanvasImage(node, venue.cover) : null;
@@ -349,27 +349,27 @@ async function renderBookingCard(ctx, node, width, height, data, getSlotLabel) {
   const bottomY = INFO_GRID_START_Y + gridH + 10;
   fillRoundRect(ctx, 30, bottomY, width - 60, BOTTOM_CARD_HEIGHT, 28, "#1658ef");
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 18px sans-serif";
-  ctx.fillText("场地预约已提交", 54, bottomY + 44);
-  ctx.font = "15px sans-serif";
-  wrapText(ctx, summary || "客户经理将尽快与您联系，确认档期与细节", 54, bottomY + 84, width - 108, 26, 2);
+  ctx.font = "bold 26px sans-serif";
+  ctx.fillText("场地预约已提交", 54, bottomY + 52);
+  ctx.font = "20px sans-serif";
+  wrapText(ctx, summary || "客户经理将尽快与您联系，确认档期与细节", 54, bottomY + 98, width - 108, 30, 2);
 }
 
 function drawSuccessBadge(ctx, x, y) {
   // 白色圆环 + 对勾
   ctx.save();
   ctx.beginPath();
-  ctx.arc(x + 40, y, 40, 0, Math.PI * 2);
+  ctx.arc(x + 48, y, 48, 0, Math.PI * 2);
   ctx.fillStyle = "rgba(255,255,255,0.16)";
   ctx.fill();
   ctx.strokeStyle = "#ffffff";
-  ctx.lineWidth = 6;
+  ctx.lineWidth = 8;
   ctx.lineCap = "round";
   ctx.lineJoin = "round";
   ctx.beginPath();
-  ctx.moveTo(x + 22, y + 2);
-  ctx.lineTo(x + 36, y + 16);
-  ctx.lineTo(x + 60, y - 12);
+  ctx.moveTo(x + 26, y + 2);
+  ctx.lineTo(x + 43, y + 19);
+  ctx.lineTo(x + 72, y - 14);
   ctx.stroke();
   ctx.restore();
 }
@@ -400,13 +400,13 @@ function drawVenueCard(ctx, venue, width, coverImage) {
   ctx.restore();
 
   ctx.fillStyle = "rgba(255,255,255,0.9)";
-  ctx.font = "14px sans-serif";
-  ctx.fillText("预约场馆", cardX + 24, cardY + 38);
+  ctx.font = "18px sans-serif";
+  ctx.fillText("预约场馆", cardX + 24, cardY + 42);
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 30px sans-serif";
-  wrapText(ctx, venue.name, cardX + 24, cardY + 92, cardW - 48, 38, 3);
-  ctx.font = "15px sans-serif";
-  wrapText(ctx, `${venue.town} · ${venue.priceLevel || "价格面议"}`, cardX + 24, cardY + 214, cardW - 48, 26, 2);
+  ctx.font = "bold 40px sans-serif";
+  wrapText(ctx, venue.name, cardX + 24, cardY + 108, cardW - 48, 46, 3);
+  ctx.font = "22px sans-serif";
+  wrapText(ctx, `${venue.town} · ${venue.priceLevel || "价格面议"}`, cardX + 24, cardY + 236, cardW - 48, 30, 2);
 }
 
 function drawInfoCard(ctx, width, infoRows) {
@@ -418,8 +418,8 @@ function drawInfoCard(ctx, width, infoRows) {
 
   fillRoundRect(ctx, cardX, cardY, cardW, gridH, 28, "#ffffff");
   ctx.fillStyle = "#7d8cb1";
-  ctx.font = "15px sans-serif";
-  ctx.fillText("预约信息", cardX + 24, cardY + 36);
+  ctx.font = "20px sans-serif";
+  ctx.fillText("预约信息", cardX + 24, cardY + 42);
 
   const cellW = (cardW - 40) / 2;
   infoRows.forEach((entry, index) => {
@@ -429,11 +429,11 @@ function drawInfoCard(ctx, width, infoRows) {
     const y = cardY + 76 + row * INFO_ROW_HEIGHT;
 
     ctx.fillStyle = "#7d8cb1";
-    ctx.font = "14px sans-serif";
-    ctx.fillText(entry[0], x, y + 18);
+    ctx.font = "18px sans-serif";
+    ctx.fillText(entry[0], x, y + 24);
     ctx.fillStyle = "#20304b";
-    ctx.font = "bold 18px sans-serif";
-    wrapText(ctx, entry[1], x, y + 52, cellW - 20, 26, 2);
+    ctx.font = "bold 26px sans-serif";
+    wrapText(ctx, entry[1], x, y + 66, cellW - 20, 32, 2);
   });
 }
 

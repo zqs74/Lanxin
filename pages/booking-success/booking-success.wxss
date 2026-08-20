@@ -148,8 +148,8 @@
 
 .bs-canvas {
   position: fixed;
-  left: -2000rpx;
-  top: -2000rpx;
-  width: 720px;
-  height: 1400px;
+  left: -9999rpx;
+  top: -9999rpx;
+  width: 720rpx;
+  height: 1450rpx;
 }
