@@ -1,12 +1,35 @@
 // booking-success.js - 场地预约成功页（展示预约信息 + Canvas 导出预约图片）
 const { getBookings } = require("../../utils/storage");
-const { encodePayload } = require("../../utils/share");
+const { encodePayload, decodePayload } = require("../../utils/share");
+const { createRecommendation } = require("../../utils/recommender");
 
 const TIME_SLOT_LABELS = {
   morning: "上午 08:00-12:00",
   afternoon: "下午 12:00-18:00",
   evening: "晚上 18:00-22:00",
 };
+
+// 补齐 demand 默认值（与 result 页一致），用于分享还原重建方案
+function normalizeDemand(payload) {
+  return Object.assign(
+    {
+      city: "东莞",
+      sentence: "",
+      budgetLevel: "mid",
+      venuePreference: "indoor",
+      playDate: "2026-08-01",
+      peopleCount: 20,
+      teamCount: 4,
+      town: "南城",
+      needReferee: true,
+      needMaterials: true,
+      needMedia: false,
+      needSupplier: false,
+      mode: "pro_event",
+    },
+    payload
+  );
+}
 
 const POSTER_WIDTH = 720;
 const INFO_GRID_START_Y = 884;
@@ -17,6 +40,7 @@ const BOTTOM_CARD_MARGIN = 48;
 Page({
   data: {
     record: null,
+    demand: null,
     form: null,
     venue: null,
     modeLabel: "",
@@ -26,34 +50,54 @@ Page({
   },
 
   onLoad(query) {
-    const record = (getBookings() || []).find((item) => item.id === query.id) || null;
-    if (!record) {
-      wx.showToast({ title: "预约记录不存在", icon: "none" });
+    // 来源一：本地记录（query.id，历史页/预约后跳转）
+    // 来源二：分享还原（query.payload，好友点开分享卡片）
+    let demand = null;
+    let bookingForm = {};
+    let result = null;
+    let record = null;
+
+    if (query.id) {
+      record = (getBookings() || []).find((item) => item.id === query.id) || null;
+      if (record) {
+        const payload = record.payload || {};
+        demand = payload.demand || null;
+        bookingForm = payload.bookingForm || {};
+        result = payload.result || {};
+      }
+    } else if (query.payload) {
+      const shared = decodePayload(query.payload);
+      if (shared && shared.demand) {
+        demand = shared.demand;
+        bookingForm = shared.bookingForm || {};
+        result = createRecommendation(normalizeDemand(demand));
+      }
+    }
+
+    if (!demand) {
+      wx.showToast({ title: "预约信息不存在", icon: "none" });
       return;
     }
 
-    const payload = record.payload || {};
-    const form = payload.bookingForm || {};
-    const demand = payload.demand || {};
-    const result = payload.result || {};
     const venueSection = (result.sections || []).find((section) => section.key === "venue");
     const venueItem = venueSection && venueSection.items[0];
 
     const venue = {
-      name: form.venueName || (venueItem && venueItem.name) || "场馆待确认",
-      town: form.venueTown || demand.town || "东莞",
-      priceLevel: form.priceLevel || (venueItem && venueItem.priceLevel) || "",
+      name: bookingForm.venueName || (venueItem && venueItem.name) || "场馆待确认",
+      town: bookingForm.venueTown || demand.town || "东莞",
+      priceLevel: bookingForm.priceLevel || (venueItem && venueItem.priceLevel) || "",
       cover: (venueItem && (venueItem.cover || venueItem.avatar || venueItem.image)) || "",
     };
 
-    const infoRows = this.buildInfoRows(form);
+    const infoRows = this.buildInfoRows(bookingForm);
 
     this.setData({
       record,
-      form,
+      demand,
+      form: bookingForm,
       venue,
       modeLabel: demand.mode === "pro_event" ? "半专业赛事" : "野球约球",
-      summary: record.summary || "",
+      summary: (record && record.summary) || result.summary || "",
       canvasHeight: this.getCanvasHeight(infoRows.length),
     });
   },
@@ -78,13 +122,31 @@ Page({
     wx.switchTab({ url: "/pages/index/index" });
   },
 
-  onShareAppMessage() {
-    const { record } = this.data;
-    const demand = (record && record.payload && record.payload.demand) || {};
+  // 回到该预约对应的办赛方案
+  goPlan() {
+    const { demand } = this.data;
+    if (!demand) {
+      return;
+    }
     const encoded = encodePayload(demand);
+    wx.navigateTo({
+      url: `/pages/result/result?payload=${encoded}`,
+    });
+  },
+
+  onShareAppMessage() {
+    const { demand, form } = this.data;
+    if (!demand) {
+      return {
+        title: "我的场地预约已提交",
+        path: "/pages/index/index",
+      };
+    }
+    // 分享还原：payload 携带完整 demand + bookingForm，好友打开直达预约成功页
+    const encoded = encodePayload({ demand, bookingForm: form });
     return {
       title: "我的场地预约已提交，一起看看办赛方案",
-      path: `/pages/result/result?payload=${encoded}`,
+      path: `/pages/booking-success/booking-success?payload=${encoded}`,
       imageUrl: this.data.venue && this.data.venue.cover ? this.data.venue.cover : "",
     };
   },

@@ -125,12 +125,25 @@
   word-break: break-all;
 }
 
-.bs-back-link {
+.bs-links {
   margin-top: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+}
+
+.bs-back-link {
   text-align: center;
   font-size: 24rpx;
   color: #1d5dff;
   text-decoration: underline;
+}
+
+.bs-link-divider {
+  width: 2rpx;
+  height: 24rpx;
+  background: rgba(29, 93, 255, 0.2);
 }
 
 .bs-canvas {

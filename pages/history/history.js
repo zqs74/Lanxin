@@ -15,6 +15,18 @@ function getSlotLabel(value) {
   return TIME_SLOT_LABELS[value] || "";
 }
 
+// 推荐记录重点：预算落点 + 方案调性（替代原 summaryNote 长句）
+function buildRecommendationHighlight(result) {
+  const parts = [];
+  if (result.budgetFocus) {
+    parts.push(`预算落点 ${result.budgetFocus}`);
+  }
+  if (result.planTone) {
+    parts.push(result.planTone);
+  }
+  return parts.join(" · ") || result.strategyLine || "";
+}
+
 function buildList(list = [], type) {
   const seen = new Set();
 
@@ -47,7 +59,7 @@ function buildList(list = [], type) {
           ? ((bookingForm.venueName && bookingForm.timeSlot)
               ? `${bookingForm.venueName} · ${getSlotLabel(bookingForm.timeSlot) || "时段待定"}`
               : (bookingForm.remark || (bookingForm.acceptFallback ? "接受同档位替代方案" : "仅接受当前方案")))
-          : (result.summaryNote || result.strategyLine || ""),
+          : buildRecommendationHighlight(result),
       });
     });
 }
@@ -104,14 +116,13 @@ Page({
   },
 
   reopenBooking(event) {
-    const { payload } = event.currentTarget.dataset;
-    if (!payload || !payload.demand) {
+    const { id } = event.currentTarget.dataset;
+    if (!id) {
       return;
     }
 
-    const encoded = encodePayload(payload.demand);
     wx.navigateTo({
-      url: `/pages/result/result?payload=${encoded}`,
+      url: `/pages/booking-success/booking-success?id=${id}`,
     });
   },
 });

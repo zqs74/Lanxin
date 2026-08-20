@@ -1,5 +1,11 @@
+/* history.wxss - 历史方案页（科技感标签 + 高亮胶囊） */
+
 .page-shell {
   padding-bottom: 220rpx;
+}
+
+.history-section + .history-section {
+  margin-top: 24rpx;
 }
 
 .history-head {
@@ -9,8 +15,49 @@
   gap: 18rpx;
 }
 
-.history-head .accent-heading {
-  flex-shrink: 0;
+/* 科技感分类标签：发光圆点 + 渐变胶囊 + 数量角标 */
+.history-tag {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 14rpx;
+  padding: 10rpx 22rpx 10rpx 34rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, rgba(29, 93, 255, 0.14) 0%, rgba(77, 141, 255, 0.05) 100%);
+  border: 2rpx solid rgba(29, 93, 255, 0.2);
+}
+
+.history-tag::before {
+  content: "";
+  position: absolute;
+  left: 16rpx;
+  top: 50%;
+  width: 10rpx;
+  height: 10rpx;
+  margin-top: -5rpx;
+  border-radius: 50%;
+  background: #2b8fff;
+  box-shadow: 0 0 14rpx 3rpx rgba(43, 143, 255, 0.55);
+}
+
+.history-tag-text {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1d5dff;
+  letter-spacing: 3rpx;
+}
+
+.history-tag-count {
+  min-width: 40rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(135deg, #1d5dff 0%, #4d8dff 100%);
+  color: #ffffff;
+  font-size: 20rpx;
+  font-weight: 700;
+  text-align: center;
+  line-height: 1.4;
+  box-shadow: 0 6rpx 14rpx rgba(29, 93, 255, 0.3);
 }
 
 .history-more-btn {
@@ -23,56 +70,16 @@
   white-space: nowrap;
 }
 
-.filter-panel {
-  margin-top: 24rpx;
-  padding: 24rpx;
-  border-radius: 24rpx;
-  background: linear-gradient(180deg, #f7faff 0%, #f3f7ff 100%);
-}
-
-.filter-group + .filter-group {
-  margin-top: 18rpx;
-}
-
-.filter-label {
-  font-size: 22rpx;
-  font-weight: 700;
-  color: #7383a6;
-}
-
-.filter-scroll {
-  margin-top: 14rpx;
-  white-space: nowrap;
-}
-
-.filter-row {
-  display: inline-flex;
-  gap: 12rpx;
-  padding-right: 24rpx;
-}
-
-.filter-chip {
-  min-width: 96rpx;
-  padding: 14rpx 20rpx;
-  border-radius: 999rpx;
-  background: #ffffff;
-  color: #627596;
-  font-size: 22rpx;
-  text-align: center;
-  box-shadow: inset 0 0 0 2rpx rgba(29, 93, 255, 0.05);
-}
-
-.filter-chip--active {
-  background: linear-gradient(135deg, #165bff 0%, #4d8dff 100%);
-  color: #ffffff;
-}
-
 .history-card {
   padding: 24rpx 0;
 }
 
 .history-card + .history-card {
   border-top: 2rpx solid #eef3fb;
+}
+
+.history-card--hover {
+  opacity: 0.92;
 }
 
 .history-top {
@@ -103,15 +110,16 @@
   color: #243556;
 }
 
+/* 重点信息：蓝色胶囊高亮 */
 .history-highlight {
-  margin-top: 10rpx;
-  font-size: 23rpx;
-  line-height: 1.6;
-  color: #63779c;
-}
-
-.history-empty-inline {
-  padding: 28rpx 0 6rpx;
-  font-size: 24rpx;
-  color: #7c8ba8;
+  margin-top: 14rpx;
+  display: inline-flex;
+  align-items: center;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(29, 93, 255, 0.08);
+  color: #1d5dff;
+  font-size: 22rpx;
+  font-weight: 600;
+  line-height: 1.5;
 }

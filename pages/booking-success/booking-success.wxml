@@ -51,7 +51,11 @@
     </view>
   </view>
 
-  <view class="bs-back-link" bindtap="goHome">返回首页继续办赛</view>
+  <view class="bs-links">
+    <view class="bs-back-link" bindtap="goPlan">查看对应办赛方案</view>
+    <view class="bs-link-divider"></view>
+    <view class="bs-back-link" bindtap="goHome">返回首页继续办赛</view>
+  </view>
 
   <view class="cta-bar">
     <button class="secondary-btn cta-btn" open-type="share">转发好友</button>
