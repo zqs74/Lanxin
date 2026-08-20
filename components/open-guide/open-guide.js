@@ -24,9 +24,18 @@ Component({
     previewQr() {
       const { qrCode } = CONTACT;
       if (!qrCode) return;
-      wx.previewImage({
-        current: qrCode,
-        urls: [qrCode],
+      // 包内静态图片需先经 getImageInfo 转成本地临时路径，wx.previewImage 才能放大预览
+      wx.getImageInfo({
+        src: qrCode,
+        success: (res) => {
+          wx.previewImage({
+            current: res.path,
+            urls: [res.path],
+          });
+        },
+        fail: () => {
+          wx.showToast({ title: "二维码加载失败", icon: "none" });
+        },
       });
     },
 

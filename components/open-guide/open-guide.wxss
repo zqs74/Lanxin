@@ -66,18 +66,6 @@
   flex-shrink: 0;
 }
 
-.og-qr-hint {
-  position: absolute;
-  left: 8rpx;
-  bottom: 8rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 999rpx;
-  background: rgba(29, 93, 255, 0.85);
-  color: #ffffff;
-  font-size: 18rpx;
-  line-height: 1.2;
-}
-
 .og-qr--placeholder {
   display: flex;
   flex-direction: column;

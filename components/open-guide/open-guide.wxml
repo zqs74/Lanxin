@@ -17,7 +17,6 @@
       <block wx:if="{{contact.qrCode}}">
         <view class="og-qr-wrap" bindtap="previewQr">
           <image class="og-qr" src="{{contact.qrCode}}" mode="aspectFill"></image>
-          <view class="og-qr-hint">点击放大</view>
         </view>
       </block>
       <view wx:else class="og-qr og-qr--placeholder" bindtap="previewQr">
