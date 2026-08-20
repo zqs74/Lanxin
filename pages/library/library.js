@@ -101,31 +101,11 @@ Page({
   },
 
   showGuide() {
-    this.setData(
-      {
-        guideVisible: true,
-      },
-      () => {
-        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
-        if (tabBar) {
-          tabBar.setData({ hidden: true });
-        }
-      }
-    );
+    this.setData({ guideVisible: true });
   },
 
   closeGuide() {
-    this.setData(
-      {
-        guideVisible: false,
-      },
-      () => {
-        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
-        if (tabBar) {
-          tabBar.setData({ hidden: false });
-        }
-      }
-    );
+    this.setData({ guideVisible: false });
   },
 
   // —— A2：联系客服入口（独立打开开通引导弹窗）——

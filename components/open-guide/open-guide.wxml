@@ -8,17 +8,24 @@
 >
   <view class="og-panel">
     <view class="og-icon-wrap">
-      <view class="og-icon">🔒</view>
+      <view class="og-lock">
+        <view class="og-lock-shackle"></view>
+        <view class="og-lock-body"></view>
+        <view class="og-lock-keyhole"></view>
+      </view>
     </view>
     <view class="og-title">查看详情需开通内部账号</view>
     <view class="og-subtitle">资源详情、联系方式与档期仅对合作办赛方开放</view>
 
     <view class="og-contact-card">
       <block wx:if="{{contact.qrCode}}">
-        <image class="og-qr" src="{{contact.qrCode}}" mode="aspectFill" bindtap="previewQr"></image>
+        <view class="og-qr-wrap" bindtap="previewQr">
+          <image class="og-qr" src="{{contact.qrCode}}" mode="aspectFill"></image>
+          <view class="og-qr-hint">点击放大</view>
+        </view>
       </block>
       <view wx:else class="og-qr og-qr--placeholder" bindtap="previewQr">
-        <view class="og-qr-logo">蓝</view>
+        <view class="og-qr-logo">篮</view>
         <view class="og-qr-tip">客服二维码</view>
       </view>
 
@@ -38,5 +45,9 @@
     </view>
 
     <button class="og-btn" bindtap="copyWechat">联系客户经理开通</button>
+
+    <view class="og-close" bindtap="close" hover-class="og-close--hover">
+      <view class="og-close-icon"></view>
+    </view>
   </view>
 </van-popup>
