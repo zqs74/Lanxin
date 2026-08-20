@@ -6,16 +6,8 @@
 export const heroData = {
   logo: '/test.png',
   title: '昇梦体育',
-  subtitle: '大众篮球赛事生态智慧运营领航者',
+  subtitle: '大众篮球赛事生态运营服务商',
   description: '以AI技术为赛事各方提供服务 — 数字化办赛 · 球员成长规划 · 赛事流量运营',
-  stats: [
-    { label: '累计营收', value: '4557', unit: '万元' },
-    { label: '服务赛事', value: '4852', unit: '场' },
-    { label: '专业人员合作', value: '3162', unit: '人' },
-    { label: '全平台曝光量', value: '50', unit: '亿+' },
-    { label: '服务球员', value: '26', unit: '万人次' },
-    { label: '球员成长档案', value: '16', unit: '万' },
-  ],
 };
 
 export const galleryImages = [

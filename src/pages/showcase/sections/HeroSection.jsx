@@ -44,35 +44,11 @@ export default function HeroSection() {
         </p>
 
         {/* Description */}
-        <p className="text-sm sm:text-base md:text-lg leading-relaxed mb-8"
+        <p className="text-sm sm:text-base md:text-lg leading-relaxed mt-4 mb-8"
           style={{ color: isLight ? 'rgba(26, 26, 26, 0.75)' : 'rgba(255, 255, 255, 0.8)' }}
         >
           {heroData.description}
         </p>
-
-        {/* Stats Bar */}
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-3 mb-8 w-full max-w-3xl">
-          {heroData.stats.map((stat, i) => (
-            <div
-              key={i}
-              className="rounded-xl p-2 sm:p-3 text-center backdrop-blur-md border"
-              style={{
-                background: isLight ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.4)',
-                borderColor: isLight ? 'rgba(184, 148, 31, 0.25)' : 'rgba(255, 255, 255, 0.1)',
-              }}
-            >
-              <div className="flex items-baseline justify-center gap-0.5">
-                <span className="text-base sm:text-xl font-black gold-shine">{stat.value}</span>
-                <span className="text-xs" style={{ color: 'var(--accent)' }}>{stat.unit}</span>
-              </div>
-              <p className="text-xs mt-0.5"
-                style={{ color: isLight ? 'rgba(26, 26, 26, 0.7)' : 'rgba(255, 255, 255, 0.7)' }}
-              >
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
