@@ -105,6 +105,8 @@ export const techSection = {
       id: 'talent-match',
       title: '专业人才匹配库',
       subtitle: '为每场比赛提供最适配人员',
+      image: '/images/showcase/tech-1.gif',
+      imageAlt: '专业人才匹配库',
       description: '一人一档案，9个结构化标签，基础标签过滤 + 深度标签加权，36小时完成到岗',
       stats: [
         { label: '已入库', value: '1168', unit: '人' },
@@ -132,6 +134,8 @@ export const techSection = {
       id: 'video-marketing',
       title: '智能视频生产与营销中台',
       subtitle: '高光识别 → 自动剪辑 → 智能宣发 → 数据反哺',
+      image: '/images/showcase/tech-3.png',
+      imageAlt: '智能视频生产与营销中台',
       description: '自动检测进球/抢断/三分等关键动作，多版本自适应输出（横板/竖版/15s/30s/60s），自动叠加品牌水印，一键批量分发',
       comparison: [
         { metric: '个人集锦生成时间', before: '10分钟（人工）', after: '20秒（智能系统）' },
