@@ -32,7 +32,8 @@ const STACK_STYLES = {
 export default function StackedBarChart({
   data = [],
   series = [],
-  title = '各渠道月度营业额（近 6 月）'
+  title = '各渠道月度营业额（近 6 月）',
+  animate
 }) {
   const [hoverIdx, setHoverIdx] = useState(null);
   // useMemo 必须在 early return 之前调用，遵守 Hook 规则
@@ -41,6 +42,9 @@ export default function StackedBarChart({
     [data, series]
   );
   if (!data.length || !series.length) return null;
+
+  // animate 传入时启用路演生长动画；不传则保持静态渲染
+  const animated = animate !== undefined;
 
   const W = 900, H = 310;
   const PAD = { L: 56, R: 20, T: 20, B: 40 };
@@ -126,8 +130,17 @@ export default function StackedBarChart({
                   cumY = topY;
                   const isLast = j === series.length - 1;
                   const st = STACK_STYLES[sr.color] || STACK_STYLES.brand;
+                  const segStyle = animated
+                    ? {
+                        transform: animate ? 'scaleY(1)' : 'scaleY(0)',
+                        transformBox: 'fill-box',
+                        transformOrigin: 'center bottom',
+                        transition: 'transform 0.9s cubic-bezier(0.22,1,0.36,1)',
+                        transitionDelay: `${(i * 0.09 + j * 0.06).toFixed(2)}s`
+                      }
+                    : undefined;
                   return (
-                    <g key={sr.name}>
+                    <g key={sr.name} style={segStyle}>
                       {/* 主体柱子：每段独立高度，从 cumY 开始，不叠加重叠 */}
                       <rect
                         x={xC - barW / 2}

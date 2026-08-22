@@ -36,7 +36,8 @@ function rankTone(rank) {
 
 export default function RoiScatterChart({
   data = [],
-  title = '渠道 ROI 效能榜（投入 · 转化 · 回报率）'
+  title = '渠道 ROI 效能榜（投入 · 转化 · 回报率）',
+  animate
 }) {
   // 按 ROI 从高到低排序
   const sorted = useMemo(
@@ -156,8 +157,11 @@ export default function RoiScatterChart({
           return (
             <div
               key={d.name}
-              className='group relative rounded-2xl border border-[var(--border)] p-3.5 hover:border-[color-mix(in_srgb,var(--brand)_55%,var(--border))] hover:-translate-y-[1px] transition-all overflow-hidden'
-              style={{ background: 'linear-gradient(180deg, var(--card-solid), color-mix(in srgb, var(--surface-muted) 40%, var(--card-solid)))' }}
+              className={`group relative rounded-2xl border border-[var(--border)] p-3.5 hover:border-[color-mix(in_srgb,var(--brand)_55%,var(--border))] hover:-translate-y-[1px] transition-all overflow-hidden ${animate ? 'tour-row' : ''}`}
+              style={{
+                background: 'linear-gradient(180deg, var(--card-solid), color-mix(in srgb, var(--surface-muted) 40%, var(--card-solid)))',
+                ...(animate ? { animationDelay: `${i * 130}ms` } : {})
+              }}
             >
               {/* 排名侧光 */}
               <div className='absolute left-0 top-0 bottom-0 w-[3px]'

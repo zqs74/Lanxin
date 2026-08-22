@@ -24,11 +24,14 @@ export default function DualLineChart({
   title = '近期增长速率（近 30 日）',
   unitA = '万',
   unitB = '%',
-  dualAxis = true
+  dualAxis = true,
+  animate
 }) {
   const [hoverIdx, setHoverIdx] = useState(null);
   if (!data.length) return null;
 
+  // animate 传入时启用路演描画动画；不传则保持静态渲染
+  const animated = animate !== undefined;
   const W = 900, H = 260;
   const PAD = { L: 56, R: 56, T: 20, B: 32 };
   const chartW = W - PAD.L - PAD.R;
@@ -88,23 +91,25 @@ export default function DualLineChart({
             );
           })}
 
-          <path d={areaA} fill='url(#dlgA)' />
+          <path d={areaA} fill='url(#dlgA)' style={animated ? { opacity: animate ? 1 : 0, transition: 'opacity 1s ease' } : undefined} />
 
           <polyline
             fill='none' stroke={cA} strokeWidth='2.8'
             strokeLinecap='round' strokeLinejoin='round'
-            points={data.map((d, i) => `${xAt(i)},${yA(d.seriesA)}`).join(' ')} />
+            points={data.map((d, i) => `${xAt(i)},${yA(d.seriesA)}`).join(' ')}
+            {...(animated ? { pathLength: 1, style: { strokeDasharray: 1, strokeDashoffset: animate ? 0 : 1, transition: 'stroke-dashoffset 1.9s cubic-bezier(0.22,1,0.36,1)' } } : {})} />
           <polyline
             fill='none' stroke={cB} strokeWidth='2.4'
             strokeLinecap='round' strokeLinejoin='round'
             strokeDasharray='6 4'
-            points={data.map((d, i) => `${xAt(i)},${yB(d.seriesB)}`).join(' ')} />
+            points={data.map((d, i) => `${xAt(i)},${yB(d.seriesB)}`).join(' ')}
+            style={animated ? { opacity: animate ? 1 : 0, transition: 'opacity 1s ease 0.9s' } : undefined} />
 
           {data.map((d, i) => {
             const isH = hoverIdx === i;
             const sparse = data.length <= 15 || i % Math.ceil(data.length / 10) === 0 || i === data.length - 1;
             return (
-              <g key={i}>
+              <g key={i} style={animated ? { opacity: animate ? 1 : 0, transition: 'opacity 0.35s ease', transitionDelay: `${(1.2 + i * 0.035).toFixed(2)}s` } : undefined}>
                 {sparse && (
                   <>
                     <circle cx={xAt(i)} cy={yA(d.seriesA)} r={isH ? 5 : 3} fill={cA} stroke={COLOR_MAP.surface} strokeWidth='2' />

@@ -1,7 +1,7 @@
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  Copy, Check, Sparkles, Clock, Shield, Award,
-  Building2, Handshake, BarChart3, TrendingUp, CalendarDays, Briefcase,
+  Copy, Check, Sparkles, Clock, Award,
+  Building2, Handshake, TrendingUp, CalendarDays, Briefcase,
   Maximize2, Minimize2, History,
   CircleDollarSign
 } from 'lucide-react';
@@ -13,9 +13,8 @@ import UserPieChart from '../components/UserPieChart.jsx';
 import KpiStrip from '../components/KpiStrip.jsx';
 import StatusPill from '../components/StatusPill.jsx';
 import ComboBarChart from '../components/ComboBarChart.jsx';
-import StackedBarChart from '../components/StackedBarChart.jsx';
 import DualLineChart from '../components/DualLineChart.jsx';
-import RoiScatterChart from '../components/RoiScatterChart.jsx';
+import MarketingReport from '../components/MarketingReport.jsx';
 
 /* ======================== 顶部 Tabs（3 个） ======================== */
 const TABS = [
@@ -336,237 +335,6 @@ function TabBrandPerformance({ brand, revenue15Day, annualRevenue, financialBrie
   );
 }
 
-/* ======================== Tab3：营销报表 ======================== */
-function TabMarketingReport({ overviewKpi, growth30Day, channelRevenue, topCampaigns }) {
-  const channelSeries = useMemo(() => [
-    { name: '抖音', color: 'brand' },
-    { name: '视频号', color: 'ok' },
-    { name: 'B站', color: 'info' },
-    { name: '小红书', color: 'warn' },
-    { name: '线下', color: 'purple' }
-  ], []);
-
-  // 渠道累计占比（6 个月合计）
-  const channelShares = useMemo(() => {
-    const perCh = channelSeries.map(c => ({
-      name: c.name,
-      color: c.color,
-      total: channelRevenue.reduce((s, m) => s + (m[c.name] || 0), 0)
-    }));
-    const sum = perCh.reduce((s, c) => s + c.total, 0);
-    return {
-      items: perCh.map(c => ({ ...c, pct: sum ? +(c.total / sum * 100).toFixed(1) : 0 })),
-      sum
-    };
-  }, [channelRevenue, channelSeries]);
-
-  const aggregate = useMemo(() => {
-    const last = channelRevenue[channelRevenue.length - 1];
-    const prev = channelRevenue[channelRevenue.length - 2];
-    const lTot = channelSeries.reduce((a, c) => a + (last?.[c.name] || 0), 0);
-    const pTot = channelSeries.reduce((a, c) => a + (prev?.[c.name] || 0), 0);
-    const mom = pTot ? ((lTot - pTot) / pTot * 100) : 0;
-    return {
-      total: 673.2,
-      avg: +(673.2 / 6).toFixed(1),
-      mom: +mom.toFixed(1),
-      latestTotal: +lTot.toFixed(1)
-    };
-  }, [channelRevenue, channelSeries]);
-
-  const colorMap = {
-    brand: 'var(--brand)', ok: 'var(--ok)', info: 'var(--info)',
-    warn: 'var(--warn)', purple: 'var(--purple)', danger: 'var(--danger)'
-  };
-
-  return (
-    <div className='space-y-4'>
-      {/* 4 KPI 顶部条 */}
-      <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3'>
-        {overviewKpi.map(k => (
-          <KpiStrip
-            key={k.key} title={k.title} value={k.value} unit={k.unit}
-            accent={k.accent} trendDir={k.trend}
-            trend={`近 30 日 ${k.trend === 'up' ? '↑' : '↓'} ${k.pct}%`}
-            iconName={k.icon}
-          />
-        ))}
-      </div>
-
-      {/* 增长追踪 + 报表汇总 */}
-      <div className='grid grid-cols-1 lg:grid-cols-12 gap-4'>
-        <div className='col-span-12 lg:col-span-8'>
-          <DualLineChart
-            data={growth30Day.map(d => ({ day: d.day, seriesA: d.revenue, seriesB: d.growthRate }))}
-            nameA='营业额（万元/日）' nameB='销量增长率（%）'
-            colorA='brand' colorB='ok'
-            title='🚀 近期增长追踪（近 30 日 · 营业额 vs 销量增长 35% 中枢）'
-            unitA='万' unitB='%' dualAxis={true}
-          />
-        </div>
-        <div className='col-span-12 lg:col-span-4'>
-          <div className='card-base card-solid p-5 space-y-3.5 h-full'>
-            <div className='flex items-center justify-between'>
-              <div className='flex items-center gap-2'>
-                <Shield size={16} className='text-[var(--ok)]' />
-                <h3 className='text-sm font-bold text-[var(--text-primary)]'>📊 报表汇总（近 6 月）</h3>
-              </div>
-              <StatusPill variant='ok'>健康增长 35%</StatusPill>
-            </div>
-            <div className='space-y-2.5'>
-              {[
-                { k: '累计营业额', v: `¥ ${aggregate.total} 万`, clr: 'var(--brand)' },
-                { k: '月均营业额', v: `¥ ${aggregate.avg} 万`, clr: 'var(--info)' },
-                { k: '2026-07', v: `¥ ${aggregate.latestTotal} 万`, clr: 'var(--purple)' },
-                { k: '月环比', v: `${aggregate.mom >= 0 ? '↑' : '↓'} ${Math.abs(aggregate.mom)}%`, clr: aggregate.mom >= 0 ? 'var(--ok)' : 'var(--danger)' },
-                { k: '综合毛利率', v: '48.32 %', clr: 'var(--purple)' },
-                { k: '全网品牌曝光', v: '4.8 亿+', clr: 'var(--brand)' }
-              ].map((it, i) => (
-                <div key={i} className='flex items-center justify-between p-2.5 rounded-xl bg-[var(--surface-muted)]/30'>
-                  <span className='text-xs text-[var(--text-muted)]'>{it.k}</span>
-                  <span className='text-sm font-bold tabular-nums' style={{ color: it.clr }}>{it.v}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 堆叠柱状 + 渠道占比卡片（删除 ROI 气泡模块） */}
-      <div className='grid grid-cols-1 lg:grid-cols-12 gap-4'>
-        <div className='col-span-12 lg:col-span-8'>
-          <StackedBarChart data={channelRevenue} series={channelSeries}
-                           title='💹 各渠道月度营业额（近 6 月 · 含线下联名）' />
-        </div>
-        <div className='col-span-12 lg:col-span-4'>
-          <div className='card-base card-solid p-5 space-y-3.5 h-full'>
-            <div className='flex items-center justify-between'>
-              <div className='flex items-center gap-2'>
-                <BarChart3 size={16} className='text-[var(--brand)]' />
-                <h3 className='text-sm font-bold text-[var(--text-primary)]'>🧩 渠道累计占比（近 6 月）</h3>
-              </div>
-              <StatusPill variant='brand' size='sm'>合计 ¥ {channelShares.sum.toFixed(1)}万</StatusPill>
-            </div>
-            {/* 占比条（横向堆叠可视化） */}
-            <div className='relative w-full h-5 rounded-full overflow-hidden border border-[var(--border)] bg-[var(--surface-muted)] shadow-inner'>
-              {(() => {
-                let offset = 0;
-                return channelShares.items.map(c => {
-                  const pct = c.pct;
-                  const left = offset;
-                  offset += pct;
-                  const bg = colorMap[c.color] || 'var(--brand)';
-                  return (
-                    <div
-                      key={c.name}
-                      className='absolute top-0 bottom-0 first:rounded-l-full last:rounded-r-full'
-                      title={`${c.name}：¥${c.total.toFixed(1)}万 · ${pct}%`}
-                      style={{ left: `${left}%`, width: `${pct}%`, background: `linear-gradient(180deg, color-mix(in srgb, ${bg} 95%, #fff), ${bg})` }}
-                    />
-                  );
-                });
-              })()}
-            </div>
-            <div className='space-y-2'>
-              {/* 表头（统一列宽，与下方每行严格对齐） */}
-              <div className='grid grid-cols-[20px_1fr_72px_92px] items-center gap-3 px-2.5 pb-2 border-b border-dashed border-[var(--border)] text-[10.5px] font-bold text-[var(--text-muted)] uppercase tracking-wider'>
-                <div />
-                <div>渠道</div>
-                <div className='text-right'>占比</div>
-                <div className='text-right'>营业额</div>
-              </div>
-              {channelShares.items.map(c => {
-                const bg = colorMap[c.color] || 'var(--brand)';
-                return (
-                  <div
-                    key={c.name}
-                    className='group grid grid-cols-[20px_1fr_72px_92px] items-start gap-3 p-2.5 rounded-2xl hover:bg-[var(--surface-muted)]/40 transition-colors'
-                  >
-                    <div className='pt-2 shrink-0'>
-                      <div
-                        className='w-3 h-3 rounded-full border shadow-sm'
-                        style={{ background: bg, borderColor: 'color-mix(in srgb, var(--border) 70%, ' + bg + ')' }}
-                      />
-                    </div>
-                    <div className='min-w-0'>
-                      <div className='text-sm font-semibold text-[var(--text-primary)] truncate'>{c.name}</div>
-                      <div className='mt-1.5 h-1.5 rounded-full overflow-hidden bg-[var(--surface-muted)]'>
-                        <div className='h-full rounded-full' style={{ width: `${c.pct}%`, background: bg }} />
-                      </div>
-                    </div>
-                    <div className='pt-0.5 shrink-0 text-right tabular-nums'>
-                      <span className='text-sm font-black' style={{ color: bg }}>{c.pct}%</span>
-                    </div>
-                    <div className='pt-0.5 shrink-0 text-right tabular-nums'>
-                      <span className='text-xs font-bold text-[var(--text-primary)]'>¥ {c.total.toFixed(1)}万</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Top 5 Campaigns 独占一行，更饱满 */}
-      <div className='card-base card-solid p-5 space-y-3.5'>
-        <div className='flex items-center justify-between flex-wrap gap-2'>
-          <div className='flex items-center gap-2'>
-            <BarChart3 size={17} className='text-[var(--brand)]' />
-            <h3 className='text-base font-bold text-[var(--text-primary)]'>🏆 本期 Top 5 营销 Campaign</h3>
-          </div>
-          <StatusPill variant='info' size='sm'>综合评分</StatusPill>
-        </div>
-        <div className='space-y-2'>
-          {/* 表头（统一列宽，与每行严格对齐） */}
-          <div className='grid grid-cols-[52px_1fr_repeat(3,_88px)] items-end gap-3 px-3.5 pb-2 border-b border-dashed border-[var(--border)] text-[10.5px] font-bold text-[var(--text-muted)] uppercase tracking-wider'>
-            <div>排名</div>
-            <div>Campaign</div>
-            <div className='text-right'>触达</div>
-            <div className='text-right'>营收</div>
-            <div className='text-right'>评分</div>
-          </div>
-          {topCampaigns.map((c, i) => {
-            const colors = ['brand', 'ok', 'info', 'purple', 'warn'];
-            const clr = `var(--${colors[i]})`;
-            return (
-              <div key={i}
-                   className='group grid grid-cols-[52px_1fr_repeat(3,_88px)] items-start gap-3 p-3.5 rounded-2xl border border-[var(--border)] hover:border-[color-mix(in_srgb,var(--brand)_55%,var(--border))] hover:-translate-y-[1px] transition-all bg-[var(--surface-muted)]/25'>
-                <div className='shrink-0'>
-                  <div className='w-10 h-10 rounded-2xl flex items-center justify-center font-black text-base tabular-nums shadow-sm'
-                       style={{ color: clr, background: `color-mix(in srgb, ${clr} 18%, var(--surface-muted))` }}>
-                    {c.rank}
-                  </div>
-                </div>
-                <div className='min-w-0'>
-                  <div className='flex items-center gap-2 flex-wrap'>
-                    <div className='font-semibold text-[var(--text-primary)] truncate'>{c.name}</div>
-                    <StatusPill variant={colors[i]} size='sm'>{c.type}</StatusPill>
-                  </div>
-                  <div className='mt-1.5 h-1.5 rounded-full overflow-hidden bg-[var(--surface-muted)]'>
-                    <div className='h-full rounded-full transition-all'
-                         style={{ width: `${c.score}%`, background: `linear-gradient(90deg, ${clr}, color-mix(in srgb, ${clr} 70%, var(--ok)))` }} />
-                  </div>
-                </div>
-                <div className='pt-0.5 shrink-0 text-right tabular-nums'>
-                  <div className='text-[11px] text-[var(--text-muted)]'>{c.reach}</div>
-                </div>
-                <div className='pt-0.5 shrink-0 text-right tabular-nums'>
-                  <div className='font-bold text-[var(--brand)] text-base'>{c.revenue}</div>
-                </div>
-                <div className='pt-0.5 shrink-0 text-right tabular-nums'>
-                  <div className='text-[10.5px] text-[var(--text-muted)]'>
-                    <span className='font-semibold text-[var(--text-primary)]'>{c.score}</span>/100
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /* ======================== 主组件 ======================== */
 export default function VideoMarketing() {
@@ -662,7 +430,7 @@ export default function VideoMarketing() {
         />
       )}
       {tab === 'report' && (
-        <TabMarketingReport
+        <MarketingReport
           overviewKpi={mock.overviewKpi}
           growth30Day={mock.growth30Day}
           channelRevenue={mock.channelRevenue}
