@@ -1,7 +1,7 @@
 {
   "name": "comptrain",
-  "version": "1.0.0",
-  "description": "篮球数据统计与分析小程序",
+  "version": "4.0.0",
+  "description": "昇梦体育参赛方小程序（智能剪辑 / 赛事资讯报名 / 个人成长分析 / 商城）",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -10,7 +10,8 @@
     "basketball",
     "statistics",
     "wechat",
-    "miniprogram"
+    "miniprogram",
+    "shengmeng"
   ],
   "author": "",
   "license": "MIT",

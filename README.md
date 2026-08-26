@@ -1,10 +1,19 @@
-# 篮球数据统计小程序 / MCBA 赛事方案规划助手
+# CompTrain 参赛方小程序（昇梦体育）
+
+> 参赛方端微信小程序，基于原生小程序 + TDesign 开发，面向篮球爱好者、训练者与参赛球队，提供**智能剪辑、赛事资讯报名、个人成长分析、商城**四大模块，并内置 MCBA 赛事方案规划 AI 助手与自定义比赛工具。
 
 ## 项目简介
 
-篮球数据统计小程序是一个基于微信小程序原生开发的篮球综合管理工具，面向篮球爱好者、训练者、球队管理者以及 2026 赛季安踏小篮球联赛（MCBA）的承办方与参赛队伍，提供比赛记录、训练管理、个人资料、**MCBA 官方赛事方案规划**和自定义即时计分等能力。
+CompTrain 是昇梦体育（2026 赛季安踏小篮球联赛 MCBA 承办方）参赛方端小程序，共四个一级模块：
 
-当前项目以前端小程序为主，业务数据主要保存在微信小程序本地存储中；AI 聊天功能通过 DeepSeek 官方 API（OpenAI 兼容接口）实现流式对话，默认模型为 `deepseek-v4-flash`。
+| 模块 | 页面 | 说明 |
+| --- | --- | --- |
+| 智能剪辑 | `pages/index` | 上传比赛视频 → 选择精彩片段 → AI 模拟生成集锦；右上角头像进入个人中心（编辑资料/主题切换/AI 助手/创建比赛） |
+| 赛事资讯报名 | `pages/match` | 赛事资讯列表、可报名赛事列表（组别/时间/地点/费用/名额）、参赛报名（本地存储） |
+| 个人成长分析 | `pages/training` | 生涯数据、技能雷达图、本周训练计划、训练记录、快速训练 |
+| 商城 | `pages/profile` | 商品分类（球服/篮球/护具/配件）、商品详情、模拟下单、我的订单 |
+
+当前项目以前端小程序为主，业务数据保存在微信小程序本地存储中；AI 聊天功能通过 DeepSeek 官方 API（OpenAI 兼容接口）实现流式对话，默认模型为 `deepseek-v4-flash`。
 
 ## 技术栈
 
@@ -19,26 +28,36 @@
 
 ## 功能模块
 
-### 首页
+### 智能剪辑（首页 `pages/index`）
 
-- 展示当前日期、生涯统计数据和快捷操作入口。
-- 从本地存储读取 `careerStats`，用于展示得分、篮板、助攻、命中率和场次。
-- 快捷入口支持创建/查看内容、进入训练中心、AI 助手和个人中心。
+- 上传比赛视频：从相册或拍摄（`wx.chooseVideo`），支持"云端视频"入口（开发中）。
+- 选择精彩片段：预设比赛片段列表，支持多选，选中态金色高亮。
+- AI 生成集锦：模拟生成流程（前端演示，2 秒后返回结果），展示集锦时长与保存/分享/重新剪辑操作。
+- **个人中心入口**：右上角头像弹出半屏面板，集成编辑资料（`pages/profile-edit`）、主题切换（跟随系统/浅色/深色）、AI 助手（`pages/chat`）、创建比赛（`pages/custom-match-setup`）。
 
-### 赛事中心
+### 赛事资讯报名（`pages/match`）
 
-- 默认选择当天日期。
-- 提供比赛列表/详情入口。
-- 比赛详情页展示静态比分、表现数据、精彩片段、比分趋势和投篮统计。
-- 比赛详情页可进入自定义比赛配置流程。
+- 赛事资讯：官方公告、赛事解读、赛程、回顾、报名指南、保障说明（本地静态数据）。
+- 可报名赛事：U8/U10/U12 小篮球联赛与企业联赛等，展示组别、日期、地点、费用、剩余名额与报名状态（报名中/即将截止/名额已满）。
+- 参赛报名：姓名 + 手机号（正则校验）+ 组别选择 + 队伍/备注，提交后存入本地 `event_registrations`，已报名赛事显示"已报名"且不可重复提交。
+- 支持按关键字搜索、按日期筛选赛事。
 
-### 训练中心
+### 个人成长分析（`pages/training`）
 
-- 展示技能雷达图、训练总评分、周训练计划、近期训练记录和快速训练入口。
-- 支持添加训练记录，当前新增记录保存在页面状态中。
-- 雷达图通过 Canvas 绘制。
+- 生涯数据：得分、篮板、助攻、命中率、场次（读 `careerStats`，从原首页迁入）。
+- 技能雷达图：六维能力（投篮/身体素质/突破上篮/组织/控球/防守），Canvas 2D 绘制。
+- 本周训练计划：周计划列表与完成状态。
+- 训练记录：最近训练记录（标题/时长/强度/亮点），支持添加记录。
+- 快速训练：投篮/力量/体能/技巧一键开始。
 
-### MCBA 赛事方案规划助手（原 AI 训练顾问）
+### 商城（`pages/profile`）
+
+- 商品分类：全部 / 球服 / 篮球 / 护具 / 配件。
+- 商品列表：12 个演示商品（emoji 图 + 名称 + 价格 + 标签）。
+- 商品详情：大图、描述、数量步进器、合计金额。
+- 模拟下单：提交后存入本地 `mall_orders`，支持"我的订单"列表查看与清空。
+
+### MCBA 赛事方案规划助手（`pages/chat`）
 
 - 角色定位：2026 赛季安踏小篮球联赛（MCBA）官方认证的「赛事方案规划助手」。
 - 调用 DeepSeek 官方 API `deepseek-v4-flash` / `deepseek-v4-pro` 进行流式对话（OpenAI 兼容 Chat Completions + stream: true）。
@@ -47,27 +66,16 @@
 - 若未提供日期或队伍数会先主动询问；费用标注「价格依据 2026 赛季安踏官方招商手册」；时段表受 08:00-22:00 场馆营业时间约束。
 - 前端 UI 内置基础 Markdown 渲染：标题、列表、表格、代码块、引用、粗体、斜体、删除线、流程图式节点图与链接。
 
-### AI 创作
+### 自定义比赛（`pages/custom-match-setup/live/result`）
 
-- 支持从相册或相机选择视频。
-- 支持选择预设精彩片段。
-- 当前 AI 生成集锦为前端模拟流程，云端视频功能仍显示为开发中。
-
-### 自定义比赛
-
-- 支持 A 队 / B 队球员配置。
-- 支持添加、删除球员，选择头像，校验姓名与球衣号码。
-- 球衣号码允许跨队重复，但同队内不可重复。
+- 支持 A 队 / B 队球员配置：添加、删除球员，选择头像，校验姓名与球衣号码（同队不可重复）。
 - 实时比赛页支持计时、得分、篮板、抢断、助攻、失误、盖帽、个人犯规、团队犯规、操作日志和撤销。
 - 结束比赛后生成赛果报告，包含胜负、分差、球员排名、MVP、单项王、犯规统计和关键时刻。
 - 赛果报告支持保存到本地和复制分享文本。
 
-### 个人中心
+### 个人资料（`pages/profile-edit`）
 
-- 展示个人资料和基础统计。
-- 支持主题切换：跟随系统、浅色模式、深色模式。
-- 支持跳转资料编辑页和 AI 训练顾问。
-- 资料编辑页支持头像选择、位置选择和基础字段保存。
+- 支持头像选择、位置选择、身高/体重/球龄/技术特点等基础字段编辑，保存在本地 `profile`。
 
 ## 目录结构
 
@@ -88,19 +96,18 @@ CompReain/
 ├── components/
 │   ├── float-ai-button/           # 可拖拽悬浮 AI 按钮
 │   └── nav-bar/                   # 自定义导航栏组件
-├── custom-tab-bar/                # 自定义底部 tabBar
+├── custom-tab-bar/                # 自定义底部 tabBar（智能剪辑/赛事资讯报名/个人成长分析/商城）
 ├── images/                        # 图标与 tabBar 图片资源
 ├── miniapp/                       # 当前为空，预留多端构建资源目录
 ├── miniprogram_npm/               # 微信开发者工具构建后的 npm 包
 ├── pages/
-│   ├── index/                     # 首页
-│   ├── match/                     # 赛事中心
-│   ├── match-detail/              # 比赛详情
-│   ├── training/                  # 训练中心
-│   ├── profile/                   # 个人中心
+│   ├── index/                     # 智能剪辑（首页，右上角头像=个人中心入口）
+│   ├── match/                     # 赛事资讯报名
+│   ├── match-detail/              # 比赛详情（保留备用，暂无入口）
+│   ├── training/                  # 个人成长分析
+│   ├── profile/                   # 商城
 │   ├── profile-edit/              # 个人资料编辑
 │   ├── chat/                      # MCBA 赛事方案规划助手（DeepSeek 官方 API + SSE）
-│   ├── create/                    # AI 创作
 │   ├── custom-match-setup/        # 自定义比赛球员配置
 │   ├── custom-match-live/         # 自定义比赛实时计分
 │   └── custom-match-result/       # 自定义比赛赛果报告
@@ -122,8 +129,8 @@ CompReain/
 3. 初始化 `globalData`，包含用户信息、主题状态、tabBar 实例、悬浮 AI 按钮实例和默认生涯数据。
 4. 调用 `loadTheme()` 读取本地主题配置 `app_theme`。
 5. 调用 `listenSystemTheme()` 监听系统主题变化。
-6. 根据 `app.json` 注册的页面路由进入首页 `pages/index/index`。
-7. 首页和 tab 页通过自定义 tabBar 同步当前选中项。
+6. 根据 `app.json` 注册的页面路由进入智能剪辑页 `pages/index/index`。
+7. 各 tab 页通过自定义 tabBar 同步当前选中项。
 8. 进入赛事方案规划页（`pages/chat/chat`）后，用户发送「帮我预定联赛方案 + 日期 + 队伍数」即可触发 DeepSeek 官方流式对话。
 
 ## 页面路由
@@ -134,7 +141,6 @@ CompReain/
 - `pages/match/match`
 - `pages/training/training`
 - `pages/profile/profile`
-- `pages/create/create`
 - `pages/match-detail/match-detail`
 - `pages/chat/chat`
 - `pages/profile-edit/profile-edit`
@@ -144,16 +150,18 @@ CompReain/
 
 自定义 tabBar 当前包含 4 个一级页面：
 
-- 首页：`pages/index/index`
-- 赛事中心：`pages/match/match`
-- 训练中心：`pages/training/training`
-- 个人中心：`pages/profile/profile`
+- 智能剪辑：`pages/index/index`
+- 赛事资讯报名：`pages/match/match`
+- 个人成长分析：`pages/training/training`
+- 商城：`pages/profile/profile`
 
 ## 本地存储键
 
 - `app_theme`：用户主题设置，支持 `auto`、`light`、`dark`
-- `careerStats`：首页生涯统计
+- `careerStats`：生涯统计（首页迁移至个人成长分析页展示）
 - `profile`：个人资料
+- `event_registrations`：参赛报名记录（赛事资讯报名页，最多保留 50 条）
+- `mall_orders`：商城模拟下单订单（最多保留 50 条）
 - `custom_match_<matchId>`：单场自定义比赛数据
 - `unfinished_custom_match`：未完成的自定义比赛
 - `finished_custom_matches`：已完成自定义比赛摘要列表
@@ -286,6 +294,8 @@ npm test
 - 页面文件通常按同名四件套组织：`.js`、`.json`、`.wxml`、`.wxss`。
 - 主题逻辑由 `app.js` 统一维护，各页面通过 `app.getUserTheme()`、`app.getThemeColors()` 和 `setTheme()` 同步。
 - tabBar 状态由 `app.js` 和 `custom-tab-bar/index.js` 协同维护。
+- **WXML 数据绑定不支持 `indexOf()` 等方法调用**，选中态等布尔判断须用对象映射（如 `registeredMap[item.id]`）。
+- 弹层（modal/panel）的 `z-index` 需高于自定义 tabBar 的 `9999`，否则会被遮挡。
 - 当前未发现 ESLint、Prettier 或其他格式化配置。
 - 当前未发现独立 `src/`、`lib/`、`services/`、`models/` 目录，业务逻辑主要写在各页面 JS 文件中。
 
@@ -298,8 +308,10 @@ npm test
 5. `README.md` 中提到 MIT 许可证，但项目根目录当前未发现 `LICENSE` 文件。
 6. `miniapp/` 目录当前为空，`project.miniapp.json` 更像是多端构建预留配置。
 7. 若流式对话出现中文乱码，可检查 `_utf8Decode` 是否被跳过；在个别不支持 `new Uint8Array(res.data)` 的基础库版本中可改为 `wx.arrayBufferToBase64 + atob` 的降级路径。
+8. `pages/create`（原 AI 创作页）已在 v4.0.0 移除，其功能并入首页智能剪辑工作台。
+9. `pages/match-detail` 当前保留但无入口（原"今日比赛"区块已移除），后续如需比赛数据查看可恢复入口。
 
 ---
 
-**版本信息**：v3.1.0（MCBA 赛事方案规划助手接入）
-**最后更新**：2026-08-05
+**版本信息**：v4.0.0（参赛方端四模块重构：智能剪辑 / 赛事资讯报名 / 个人成长分析 / 商城）
+**最后更新**：2026-08-26
