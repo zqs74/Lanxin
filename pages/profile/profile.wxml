@@ -1,119 +1,110 @@
-<!-- profile.wxml -->
+<!-- profile.wxml - 商城 -->
 <page-meta background-color="{{pageBg}}" root-background-color="{{pageBg}}" page-style="background:{{pageBg}}" />
 <view class="page-wrapper {{themeClass}}">
   <view class="page-header-gradient"></view>
 
   <view class="container slide-up">
+    <!-- 页面标题 -->
     <view class="page-header">
-      <view class="page-title">个人中心</view>
-      <view class="page-subtitle">管理资料、数据和偏好设置</view>
-    </view>
-
-    <view class="section">
-      <view class="profile-card card">
-        <view class="profile-header">
-          <view class="avatar-section">
-            <view class="avatar gradient-bg">
-              <image wx:if="{{profile.avatar}}" class="avatar-image" src="{{profile.avatar}}" mode="aspectFill"></image>
-              <t-icon wx:else name="user" size="52rpx" color="#0a0a0a" />
-            </view>
-            <view class="profile-basic">
-              <view class="name">{{ profile.name }}</view>
-              <view class="profile-tag">{{ profile.position }}</view>
-            </view>
-          </view>
-          <view class="edit-btn btn-primary btn-small" bindtap="editProfile">编辑资料</view>
-        </view>
-
-        <view class="profile-stats">
-          <view class="stat-card">
-            <view class="stat-icon">
-              <t-icon name="ruler" size="34rpx" color="#D4AF37" />
-            </view>
-            <view class="stat-number">{{ profile.height }}</view>
-            <view class="stat-desc">身高</view>
-          </view>
-          <view class="stat-card">
-            <view class="stat-icon">
-              <t-icon name="chart-radar" size="34rpx" color="#D4AF37" />
-            </view>
-            <view class="stat-number">{{ profile.weight }}</view>
-            <view class="stat-desc">体重</view>
-          </view>
-          <view class="stat-card">
-            <view class="stat-icon">
-              <t-icon name="time" size="34rpx" color="#D4AF37" />
-            </view>
-            <view class="stat-number">{{ profile.yearsOfPlay || '未设置' }}</view>
-            <view class="stat-desc">球龄</view>
-          </view>
-        </view>
+      <view class="page-title">商城</view>
+      <view class="page-subtitle">精选篮球装备与周边</view>
+      <view class="orders-entry" bindtap="showOrders">
+        <t-icon name="time" size="30rpx" color="#D4AF37" />
+        <text class="orders-entry-text">我的订单</text>
       </view>
     </view>
 
-    <view class="section">
-      <view class="section-header">
-        <view class="section-title">个人数据</view>
-        <view class="data-badge">场均</view>
+    <!-- 分类 -->
+    <view class="category-bar">
+      <view
+        wx:for="{{ categories }}"
+        wx:key="key"
+        class="category-item {{ activeCategory === item.key ? 'active' : '' }}"
+        data-key="{{ item.key }}"
+        bindtap="switchCategory"
+      >
+        {{ item.label }}
       </view>
+    </view>
 
-      <view class="stats-section card">
-        <view class="stats-grid">
-          <view class="stat-item">
-            <view class="stat-value gradient-text">{{ stats.points }}</view>
-            <view class="stat-label">场均得分</view>
-          </view>
-          <view class="stat-item">
-            <view class="stat-value gradient-text">{{ stats.fieldGoals }}</view>
-            <view class="stat-label">场均投篮</view>
-          </view>
-          <view class="stat-item">
-            <view class="stat-value gradient-text">{{ stats.shootingPercentage }}%</view>
-            <view class="stat-label">命中率</view>
+    <!-- 商品网格 -->
+    <view class="product-grid">
+      <view
+        class="product-card card"
+        wx:for="{{ filteredProducts }}"
+        wx:key="id"
+        data-id="{{ item.id }}"
+        bindtap="openDetail"
+      >
+        <view class="product-emoji">
+          <text class="product-emoji-text">{{ item.emoji }}</text>
+          <view wx:if="{{ item.tag }}" class="product-tag">{{ item.tag }}</view>
+        </view>
+        <view class="product-name">{{ item.name }}</view>
+        <view class="product-bottom">
+          <text class="product-price">¥{{ item.price }}</text>
+          <view class="product-buy">
+            <t-icon name="cart" size="30rpx" color="#0a0a0a" />
           </view>
         </view>
       </view>
     </view>
 
-    <view class="section">
-      <view class="section-header">
-        <view class="section-title">设置</view>
+    <view wx:if="{{ filteredProducts.length === 0 }}" class="no-data">该分类暂无商品</view>
+  </view>
+
+  <!-- 商品详情/下单弹层 -->
+  <view wx:if="{{ detailVisible }}" class="modal-mask" bindtap="closeDetail">
+    <view class="modal-panel {{ themeClass }}" catchtap="stopPropagation">
+      <view class="detail-emoji">
+        <text class="detail-emoji-text">{{ currentProduct.emoji }}</text>
       </view>
+      <view class="detail-header">
+        <view class="detail-name">{{ currentProduct.name }}</view>
+        <view class="modal-close" bindtap="closeDetail"><t-icon name="close" size="30rpx" color="var(--text-tertiary)" /></view>
+      </view>
+      <view class="detail-price">¥{{ currentProduct.price }}</view>
+      <view class="detail-desc">{{ currentProduct.desc }}</view>
 
-      <view class="settings-card card">
-        <view class="setting-item" bindtap="handleToggleTheme">
-          <view class="setting-left">
-            <view class="setting-icon">
-              <t-icon name="mode-light" size="34rpx" color="#D4AF37" />
-            </view>
-            <view class="setting-copy">
-              <view class="setting-text">主题模式</view>
-              <view class="setting-desc">切换浅色、深色或跟随系统</view>
-            </view>
-          </view>
-          <view class="setting-right">
-            <view class="theme-value">{{ themeLabel }}</view>
-            <t-icon name="chevron-right" size="28rpx" color="#999999" />
-          </view>
-        </view>
-
-        <view class="setting-item" bindtap="goToChat">
-          <view class="setting-left">
-            <view class="setting-icon">
-              <t-icon name="robot" size="34rpx" color="#D4AF37" />
-            </view>
-            <view class="setting-copy">
-              <view class="setting-text">训练顾问</view>
-              <view class="setting-desc">分析比赛和训练表现</view>
-            </view>
-          </view>
-          <view class="setting-right">
-            <t-icon name="chevron-right" size="28rpx" color="#999999" />
-          </view>
+      <view class="count-row">
+        <view class="count-label">购买数量</view>
+        <view class="count-stepper">
+          <view class="stepper-btn" bindtap="decrease">−</view>
+          <text class="stepper-value">{{ buyCount }}</text>
+          <view class="stepper-btn plus" bindtap="increase">＋</view>
         </view>
       </view>
+      <view class="total-row">合计：<text class="total-price">¥{{ currentProduct.price * buyCount }}</text></view>
+
+      <button class="btn btn-primary submit-btn" bindtap="submitOrder">模拟下单</button>
     </view>
   </view>
 
+  <!-- 我的订单弹层 -->
+  <view wx:if="{{ ordersVisible }}" class="modal-mask" bindtap="closeOrders">
+    <view class="modal-panel {{ themeClass }}" catchtap="stopPropagation">
+      <view class="modal-header">
+        <view class="modal-title">我的订单</view>
+        <view class="modal-close" bindtap="closeOrders"><t-icon name="close" size="30rpx" color="var(--text-tertiary)" /></view>
+      </view>
+
+      <view wx:if="{{ orders.length === 0 }}" class="no-data orders-empty">暂无订单，去逛逛吧</view>
+
+      <scroll-view scroll-y class="orders-list">
+        <view class="order-item card" wx:for="{{ orders }}" wx:key="id">
+          <view class="order-emoji"><text>{{ item.emoji }}</text></view>
+          <view class="order-info">
+            <view class="order-name">{{ item.productName }}</view>
+            <view class="order-meta">¥{{ item.price }} × {{ item.count }}</view>
+          </view>
+          <view class="order-total">¥{{ item.total }}</view>
+        </view>
+      </scroll-view>
+
+      <button wx:if="{{ orders.length > 0 }}" class="btn btn-ghost clear-btn" bindtap="clearOrders">清空订单</button>
+    </view>
+  </view>
+
+  <!-- 悬浮AI按钮 -->
   <float-ai-button></float-ai-button>
 </view>

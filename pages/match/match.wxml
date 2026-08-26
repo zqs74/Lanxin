@@ -1,4 +1,4 @@
-<!-- match.wxml - 现代化UI设计 -->
+<!-- match.wxml - 赛事资讯报名 -->
 <page-meta background-color="{{pageBg}}" root-background-color="{{pageBg}}" page-style="background:{{pageBg}}" />
 <view class="page-wrapper {{themeClass}}">
   <view class="page-header-gradient"></view>
@@ -6,120 +6,145 @@
   <view class="container slide-up">
     <!-- 页面标题 -->
     <view class="page-header">
-      <view class="page-title">赛事中心</view>
-      <view class="page-subtitle">查看和管理你的比赛</view>
+      <view class="page-title">赛事资讯报名</view>
+      <view class="page-subtitle">查看赛事资讯，报名参加比赛</view>
     </view>
 
     <!-- 搜索区 -->
     <view class="search-section">
       <view class="search-box card">
         <view class="search-icon"><t-icon name="search" size="30rpx" color="#D4AF37" /></view>
-        <input placeholder="搜索球队名称..." class="search-input" placeholder-class="search-placeholder"></input>
+        <input placeholder="搜索赛事名称或地点..." class="search-input" placeholder-class="search-placeholder" value="{{ searchKeyword }}" bindinput="onSearchInput"></input>
       </view>
     </view>
 
-    <!-- 日期选择区 -->
-    <view class="date-section">
+    <!-- 赛事资讯区 -->
+    <view class="section">
       <view class="section-header">
-        <view class="section-title">选择日期</view>
+        <view class="section-title">赛事资讯</view>
+        <view class="section-count">{{ newsList.length }} 条</view>
       </view>
-      <picker 
-        mode="date" 
-        value="{{ selectedDate }}" 
-        start="2020-01-01" 
-        end="2030-12-31" 
-        bindchange="onDateChange"
-      >
-        <view class="date-picker card">
-          <t-icon class="date-picker-icon" name="calendar" size="30rpx" color="#D4AF37" />
-          <text class="date-picker-text">{{ selectedDate }}</text>
-          <text class="date-picker-arrow">›</text>
+      <view class="news-list">
+        <view class="news-card card" wx:for="{{ newsList }}" wx:key="id" data-id="{{ item.id }}" bindtap="openNews">
+          <view class="news-tag">{{ item.tag }}</view>
+          <view class="news-title">{{ item.title }}</view>
+          <view class="news-date">{{ item.date }}</view>
         </view>
-      </picker>
+      </view>
     </view>
 
-    <!-- 比赛列表区 -->
-    <view class="match-section">
+    <!-- 可报名赛事区 -->
+    <view class="section">
       <view class="section-header">
-        <view class="section-title">今日比赛</view>
-        <view class="match-count">2 场</view>
+        <view class="section-title">可报名赛事</view>
+        <view class="section-count">{{ filteredEvents.length }} 场</view>
       </view>
-      
-      <view class="match-list">
-        <!-- 比赛卡片1 -->
-        <view class="match-card card" bindtap="goToMatchDetail">
-          <view class="match-status-badge playing">
-            <view class="status-dot"></view>
-            比赛中
-          </view>
-          
-          <view class="match-header">
-            <view class="match-time">
-              <t-icon class="time-icon" name="time" size="24rpx" color="#D4AF37" />
-              16:30
-            </view>
-          </view>
-          
-          <view class="match-teams">
-            <view class="team">
-              <view class="team-shield red"><t-icon name="flag" size="34rpx" color="#ffffff" /></view>
-              <view class="team-name">红队</view>
-            </view>
-            
-            <view class="score-box">
-              <view class="score">0 : 0</view>
-            </view>
-            
-            <view class="team">
-              <view class="team-name">蓝队</view>
-              <view class="team-shield blue"><t-icon name="flag" size="34rpx" color="#ffffff" /></view>
-            </view>
-          </view>
-          
-          <view class="match-venue-bottom">
-            <t-icon class="venue-icon" name="location" size="24rpx" color="#D4AF37" />
-            场地1
-          </view>
-        </view>
 
-        <!-- 比赛卡片2 -->
-        <view class="match-card card" bindtap="goToMatchDetail">
-          <view class="match-status-badge upcoming">
-            未开始
+      <view wx:if="{{ filteredEvents.length === 0 }}" class="no-data">暂无符合条件的赛事，换个条件试试</view>
+
+      <view class="event-list">
+        <view class="event-card card" wx:for="{{ filteredEvents }}" wx:key="id" data-id="{{ item.id }}" bindtap="openEvent">
+          <view class="event-top">
+            <view class="event-group">{{ item.group }}</view>
+            <view class="event-status {{ item.status === '名额已满' ? 'full' : (item.status === '即将截止' ? 'urgent' : 'open') }}">{{ item.status }}</view>
           </view>
-          
-          <view class="match-header">
-            <view class="match-time">
-              <t-icon class="time-icon" name="time" size="24rpx" color="#D4AF37" />
-              18:30
-            </view>
+          <view class="event-name">{{ item.name }}</view>
+          <view class="event-meta">
+            <view class="event-meta-item"><t-icon name="time" size="26rpx" color="#D4AF37" />{{ item.date }} {{ item.time }}</view>
+            <view class="event-meta-item"><t-icon name="location" size="26rpx" color="#D4AF37" />{{ item.venue }}</view>
+            <view class="event-meta-item"><t-icon name="money" size="26rpx" color="#D4AF37" />{{ item.fee }}</view>
           </view>
-          
-          <view class="match-teams">
-            <view class="team">
-              <view class="team-shield green"><t-icon name="flag" size="34rpx" color="#ffffff" /></view>
-              <view class="team-name">A队</view>
+          <view class="event-bottom">
+            <view class="event-slots">{{ item.slots > 0 ? '剩余 ' + item.slots + ' 个名额' : '名额已满' }}</view>
+            <view
+              class="register-btn {{ registeredMap[item.id] ? 'done' : '' }}"
+              catchtap="openRegister"
+              data-id="{{ item.id }}"
+            >
+              {{ registeredMap[item.id] ? '已报名' : '立即报名' }}
             </view>
-            
-            <view class="score-box">
-              <view class="score">0 : 0</view>
-            </view>
-            
-            <view class="team">
-              <view class="team-name">B队</view>
-              <view class="team-shield orange"><t-icon name="flag" size="34rpx" color="#ffffff" /></view>
-            </view>
-          </view>
-          
-          <view class="match-venue-bottom">
-            <t-icon class="venue-icon" name="location" size="24rpx" color="#D4AF37" />
-            场地2
           </view>
         </view>
       </view>
     </view>
   </view>
-  
+
+  <!-- 资讯详情弹层 -->
+  <view wx:if="{{ newsDetail }}" class="modal-mask" bindtap="closeNews">
+    <view class="modal-panel {{ themeClass }}" catchtap="stopPropagation">
+      <view class="modal-header">
+        <view class="modal-title">{{ newsDetail.title }}</view>
+        <view class="modal-close" bindtap="closeNews"><t-icon name="close" size="30rpx" color="var(--text-tertiary)" /></view>
+      </view>
+      <view class="modal-meta">{{ newsDetail.tag }} · {{ newsDetail.date }}</view>
+      <scroll-view scroll-y class="modal-body">
+        <text class="modal-content">{{ newsDetail.content }}</text>
+      </scroll-view>
+    </view>
+  </view>
+
+  <!-- 赛事详情弹层 -->
+  <view wx:if="{{ eventDetail && !registerVisible }}" class="modal-mask" bindtap="closeEvent">
+    <view class="modal-panel {{ themeClass }}" catchtap="stopPropagation">
+      <view class="modal-header">
+        <view class="modal-title">{{ eventDetail.name }}</view>
+        <view class="modal-close" bindtap="closeEvent"><t-icon name="close" size="30rpx" color="var(--text-tertiary)" /></view>
+      </view>
+      <view class="event-detail-info">
+        <view class="detail-row"><text class="detail-label">组别</text><text class="detail-value">{{ eventDetail.group }}</text></view>
+        <view class="detail-row"><text class="detail-label">时间</text><text class="detail-value">{{ eventDetail.date }} {{ eventDetail.time }}</text></view>
+        <view class="detail-row"><text class="detail-label">地点</text><text class="detail-value">{{ eventDetail.venue }}</text></view>
+        <view class="detail-row"><text class="detail-label">报名费</text><text class="detail-value">{{ eventDetail.fee }}</text></view>
+        <view class="detail-row"><text class="detail-label">名额</text><text class="detail-value">{{ eventDetail.slots > 0 ? '剩余 ' + eventDetail.slots + ' 个' : '已满' }}</text></view>
+      </view>
+      <button
+        class="btn btn-primary detail-register-btn"
+        bindtap="openRegister"
+        data-id="{{ eventDetail.id }}"
+        disabled="{{ eventDetail.status === '名额已满' || registeredMap[eventDetail.id] }}"
+      >
+        {{ eventDetail.status === '名额已满' ? '名额已满' : (registeredMap[eventDetail.id] ? '已报名' : '立即报名') }}
+      </button>
+    </view>
+  </view>
+
+  <!-- 报名表单弹层 -->
+  <view wx:if="{{ registerVisible }}" class="modal-mask" bindtap="closeRegister">
+    <view class="modal-panel register-panel {{ themeClass }}" catchtap="stopPropagation">
+      <view class="modal-header">
+        <view class="modal-title">报名参赛</view>
+        <view class="modal-close" bindtap="closeRegister"><t-icon name="close" size="30rpx" color="var(--text-tertiary)" /></view>
+      </view>
+      <view class="register-event-name">{{ eventDetail ? eventDetail.name : '' }}</view>
+      <view class="form-group">
+        <view class="form-label">姓名 <text class="required">*</text></view>
+        <input class="input-field" placeholder="请输入姓名" value="{{ registerForm.name }}" data-field="name" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">手机号 <text class="required">*</text></view>
+        <input class="input-field" type="number" maxlength="11" placeholder="请输入手机号" value="{{ registerForm.phone }}" data-field="phone" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">组别 <text class="required">*</text></view>
+        <picker mode="selector" range="{{ registerGroups }}" value="{{ groupIndex }}" bindchange="onGroupChange">
+          <view class="picker-box">
+            <text class="picker-text">{{ registerForm.group || '请选择组别' }}</text>
+            <t-icon name="chevron-down" size="28rpx" color="var(--text-tertiary)" />
+          </view>
+        </picker>
+      </view>
+      <view class="form-group">
+        <view class="form-label">队伍名称</view>
+        <input class="input-field" placeholder="选填" value="{{ registerForm.team }}" data-field="team" bindinput="onFormInput" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">备注</view>
+        <textarea class="input-field textarea-field" placeholder="选填，如身高、球衣号等" value="{{ registerForm.remark }}" data-field="remark" bindinput="onFormInput" maxlength="100"></textarea>
+      </view>
+      <button class="btn btn-primary submit-btn" bindtap="submitRegister">提交报名</button>
+    </view>
+  </view>
+
   <!-- 悬浮AI按钮 -->
   <float-ai-button></float-ai-button>
 </view>

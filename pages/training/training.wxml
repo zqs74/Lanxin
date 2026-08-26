@@ -1,4 +1,4 @@
-<!-- training.wxml - 优化版训练中心 -->
+<!-- training.wxml - 个人成长分析 -->
 <page-meta background-color="{{pageBg}}" root-background-color="{{pageBg}}" page-style="background:{{pageBg}}" />
 <view class="page-wrapper {{themeClass}}">
   <view class="page-header-gradient"></view>
@@ -6,8 +6,37 @@
   <view class="container slide-up">
     <!-- 页面标题 -->
     <view class="page-header">
-      <view class="page-title">训练中心</view>
-      <view class="page-subtitle">科学训练，持续进步</view>
+      <view class="page-title">个人成长分析</view>
+      <view class="page-subtitle">记录成长轨迹，见证每一点进步</view>
+    </view>
+
+    <!-- 生涯数据（从首页迁入） -->
+    <view class="section">
+      <view class="section-header">
+        <view class="section-title">生涯数据</view>
+      </view>
+      <view class="career-grid">
+        <view class="career-item card">
+          <view class="career-value">{{ careerStats.points }}</view>
+          <view class="career-label">得分</view>
+        </view>
+        <view class="career-item card">
+          <view class="career-value">{{ careerStats.rebounds }}</view>
+          <view class="career-label">篮板</view>
+        </view>
+        <view class="career-item card">
+          <view class="career-value">{{ careerStats.assists }}</view>
+          <view class="career-label">助攻</view>
+        </view>
+        <view class="career-item card">
+          <view class="career-value">{{ careerStats.shootingPercentage }}</view>
+          <view class="career-label">命中率</view>
+        </view>
+        <view class="career-item card">
+          <view class="career-value">{{ careerStats.totalGames }}</view>
+          <view class="career-label">场次</view>
+        </view>
+      </view>
     </view>
 
     <!-- 今日训练概览 -->

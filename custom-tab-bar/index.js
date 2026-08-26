@@ -1,32 +1,32 @@
 const TAB_LIST = [
   {
     value: 'home',
-    text: '首页',
-    ariaLabel: '首页',
+    text: '智能剪辑',
+    ariaLabel: '智能剪辑',
     pagePath: '/pages/index/index',
     icon: '/images/tabbar/no/1.png',
     activeIcon: '/images/tabbar/yes/1.png'
   },
   {
     value: 'match',
-    text: '赛事中心',
-    ariaLabel: '赛事中心',
+    text: '赛事资讯报名',
+    ariaLabel: '赛事资讯报名',
     pagePath: '/pages/match/match',
     icon: '/images/tabbar/no/2.png',
     activeIcon: '/images/tabbar/yes/2.svg'
   },
   {
     value: 'training',
-    text: '训练中心',
-    ariaLabel: '训练中心',
+    text: '个人成长分析',
+    ariaLabel: '个人成长分析',
     pagePath: '/pages/training/training',
     icon: '/images/tabbar/no/3.png',
     activeIcon: '/images/tabbar/yes/3.png'
   },
   {
     value: 'profile',
-    text: '个人中心',
-    ariaLabel: '个人中心',
+    text: '商城',
+    ariaLabel: '商城',
     pagePath: '/pages/profile/profile',
     icon: '/images/tabbar/no/4.png',
     activeIcon: '/images/tabbar/yes/4.png'

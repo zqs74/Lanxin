@@ -4,7 +4,6 @@
     "pages/match/match",
     "pages/training/training",
     "pages/profile/profile",
-    "pages/create/create",
     "pages/match-detail/match-detail",
     "pages/chat/chat",
     "pages/profile-edit/profile-edit",
@@ -29,19 +28,19 @@
     "list": [
       {
         "pagePath": "pages/index/index",
-        "text": "首页"
+        "text": "智能剪辑"
       },
       {
         "pagePath": "pages/match/match",
-        "text": "赛事中心"
+        "text": "赛事资讯报名"
       },
       {
         "pagePath": "pages/training/training",
-        "text": "训练中心"
+        "text": "个人成长分析"
       },
       {
         "pagePath": "pages/profile/profile",
-        "text": "个人中心"
+        "text": "商城"
       }
     ]
   },

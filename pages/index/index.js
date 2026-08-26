@@ -1,5 +1,16 @@
-// index.js - 昇梦体育 首页
+// index.js - 昇梦体育 智能剪辑工作台（含右上角头像个人中心入口）
 const app = getApp()
+
+const DEFAULT_PROFILE = {
+  name: '篮球爱好者',
+  position: '未设置',
+  height: '未设置',
+  weight: '未设置',
+  age: '',
+  yearsOfPlay: '',
+  skillFeature: '',
+  avatar: ''
+}
 
 Page({
   data: {
@@ -7,32 +18,39 @@ Page({
     themeClass: '',
     pageBg: '#f8f7f4',
     currentDate: '',
-    careerStats: {
-      points: 0, rebounds: 0, assists: 0,
-      shootingPercentage: 0.0, totalGames: 0
-    },
-    statsData: [
-      { id: 1, iconName: 'chart-line', value: '0', label: '得分' },
-      { id: 2, iconName: 'chart-column', value: '0', label: '篮板' },
-      { id: 3, iconName: 'assignment-user', value: '0', label: '助攻' },
-      { id: 4, iconName: 'chart-radar', value: '0%', label: '命中率' },
-      { id: 5, iconName: 'time', value: '0', label: '场次' }
+    themeLabel: '跟随系统',
+    profile: DEFAULT_PROFILE,
+    // 剪辑工作台
+    videoName: '',
+    clips: [
+      { id: 1, time: '第一节 08:24', description: '两分跳投', type: '投篮', selected: false },
+      { id: 2, time: '第一节 06:12', description: '突破上篮', type: '上篮', selected: false },
+      { id: 3, time: '第二节 10:05', description: '三分远投', type: '三分', selected: false },
+      { id: 4, time: '第三节 05:30', description: '罚球得分', type: '罚球', selected: false },
+      { id: 5, time: '第四节 01:20', description: '关键三分', type: '三分', selected: false }
     ],
-    quickActions: [
-      { id: 1, iconName: 'edit-1', label: '创建比赛', action: 'createMatch', bgColor: 'linear-gradient(135deg, #44ceff 0%, #59a8ff 100%)' },
-      { id: 2, iconName: 'activity', label: '查看训练', action: 'goTraining', bgColor: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)' },
-      { id: 3, iconName: 'robot', label: 'AI助手', action: 'goChat', bgColor: 'linear-gradient(135deg, #faad14 0%, #ffc53d 100%)' },
-      { id: 4, iconName: 'user', label: '个人中心', action: 'goProfile', bgColor: 'linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)' }
-    ],
-    activeVideoTab: 'collection',
-    contentAnimClass: '',
+    selectedCount: 0,
+    isGenerating: false,
+    videoGenerated: false,
+    generatedDuration: '',
+    // 个人中心弹层
+    panelVisible: false
   },
 
   onLoad() {
     this.initTheme()
     this.setNavHeight()
     this.setCurrentDate()
-    this.loadCareerStats()
+  },
+
+  onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) { this.getTabBar().updateSelected(0) }
+    const userTheme = app.getUserTheme()
+    const { pageBg } = app.getThemeColors()
+    this.setData({ themeClass: this.getThemeClass(userTheme), pageBg })
+    this.applyNavBarColor()
+    this.loadProfile()
+    this.syncThemeLabel()
   },
 
   initTheme() {
@@ -51,6 +69,7 @@ Page({
     const { pageBg } = app.getThemeColors()
     this.setData({ themeClass: this.getThemeClass(userTheme), pageBg })
     this.applyNavBarColor()
+    this.syncThemeLabel()
   },
 
   applyNavBarColor() {
@@ -70,54 +89,123 @@ Page({
     this.setData({ navHeight: (statusBarHeight + navBarHeight) * 2 })
   },
 
-  onShow() {
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) { this.getTabBar().updateSelected(0) }
-    const userTheme = app.getUserTheme()
-    const { pageBg } = app.getThemeColors()
-    this.setData({ themeClass: this.getThemeClass(userTheme), pageBg })
-    this.applyNavBarColor()
-  },
-
   setCurrentDate() {
     const now = new Date(); const month = now.getMonth() + 1; const day = now.getDate()
     const weekdays = ['周日','周一','周二','周三','周四','周五','周六']
     this.setData({ currentDate: `${month}月${day}日 ${weekdays[now.getDay()]}` })
   },
 
-  loadCareerStats() {
+  // ===== 个人中心（头像弹层） =====
+  loadProfile() {
     try {
-      const stats = wx.getStorageSync('careerStats')
-      if (stats) {
-        this.setData({
-          careerStats: stats,
-          statsData: [
-            { id: 1, iconName: 'chart-line', value: stats.points.toString(), label: '得分' },
-            { id: 2, iconName: 'chart-column', value: stats.rebounds.toString(), label: '篮板' },
-            { id: 3, iconName: 'assignment-user', value: stats.assists.toString(), label: '助攻' },
-            { id: 4, iconName: 'chart-radar', value: stats.shootingPercentage + '%', label: '命中率' },
-            { id: 5, iconName: 'time', value: stats.totalGames.toString(), label: '场次' }
-          ]
-        })
-      }
-    } catch (e) { console.error('加载生涯数据失败', e) }
+      const profile = wx.getStorageSync('profile')
+      this.setData({ profile: this.normalizeProfile(profile || DEFAULT_PROFILE) })
+    } catch (e) { console.error('加载个人资料失败', e) }
   },
 
-  switchVideoTab(e) {
-    const tab = e.currentTarget.dataset.tab
-    if (tab === this.data.activeVideoTab) return
-    this.setData({ contentAnimClass: 'fade-out' })
-    setTimeout(() => { this.setData({ activeVideoTab: tab, contentAnimClass: 'fade-in' }) }, 150)
-  },
-
-  goToCreate() { wx.navigateTo({ url: '/pages/create/create' }) },
-
-  handleAction(e) {
-    const action = e.currentTarget.dataset.action
-    switch(action) {
-      case 'createMatch': wx.navigateTo({ url: '/pages/create/create' }); break
-      case 'goTraining': wx.switchTab({ url: '/pages/training/training' }); break
-      case 'goChat': wx.navigateTo({ url: '/pages/chat/chat' }); break
-      case 'goProfile': wx.switchTab({ url: '/pages/profile/profile' }); break
+  normalizeProfile(profile = {}) {
+    const source = { ...DEFAULT_PROFILE, ...profile }
+    return {
+      ...source,
+      name: source.name || '篮球爱好者',
+      position: source.position || '未设置',
+      height: source.height ? `${source.height}cm` : '未设置',
+      weight: source.weight ? `${source.weight}kg` : '未设置'
     }
+  },
+
+  syncThemeLabel() {
+    const userTheme = app.getUserTheme()
+    const labelMap = { auto: '跟随系统', light: '浅色模式', dark: '深色模式' }
+    this.setData({ themeLabel: labelMap[userTheme] || '跟随系统' })
+  },
+
+  openPanel() { this.setData({ panelVisible: true }) },
+  closePanel() { this.setData({ panelVisible: false }) },
+  stopPropagation() {},
+
+  editProfile() {
+    this.closePanel()
+    wx.navigateTo({ url: '/pages/profile-edit/profile-edit' })
+  },
+
+  switchTheme() {
+    const choices = ['跟随系统', '浅色模式', '深色模式']
+    const themeMap = { '跟随系统': 'auto', '浅色模式': 'light', '深色模式': 'dark' }
+    wx.showActionSheet({
+      itemList: choices,
+      success: (res) => {
+        const selected = choices[res.tapIndex]
+        const userTheme = themeMap[selected]
+        app.setUserTheme(userTheme)
+        this.syncThemeLabel()
+        wx.showToast({ title: `已切换为${selected}`, icon: 'success', duration: 1400 })
+      }
+    })
+  },
+
+  goChat() {
+    this.closePanel()
+    wx.navigateTo({ url: '/pages/chat/chat' })
+  },
+
+  goCreateMatch() {
+    this.closePanel()
+    wx.navigateTo({ url: '/pages/custom-match-setup/custom-match-setup' })
+  },
+
+  // ===== 智能剪辑工作台 =====
+  uploadLocalVideo() {
+    wx.chooseVideo({
+      sourceType: ['album', 'camera'],
+      maxDuration: 60,
+      camera: 'back',
+      success: (res) => {
+        const name = (res && res.tempFilePath) ? res.tempFilePath.split('/').pop() : '比赛视频'
+        this.setData({ videoName: name || '比赛视频', videoGenerated: false })
+        wx.showToast({ title: '视频已选择', icon: 'success' })
+      }
+    })
+  },
+
+  useCloudVideo() {
+    wx.showToast({ title: '云端视频功能开发中', icon: 'none' })
+  },
+
+  toggleClip(e) {
+    const index = e.currentTarget.dataset.index
+    const clips = this.data.clips
+    clips[index].selected = !clips[index].selected
+    const selectedCount = clips.filter(c => c.selected).length
+    this.setData({ clips, selectedCount, videoGenerated: false })
+  },
+
+  generateWithAI() {
+    if (this.data.selectedCount === 0) {
+      wx.showToast({ title: '请选择至少一个精彩片段', icon: 'none' })
+      return
+    }
+    if (this.data.isGenerating) return
+    this.setData({ isGenerating: true })
+    wx.showLoading({ title: 'AI 生成中...', mask: true })
+    setTimeout(() => {
+      wx.hideLoading()
+      const duration = `${this.data.selectedCount * 8 + 23}秒`
+      this.setData({ isGenerating: false, videoGenerated: true, generatedDuration: duration })
+      wx.showToast({ title: '集锦生成成功！', icon: 'success' })
+    }, 2000)
+  },
+
+  saveVideo() {
+    wx.showToast({ title: '已保存到我的集锦', icon: 'success' })
+  },
+
+  shareVideo() {
+    wx.showToast({ title: '分享功能开发中', icon: 'none' })
+  },
+
+  resetVideo() {
+    const clips = this.data.clips.map(c => ({ ...c, selected: false }))
+    this.setData({ clips, selectedCount: 0, videoGenerated: false, videoName: '' })
   }
 })

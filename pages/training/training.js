@@ -1,4 +1,4 @@
-// training.js - 昇梦体育 训练中心
+// training.js - 昇梦体育 个人成长分析
 const app = getApp()
 
 Page({
@@ -8,6 +8,7 @@ Page({
     pageBg: '#f8f7f4',
     todayDate: '',
     overallScore: 80,
+    careerStats: { points: 0, rebounds: 0, assists: 0, shootingPercentage: '0%', totalGames: 0 },
     showAddModal: false,
     newRecord: { title: '', duration: '', intensity: '中等强度', highlightsText: '' },
     radarData: {
@@ -39,6 +40,7 @@ Page({
     this.setNavHeight()
     this.setTodayDate()
     this.calculateOverallScore()
+    this.loadCareerStats()
     wx.nextTick(() => this.drawRadarChart())
   },
 
@@ -70,6 +72,24 @@ Page({
   },
   setTodayDate() { const n = new Date(); this.setData({ todayDate: `${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}` }) },
   calculateOverallScore() { const v = this.data.radarData.values; this.setData({ overallScore: Math.round(v.reduce((a,b)=>a+b,0)/v.length) }) },
+
+  // 生涯数据（从原首页迁入）
+  loadCareerStats() {
+    try {
+      const stats = wx.getStorageSync('careerStats')
+      if (stats) {
+        this.setData({
+          careerStats: {
+            points: stats.points || 0,
+            rebounds: stats.rebounds || 0,
+            assists: stats.assists || 0,
+            shootingPercentage: (stats.shootingPercentage || 0) + '%',
+            totalGames: stats.totalGames || 0
+          }
+        })
+      }
+    } catch (e) { console.error('加载生涯数据失败', e) }
+  },
 
   drawRadarChart() {
     wx.createSelectorQuery()

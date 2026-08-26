@@ -1,90 +1,132 @@
-<!-- index.wxml - 现代化UI设计 -->
+<!-- index.wxml - 智能剪辑工作台（右上角头像=个人中心） -->
 <page-meta background-color="{{pageBg}}" root-background-color="{{pageBg}}" page-style="background:{{pageBg}}" />
 <view class="page-wrapper {{themeClass}}">
-  <!-- 页面顶部渐变装饰 -->
   <view class="page-header-gradient"></view>
 
   <view class="container slide-up">
-    <!-- 顶部导航区 -->
+    <!-- 顶部导航区：左问候，右头像 -->
     <view class="top-nav">
       <view class="user-greeting">
         <view class="greeting-text">你好！</view>
         <view class="date-text">{{ currentDate }}</view>
       </view>
-      <view class="app-title">
-        <text class="title-main">昇梦</text>
-        <text class="title-highlight">篮球</text>
+      <view class="avatar-btn" bindtap="openPanel">
+        <image wx:if="{{ profile.avatar }}" class="avatar-img" src="{{ profile.avatar }}" mode="aspectFill" />
+        <view wx:else class="avatar-img avatar-placeholder">
+          <t-icon name="user" size="40rpx" color="#D4AF37" />
+        </view>
+        <view class="avatar-dot"></view>
       </view>
     </view>
 
-    <!-- 创作入口区 -->
-    <view class="create-entry card" bindtap="goToCreate">
-      <view class="camera-icon pulse-animation">
-        <t-icon name="pen-ball" size="56rpx" color="#0a0a0a" />
-      </view>
-      <view class="create-info">
-        <view class="create-title">记录集锦</view>
-        <view class="create-subtitle">整理比赛片段与训练表现</view>
-      </view>
-      <view class="page-forward-btn">
-        <t-icon name="chevron-right" size="30rpx" color="#D4AF37" />
-      </view>
-    </view>
-
-    <!-- 生涯数据区 -->
+    <!-- 智能剪辑工作台 -->
     <view class="section">
-      <view class="section-title">生涯数据</view>
-      <view class="stats-grid">
-        <view class="stat-item card-gradient" wx:for="{{ statsData }}" wx:key="id">
-          <view class="stat-icon">
-            <t-icon name="{{ item.iconName }}" size="44rpx" color="#D4AF37" />
+      <view class="section-title">智能剪辑</view>
+
+      <!-- 上传视频卡 -->
+      <view class="upload-card card" bindtap="uploadLocalVideo">
+        <view class="camera-icon">
+          <t-icon name="pen-ball" size="56rpx" color="#0a0a0a" />
+        </view>
+        <view class="create-info">
+          <view class="create-title">{{ videoName ? '已选择：' + videoName : '上传比赛视频' }}</view>
+          <view class="create-subtitle">{{ videoName ? '点击可重新选择视频' : '从相册或拍摄一段比赛视频' }}</view>
+        </view>
+        <view class="cloud-btn" catchtap="useCloudVideo">
+          <t-icon name="cloud-upload" size="30rpx" color="#D4AF37" />
+          <text class="cloud-btn-text">云端</text>
+        </view>
+      </view>
+
+      <!-- 片段选择卡 -->
+      <view class="clip-card card">
+        <view class="clip-header">
+          <view class="section-title mini">选择精彩片段</view>
+          <view class="clip-count">{{ selectedCount }}/{{ clips.length }} 已选</view>
+        </view>
+        <view class="clip-list">
+          <view
+            wx:for="{{ clips }}"
+            wx:key="id"
+            class="clip-item {{ item.selected ? 'selected' : '' }}"
+            data-index="{{ index }}"
+            bindtap="toggleClip"
+          >
+            <view class="clip-check">
+              <t-icon wx:if="{{ item.selected }}" name="check" size="28rpx" color="#ffffff" />
+            </view>
+            <view class="clip-type">{{ item.type }}</view>
+            <view class="clip-body">
+              <view class="clip-time">{{ item.time }}</view>
+              <view class="clip-desc">{{ item.description }}</view>
+            </view>
           </view>
-          <view class="stat-value gradient-text">{{ item.value }}</view>
-          <view class="stat-label">{{ item.label }}</view>
         </view>
       </view>
-    </view>
 
-    <!-- 创作集锦区 -->
-    <view class="section">
-      <view class="video-tabs tab-bar">
-        <view class="tab-item {{ activeVideoTab === 'collection' ? 'active' : '' }}" bindtap="switchVideoTab" data-tab="collection">
-          创作集锦
-        </view>
-        <view class="tab-item {{ activeVideoTab === 'featured' ? 'active' : '' }}" bindtap="switchVideoTab" data-tab="featured">
-          精选视频
-        </view>
-      </view>
-      <view wx:if="{{ activeVideoTab === 'collection' }}" class="no-videos card {{ contentAnimClass }}">
-        <view class="film-icon float-animation">
-          <t-icon name="movie-clapper" size="104rpx" color="#D4AF37" />
-        </view>
-        <view class="no-data-text">暂无创作集锦</view>
-        <view class="hint-text">点击上方"记录集锦"创作你的第一个精彩瞬间</view>
-      </view>
-      <view wx:else class="no-videos card {{ contentAnimClass }}">
-        <view class="film-icon float-animation">
-          <t-icon name="movie-clapper" size="104rpx" color="#D4AF37" />
-        </view>
-        <view class="no-data-text">暂无精选视频</view>
-        <view class="hint-text">敬请期待精彩内容</view>
-      </view>
-    </view>
+      <!-- 生成按钮 -->
+      <button class="btn btn-primary generate-btn" bindtap="generateWithAI" disabled="{{ isGenerating }}">
+        {{ isGenerating ? 'AI 生成中...' : 'AI 生成集锦' }}
+      </button>
 
-    <!-- 快捷功能区 -->
-    <view class="section">
-      <view class="section-title">快捷功能</view>
-      <view class="quick-actions">
-        <view class="action-item card" wx:for="{{ quickActions }}" wx:key="id" bindtap="handleAction" data-action="{{ item.action }}">
-          <view class="action-icon" style="background: {{ item.bgColor }}">
-            <t-icon name="{{ item.iconName }}" size="44rpx" color="#ffffff" />
-          </view>
-          <view class="action-label">{{ item.label }}</view>
+      <!-- 生成结果卡 -->
+      <view wx:if="{{ videoGenerated }}" class="result-card card fade-in">
+        <view class="result-icon">
+          <t-icon name="check-circle" size="64rpx" color="#52c41a" />
+        </view>
+        <view class="result-title">集锦生成成功！</view>
+        <view class="result-meta">共 {{ selectedCount }} 个片段 · 时长 {{ generatedDuration }}</view>
+        <view class="result-actions">
+          <button class="btn btn-primary btn-small" bindtap="saveVideo">保存</button>
+          <button class="btn btn-ghost btn-small" bindtap="shareVideo">分享</button>
+          <button class="btn btn-ghost btn-small" bindtap="resetVideo">重新剪辑</button>
         </view>
       </view>
     </view>
   </view>
-  
+
+  <!-- 个人中心弹层 -->
+  <view wx:if="{{ panelVisible }}" class="panel-mask" bindtap="closePanel">
+    <view class="panel {{ themeClass }}" catchtap="stopPropagation">
+      <view class="panel-handle"></view>
+      <view class="panel-header">
+        <image wx:if="{{ profile.avatar }}" class="panel-avatar" src="{{ profile.avatar }}" mode="aspectFill" />
+        <view wx:else class="panel-avatar avatar-placeholder-big">
+          <t-icon name="user" size="56rpx" color="#D4AF37" />
+        </view>
+        <view class="panel-user">
+          <view class="panel-name">{{ profile.name }}</view>
+          <view class="panel-position">{{ profile.position }} · {{ profile.height }} · {{ profile.weight }}</view>
+        </view>
+      </view>
+      <view class="menu-list">
+        <view class="menu-item" bindtap="editProfile">
+          <view class="menu-icon gold"><t-icon name="edit-1" size="36rpx" color="#D4AF37" /></view>
+          <text class="menu-label">编辑资料</text>
+          <t-icon name="chevron-right" size="30rpx" color="var(--text-tertiary)" />
+        </view>
+        <view class="menu-item" bindtap="switchTheme">
+          <view class="menu-icon blue"><t-icon name="view-module" size="36rpx" color="#6495ED" /></view>
+          <text class="menu-label">主题切换</text>
+          <text class="menu-value">{{ themeLabel }}</text>
+        </view>
+        <view class="menu-item" bindtap="goChat">
+          <view class="menu-icon orange"><t-icon name="robot" size="36rpx" color="#faad14" /></view>
+          <text class="menu-label">AI 助手</text>
+          <t-icon name="chevron-right" size="30rpx" color="var(--text-tertiary)" />
+        </view>
+        <view class="menu-item" bindtap="goCreateMatch">
+          <view class="menu-icon green"><t-icon name="flag" size="36rpx" color="#52c41a" /></view>
+          <text class="menu-label">创建比赛</text>
+          <t-icon name="chevron-right" size="30rpx" color="var(--text-tertiary)" />
+        </view>
+      </view>
+      <view class="panel-close" bindtap="closePanel">
+        <t-icon name="close" size="34rpx" color="var(--text-tertiary)" />
+      </view>
+    </view>
+  </view>
+
   <!-- 悬浮AI按钮 -->
   <float-ai-button></float-ai-button>
 </view>
