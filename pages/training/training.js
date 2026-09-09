@@ -7,26 +7,18 @@ Page({
     themeClass: '',
     pageBg: '#f8f7f4',
     todayDate: '',
-    overallScore: 80,
+    overallScore: '',
+    todaySummary: { durationMinutes: 0, count: 0, intensity: '' },
     careerStats: { points: 0, rebounds: 0, assists: 0, shootingPercentage: '0%', totalGames: 0 },
     showAddModal: false,
     newRecord: { title: '', duration: '', intensity: '中等强度', highlightsText: '' },
     radarData: {
       dimensions: ['投篮','身体素质','突破/上篮','组织','控球/运球','防守'],
-      values: [78, 85, 82, 72, 80, 83],
+      values: [null, null, null, null, null, null],
       colors: ['rgba(212,175,55,0.9)','rgba(255,215,0,0.9)','rgba(244,196,48,0.9)','rgba(218,165,32,0.9)','rgba(184,134,11,0.85)','rgba(255,193,37,0.9)']
     },
-    weeklyPlans: [
-      { id: 1, day: '周一', date: '03-24', title: '投篮专项训练', description: '中距离跳投 × 200次', status: 'completed', statusText: '已完成' },
-      { id: 2, day: '周二', date: '03-25', title: '力量训练', description: '核心肌群强化', status: 'completed', statusText: '已完成' },
-      { id: 3, day: '周三', date: '03-26', title: '技术综合训练', description: '运球 + 传球练习', status: 'today', statusText: '今日' },
-      { id: 4, day: '周四', date: '03-27', title: '体能训练', description: '耐力跑 + 变速跑', status: 'upcoming', statusText: '待进行' }
-    ],
-    recentRecords: [
-      { id: 1, day: '26', month: '03月', title: '投篮专项训练', duration: 60, intensity: '高强度', highlights: ['三分命中率提升','手感火热'] },
-      { id: 2, day: '25', month: '03月', title: '团队对抗训练', duration: 90, intensity: '中等强度', highlights: ['5次助攻','防守积极'] },
-      { id: 3, day: '24', month: '03月', title: '个人技术训练', duration: 45, intensity: '低强度', highlights: ['运球熟练'] }
-    ],
+    weeklyPlans: [],
+    recentRecords: [],
     quickTrain: [
       { id: 1, iconName: 'pen-ball', title: '投篮练习', duration: '30分钟', bgColor: 'linear-gradient(135deg, #D4AF37 0%, #FFD700 100%)' },
       { id: 2, iconName: 'activity', title: '力量训练', duration: '20分钟', bgColor: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)' },
@@ -40,7 +32,6 @@ Page({
     this.setNavHeight()
     this.setTodayDate()
     this.calculateOverallScore()
-    this.loadCareerStats()
     wx.nextTick(() => this.drawRadarChart())
   },
 
@@ -59,6 +50,7 @@ Page({
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) { this.getTabBar().updateSelected(2) }
     this._syncTheme()
+    this.loadTrainingData()
     wx.nextTick(() => this.drawRadarChart())
   },
 
@@ -71,24 +63,91 @@ Page({
     this.setData({ navHeight: (statusBarHeight + navBarHeight) * 2 })
   },
   setTodayDate() { const n = new Date(); this.setData({ todayDate: `${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}` }) },
-  calculateOverallScore() { const v = this.data.radarData.values; this.setData({ overallScore: Math.round(v.reduce((a,b)=>a+b,0)/v.length) }) },
+  calculateOverallScore() {
+    const v = this.data.radarData.values
+    this.setData({ overallScore: v.length && v.every(Number.isFinite) ? Math.round(v.reduce((a,b)=>a+b,0)/v.length) : '' })
+  },
+
+  async getApi() {
+    if (app.globalData.authReady) await app.globalData.authReady
+    const api = app.api || app.globalData.api
+    await api.ensureLogin()
+    return api
+  },
+
+  localDate() {
+    const n = new Date()
+    return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`
+  },
+
+  mapRecord(record) {
+    const date = String(record.trainingDate || '')
+    return { ...record, day: date.slice(8, 10), month: date ? date.slice(5, 7) + '月' : '',
+      duration: record.durationMinutes, highlights: Array.isArray(record.highlights) ? record.highlights : [] }
+  },
+
+  applyRecords(records) {
+    const rows = Array.isArray(records) ? records : []
+    const today = rows.filter(row => row.trainingDate === this.localDate())
+    this.setData({ recentRecords: rows.map(row => this.mapRecord(row)), todaySummary: {
+      durationMinutes: today.reduce((sum, row) => sum + (Number(row.durationMinutes) || 0), 0),
+      count: today.length, intensity: today.length ? today[0].intensity || '' : ''
+    } })
+  },
+
+  async loadTrainingData() {
+    const revision = this._recordsRevision || 0
+    const request = this._loadRequest = (this._loadRequest || 0) + 1
+    try {
+      const api = await this.getApi()
+      const results = await Promise.allSettled([
+        api.get('/api/training/overview'), api.get('/api/training/records'), api.get('/api/home/overview')
+      ])
+      if (request !== this._loadRequest) return
+      const [overview, records, home] = results
+      if (overview.status === 'fulfilled') {
+        const data = overview.value || {}
+        const radar = Array.isArray(data.radarData) ? data.radarData : []
+        // Match labels, never reinterpret points/rebounds as physical ability.
+        const values = this.data.radarData.dimensions.map(label => {
+          const item = radar.find(row => row.label === label)
+          return item && Number.isFinite(item.value) && item.max > 0 ? Math.max(0, Math.min(100, item.value / item.max * 100)) : null
+        })
+        const plans = Array.isArray(data.plans) ? data.plans : (data.upcomingSchedule || [])
+        this.setData({ 'radarData.values': values, weeklyPlans: plans.map(plan => {
+          const date = String(plan.startDate || '')
+          const completed = String(plan.status || '').toUpperCase() === 'COMPLETED' || plan.progress === 100
+          const status = completed ? 'completed' : date === this.localDate() ? 'today' : 'upcoming'
+          const dayIndex = date ? new Date(date + 'T00:00:00').getDay() : -1
+          return { ...plan, day: ['周日','周一','周二','周三','周四','周五','周六'][dayIndex] || '',
+            date: date.slice(5), description: plan.goal || '', status,
+            statusText: completed ? '已完成' : status === 'today' ? '今日' : '待进行' }
+        }) })
+        this.calculateOverallScore()
+        wx.nextTick(() => this.drawRadarChart())
+      }
+      if (revision === (this._recordsRevision || 0)) {
+        if (records.status === 'fulfilled') this.applyRecords(records.value)
+        else if (overview.status === 'fulfilled') this.applyRecords(overview.value.recentRecords)
+      }
+      if (home.status === 'fulfilled') this.applyCareerStats(home.value.careerStats)
+      const failed = results.find(result => result.status === 'rejected')
+      if (failed) wx.showToast({ title: failed.reason.message || '加载失败', icon: 'none' })
+    } catch (error) { wx.showToast({ title: error.message || '加载失败', icon: 'none' }) }
+  },
 
   // 生涯数据（从原首页迁入）
-  loadCareerStats() {
-    try {
-      const stats = wx.getStorageSync('careerStats')
-      if (stats) {
-        this.setData({
-          careerStats: {
-            points: stats.points || 0,
-            rebounds: stats.rebounds || 0,
-            assists: stats.assists || 0,
-            shootingPercentage: (stats.shootingPercentage || 0) + '%',
-            totalGames: stats.totalGames || 0
-          }
-        })
+  applyCareerStats(stats = {}) {
+    stats = stats || {}
+    this.setData({
+      careerStats: {
+        points: stats.points || 0,
+        rebounds: stats.rebounds || 0,
+        assists: stats.assists || 0,
+        shootingPercentage: (stats.shootingPercentage || 0) + '%',
+        totalGames: stats.totalGames || 0
       }
-    } catch (e) { console.error('加载生涯数据失败', e) }
+    })
   },
 
   drawRadarChart() {
@@ -151,8 +210,8 @@ Page({
         const pointList = d.values.map((value, i) => {
           const a = i * 2 * Math.PI / d.dimensions.length - Math.PI / 2
           const r = R * value / 100
-          return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a), value }
-        })
+          return Number.isFinite(value) ? { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a), value } : null
+        }).filter(Boolean)
 
         ctx.beginPath()
         pointList.forEach((p, i) => { i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y) })
@@ -199,17 +258,34 @@ Page({
   onRecordHighlightsInput(e) { this.setData({ 'newRecord.highlightsText': e.detail.value }) },
   selectIntensity(e) { this.setData({ 'newRecord.intensity': e.currentTarget.dataset.intensity }) },
 
-  saveRecord() {
+  async saveRecord() {
+    if (this._savingRecord) return
     const {title,duration,intensity,highlightsText}=this.data.newRecord
-    if(!title||!duration){wx.showToast({title:'请填写完整信息',icon:'none'});return}
-    const n=new Date();const day=String(n.getDate()).padStart(2,'0');const month=String(n.getMonth()+1).padStart(2,'0')+'月'
+    if(!title.trim()||!Number.isInteger(Number(duration))||Number(duration)<1||Number(duration)>1440){wx.showToast({title:'请填写完整信息',icon:'none'});return}
     const hl=highlightsText?highlightsText.split(',').map(h=>h.trim()).filter(h=>h):[]
-    this.setData({recentRecords:[{id:Date.now(),day,month,title,duration:parseInt(duration),intensity,highlights:hl},...this.data.recentRecords],showAddModal:false})
-    wx.showToast({title:'记录添加成功',icon:'success'})
+    return this.createRecord({ trainingDate: this.localDate(), title: title.trim(), durationMinutes: Number(duration), intensity, highlights: hl }, false)
+  },
+
+  async createRecord(payload, quick) {
+    if (this._savingRecord) return
+    this._savingRecord = true
+    try {
+      const api = await this.getApi()
+      const saved = await api.post('/api/training/records', payload)
+      this._recordsRevision = (this._recordsRevision || 0) + 1
+      this.applyRecords([saved, ...this.data.recentRecords.filter(record => record.id !== saved.id)])
+      if (!quick) this.setData({ showAddModal: false })
+      wx.showToast({title: quick ? '训练已开始' : '记录添加成功',icon:'success'})
+      return saved
+    } catch (error) { wx.showToast({title:error.message || '保存失败',icon:'none'}) }
+    finally { this._savingRecord = false }
   },
 
   startQuickTrain(e) {
-    const item=this.data.quickTrain.find(t=>t.id===e.currentTarget.dataset.id)
-    wx.showModal({title:'开始训练',content:`确定开始「${item.title}」吗？`,success:(res)=>{if(res.confirm)wx.showToast({title:'训练已开始',icon:'success'})}})
+    const item=this.data.quickTrain.find(t=>String(t.id)===String(e.currentTarget.dataset.id))
+    if (!item) return
+    wx.showModal({title:'开始训练',content:`确定开始「${item.title}」吗？`,success:(res)=>{if(res.confirm) return this.createRecord({
+      trainingDate: this.localDate(), title: item.title, durationMinutes: parseInt(item.duration), intensity: '中等强度', highlights: []
+    }, true)}})
   }
 })

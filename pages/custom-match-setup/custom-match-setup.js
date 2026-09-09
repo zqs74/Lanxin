@@ -1,5 +1,6 @@
 // custom-match-setup.js - 支持双方队伍
 const app = getApp()
+const matchSync = require('../../utils/custom-match-sync')
 
 Page({
   data: {
@@ -20,7 +21,15 @@ Page({
       matchId: options.matchId || 'custom_' + Date.now()
     })
 
-    this.initPlayers()
+    this._initializing = true
+    let local
+    try { local = matchSync.read(this.data.matchId) } catch (_) {}
+    this._started = !!local && local.status !== 'draft'
+    if (local && local.status === 'draft') {
+      this.setData({ players: local.players || [] })
+      this.updateTeamPlayers()
+    } else this.initPlayers()
+    this._initializing = false
   },
 
   _syncTheme: function() {
@@ -45,8 +54,25 @@ Page({
   },
 
   onShow: function() {
+    this._visible = true
     this._syncTheme()
     this.checkUnfinishedMatch()
+  },
+
+  onHide: function() {
+    this._visible = false
+    this.saveDraft()
+    return matchSync.sync(this.data.matchId)
+  },
+
+  onUnload: function() { return this.onHide() },
+
+  saveDraft: function() {
+    if (this._initializing || this._started || !this.data.matchId) return
+    this._editRevision = (this._editRevision || 0) + 1
+    try {
+      matchSync.saveLocal({ matchId: this.data.matchId, players: this.data.players, status: 'draft' })
+    } catch (error) { wx.showToast({ title: '保存失败，请重试', icon: 'none' }) }
   },
 
   initPlayers: function() {
@@ -91,12 +117,25 @@ Page({
       teamAPlayers,
       teamBPlayers
     })
+    this.saveDraft()
   },
 
-  checkUnfinishedMatch: function() {
+  checkUnfinishedMatch: async function() {
+    if (this._checking) return
+    this._checking = true
+    const revision = this._editRevision || 0
     try {
-      const unfinishedMatch = wx.getStorageSync('unfinished_custom_match')
-      if (unfinishedMatch && unfinishedMatch.matchId === this.data.matchId) {
+      const unfinishedMatch = await matchSync.load(this.data.matchId)
+      if (!this._visible || revision !== (this._editRevision || 0)) return
+      if (unfinishedMatch && unfinishedMatch.status === 'completed') this._started = true
+      if (unfinishedMatch && unfinishedMatch.status === 'draft') {
+        this._initializing = true
+        this.setData({ players: unfinishedMatch.players || [] })
+        this.updateTeamPlayers()
+        this._initializing = false
+      }
+      if (unfinishedMatch && unfinishedMatch.status === 'in_progress') {
+        this._started = true
         wx.showModal({
           title: '恢复比赛',
           content: '检测到未完成的比赛，是否恢复继续？',
@@ -107,6 +146,7 @@ Page({
               this.resumeMatch(unfinishedMatch)
             } else {
               wx.removeStorageSync('unfinished_custom_match')
+              this._started = false
               this.initPlayers()
             }
           }
@@ -114,10 +154,11 @@ Page({
       }
     } catch (e) {
       console.log('检查未完成比赛失败:', e)
-    }
+    } finally { this._checking = false }
   },
 
   resumeMatch: function(matchData) {
+    this._started = true
     this.setData({ 
       players: matchData.players || [] 
     })
@@ -376,8 +417,9 @@ Page({
     }
 
     try {
-      wx.setStorageSync('custom_match_' + this.data.matchId, matchData)
-      wx.setStorageSync('unfinished_custom_match', matchData)
+      matchSync.saveLocal(matchData)
+      this._started = true
+      matchSync.sync(this.data.matchId)
 
       wx.navigateTo({
         url: `/pages/custom-match-live/custom-match-live?matchId=${this.data.matchId}`

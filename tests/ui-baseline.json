@@ -1,0 +1,1022 @@
+{
+  "commit": "75ea0b1d64d736565412622802ef8a62155d46df",
+  "files": [
+    {
+      "path": "app.wxss",
+      "sha256": "283b29eb2f2301d732b366471e19f10f43b3f4e454afe986cabf1e3e34679dbd"
+    },
+    {
+      "path": "components/float-ai-button/float-ai-button.wxml",
+      "sha256": "024595f557faf56989aebea4d53cee453c709fc712e4db997a33ffd28ee37142"
+    },
+    {
+      "path": "components/float-ai-button/float-ai-button.wxss",
+      "sha256": "d23cf9015af21ddf1074117fd9b499d14216aa1de93fe54a9461792421f6e421"
+    },
+    {
+      "path": "components/nav-bar/nav-bar.wxml",
+      "sha256": "9c6c55fa0bba4c303a620c27e9f44d4bb99a666aae5f6611e38879fd5776400d"
+    },
+    {
+      "path": "components/nav-bar/nav-bar.wxss",
+      "sha256": "20940c106d0e7af2c06803e874d0f2b4dc9f8b9b4f473e8cef77cd574108594a"
+    },
+    {
+      "path": "custom-tab-bar/index.wxml",
+      "sha256": "912b0329ba09399e77210c3e7bf4f42fac5d83f6d5f4ff7053ea6dc655c12118"
+    },
+    {
+      "path": "custom-tab-bar/index.wxss",
+      "sha256": "cd4702c8146553e25f9a740a1ec5c18de1b4c2523c68bdee715cc96b5e95da38"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/action-sheet/action-sheet.wxml",
+      "sha256": "ff16b0ba4817d7d174069f413fc2e49fea339903c0f0e065acfd2edd38b52a3c"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/action-sheet/action-sheet.wxss",
+      "sha256": "d29456618fae63090fc8a2ef19cff0b81b5cfe8b6e045291ace84120ab7390e3"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/action-sheet/template/grid.wxml",
+      "sha256": "604d0c87f2e75f56181a17b4e510abd182d6c01ddacd6aa81cbb57c0a5b46f93"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/attachments/attachments.wxml",
+      "sha256": "54f25d2f9248a7c80d7cd0cb28aa838eded7257853a5a5ca8cf30ea224511e5d"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/attachments/attachments.wxss",
+      "sha256": "4759fd2569a3895b204c6b9321f5f051661ab48bc008156fec828a9082d4288e"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/avatar-group/avatar-group.wxml",
+      "sha256": "05f4f474e257c5387d3fc98db9d1cc096aefa7bb2064eb3510f448e3d9e510be"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/avatar-group/avatar-group.wxss",
+      "sha256": "ec288da04fc81853a6308d741f31b9cbce4113d7f8fa1503669f9e510ebd6573"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/avatar/avatar.wxml",
+      "sha256": "ed5e08758d0cafc6b54fc1ad0ff6e3017ac01a2becb425e7a7906f2d004d96e1"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/avatar/avatar.wxss",
+      "sha256": "df2c850c090e1c096a50689ca5ff86b10da3f3e05b76de33d23143a3a3b374f0"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/back-top/back-top.wxml",
+      "sha256": "4477f6ecdf9d3c00ea3a755a4a8a241fef6395579e6b69b21016e2255ade1361"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/back-top/back-top.wxss",
+      "sha256": "4f0f196c6655035ac20ea35bae867e94a885efcb2a1f370b2bb7d490a7b6fa70"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/badge/badge.wxml",
+      "sha256": "ed537b4334939bb92b5c30c32adda0656bcda9194c82ceb48ab11de7ae139e02"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/badge/badge.wxss",
+      "sha256": "8d2c1fbf6cda72cc9d192e59c689b7685df6b584c5f3dd2dba85432d9eecbc72"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/button/button.wxml",
+      "sha256": "f709d1e299df87a4aa22929560d4fcabb6039a10488feefd1ece9b897c98bb87"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/button/button.wxss",
+      "sha256": "88230a8d6627f0248edc602176c9d5965fc6b60590420482b744c75f5633daf7"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/calendar/calendar-header.wxml",
+      "sha256": "a933ab545c02547c06dea7287496c1ad814db74f5a615c7073dcccc0985d2b60"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/calendar/calendar.wxml",
+      "sha256": "f41e2cb8ceed22a151907e7ec75820b6837c3466d97ba6c4e445e1831c450e2f"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/calendar/calendar.wxss",
+      "sha256": "a36fa23cf7927190b6e9f0178c974967bae21b4bb7adc30efc5a3d1637bd982c"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/calendar/template.wxml",
+      "sha256": "4159510a23dc751e7fbe1f8b6d906269fdd33b25a56d638ce864504477227f3f"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/cascader/cascader.wxml",
+      "sha256": "663ef239abdf1c31c1406c63e7001d10baf22e6a17d4d2b4ab0d1c5d886484ab"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/cascader/cascader.wxss",
+      "sha256": "70dc112daaa9e108e5d0f9568c0e0a2905c54b49bb69771c37760b0b52191831"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/cell-group/cell-group.wxml",
+      "sha256": "4313197d9be843426ce9113bb2a9efeb6b64ae6f2da8273acb4eb7577286f64f"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/cell-group/cell-group.wxss",
+      "sha256": "79d989f15b7e6202f1cb4257ea3573f994ce844719326a004f011c5ebc75210d"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/cell/cell.wxml",
+      "sha256": "dc4c11b098036c56d8da06d797057c8ca78b2c81c08f6feb2d98fa843e9a0622"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/cell/cell.wxss",
+      "sha256": "4b61b6e9a762812ff002be52745f460979d7407ecd80fb036e12a56cc72d6932"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-actionbar/chat-actionbar.wxml",
+      "sha256": "2d70a36a4288182ce9e2475ed5bf940198267b83558e6049c5043536d12d43af"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-actionbar/chat-actionbar.wxss",
+      "sha256": "cbb2962bcbae3c4ba9ee53fc18cc805dff42859d513fee0f43b5247b8bb19535"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-content/chat-content.wxml",
+      "sha256": "867e8b12700b0ec1ee4904bcc5108970c51a2ac9a60daf0186bbe4a1df96f206"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-content/chat-content.wxss",
+      "sha256": "9afcf38719597d4fc99d9921496f5266fbface97c5a013494ae3b1fbfbc43948"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-list/chat-list.wxml",
+      "sha256": "fdc62112360d35e00ffa0f0696f07f55c201e30e97180414490420eee800b9f3"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-list/chat-list.wxss",
+      "sha256": "9d100fe8ad18c321fa8644a111a2e459c21e52f76f8ea6891a5a49666958a925"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-loading/chat-loading.wxml",
+      "sha256": "459fe22c4958e06015bc5a80eaf8de6d1117b65fc2c1275810fa920836783ffd"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-loading/chat-loading.wxss",
+      "sha256": "86387e972741ca0b3f56b73548fc4cc895d3a6951fa9ec8a9a8ba7e86b2fe2d8"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-markdown/chat-markdown-code/chat-markdown-code.wxml",
+      "sha256": "30a22afeb65b3c687691230c78d3f415d29fc4e736d0e092c4b11d8f099def5d"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-markdown/chat-markdown-code/chat-markdown-code.wxss",
+      "sha256": "eb7e1e27fffb6b334a3d11c054eae4bec186615be86f47915c5535eae4df5355"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-markdown/chat-markdown-node/chat-markdown-node.wxml",
+      "sha256": "8759b313482415cfa7898418c50a3d1735899dc5549809e2e358faaf6d8c2a45"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-markdown/chat-markdown-node/chat-markdown-node.wxss",
+      "sha256": "d8a2c88f8a97f8196555497a6c904219081901c459d2f81e7fd63cad05844b6c"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-markdown/chat-markdown-table/chat-markdown-table.wxml",
+      "sha256": "54ee7d07a3c5bb8654a2a0a1e0b7c33b41946ec9a9afec640f00f1ff84a96a42"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-markdown/chat-markdown-table/chat-markdown-table.wxss",
+      "sha256": "3257c758506a7de696badfc0ba8f16ca053367098b84e2023e5ae130fa251126"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-markdown/chat-markdown.wxml",
+      "sha256": "608b8b33309b6d0e680a63d58bdb98e4537052a6de026b34ef6c1f794c0ef46c"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-markdown/chat-markdown.wxss",
+      "sha256": "65efbd9d948efdca4be9b7f50df47ac9031d4d45fd1325ebb54d59efe4e49530"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-message/chat-message.wxml",
+      "sha256": "1f414617b14c5213b3fbdd8cc661117dcb1cfb1fb32344108eb00815de2d47ff"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-message/chat-message.wxss",
+      "sha256": "f8611475f4fb37c32286bb7fec94fc2b2a5c3b881723e61334959534fc86aca1"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-sender/chat-sender.wxml",
+      "sha256": "0f6710ca136c2ece27cf3cb4f01d119d16ba6efaef06001aab5cf80f455bd1db"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-sender/chat-sender.wxss",
+      "sha256": "bd5876fcb6520627f083be54da0c099e03242f93523563bcb77fca272a800c4f"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-thinking/chat-thinking.wxml",
+      "sha256": "c7e768bcf0d2e507186e65e40a02141381d5b6da714cdf3a4c84478e8d622209"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/chat-thinking/chat-thinking.wxss",
+      "sha256": "fa173b96b6bf5af493326db4aede3160b2cb1f8df5cb0857ec6a319119334c30"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/check-tag/check-tag.wxml",
+      "sha256": "bffd519eddf37eaf6e6fb705864e2acef8120f6cb85f28ab16baa25199303602"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/check-tag/check-tag.wxss",
+      "sha256": "d2831a38354524f3c2c100bc0b75bd934e7b08c1c4710349b7d8089bb05c9444"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/checkbox-group/checkbox-group.wxml",
+      "sha256": "e85c262f32684196f76666e42ba948cfb05d277924bcfa8386a33aef2afd9995"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/checkbox-group/checkbox-group.wxss",
+      "sha256": "b5c2b85ff4bca32d4d8ce7149cb10b3fb15b0e69346ca679cd83e70668b22225"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/checkbox/checkbox.wxml",
+      "sha256": "2cf4a4b1f7399de37b4fb6f343113ce850611be3fcd72dc1539393722eabd67c"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/checkbox/checkbox.wxss",
+      "sha256": "c12b860f58706481d22549b9f1b35388080d8cecdc7bfeb5ac1e4cb65d4825e3"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/col/col.wxml",
+      "sha256": "b00763edb03025f6183b2999e85ea1bdbe0d8c51232da391848f0770855fc598"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/col/col.wxss",
+      "sha256": "f5f22e924d10e259db4a86e9cb07ab96525c2c74c7ca60d16e55cf8d4af006d2"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/collapse-panel/collapse-panel.wxml",
+      "sha256": "45eb6eb08bf4bdf1ac7f6f6d5b95be4bdb31ffdc228bf6dbc2aa744d8cc87ee5"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/collapse-panel/collapse-panel.wxss",
+      "sha256": "1d0c84f2a114334188032075f1d5652fdf5394a805aa7ddb79c0db411d43dfa8"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/collapse/collapse.wxml",
+      "sha256": "080adf0ca962d882b5952e6341d937a1302b8fe1a45088cae85f97deddd6fc8c"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/collapse/collapse.wxss",
+      "sha256": "1a97adaa0837257e72e251ec3c0388952f2a23e1ad4e60ed353b8cb241c8a670"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/color-picker/color-picker.wxml",
+      "sha256": "c407797b0592d19ea2304d33e37a9a154a87bf4c0fb52f50f2726b1f3d113ac8"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/color-picker/color-picker.wxss",
+      "sha256": "5f4e5319afeae117483f805c933d5a1d524db7ececa8a84f7928e2d969a1d965"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/color-picker/template.wxml",
+      "sha256": "1b2d9c5feda33fa5a8b2d29feab81e588ac48143e849af07f58e78e95b18085c"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/_variables.wxss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/base.wxss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/icons.wxss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/index.wxss",
+      "sha256": "728986ece4beb3d9cda2fbe3a0701e07816b96f48112cd454432691d1cd33ebf"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/mixins/_border.wxss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/mixins/_clearfix.wxss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/mixins/_cursor.wxss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/mixins/_ellipsis.wxss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/mixins/_hairline.wxss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/mixins/_index.wxss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/mixins/_other.wxss",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/theme/_components.wxss",
+      "sha256": "cb5184760249d47ff81df1f50d7da41c61850460c3463198d5e731b89f505a76"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/theme/_dark.wxss",
+      "sha256": "cec96e1f3a943e01c7bc03bcb4a4807dd128011412af0a07201a0d9cb673c292"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/theme/_font.wxss",
+      "sha256": "fbef453387d2cbb8360c2f9d69ebe1415630ea0449aae6307c7ee8e2b622f9d9"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/theme/_index.wxss",
+      "sha256": "7f645a060f8dd57c88c19c7bd4681225f27729ef6a0f532f9d1d32010b671fff"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/theme/_light.wxss",
+      "sha256": "7604eecbdd585c4a4af88f4e24864db00f95310df26994d7e74c162d638b85fa"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/theme/_radius.wxss",
+      "sha256": "009c6f417a030687cd372f8b02f605285bad269605d4cf2728ac7b8ddd2a89af"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/theme/_spacer.wxss",
+      "sha256": "3f659a36b14ba9a79e0f5e62d32f42520e3cc85aea2597a27b744854fe5dc5f3"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/style/utilities/_index.wxss",
+      "sha256": "728986ece4beb3d9cda2fbe3a0701e07816b96f48112cd454432691d1cd33ebf"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/template/badge.wxml",
+      "sha256": "76606a8a9803cb071068fd0cc8f91f083f923a47671a37429d33838b1b05b633"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/template/button.wxml",
+      "sha256": "ecbb2241981a519db4ea3ca8477b3c6886c7a3212f16db7a6ac0a67881213051"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/template/icon.wxml",
+      "sha256": "797f507e6c470707e332ef42726d64f898d91d89c5f73ef4e02e04c19551c070"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/common/template/image.wxml",
+      "sha256": "57ad1fee3041956c6c55ad7ad0e9da6427ad39f13bba05cc951baca51ac3e235"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/config-provider/config-provider.wxml",
+      "sha256": "f27856737f539b7d7232eceb9d225640d9b9644a5e4f3fcbb6ba5f4f3dba8f5f"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/config-provider/config-provider.wxss",
+      "sha256": "b5c2b85ff4bca32d4d8ce7149cb10b3fb15b0e69346ca679cd83e70668b22225"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/count-down/count-down.wxml",
+      "sha256": "5acf6e08918f4903b31653388c2a226f4b56d74d4fae324dffbf3d58dce71285"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/count-down/count-down.wxss",
+      "sha256": "44ab2862ef1534a5572dc60df2f670689dc27426469b860946894a8de74b76e7"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/date-time-picker/date-time-picker.wxml",
+      "sha256": "9fab5d88a27de7c6dfa22ca4ccbf9bd947b3c24b6e0a25ef46c9aab1dba1f264"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/date-time-picker/date-time-picker.wxss",
+      "sha256": "cfbb0c975fc48c75a6f7e940fcbb401d45dd7c469911661db91a3494e1c2a49f"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/dialog/dialog.wxml",
+      "sha256": "a28f685682fc23cb12e79a5e6357f0ff5cddfa2ffcb64a353022b399607f42c0"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/dialog/dialog.wxss",
+      "sha256": "57b46936ad5f4d4945965a6135b4361d1df51079131b24c25800080d2b27d182"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/divider/divider.wxml",
+      "sha256": "3e417053e1b1067501e761fe2d38637faadb648bd654d6f823fc33e73c290dee"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/divider/divider.wxss",
+      "sha256": "615ea4b7db6d2daf57e75338991c54e260a2091e132ef9160776fbbcf2e2811a"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/drawer/drawer.wxml",
+      "sha256": "3bba979ea07ffc5a45f5045c7138c53a1fb891f33dc25a1a45e6866ec4c480f9"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/drawer/drawer.wxss",
+      "sha256": "857018254dafd86341734eb4a419e24a00106fd380303b1cc9181a89a08ae7ef"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/dropdown-item/dropdown-item.wxml",
+      "sha256": "56952de0ad8b634bc5f3e8698aea818aa4496791c92a09580e91ad710ad8e534"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/dropdown-item/dropdown-item.wxss",
+      "sha256": "70604b646b203a1db1fdd46321841bf702d5805a54c688317e9fc5054962432a"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/dropdown-menu/dropdown-menu.wxml",
+      "sha256": "b93b773fed082fc9df889bb4d104c62e74e8feb5596caa38290b498cf7f50899"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/dropdown-menu/dropdown-menu.wxss",
+      "sha256": "d64f2ed8e7861386f6c532ee44c3fc3c453904a9a5fc6ddb717f49b12e354674"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/empty/empty.wxml",
+      "sha256": "a0144642e64e45cec2d0b6f50d1676a17ae3bc569dabf349e8a18fcd352c5f62"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/empty/empty.wxss",
+      "sha256": "ccd5fb0dc58e13d71b441802a4f7a21ec3bb3c726ed92ff305b8f929d48fc52d"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/fab/draggable/draggable.wxml",
+      "sha256": "7ca9591bc8b1f486cf0e9c729fd214709510cafa69f68569291b44d43432d561"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/fab/draggable/draggable.wxss",
+      "sha256": "7e95dc3c51fed56a44316b1a1d43c732ef6738d1707052da85c1350621d568e9"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/fab/fab.wxml",
+      "sha256": "6cbb8843172bde4c32e92592509aff3eb8278b6b245cb2648e09de88c195a738"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/fab/fab.wxss",
+      "sha256": "a065d31ad3830881a45b49bdd4e5ec2d61422243c43dd6c184c7518f599bb5e9"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/fab/template/draggable.wxml",
+      "sha256": "a16cafbdd357d3b01b4309770a1f29332eb7407d997d1cec2139eb2c883a2de7"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/fab/template/view.wxml",
+      "sha256": "62247fca4d43af92013148b614d79b2a9c76565def3e2c298504de284688f3f2"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/footer/footer.wxml",
+      "sha256": "99e5889d5ec8937a096a220736d1a990d3355411cec7cb4ccd68313b0d9dfbf7"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/footer/footer.wxss",
+      "sha256": "dcd90f89e27a0c5bc5aed4f1a686f1d7a35766bf8b1842faa02c7658b6e10efc"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/form-item/form-item.wxml",
+      "sha256": "55244f7a99526363d930ffab9849aa316af6b8695cf2779e7fba3fad1c585c0c"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/form-item/form-item.wxss",
+      "sha256": "adc0b446e72c4bf446d1db8b10e941ccc897881c79447f436f2695ca4ccc182b"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/form/form.wxml",
+      "sha256": "9f0a0756cb7523d693eabfb5f0162ce48e52e3452ccba6507eac4865d239d7ae"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/form/form.wxss",
+      "sha256": "1d4177aec05e2701e77ec024181ec8d322015a3b2f118d19eb2621a18c055b9a"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/grid-item/grid-item.wxml",
+      "sha256": "1c7a4f147f4e49e64e3c475ba3d226f75ea3fbc63bf67143a4c9fa880507b186"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/grid-item/grid-item.wxss",
+      "sha256": "a59f29193fe21833037d78b171f25d700da87521c7cf1bb12bf6ee317b148020"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/grid/grid.wxml",
+      "sha256": "0f79b56b8551f02ad0205cd3fbfed6d4b235b87166a2174e7ae9f390facbf293"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/grid/grid.wxss",
+      "sha256": "3fb7a8c5b66d5ab7435ad3f9e1127ad74740c102bafc38ae3c0ff40b43709d76"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/guide/content.wxml",
+      "sha256": "25821546762d3e33849fd1b3654cda8d06fd7241721615dc8aca6bd9f1d56f31"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/guide/guide.wxml",
+      "sha256": "4b5ec48db49a46fb80cf2a496cd6823785abce34dca8bc610e97c01e5edd5186"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/guide/guide.wxss",
+      "sha256": "2292b80db215b180cf4602a300a285e4180f04fa1017a2089cd1df000a66da71"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/icon/icon.wxml",
+      "sha256": "2908cf7185aea03253282744165b0fb4336e1ba5281c25796d6a18e3c45b9cef"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/icon/icon.wxss",
+      "sha256": "f326dfb03fed8c0a6e658c0da9d048b4fe10199dbf4daf5984cc3686a78f019a"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/image-viewer/image-viewer.wxml",
+      "sha256": "ba4522d7f52c0f60bbbdbe30c5bac41407194384c84773909c09ea67504286db"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/image-viewer/image-viewer.wxss",
+      "sha256": "5c82de1343b7ac6a9695098e10330d99e6cb3c55f7d3214e4ef54a6dc4f51ecb"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/image/image.wxml",
+      "sha256": "8d709a9c1fde4e77de01fbe2a225f3e5f4c3a83cbf7f11f1be4f46942070a61b"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/image/image.wxss",
+      "sha256": "618af9d6875ac5da64e85040f0e84e98a1638005fe8fc0904ce12d218edcf891"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/indexes-anchor/indexes-anchor.wxml",
+      "sha256": "64809da658410d4c2f16ea53e8700406f854591f653b01cebafec67843fd690e"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/indexes-anchor/indexes-anchor.wxss",
+      "sha256": "5961d573e86cacd7e49ab96b0885c443ee53fccb4b53e36fb7c34539382dbc6e"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/indexes/indexes.wxml",
+      "sha256": "e55970f4560df3afdfc5b32a2d1065d6f4972894480156c949b9879de5509d48"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/indexes/indexes.wxss",
+      "sha256": "b62c810f824edf9cf2456f3868f6e72dbddcf39eb479b0e09b2a290988277510"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/input/input.wxml",
+      "sha256": "c2e9e956df1e2b5b90054b9e3bcaad38a22e72567b3c0df4803f38cacc8a50d9"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/input/input.wxss",
+      "sha256": "af83c28388bc92cc05d1f6b08b5a23d581bd1e846c3a512b9fdf6aa5399acd1d"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/link/link.wxml",
+      "sha256": "fbd205dfbeb3ca0744c0c6d45ad698ec98d774fb55235321fe2116790950f762"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/link/link.wxss",
+      "sha256": "d1ca623d619afbf40f0a1e289410d3663d2ac8d85909655ca919c55129e1ba2b"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/loading/loading.wxml",
+      "sha256": "d20734755edb1e5d2169fd748be14be646ec0f0060949b73439f90a66846eaf9"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/loading/loading.wxss",
+      "sha256": "bfb456a83ce12afc91e1f83f7e277f1c5c2accc46154e4bd840873f224bb3d45"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/message-item/message-item.wxml",
+      "sha256": "f02b9c1d08ef64a55b97671d18fc24dddfdc21c3dba8e765d3bd58cc66225745"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/message-item/message-item.wxss",
+      "sha256": "324c8b34bc64497f7bc736daa69fbaa9ea9b7e9655286ca939278c95b2f19651"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/message/message.wxml",
+      "sha256": "d1f051423c0d18e7729c7fcfe1180eebffd34794a0ccbfa33f5a59a97c3dd2f6"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/message/message.wxss",
+      "sha256": "b5c2b85ff4bca32d4d8ce7149cb10b3fb15b0e69346ca679cd83e70668b22225"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/navbar/navbar.wxml",
+      "sha256": "faa38d96e710aa5625e0729889429b8e5f1617edf94fe4ce626ab93ab04096b1"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/navbar/navbar.wxss",
+      "sha256": "c56d780aa9e999615f35267ec2b0177e9884b75f62f0b2591585960ab8e7ee30"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/notice-bar/notice-bar.wxml",
+      "sha256": "13d37f087c142988eb0b3ab495fe999450b786c9d37cd1dfbba0cfb564ec46d1"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/notice-bar/notice-bar.wxss",
+      "sha256": "95de57faf019ea547c568d699f011d1d71781be2215b57d5ac0ab4b8e5a9f9fe"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/overlay/overlay.wxml",
+      "sha256": "7a51c8130342e006cf1e7093b2f1c6027884d65e7a00b72bf28b11306ad52e6b"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/overlay/overlay.wxss",
+      "sha256": "cf21c5a334f36ad3383b829ecb23c9340e8f3413848d62b160399d1f123b08e7"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/picker-item/picker-item.wxml",
+      "sha256": "f78331ea1e3a02f528be18a35174213f798d2f91b781ec9fdea5931ae5485e0f"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/picker-item/picker-item.wxss",
+      "sha256": "6a40c2e204a1ed3958850ca7f5840a84de2bb4db00447017071f0e6599bfd3e8"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/picker/picker.wxml",
+      "sha256": "6e432b5c384794ac780016c17d08a77a956a85a31d8d9dfff7059c75c044afc2"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/picker/picker.wxss",
+      "sha256": "8abf80784ed88a23c146e896cecb3284fbfb6e6c854e7a36236508b28c848acb"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/picker/template.wxml",
+      "sha256": "c511f3a3e3a5867da823da48f0b2857e117b1d592887e727fb0f7fa41614f2cc"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/popover/popover.wxml",
+      "sha256": "8877f45ab9c94884c962f7bf451270bdebcc31ca8fa4d85390237164d5009e37"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/popover/popover.wxss",
+      "sha256": "742feaf7d4e47ae7c7ab160b71add7a4263e486776e234e798cfefa2f40afb6e"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/popup/popup.wxml",
+      "sha256": "675c4c2937f8649d74b739af3af6d06c017a153602b88a924fd79deb4ebb7e1c"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/popup/popup.wxss",
+      "sha256": "a10e2b0bdabe7e3faf11dc42868bdd2f8ec4195a5c1c5d697f63e727bde99cb0"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/progress/progress.wxml",
+      "sha256": "0e79184c9e4249b5cad3aa9cc95cdb9f72750f8143de19fb339a92163215a6fa"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/progress/progress.wxss",
+      "sha256": "956a77c9d53ca177b1b1a3cefa6384059494f57530dea13b22a75c7951754aeb"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/pull-down-refresh/pull-down-refresh.wxml",
+      "sha256": "090b1eb0d8d4ece8e35bf30ce2aafadadce151c7935dac7fbc45392ec1e250d0"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/pull-down-refresh/pull-down-refresh.wxss",
+      "sha256": "1ba2b3be2a6d331a6ba1c8f2901190793dac6595d73512d3f0d3f06e9c0f64d1"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/qrcode/components/qrcode-canvas/qrcode-canvas.wxml",
+      "sha256": "ed4757b8f67a677883373c9a2f1930d2ba41077fe72abbde2b86f29fd6cb4282"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/qrcode/components/qrcode-canvas/qrcode-canvas.wxss",
+      "sha256": "d059046d841a98d1f9af61cb896b788f11397ade19d990907084df98a3f7c58e"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/qrcode/components/qrcode-status/qrcode-status.wxml",
+      "sha256": "ec723019c367e2df7d6baa2e1804b1e838a6648c91554cdcd7139e59d7e0684b"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/qrcode/components/qrcode-status/qrcode-status.wxss",
+      "sha256": "5e011e8ce9c0ad12e2cc5dd1ee362cc7d402809242a7983e277a4eee9b949079"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/qrcode/qrcode.wxml",
+      "sha256": "63176d91b6a2c97920c7ec19c5d5593c8df89b089e6fd31e11e903b0ca2dc0c9"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/qrcode/qrcode.wxss",
+      "sha256": "c0e6e055c09efcb6eef9f432fbfb3d8d0ee0be7e5a6ea46d15519e86bb65e6d5"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/radio-group/radio-group.wxml",
+      "sha256": "ddb7444b74a2358c008d6a0c0f1df875f0cb360576d7431f730955e94f9cb8a1"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/radio-group/radio-group.wxss",
+      "sha256": "b5c2b85ff4bca32d4d8ce7149cb10b3fb15b0e69346ca679cd83e70668b22225"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/radio/radio.wxml",
+      "sha256": "cefe6df9006a752e36a8ecb83cfcd35819281ea542fc382f5809899634e14802"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/radio/radio.wxss",
+      "sha256": "fc7ec7003590d444ffab18a04f39c947513bfa28734304837c67e94467f3ed12"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/rate/rate.wxml",
+      "sha256": "71ad4e49ecb344441f1859f7c4f3fea9b31f7a7b52ddbef5fe110cd2a0e87ce1"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/rate/rate.wxss",
+      "sha256": "1b8f1dbffcaa404fc241fdcd4abcb47d08611ed639185766fe0a0965e8d8164f"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/result/result.wxml",
+      "sha256": "4f4724a5e867812abc8a6a45aabb680cdd199f9bb4e09a3316b1b75c7322b306"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/result/result.wxss",
+      "sha256": "7260344b7f723badcaf17e995d399cad80e9a8b4eef1754176c5a80303baeb7f"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/row/row.wxml",
+      "sha256": "ff469c24f381270bca7078409771b0c76bc75fd967ec4e8221916ca9aff878c9"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/row/row.wxss",
+      "sha256": "322859e10132fad5cc578183b02b37daf286da2fd60588d36d049835b755fa65"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/scroll-view/scroll-view.wxml",
+      "sha256": "fcc1a6ecd1be9e08c1a423015cad3a5e1be964e2867a084752a510ca02d801b3"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/scroll-view/scroll-view.wxss",
+      "sha256": "b5c2b85ff4bca32d4d8ce7149cb10b3fb15b0e69346ca679cd83e70668b22225"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/search/search.wxml",
+      "sha256": "92f8cf893b878a7d0198eb400447a2ec2d0894edb9f0a3c2fc69a487285ed2fb"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/search/search.wxss",
+      "sha256": "0995e0cc5f6fff4a4c6072d8f0972b083fedb0372d2c63c3af8f7485d2bb7c36"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/side-bar-item/side-bar-item.wxml",
+      "sha256": "a4187653f6863069f8fda064da8f6c9e6e8b18ccb1bffff5ba4bf954354b5bb7"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/side-bar-item/side-bar-item.wxss",
+      "sha256": "af3e62a4e0dd1a9b3957d5a19afdaa1c43f503373e154115acc28dba3205d74b"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/side-bar/side-bar.wxml",
+      "sha256": "92bdbe02410dea2d083f76fd246c7613d52d0c47491b61c1c9d1c2ddcdc529a3"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/side-bar/side-bar.wxss",
+      "sha256": "fd60f297d71927be9f1b6c85c8aa23b610c0796ec72a4d3106f0279e0871dfe7"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/skeleton/skeleton.wxml",
+      "sha256": "738a306bd4b6e4c0597ba3e02e27d79a776863fdefb5b9aac8bf5aa82d375a5d"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/skeleton/skeleton.wxss",
+      "sha256": "0148480de017f1d15edfb251255ee63e7a31aba7e9394174a31eec9781057616"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/slider/slider.wxml",
+      "sha256": "139b157e5b51468c95f17f3a27b2fab54d3f92bb843f6551fed1bee51efb7876"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/slider/slider.wxss",
+      "sha256": "23ce489120a5237076c6016bd873343e8920ca406173ba5454677c236c721d3d"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/step-item/step-item.wxml",
+      "sha256": "3895d56a35585b88659a9aaf3b1d33332c6d9e1865ad0122b315c3eb9690a465"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/step-item/step-item.wxss",
+      "sha256": "618b9ecb619ad7a2507d27d398b93d2979d8a87bba0c683c159021d3166d5d28"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/stepper/stepper.wxml",
+      "sha256": "1dc781ad9b9cf54979cc29b5926424e98529637b98402c276e4926ead3d94120"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/stepper/stepper.wxss",
+      "sha256": "2859c319cd2e55bab52b9f976c6f7e070137c26bd2ddb760bbba45c914f40a79"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/steps/steps.wxml",
+      "sha256": "fa14945426be84e9a4af17b5127e7edab1195e086fcdb6d5c916c4ce09334353"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/steps/steps.wxss",
+      "sha256": "03683e13cffe210169e0551fd56cfef65418cea2fdaae21ccf39ff0ac200f021"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/sticky/sticky.wxml",
+      "sha256": "d0379e10b608ff7ca5db139991ecc7521d5ba7faa333364c079b1c95c1845d73"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/sticky/sticky.wxss",
+      "sha256": "21ab1058412565e7600643a7b5b6c5421e9a0c37976e19b47ca9901ea7fc9598"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/swipe-cell/swipe-cell.wxml",
+      "sha256": "0445c2330c5261b5b19b406b290e4ca698c9e4a682ab3c7bdbfdf07ddc7e5847"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/swipe-cell/swipe-cell.wxss",
+      "sha256": "aaa2cabb07841671dffc9787f1e51bec821671247c3d9b34c13018a681f8e7f9"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/swiper-nav/swiper-nav.wxml",
+      "sha256": "da58b6b0b639d98ac56d7603503cbbd4dbaa627c3032c5b1061f1211b7b3230b"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/swiper-nav/swiper-nav.wxss",
+      "sha256": "0f2dcc576f1561840efccdd1e5537f6a787dc881b97d2c0fbfe32cd8fcec73bf"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/swiper/swiper.wxml",
+      "sha256": "37d0fc93164e5d22fa85dbd60a77b7aa01d1a01a821958e3ed46fa7ce790341a"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/swiper/swiper.wxss",
+      "sha256": "951f761d9a84bc6f711bcabaa5898bd653ced14780eb60f46fc9d2e952537687"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/switch/switch.wxml",
+      "sha256": "c5516da0418bdd6beb59278d715626f19da25ad11b296f95a9d0a8e1a7bb2903"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/switch/switch.wxss",
+      "sha256": "19e36cf832eb0b1ea12027d1516e0dfb32aa47f52f1adced5cccf2a7b45b5d56"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tab-bar-item/tab-bar-item.wxml",
+      "sha256": "af4be40bbc3016c219564ff93abe1a06138fb12d9298a5cd8231d957d7eb1c06"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tab-bar-item/tab-bar-item.wxss",
+      "sha256": "3c482fae98c3ac484506ead7cb3f7172f23be169ae6a537f05fbb3a17c47afde"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tab-bar/tab-bar.wxml",
+      "sha256": "7c259bf9cc02473ce5426cecc5c48e995f7d748462533807fd41d1e002529997"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tab-bar/tab-bar.wxss",
+      "sha256": "41a4902e9b3f2d9345a67286e98018076c87501ebbf217356edfa50ad67b6bdb"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tab-panel/tab-panel.wxml",
+      "sha256": "3eb5162e576d36cd3e9e041e7791987cf364f1035789bd1bcf3318a9bb6229ac"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tab-panel/tab-panel.wxss",
+      "sha256": "2537c27fa43b711cefe3457f8891314c01d049325c3762cb9a6501526d499934"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tabs/tabs.wxml",
+      "sha256": "a51cc0afb98b922b6bf136766717c2ae65221f44702b1753cc3067a8c91fa101"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tabs/tabs.wxss",
+      "sha256": "1c09117d507b4fd73aa93fd94128d1756fd69353fcf94c7760484f76ea167144"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tag/tag.wxml",
+      "sha256": "e72b625be003d3cca730a70aac6b9e53161d0ff353788fe7cd329205b5a9f458"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tag/tag.wxss",
+      "sha256": "d422481e256a3cfc13bb5b5506196599c95a310994bc7e93eb8cb7f0fe21cf06"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/textarea/textarea.wxml",
+      "sha256": "6af62c887750054c705e499458d7b425a232a934de9435c1f5793043d4223fbb"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/textarea/textarea.wxss",
+      "sha256": "c3492f00957b72d4ba6900be0a4db6bcbafc2a86068655d707f16e82a8a9253d"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/toast/toast.wxml",
+      "sha256": "d8b5dd0204f6e53ada0e25e8d9c17a208b6df22c7a0b369f0ef4b106154c6729"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/toast/toast.wxss",
+      "sha256": "209d9863ae461298453abf2121397f5bd815a469a3d014ec60d04cf2d94b57f5"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/transition/transition.wxml",
+      "sha256": "87b9feb6a734ccb5515fca6a0cec1d82643c2e1db28e6d13ee22dd3e317afba9"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/transition/transition.wxss",
+      "sha256": "52ac1ebd64a392cc910cbe2eb7b55dd6f6ba711a206241d93025d939eb5c66f5"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tree-select/tree-select.wxml",
+      "sha256": "34058604680192246f8c4d0894faf547d386d2c2381803d9b51ff35c919ad96e"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/tree-select/tree-select.wxss",
+      "sha256": "be0657c04869809e1322899f64358270e739d672c5caabf5ce48d1396a3172ee"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/upload/upload.wxml",
+      "sha256": "8db3c52b4b44edc875b69a350c5746ed999fa0aa36b40595e60b359b149321cf"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/upload/upload.wxss",
+      "sha256": "4ff0bd40502f1324d639d9a2ed10eedf72449338da1163c386815879beb9ba03"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/watermark/watermark.wxml",
+      "sha256": "6984a8a1f24d8ab9e580a1ee4f76b3bba135ffaf34a287091a12b45ec13d3fad"
+    },
+    {
+      "path": "miniprogram_npm/tdesign-miniprogram/watermark/watermark.wxss",
+      "sha256": "9b0e0e46cf980e473286cdfcdda6fb0fdc02c8e709468efb975ef404d60100e2"
+    },
+    {
+      "path": "pages/chat/chat.wxml",
+      "sha256": "1226dec800827091e95dd7dde01c43ba6b3f0a498914bb422d1321b3f56f28fb"
+    },
+    {
+      "path": "pages/chat/chat.wxss",
+      "sha256": "afd0ac6fe3cfae619d1f67f3de43b34ac99c35b76700ebca2e42105e3513fa29"
+    },
+    {
+      "path": "pages/custom-match-live/custom-match-live.wxml",
+      "sha256": "ca495b96489790d7168ae295ddf6e817107786ddb2cba14f4521f42f18aa62fc"
+    },
+    {
+      "path": "pages/custom-match-live/custom-match-live.wxss",
+      "sha256": "4ffa25fe633fa9577b092cc10d35d3336d11516ef5acc3cbab6a7c98cec95924"
+    },
+    {
+      "path": "pages/custom-match-result/custom-match-result.wxml",
+      "sha256": "6e3713a80e5c228aab7c6f1b5341cc3e10c597e63bcf05cd83e055320cdbb4e6"
+    },
+    {
+      "path": "pages/custom-match-result/custom-match-result.wxss",
+      "sha256": "4437f9931894ddb82898f93d9199c530c51c6469c012dc0cb633a22d9be8c507"
+    },
+    {
+      "path": "pages/custom-match-setup/custom-match-setup.wxml",
+      "sha256": "69d2e62e5b86fed071ec6df537f1f31aa9ebe1543d6df04ab1ec1e80426d6fdc"
+    },
+    {
+      "path": "pages/custom-match-setup/custom-match-setup.wxss",
+      "sha256": "ef16bc844a999cc6c441e495762eb303ca6d1fb758efe60095c6acb9a31a1ef1"
+    },
+    {
+      "path": "pages/index/index.wxml",
+      "sha256": "962f841e3992aa7117a868897fe35db469336e228090a809932aebf0fe8d3385"
+    },
+    {
+      "path": "pages/index/index.wxss",
+      "sha256": "fc0f485bd02bda175139da735cde55e3ed74bee17310bdf234dc361737031491"
+    },
+    {
+      "path": "pages/match-detail/match-detail.wxml",
+      "sha256": "f403e698b042b414a62b85dc2c6d1181fa25552af95d477815df6f9004a9a6ce"
+    },
+    {
+      "path": "pages/match-detail/match-detail.wxss",
+      "sha256": "8770c9acd518e395fa9df1f3414fab1860dbe195ffb49ca950620411f272ff39"
+    },
+    {
+      "path": "pages/match/match.wxml",
+      "sha256": "c6ad497ab1139d5d9b64f4848ca93674de0d460b4ca3df32a34000111e0f5386"
+    },
+    {
+      "path": "pages/match/match.wxss",
+      "sha256": "c2d1065824f0d8f16a6bddd8297046498acfc23601c06e8369aecbb83baeb1ff"
+    },
+    {
+      "path": "pages/profile-edit/profile-edit.wxml",
+      "sha256": "f7ad7d7477c7a5281bac7a239193ab85f274a1f3a32ec05f8496012d8e8534e0"
+    },
+    {
+      "path": "pages/profile-edit/profile-edit.wxss",
+      "sha256": "cf7c8f10b0bad62010a4901425e9d669e2424ae52b24cb434315c550f30751b1"
+    },
+    {
+      "path": "pages/profile/profile.wxml",
+      "sha256": "eb4bc6c64825a87cdd8d14103419cb1f06085d64a7d54d0d104c6f0ee54bd698"
+    },
+    {
+      "path": "pages/profile/profile.wxss",
+      "sha256": "fa630153c3df3a585c6f631d9ae6f9b1623d39f4c0a8e7760d1e440d8f0a56c1"
+    },
+    {
+      "path": "pages/training/training.wxml",
+      "sha256": "02defbe43c93766196fcbf7405fe6b8c7316d8c82a4e704460d65b72ac7337c1"
+    },
+    {
+      "path": "pages/training/training.wxss",
+      "sha256": "7d587dd6f2f630e372aae538794eeb4089b5991505694bd3cebc9ac12bc390e9"
+    }
+  ],
+  "lineEndings": "LF (Git source normalized, independent of checkout autocrlf)"
+}

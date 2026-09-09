@@ -22,8 +22,14 @@ Page({
   },
 
   onLoad() {
+    this._chatUnloaded = false
     this.initLayout()
     this.initTheme()
+  },
+
+  onUnload() {
+    this._chatUnloaded = true
+    if (this._cancelChat) this._cancelChat()
   },
 
   _themeClass(ut) { return ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') },
@@ -92,11 +98,13 @@ Page({
   sendQuickQuestion(e) { this.setData({ userInput: e.currentTarget.dataset.question }); this.sendMessage() },
 
   scrollToBottom() {
+    if (this._chatUnloaded) return
     this.setData({
       scrollToView: '',
       thinkingScrollToView: ''
     })
     setTimeout(() => {
+      if (this._chatUnloaded) return
       this.setData({
         scrollToView: 'msg-bottom',
         thinkingScrollToView: 'thinking-bottom'
@@ -105,6 +113,7 @@ Page({
   },
 
   sendMessage() {
+    if (this.data.isLoading || this._chatUnloaded) return
     const message = this.data.userInput.trim()
     if (!message) { wx.showToast({ title: '请输入消息', icon: 'none' }); return }
     const now = new Date(); const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
@@ -568,23 +577,41 @@ Page({
     return new Promise((resolve) => {
       const now = new Date(); const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
       const messages = [{ "role":"system","content":"你现在是 2026 赛季安踏小篮球联赛（MCBA）官方认证的“赛事方案规划助手”。\n你掌握该联赛的全部真实运营信息，并具备专业赛事策划能力。你的唯一任务是：当用户提出“帮我预定一个联赛方案”或类似需求时，输出一份符合 2026 赛季实际情况、完整且可直接执行的《赛事承办/参赛方案》。\n\n【赛事基础信息（固定数据）】\n- 联赛全称：2026 赛季安踏小篮球联赛（ANTA MCBA Mini Basketball League）\n- 官方简称：MCBA 中国小篮球\n- 主办及冠名：安踏体育用品有限公司（主赞助商）、冠途体育（联合赞助商）\n- 唯一指定比赛场馆：国贸室内篮球场（地址：北京市朝阳区国贸商圈，含 3 片标准小篮球场地，配备专业木地板、电子计时记分屏、观众席 200 席）\n- 赛制：U8/U10/U12 三个年龄组，采用 4v4 小篮球规则（篮高 2.60m/2.75m，用 5 号球）\n- 赛季时间窗口：2026 年 5 月 1 日 – 2026 年 8 月 31 日（周末及节假日举行）\n- 参赛对象：全国各俱乐部、学校、社区青训队伍\n\n【你需要提供的完整方案结构（缺一不可）】\n当用户要求“预定方案”时，你必须按以下模块输出，并确保所有数据逻辑自洽、符合真实场馆承载量：\n\n1. 方案概要（赛事名称、组别、拟定日期、预计队伍数、参赛人数）\n2. 场地与时间安排（根据用户拟定的日期，提供具体时段表：热身、比赛、清场；最多每日 6 场次/场地，全天 18 场次上限）\n3. 报名与费用明细（列出：报名费/队伍、保险费/人、押金、安踏装备包费用、冠途媒体服务费，总计预算）\n4. 赞助商权益落地（安踏主赞助：提供比赛用球、纪念T恤、冠亚季军奖品；冠途赞助：提供赛事直播、数据统计、短视频集锦——需明确交付标准）\n5. 竞赛组织配置（每场地配备 1 名国家级裁判、1 名记录台人员、1 名赛事志愿者；说明是否含医疗急救站）\n6. 后勤保障清单（饮用水、秩序册、成绩公告栏、停车指引、家长观赛区管理）\n7. 风险预案（天气备用室内空调、伤病绿色通道、设备故障备用计时器）\n8. 下一步行动建议（告知用户需确认的日期、队伍数量，以及联系场馆预订押金、安踏物料申领流程）\n\n【回答规则】\n- 若用户未提供具体日期或队伍数，你必须先主动询问这两项关键信息，再生成完整方案。\n- 方案中所有费用需以“元/队”或“元/人”明确标注，并注明“价格依据 2026 赛季安踏官方招商手册”。\n- 所有时间安排必须与国贸室内篮球场的营业时间（08:00-22:00）冲突检测，若超出需提示调整。\n- 语气专业、自信，但需保持“协助式”口吻，结尾附上您的专属赛事顾问联系方式（虚拟）及下一步操作清单。\n- 可以使用 Markdown 标题、列表、表格来组织内容，但不要把整段回答包进 ``` 代码块，不要输出 emoji。\n\n现在，请等待用户提出“预定方案”请求，并严格按以上规则执行。" },
-        ...this.data.messages.map(msg=>({role:msg.role,content:msg.content}))]
-
-      const CONFIG = {
-        baseURL: 'https://api.deepseek.com',
-        apiKey: 'sk-a7da0fbe152945fc95afc59d11b1d88f',
-        model: 'deepseek-v4-flash'
-      }
+        ...this.data.messages.filter(msg => !msg.isError).map(msg=>({role:msg.role,content:msg.content}))]
 
       let fullContent = ''
       let fullThinking = ''
       let assistantMsgIndex = this.data.messages.length
       let sseBuffer = ''
+      let pendingUtf8 = new Uint8Array(0)
       let streamFinished = false
+      let requestTask = null
+      let cancelRequested = false
+      const abortRequest = () => {
+        cancelRequested = true
+        if (!requestTask) return
+        const task = requestTask
+        requestTask = null
+        try { task.abort() } catch (_) { console.error('comptrain_chat_abort_error') }
+      }
+      const cancel = () => {
+        if (!streamFinished) {
+          streamFinished = true
+          resolve()
+        }
+        clearRequest()
+        abortRequest()
+      }
+      this._cancelChat = cancel
+      const clearRequest = () => {
+        if (this._cancelChat === cancel) this._cancelChat = null
+      }
 
       const finishStream = () => {
         if (streamFinished) return
         streamFinished = true
+        clearRequest()
+        abortRequest()
         const finalBlocks = this.parseMarkdownBlocks(fullContent)
         const finalRendered = this.blocksToRichText(finalBlocks)
         const finalMessages = [...this.data.messages]
@@ -624,8 +651,12 @@ Page({
       const handleError = (errMsg) => {
         if (streamFinished) return
         streamFinished = true
-        console.error('DeepSeek API 调用失败:', errMsg)
-        this.setData({ isLoading: false, isThinking: false, currentThinking: '' })
+        clearRequest()
+        abortRequest()
+        console.error('comptrain_chat_error')
+        this.setData({ isLoading: false, isThinking: false, currentThinking: '', hasAssistantMsg: false,
+          messages: this.data.messages.map((msg, index) => index === assistantMsgIndex && msg.role === 'assistant'
+            ? { ...msg, isStreaming: false, isThinking: false, isError: true } : msg) })
         wx.showToast({ title: errMsg || 'AI服务暂时不可用', icon: 'none' })
         const errNow = new Date()
         this.setData({
@@ -640,12 +671,19 @@ Page({
       }
 
       const dispatchSSEEvent = (rawData) => {
-        if (!rawData || rawData === '[DONE]') {
-          finishStream()
+        if (streamFinished) return
+        if (!rawData) return
+        if (rawData === '[DONE]') {
+          if (fullContent.trim()) finishStream()
+          else handleError('AI服务暂时不可用')
           return
         }
         try {
           const data = JSON.parse(rawData)
+          if (data.error) {
+            handleError('AI服务暂时不可用')
+            return
+          }
           const think = data?.choices?.[0]?.delta?.reasoning_content
           if (think) {
             fullThinking += think
@@ -687,14 +725,14 @@ Page({
             this.scrollToBottom()
           }
         } catch (parseError) {
-          console.log('解析 SSE 事件数据失败:', parseError, rawData)
+          handleError('AI服务暂时不可用')
         }
       }
 
       const flushSSEBuffer = () => {
         if (!sseBuffer) return
         let doubleNLIndex
-        while ((doubleNLIndex = sseBuffer.indexOf('\n\n')) !== -1) {
+        while (!streamFinished && (doubleNLIndex = sseBuffer.indexOf('\n\n')) !== -1) {
           const rawEvent = sseBuffer.slice(0, doubleNLIndex)
           sseBuffer = sseBuffer.slice(doubleNLIndex + 2)
           const lines = rawEvent.split('\n')
@@ -708,51 +746,54 @@ Page({
             dispatchSSEEvent(dataLines.join('\n'))
           }
         }
+        if (streamFinished) sseBuffer = ''
       }
 
       try {
-        const requestTask = wx.request({
-          url: `${CONFIG.baseURL}/chat/completions`,
-          method: 'POST',
-          header: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${CONFIG.apiKey}`
-          },
-          data: {
-            model: CONFIG.model,
-            messages: messages,
-            stream: true,
-            temperature: 0.7
-          },
-          enableChunked: true,
-          timeout: 120000,
-          success: (res) => {
-            if (res.statusCode !== 200 && !streamFinished) {
-              const errMsg = (res.data && (res.data.error?.message || res.data.message)) || `请求失败 (${res.statusCode})`
-              handleError(errMsg)
+        Promise.resolve(app.api.stream('/api/comptrain/chat/completions', { messages, stream: true }, {
+          onComplete: (res) => {
+            if (streamFinished) return
+            if (!res || res.statusCode < 200 || res.statusCode >= 300) {
+              handleError('AI服务暂时不可用')
               return
             }
             flushSSEBuffer()
-            if (!streamFinished) finishStream()
+            if (!streamFinished) handleError('AI服务暂时不可用')
           },
-          fail: (err) => {
-            handleError(err.errMsg || '网络请求失败')
-          }
-        })
-
-        requestTask.onChunkReceived((res) => {
+          onError: () => handleError('网络请求失败'),
+          onChunkReceived: (res) => {
           if (streamFinished) return
           try {
-            const uint8 = new Uint8Array(res.data)
-            const chunk = this._utf8Decode(uint8)
+            const received = new Uint8Array(res.data)
+            const uint8 = new Uint8Array(pendingUtf8.length + received.length)
+            uint8.set(pendingUtf8)
+            uint8.set(received, pendingUtf8.length)
+            // Transport chunks can split a UTF-8 character. Feed only complete bytes
+            // to the existing decoder and leave SSE/Markdown rendering unchanged.
+            let end = uint8.length
+            let lead = end - 1
+            while (lead >= 0 && (uint8[lead] & 0xC0) === 0x80) lead--
+            if (lead >= 0) {
+              const byte = uint8[lead]
+              const size = byte >= 0xF0 ? 4 : byte >= 0xE0 ? 3 : byte >= 0xC0 ? 2 : 1
+              if (end - lead < size) end = lead
+            }
+            pendingUtf8 = uint8.slice(end)
+            const chunk = this._utf8Decode(uint8.subarray(0, end))
             sseBuffer += chunk
             flushSSEBuffer()
           } catch (e) {
-            console.log('接收 chunk 失败:', e)
+            handleError('AI服务暂时不可用')
           }
+          }
+        })).then(task => {
+          requestTask = task
+          if (cancelRequested || this._chatUnloaded) abortRequest()
+        }).catch(() => {
+          handleError('网络请求失败')
         })
       } catch (e) {
-        handleError(e.message || '初始化请求失败')
+        handleError('初始化请求失败')
       }
     })
   }
