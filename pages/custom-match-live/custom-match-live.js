@@ -1,5 +1,6 @@
 // custom-match-live.js - 优化版（含计时器、双方队伍支持）
 const app = getApp()
+const matchSync = require('../../utils/custom-match-sync')
 
 Page({
   data: {
@@ -36,7 +37,6 @@ Page({
     this.initTheme()
     this.setNavHeight()
     this.setData({ matchId: options.matchId })
-    this.loadMatchData()
   },
 
   _syncTheme: function() {
@@ -61,26 +61,45 @@ Page({
   },
 
   onShow: function() {
+    this._visible = true
     this._syncTheme()
     if (this.data.matchId) {
       this.loadMatchData()
-      this.startTimer()
     }
   },
 
   onHide: function() {
+    this._visible = false
     this.stopTimer()
+    return matchSync.sync(this.data.matchId)
   },
 
   onUnload: function() {
-    this.stopTimer()
+    return this.onHide()
   },
 
-  loadMatchData: function() {
+  loadMatchData: async function() {
+    const request = this._loadRequest = (this._loadRequest || 0) + 1
+    const revision = this._editRevision || 0
     try {
-      const matchData = wx.getStorageSync('custom_match_' + this.data.matchId)
+      // Render the durable local draft immediately so offline scoring is usable.
+      const local = matchSync.read(this.data.matchId)
+      if (local && local.status === 'in_progress') this.applyMatchData(local)
+      const matchData = await matchSync.load(this.data.matchId)
+      if (!this._visible || request !== this._loadRequest || revision !== (this._editRevision || 0)) return
 
       if (matchData && matchData.status === 'in_progress') {
+        this.applyMatchData(matchData)
+      } else {
+        wx.showToast({ title: '比赛数据加载失败', icon: 'error' })
+      }
+    } catch (e) {
+      console.error('加载比赛数据失败:', e)
+      wx.showToast({ title: '数据加载异常', icon: 'error' })
+    }
+  },
+
+  applyMatchData: function(matchData) {
         const players = this.normalizePlayers(matchData.players || [])
         const teamAFoulRecords = matchData.teamAFoulRecords || []
         const teamBFoulRecords = matchData.teamBFoulRecords || []
@@ -102,22 +121,7 @@ Page({
           teamBFoulRecords,
           startTime: new Date(matchData.startTime)
         })
-      } else {
-        wx.showToast({
-          title: '比赛数据加载失败',
-          icon: 'error'
-        })
-        setTimeout(() => {
-          wx.navigateBack()
-        }, 1500)
-      }
-    } catch (e) {
-      console.error('加载比赛数据失败:', e)
-      wx.showToast({
-        title: '数据加载异常',
-        icon: 'error'
-      })
-    }
+        if (this._visible) this.startTimer()
   },
 
   // ===== 计时器功能 =====
@@ -390,6 +394,8 @@ Page({
   },
 
   updateMatchData: function(players, teamAFoulRecords = this.data.teamAFoulRecords, teamBFoulRecords = this.data.teamBFoulRecords) {
+    if (this._ended) return
+    this._editRevision = (this._editRevision || 0) + 1
     const totalScore = this.calculateTotalScore(players)
     const teamStats = this.calculateTeamStats(players, teamAFoulRecords, teamBFoulRecords)
     const matchData = wx.getStorageSync('custom_match_' + this.data.matchId) || {}
@@ -425,8 +431,8 @@ Page({
         actionLog: this.data.actionLog
       }
 
-      wx.setStorageSync('custom_match_' + this.data.matchId, nextMatchData)
-      wx.setStorageSync('unfinished_custom_match', nextMatchData)
+      matchSync.saveLocal(nextMatchData)
+      matchSync.sync(this.data.matchId)
     } catch (e) {
       console.error('保存比赛数据失败:', e)
       wx.showToast({
@@ -527,6 +533,8 @@ Page({
   },
 
   confirmEndMatch: function() {
+    if (this._ended) return
+    this._editRevision = (this._editRevision || 0) + 1
     try {
       const matchData = wx.getStorageSync('custom_match_' + this.data.matchId)
 
@@ -541,8 +549,9 @@ Page({
       matchData.teamBFoulRecords = this.data.teamBFoulRecords
       matchData.duration = this.data.matchTime
 
-      wx.setStorageSync('custom_match_' + this.data.matchId, matchData)
-      wx.removeStorageSync('unfinished_custom_match')
+      matchSync.saveLocal(matchData)
+      this._ended = true
+      matchSync.sync(this.data.matchId)
 
       const finishedMatches = wx.getStorageSync('finished_custom_matches') || []
       finishedMatches.push({

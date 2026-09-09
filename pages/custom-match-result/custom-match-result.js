@@ -1,5 +1,6 @@
 // custom-match-result.js - 按A队B队分组显示 + 修复比赛时长
 const app = getApp()
+const matchSync = require('../../utils/custom-match-sync')
 
 Page({
   data: {
@@ -69,11 +70,28 @@ Page({
     })
   },
 
-  loadMatchResult: function() {
+  loadMatchResult: async function() {
     try {
-      const matchData = wx.getStorageSync('custom_match_' + this.data.matchId)
+      const local = matchSync.read(this.data.matchId)
+      if (local && local.status === 'completed') this.applyMatchResult(local)
+      const matchData = await matchSync.load(this.data.matchId)
       
       if (matchData && matchData.status === 'completed') {
+        this.applyMatchResult(matchData)
+      } else {
+        wx.showToast({ title: '比赛数据不存在', icon: 'error' })
+        setTimeout(() => { wx.navigateBack() }, 1500)
+      }
+    } catch (e) {
+      console.error('加载比赛结果失败:', e)
+      wx.showToast({ title: '数据加载失败', icon: 'error' })
+    }
+  },
+
+  onHide: function() { return matchSync.sync(this.data.matchId) },
+  onUnload: function() { return this.onHide() },
+
+  applyMatchResult: function(matchData) {
         const players = this.normalizePlayers(matchData.players || [])
         const actionLog = matchData.actionLog || []
         const teamAFoulRecords = matchData.teamAFoulRecords || []
@@ -109,14 +127,6 @@ Page({
         
         // 生成分析数据
         this.generateAnalysisData(enrichedPlayers, actionLog, teamAFoulRecords, teamBFoulRecords)
-      } else {
-        wx.showToast({ title: '比赛数据不存在', icon: 'error' })
-        setTimeout(() => { wx.navigateBack() }, 1500)
-      }
-    } catch (e) {
-      console.error('加载比赛结果失败:', e)
-      wx.showToast({ title: '数据加载失败', icon: 'error' })
-    }
   },
 
   normalizePlayers: function(players) {

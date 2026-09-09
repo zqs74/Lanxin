@@ -45,11 +45,28 @@ Page({
     app.applyNavBarColor(app.getTheme())
   },
 
-  loadProfile() {
-    const stored = wx.getStorageSync('profile') || {}
-    const profile = { ...DEFAULT_PROFILE, ...stored }
-    const positionIndex = this.data.positions.indexOf(profile.position)
-    this.setData({ profile, positionIndex })
+  async getApi() {
+    if (app.globalData.authReady) await app.globalData.authReady
+    return app.api || app.globalData.api
+  },
+
+  mapProfile(user) {
+    const str = value => value == null ? '' : String(value)
+    return { name: user.nickname || '', avatar: user.avatarUrl || '', position: user.position || '',
+      age: str(user.age), height: str(user.heightCm), weight: str(user.weightKg),
+      yearsOfPlay: str(user.yearsOfPlay), skillFeature: user.skillFeature || '' }
+  },
+
+  async loadProfile() {
+    const revision = this._editRevision || 0
+    try {
+      const api = await this.getApi()
+      const user = await api.get('/api/auth/me')
+      const profile = this.mapProfile(user)
+      if (revision === (this._editRevision || 0)) {
+        this.setData({ profile, positionIndex: this.data.positions.indexOf(profile.position) })
+      }
+    } catch (error) { wx.showToast({ title: error.message || '加载失败', icon: 'none' }) }
   },
 
   goBack() {
@@ -62,6 +79,7 @@ Page({
   },
 
   updateProfileField(field, value) {
+    this._editRevision = (this._editRevision || 0) + 1
     this.setData({ [`profile.${field}`]: value })
   },
 
@@ -73,6 +91,7 @@ Page({
   onSkillFeatureChange(e) { this.updateProfileField('skillFeature', e.detail.value) },
 
   onPositionChange(e) {
+    this._editRevision = (this._editRevision || 0) + 1
     const positionIndex = Number(e.detail.value)
     this.setData({
       positionIndex,
@@ -88,13 +107,14 @@ Page({
       success: (res) => {
         const file = res.tempFiles && res.tempFiles[0]
         if (file && file.tempFilePath) {
-          this.setData({ 'profile.avatar': file.tempFilePath })
+          this.updateProfileField('avatar', file.tempFilePath)
         }
       }
     })
   },
 
-  saveProfile() {
+  async saveProfile() {
+    if (this._saving) return
     const profile = { ...this.data.profile }
     profile.name = String(profile.name || '').trim()
     profile.position = String(profile.position || '').trim()
@@ -109,8 +129,38 @@ Page({
       return
     }
 
-    wx.setStorageSync('profile', profile)
-    wx.showToast({ title: '资料已保存', icon: 'success', duration: 900 })
-    setTimeout(() => this.goBack(), 900)
+    const number = value => value === '' ? null : Number(value)
+    const numeric = [profile.age, profile.height, profile.weight, profile.yearsOfPlay]
+    if (numeric.some(value => value !== '' && !Number.isInteger(Number(value)))) {
+      wx.showToast({ title: '请填写完整信息', icon: 'none' })
+      return
+    }
+    this._saving = true
+    const revision = this._editRevision = (this._editRevision || 0) + 1
+    try {
+      const api = await this.getApi()
+      const auth = await api.ensureLogin()
+      if (!auth || auth.userId == null) throw { message: '未登录或登录已过期' }
+      const localAvatar = value => !!value && (!/^https?:\/\//i.test(value) || /^https?:\/\/(tmp|usr)\//i.test(value))
+      if (localAvatar(profile.avatar)) {
+        const uploaded = await api.upload('/api/upload/image', profile.avatar)
+        if (!uploaded || !uploaded.url || localAvatar(uploaded.url)) throw { message: '保存失败，请重试' }
+        profile.avatar = uploaded.url
+      }
+      const saved = await api.put('/api/users/' + encodeURIComponent(auth.userId), {
+        nickname: profile.name, avatarUrl: profile.avatar, position: profile.position,
+        age: number(profile.age), heightCm: number(profile.height), weightKg: number(profile.weight),
+        yearsOfPlay: number(profile.yearsOfPlay), skillFeature: profile.skillFeature
+      })
+      const confirmed = this.mapProfile(saved)
+      wx.setStorageSync('profile', confirmed)
+      if (revision === this._editRevision) {
+        this.setData({ profile: confirmed, positionIndex: this.data.positions.indexOf(confirmed.position) })
+        setTimeout(() => { if (revision === this._editRevision) this.goBack() }, 900)
+      }
+      wx.showToast({ title: '资料已保存', icon: 'success', duration: 900 })
+      return saved
+    } catch (error) { wx.showToast({ title: error.message || '保存失败，请重试', icon: 'none' }) }
+    finally { this._saving = false }
   }
 })

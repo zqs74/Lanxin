@@ -1,10 +1,8 @@
+const { createApiClient } = require('./utils/api')
+
 // app.js - 昇梦体育 主题系统（auto/light/dark 三模式 + wx.onThemeChange）
 App({
   onLaunch() {
-    wx.cloud.init({
-      env: "cloud1-d8gg26do45365a017"
-    })
-
     this.globalData = {
       userInfo: null,
       userTheme: 'auto',
@@ -13,13 +11,23 @@ App({
       tabBarInstances: [],
       floatAIButtonInstances: [],
       careerStats: {
-        points: 128,
-        rebounds: 86,
-        assists: 42,
-        shootingPercentage: 38.7,
-        totalGames: 24
+        points: 0,
+        rebounds: 0,
+        assists: 0,
+        shootingPercentage: 0,
+        totalGames: 0
       }
     }
+
+    this.api = createApiClient(wx)
+    this.globalData.api = this.api
+    this.globalData.authReady = this.api.ensureLogin().then(user => {
+      this.globalData.userInfo = user
+      return user
+    }).catch(error => {
+      this.globalData.authError = { code: error.code, message: error.message }
+      return null
+    })
 
     this.loadTheme()
     this.listenSystemTheme()
@@ -41,11 +49,11 @@ App({
     tabBarInstances: [],
     floatAIButtonInstances: [],
     careerStats: {
-      points: 128,
-      rebounds: 86,
-      assists: 42,
-      shootingPercentage: 38.7,
-      totalGames: 24
+      points: 0,
+      rebounds: 0,
+      assists: 0,
+      shootingPercentage: 0,
+      totalGames: 0
     }
   },
 
@@ -296,39 +304,5 @@ App({
     return this.globalData.userTheme
   },
 
-  api: {
-    baseURL: 'http://192.168.43.233:8080',
-    get: function(url, params) {
-      const baseURL = this.baseURL;
-      wx.showLoading({
-        title: '加载中...'
-      });
-
-      return new Promise((resolve, reject) => {
-        wx.request({
-          url: baseURL + url,
-          method: 'GET',
-          data: params,
-          success: (res) => {
-            wx.hideLoading();
-            console.log('API响应:', res);
-            if (res.statusCode === 200) {
-              if (res.data.code === 0) {
-                resolve(res.data.data);
-              } else {
-                reject(res.data);
-              }
-            } else {
-              reject({ message: '网络错误' + res.statusCode });
-            }
-          },
-          fail: (err) => {
-            wx.hideLoading();
-            console.log('API请求失败:', err);
-            reject(err);
-          }
-        });
-      });
-    }
-  }
+  api: null
 })

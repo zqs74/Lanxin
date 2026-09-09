@@ -1,6 +1,13 @@
 // profile.js - 昇梦体育 商城（原个人中心已迁入首页头像弹层）
 const app = getApp()
 
+let requestSequence = 0
+const api = () => app.api || app.globalData.api
+const showError = error => wx.showToast({ title: (error && error.message) || '请求失败，请重试', icon: 'none' })
+const cacheOrders = list => {
+  try { wx.setStorageSync('mall_orders', list) } catch (e) { console.error('保存订单失败', e) }
+}
+
 const CATEGORIES = [
   { key: 'all', label: '全部' },
   { key: 'jersey', label: '球服' },
@@ -9,29 +16,14 @@ const CATEGORIES = [
   { key: 'gear', label: '配件' }
 ]
 
-const PRODUCTS = [
-  { id: 1, name: '昇梦定制球服（红）', category: 'jersey', price: 129, emoji: '👕', tag: '热卖', desc: '透气速干面料，专业赛事级剪裁，支持号码定制' },
-  { id: 2, name: '昇梦定制球服（蓝）', category: 'jersey', price: 129, emoji: '👕', tag: '经典', desc: '透气速干面料，深蓝配色，适合球队统一着装' },
-  { id: 3, name: '昇梦定制球服（金）', category: 'jersey', price: 139, emoji: '👕', tag: '限定', desc: '冠军金配色，吸湿排汗，联赛官方同款' },
-  { id: 4, name: '专业比赛篮球 7 号', category: 'ball', price: 89, emoji: '🏀', tag: '热卖', desc: '标准比赛用球，PU 材质，室内外通用' },
-  { id: 5, name: '小篮球 5 号（青少年）', category: 'ball', price: 69, emoji: '🏀', tag: 'U12', desc: '符合小篮球联赛标准，适合 U8/U10/U12 组别' },
-  { id: 6, name: '训练用篮球 6 号', category: 'ball', price: 79, emoji: '🏀', tag: '', desc: '耐磨训练球，手感舒适，适合日常训练' },
-  { id: 7, name: '吸汗护腕（双只装）', category: 'guard', price: 29, emoji: '🧤', tag: '实惠', desc: '加厚吸汗，防滑耐磨，多色可选' },
-  { id: 8, name: '运动护膝', category: 'guard', price: 59, emoji: '🦿', tag: '', desc: '弹簧支撑，减压缓冲，保护膝盖' },
-  { id: 9, name: '运动护踝', category: 'guard', price: 49, emoji: '🦶', tag: '', desc: '轻薄透气，防崴脚，实战必备' },
-  { id: 10, name: '便携运动水壶', category: 'gear', price: 25, emoji: '🥤', tag: '', desc: '大容量 750ml，食品级材质，一键开合' },
-  { id: 11, name: '运动速干毛巾', category: 'gear', price: 19, emoji: '🧣', tag: '', desc: '超强吸水，柔软亲肤，训练擦汗好帮手' },
-  { id: 12, name: '篮球收纳网袋', category: 'gear', price: 15, emoji: '👜', tag: '', desc: '加粗网绳，可装 2-3 颗篮球，方便携带' }
-]
-
 Page({
   data: {
     themeClass: '',
     pageBg: '#f8f7f4',
     categories: CATEGORIES,
     activeCategory: 'all',
-    products: PRODUCTS,
-    filteredProducts: PRODUCTS,
+    products: [],
+    filteredProducts: [],
     // 详情/下单
     detailVisible: false,
     currentProduct: null,
@@ -43,7 +35,7 @@ Page({
 
   onLoad() {
     this.initTheme()
-    this.loadOrders()
+    return this.loadProducts()
   },
 
   _themeClass(ut) { return ut === 'auto' ? '' : (ut === 'light' ? 'theme-light' : 'theme-dark') },
@@ -63,7 +55,19 @@ Page({
     const tabBar = typeof this.getTabBar === 'function' && this.getTabBar()
     if (tabBar) tabBar.updateSelected(3)
     this._syncTheme()
-    this.loadOrders()
+    return this.loadOrders()
+  },
+
+  async loadProducts() {
+    try {
+      const products = await api().get('/api/comptrain/products', { category: 'all' })
+      if (!Array.isArray(products)) throw new Error('请求失败，请重试')
+      const key = this.data.activeCategory
+      this.setData({ products, filteredProducts: key === 'all' ? products : products.filter(p => p.category === key) })
+    } catch (e) {
+      this.setData({ products: [], filteredProducts: [] })
+      showError(e)
+    }
   },
 
   // ===== 分类 =====
@@ -76,73 +80,99 @@ Page({
 
   // ===== 商品详情 =====
   openDetail(e) {
+    if (this._orderSubmitting || this._clearingOrders) return
     const id = e.currentTarget.dataset.id
     const product = this.data.products.find(p => p.id === id)
     if (!product) return
+    this._orderRequest = null
     this.setData({ currentProduct: product, detailVisible: true, buyCount: 1 })
   },
 
-  closeDetail() { this.setData({ detailVisible: false }) },
+  closeDetail() {
+    if (this._orderSubmitting) return
+    this._orderRequest = null
+    this.setData({ detailVisible: false })
+  },
 
   increase() {
+    if (this._orderSubmitting) return
     if (this.data.buyCount >= 99) return
     this.setData({ buyCount: this.data.buyCount + 1 })
   },
 
   decrease() {
+    if (this._orderSubmitting) return
     if (this.data.buyCount <= 1) return
     this.setData({ buyCount: this.data.buyCount - 1 })
   },
 
-  // ===== 模拟下单 =====
-  submitOrder() {
+  // ===== 下单 =====
+  async submitOrder() {
+    if (this._orderSubmitting || this._clearingOrders || !this.data.detailVisible) return
     const product = this.data.currentProduct
     if (!product) return
     const count = this.data.buyCount
-    const order = {
-      id: 'ord_' + Date.now(),
-      productId: product.id,
-      productName: product.name,
-      emoji: product.emoji,
-      price: product.price,
-      count,
-      total: product.price * count,
-      createdAt: new Date().toISOString()
+    const signature = JSON.stringify([product.id, count])
+    if (!this._orderRequest || this._orderRequest.signature !== signature) {
+      this._orderRequest = {
+        signature,
+        id: `order_${Date.now()}_${++requestSequence}_${Math.random().toString(36).slice(2)}`
+      }
     }
+    this._orderSubmitting = true
+    this._ordersVersion = (this._ordersVersion || 0) + 1
     try {
-      const list = wx.getStorageSync('mall_orders') || []
-      list.unshift(order)
-      wx.setStorageSync('mall_orders', list.slice(0, 50))
-      this.setData({ orders: list.slice(0, 50) })
-    } catch (e) { console.error('保存订单失败', e) }
-
-    this.setData({ detailVisible: false })
-    wx.showToast({ title: '下单成功（演示）', icon: 'success' })
+      const order = await api().post('/api/comptrain/orders', {
+        productId: product.id, count, requestId: this._orderRequest.id
+      })
+      if (!order || order.id == null || order.status !== 'UNPAID') throw new Error('请求失败，请重试')
+      const list = [order, ...this.data.orders.filter(item => item.id !== order.id)]
+      this._ordersVersion = (this._ordersVersion || 0) + 1
+      this.setData({ orders: list, detailVisible: false })
+      cacheOrders(list)
+      this._orderRequest = null
+      wx.showToast({ title: '下单成功（演示）', icon: 'success' })
+    } catch (e) { showError(e) } finally { this._orderSubmitting = false }
   },
 
   // ===== 订单 =====
-  loadOrders() {
+  async loadOrders() {
+    const version = this._ordersVersion = (this._ordersVersion || 0) + 1
     try {
-      const list = wx.getStorageSync('mall_orders') || []
+      const list = await api().get('/api/comptrain/orders')
+      if (!Array.isArray(list)) throw new Error('请求失败，请重试')
+      if (version !== this._ordersVersion || this._orderSubmitting || this._clearingOrders) return
       this.setData({ orders: list })
-    } catch (e) { this.setData({ orders: [] }) }
+      cacheOrders(list)
+    } catch (e) {
+      if (version !== this._ordersVersion || this._orderSubmitting || this._clearingOrders) return
+      this.setData({ orders: [] })
+      showError(e)
+    }
   },
 
-  showOrders() { this.loadOrders(); this.setData({ ordersVisible: true }) },
+  showOrders() { this.setData({ ordersVisible: true }); return this.loadOrders() },
   closeOrders() { this.setData({ ordersVisible: false }) },
 
   clearOrders() {
-    wx.showModal({
+    if (this._clearingOrders || this._orderSubmitting) return
+    this._clearingOrders = true
+    try { wx.showModal({
       title: '清空订单',
       content: '确定清空全部订单记录吗？',
-      success: (res) => {
-        if (res.confirm) {
+      success: async (res) => {
+        if (!res.confirm) { this._clearingOrders = false; return }
+        this._ordersVersion = (this._ordersVersion || 0) + 1
+        try {
+          await api().delete('/api/comptrain/orders')
+          this._ordersVersion = (this._ordersVersion || 0) + 1
           try { wx.removeStorageSync('mall_orders') } catch (e) {}
           this.setData({ orders: [] })
           wx.showToast({ title: '已清空', icon: 'success' })
-        }
-      }
-    })
+        } catch (e) { showError(e) } finally { this._clearingOrders = false }
+      },
+      fail: (e) => { this._clearingOrders = false; showError(e) }
+    }) } catch (e) { this._clearingOrders = false; showError(e) }
   },
 
   stopPropagation() {}

@@ -48,19 +48,19 @@
       <view class="today-summary card">
         <view class="summary-item">
           <view class="summary-icon"><t-icon name="time" size="40rpx" color="#D4AF37" /></view>
-          <view class="summary-value">60</view>
+          <view class="summary-value">{{ todaySummary.durationMinutes }}</view>
           <view class="summary-label">分钟</view>
         </view>
         <view class="summary-divider"></view>
         <view class="summary-item">
           <view class="summary-icon"><t-icon name="activity" size="40rpx" color="#D4AF37" /></view>
-          <view class="summary-value">4</view>
+          <view class="summary-value">{{ todaySummary.count }}</view>
           <view class="summary-label">项目</view>
         </view>
         <view class="summary-divider"></view>
         <view class="summary-item">
           <view class="summary-icon"><t-icon name="flashlight" size="40rpx" color="#D4AF37" /></view>
-          <view class="summary-value">高强度</view>
+          <view class="summary-value">{{ todaySummary.intensity }}</view>
           <view class="summary-label">强度</view>
         </view>
       </view>
