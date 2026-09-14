@@ -4,8 +4,8 @@
       <view class="bs-hero-check"></view>
     </view>
     <view class="bs-hero-kicker">篮芯办赛</view>
-    <view class="bs-hero-title">预约成功</view>
-    <view class="bs-hero-sub">已提交场地预约，客户经理将尽快与您联系确认档期</view>
+    <view class="bs-hero-title">{{record.statusLabel || '预约已提交'}}</view>
+    <view class="bs-hero-sub">{{statusDescription}}</view>
   </view>
 
   <view class="section-card bs-venue-card" wx:if="{{venue}}">

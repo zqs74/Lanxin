@@ -1,42 +1,37 @@
-const {
-  libraryCategories,
-  venues,
-  referees,
-  materials,
-  rentalItems,
-  suppliers,
-  mediaResources,
-} = require("../../utils/data/resources");
+const api = require('../../utils/api');
+const session = require('../../utils/session');
+const CATEGORY_LABELS = { venues: '场馆', referees: '裁判', materials: '物料', rentals: '租赁', suppliers: '供应商', media: '媒体' };
 
-const sourceMap = {
-  venues,
-  referees,
-  materials,
-  rentals: rentalItems,
-  suppliers,
-  media: mediaResources,
-};
-
-Page({
+Page(session.protectPage({
   data: {
-    categories: libraryCategories,
+    categories: [],
     activeCategory: "venues",
-    featuredItem: venues[0],
-    list: venues.slice(1),
-    resourceCount: venues.length,
+    featuredItem: null,
+    list: [],
+    resourceCount: 0,
     activeCategoryLabel: "场馆",
     townFilter: "全部",
     emptyText: "",
-    towns: ["全部", "南城", "东城", "松山湖", "大朗", "黄江", "虎门"],
+    towns: ["全部"],
     // A1 详情访问控制：点击详情 → 居中弹窗展示客服二维码
     guideVisible: false,
   },
 
-  onLoad() {
-    this.refreshList();
+  async onLoad() {
+    const config = await api.getConfig();
+    const taxonomy = config.taxonomy || {};
+    const raw = Array.isArray(taxonomy) ? taxonomy : (taxonomy.categories || taxonomy.libraryCategories || taxonomy.resourceCategories);
+    // These are navigation labels for the contracted endpoints, never resource cards.
+    const source = Array.isArray(raw) ? raw : Object.keys(raw || CATEGORY_LABELS)
+      .map(key => ({ key, label: (raw && typeof raw[key] === 'string' && raw[key]) || CATEGORY_LABELS[key] || key }));
+    const categories = source.map(item => typeof item === 'string' ? { key: item, label: CATEGORY_LABELS[item] || item } :
+      Object.assign({}, item, { key: item.key || item.value }));
+    this.setData({ categories, activeCategory: categories.some(item => item.key === this.data.activeCategory)
+      ? this.data.activeCategory : (categories[0] && categories[0].key) || 'venues', towns: ['全部'].concat(config.towns || []) });
   },
 
-  onShow() {
+  async onShow() {
+    await this.refreshList();
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
       this.getTabBar().setData({
         active: "library",
@@ -69,29 +64,20 @@ Page({
     );
   },
 
-  refreshList() {
-    const raw = sourceMap[this.data.activeCategory] || [];
-    const sourceList = this.data.townFilter === "全部"
-      ? raw
-      : raw.filter((item) => !item.town || item.town === this.data.townFilter);
-    const featuredItem = sourceList[0] || null;
-    const list = featuredItem ? sourceList.slice(1) : [];
-    const currentCategory = this.data.categories.find((item) => item.key === this.data.activeCategory);
-
-    let emptyText = "";
-    if (!sourceList.length) {
-      emptyText = this.data.activeCategory === "venues"
-        ? "当前镇区暂无匹配场馆，可以试试周边镇区"
-        : "当前镇区暂无这类资源，可以换个筛选试试";
+  async refreshList() {
+    const sequence = this._listSequence = (this._listSequence || 0) + 1;
+    const { activeCategory, townFilter } = this.data;
+    this.setData({ featuredItem: null, list: [], resourceCount: 0, emptyText: '正在加载资源' });
+    try {
+      const items = await api.listAll('/api/resources', { category: activeCategory, town: townFilter === '全部' ? '' : townFilter });
+      if (this._dead || sequence !== this._listSequence) return;
+      const category = this.data.categories.find(item => item.key === activeCategory || item.value === activeCategory);
+      this.setData({ featuredItem: items[0] || null, list: items.slice(1), resourceCount: items.length,
+        activeCategoryLabel: category ? category.label : '资源', emptyText: items.length ? '' : '当前筛选暂无资源，可以换个筛选试试' });
+    } catch (error) {
+      if (sequence === this._listSequence && !this._dead) this.setData({ featuredItem: null, list: [], resourceCount: 0, emptyText: '资源加载失败，请稍后重试' });
+      throw error;
     }
-
-    this.setData({
-      featuredItem,
-      list,
-      resourceCount: sourceList.length,
-      activeCategoryLabel: currentCategory ? currentCategory.label : "资源",
-      emptyText,
-    });
   },
 
   // —— A1：详情访问控制（点击详情 → 居中弹窗展示客服二维码，详情不对外展示）——
@@ -101,6 +87,7 @@ Page({
   },
 
   showGuide() {
+    api.applyContact(this);
     this.setData(
       {
         guideVisible: true,
@@ -132,4 +119,4 @@ Page({
   openContact() {
     this.showGuide();
   },
-});
+}));

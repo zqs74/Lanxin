@@ -1,40 +1,37 @@
 // poster.js - 方案海报页（预览 + Painter 生成海报导出）
-const { decodePayload, encodePayload } = require("../../utils/share");
-const { createRecommendation } = require("../../utils/recommender");
+const { loadPlan, prepareShare, shareMessage } = require('../../utils/share');
+const session = require('../../utils/session');
 
-Page({
+Page(session.protectPage({
   data: {
     poster: null,
     saving: false,
     palette: null,
   },
 
-  onLoad(query) {
-    const payload = decodePayload(query.payload || "");
-    const result = createRecommendation(payload || {});
-    this.setData({
-      poster: result.posterPayload,
-    });
+  async onShow() {
+    const record = await loadPlan(this._query);
+    if (this._dead) return;
+    this.setData({ poster: record.payload.result.posterPayload || null });
+    prepareShare(this, record.id, this._query.shareId);
   },
 
-  onShareAppMessage() {
-    const payload = getApp().globalData.latestSharePayload || {};
-    const encoded = encodePayload(payload);
-    return {
-      title: this.data.poster ? this.data.poster.title : "东莞篮球约战方案",
-      path: `/pages/result/result?payload=${encoded}`,
-    };
-  },
+  onShareAppMessage() { return shareMessage(this, this.data.poster && this.data.poster.title); },
 
   // —— Painter 导出：设置 palette 触发组件渲染，imgOK 回调拿图片路径 ——
-  savePoster() {
+  async savePoster() {
     if (this.data.saving || !this.data.poster) {
       return;
     }
-    this.setData({
-      saving: true,
-      palette: buildPosterPalette(this.data.poster),
-    });
+    this.setData({ saving: true });
+    try {
+      await session.me();
+      const record = await loadPlan(this._query);
+      if (this._dead) return;
+      const poster = record.payload.result.posterPayload;
+      if (!poster) throw new Error('当前方案暂无可用海报');
+      this.setData({ poster, palette: buildPosterPalette(poster) });
+    } catch (error) { this.setData({ saving: false }); throw error; }
   },
 
   onImgOK(event) {
@@ -67,7 +64,7 @@ Page({
     this.setData({ saving: false });
     wx.showToast({ title, icon: "none" });
   },
-});
+}));
 
 // 方案海报 palette（Painter JSON 布局，蓝白风格，与预约卡同源）
 function buildPosterPalette(poster) {

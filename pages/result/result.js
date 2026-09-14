@@ -1,34 +1,20 @@
-const {
-  APP_MODE,
-  BUDGET_OPTIONS,
-  DATE_OPTIONS,
-  TOWN_OPTIONS,
-} = require("../../utils/constants");
-const { decodePayload, encodePayload } = require("../../utils/share");
-const { createRecommendation } = require("../../utils/recommender");
-const { saveRecommendation, saveBooking } = require("../../utils/storage");
+const { APP_MODE } = require('../../utils/constants');
+const { loadPlan, planPath, prepareShare, shareMessage } = require('../../utils/share');
+const { createRecommendation } = require('../../utils/recommender');
+const { saveBooking } = require('../../utils/storage');
+const api = require('../../utils/api');
+const session = require('../../utils/session');
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
+const DEMAND_FIELDS = ['mode', 'city', 'sentence', 'town', 'playDate', 'peopleCount', 'teamCount',
+  'budgetLevel', 'venuePreference', 'needReferee', 'needMaterials', 'needMedia', 'needSupplier'];
 
-function normalizeDemand(payload) {
-  return Object.assign(
-    {
-      city: "东莞",
-      sentence: "",
-      budgetLevel: "mid",
-      venuePreference: "indoor",
-      playDate: "2026-08-01",
-      peopleCount: 20,
-      teamCount: 4,
-      town: "南城",
-      needReferee: true,
-      needMaterials: true,
-      needMedia: false,
-      needSupplier: false,
-      mode: APP_MODE.PRO_EVENT,
-    },
-    payload
-  );
+function copySharedDemand(source) {
+  const demand = {};
+  DEMAND_FIELDS.forEach(key => {
+    if (source && ['string', 'number', 'boolean'].includes(typeof source[key])) demand[key] = source[key];
+  });
+  return demand;
 }
 
 function getTodayTimestamp() {
@@ -77,14 +63,14 @@ function formatDateValue(value) {
   return `${year}-${month}-${day}`;
 }
 
-Page({
+Page(session.protectPage({
   data: {
     mode: APP_MODE.PRO_EVENT,
     demand: null,
     result: null,
-    budgetOptions: BUDGET_OPTIONS,
-    dateOptions: DATE_OPTIONS,
-    townOptions: TOWN_OPTIONS,
+    budgetOptions: [],
+    dateOptions: [],
+    townOptions: [],
     tuneVisible: false,
     bookingVisible: false,
     bookingDateCalendarVisible: false,
@@ -101,45 +87,44 @@ Page({
       acceptFallback: true,
     },
     // A3 场地预约：时段选项与预约场馆（锁定主推馆）
-    timeSlots: [
-      { label: "上午 08:00-12:00", value: "morning" },
-      { label: "下午 12:00-18:00", value: "afternoon" },
-      { label: "晚上 18:00-22:00", value: "evening" },
-    ],
+    timeSlots: [],
+    planId: "",
     bookingVenue: null,
     // A1 详情访问控制：点击方案资源卡 → 居中弹窗展示客服二维码
     guideVisible: false,
   },
 
-  onLoad(query) {
-    const payload = decodePayload(query.payload || "") || getApp().globalData.latestSharePayload;
-    const demand = normalizeDemand(payload);
-    const result = createRecommendation(demand);
-    const initialBookingDate = formatDateValue(demand.playDate);
+  async onLoad() {
+    const config = await api.getConfig();
+    this.setData({ budgetOptions: config.budgetOptions || [], dateOptions: config.dateOptions || [],
+      townOptions: config.towns || [], timeSlots: config.timeSlots || [] });
+  },
 
-    // A3：预约场馆锁定主推馆（方案 venue 段第一项）
-    const venueSection = (result.sections || []).find((section) => section.key === "venue");
-    const bookingVenue = (venueSection && venueSection.items[0]) || null;
+  async onShow() {
+    const query = this._query;
+    const sequence = this._resultSequence = (this._resultSequence || 0) + 1;
+    const record = await loadPlan(query);
+    if (this._dead || query !== this._query || sequence !== this._resultSequence) return;
+    this.applyRecord(record);
+  },
 
-    this.setData({
-      mode: demand.mode,
-      demand,
-      result,
-      bookingVenue,
-      "bookingForm.expectedDate": initialBookingDate,
-      bookingCalendarDefaultDate: parseDateValue(initialBookingDate) || getTodayTimestamp(),
-    });
-
-    getApp().setLatestSharePayload(result.sharePayload);
+  applyRecord(record) {
+    if (!record || !record.payload || !record.payload.demand || !record.payload.result) throw new Error('方案响应无效');
+    api.id(record.id);
+    this.record = record;
+    const { demand, result } = record.payload;
+    const venueSection = (result.sections || []).find(section => section.key === 'venue');
+    const initialBookingDate = this.data.planId === record.id && this.data.bookingForm.expectedDate
+      ? this.data.bookingForm.expectedDate : formatDateValue(demand.playDate);
+    this.setData({ planId: record.id, mode: demand.mode, demand, result,
+      bookingVenue: (venueSection && venueSection.items && venueSection.items[0]) || null,
+      'bookingForm.expectedDate': initialBookingDate,
+      bookingCalendarDefaultDate: parseDateValue(initialBookingDate) || getTodayTimestamp() });
+    prepareShare(this, record.id, this._query.shareId);
   },
 
   onShareAppMessage() {
-    const { result } = this.data;
-    const encoded = encodePayload(result.sharePayload);
-    return {
-      title: result.posterPayload ? result.posterPayload.title : "东莞篮球约战方案",
-      path: `/pages/result/result?payload=${encoded}`,
-    };
+    return shareMessage(this, this.data.result && this.data.result.posterPayload && this.data.result.posterPayload.title);
   },
 
   openTunePanel() {
@@ -188,50 +173,24 @@ Page({
     });
   },
 
-  rematchResult() {
-    const demand = Object.assign({}, this.data.demand);
-    const result = createRecommendation(demand);
-    const record = {
-      id: `rec_${Date.now()}`,
-      type: "recommendation",
-      mode: demand.mode,
-      createdAt: new Date().toISOString(),
-      summary: `${result.summary}（调整后）`,
-      payload: {
-        demand,
-        result,
-      },
-    };
-
-    saveRecommendation(record);
-    getApp().setLatestSharePayload(result.sharePayload);
-
-    this.setData(
-      {
-        result,
-        tuneVisible: false,
-      },
-      () => {
-        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
-        if (tabBar) {
-          tabBar.setData({
-            hidden: false,
-          });
-        }
-      }
-    );
-
-    wx.showToast({
-      title: "已重新匹配",
-      icon: "success",
-    });
+  async rematchResult() {
+    if (this._rematching || this._owningPlan || !this.data.demand) return;
+    this._rematching = true;
+    this._resultSequence = (this._resultSequence || 0) + 1;
+    const demand = JSON.parse(JSON.stringify(this.data.demand));
+    try {
+      const record = await api.submitOnce('plan', demand, requestId => createRecommendation(demand, requestId));
+      if (this._dead) return;
+      this._query = { id: record.id };
+      this.applyRecord(record);
+      this.closeTunePanel();
+      wx.showToast({ title: '已重新匹配', icon: 'success' });
+    } finally { this._rematching = false; }
   },
 
   openPoster() {
-    const encoded = encodePayload(this.data.result.sharePayload);
-    wx.navigateTo({
-      url: `/pages/poster/poster?payload=${encoded}`,
-    });
+    if (!this.data.result) return;
+    wx.navigateTo({ url: planPath(this._query, 'poster') });
   },
 
   // —— A1：方案资源卡详情守卫（点击 → 居中弹窗展示客服二维码，详情不对外展示）——
@@ -240,6 +199,7 @@ Page({
   },
 
   showGuide() {
+    api.applyContact(this);
     this.setData(
       {
         guideVisible: true,
@@ -267,7 +227,22 @@ Page({
     );
   },
 
-  openBooking() {
+  async openBooking() {
+    if (this._owningPlan || this._rematching) return;
+    if (this._query.shareId) {
+      this._owningPlan = true;
+      this._resultSequence = (this._resultSequence || 0) + 1;
+      try {
+        const demand = copySharedDemand(this.data.demand);
+        wx.showToast({ title: '正在为你重新匹配预约方案', icon: 'none' });
+        const record = await api.submitOnce('shared-booking-plan', demand,
+          requestId => createRecommendation(demand, requestId));
+        if (this._dead) return;
+        this._query = { id: record.id };
+        this.applyRecord(record);
+      } finally { this._owningPlan = false; }
+    }
+    if (!this.data.bookingVenue || !this.data.planId) { wx.showToast({ title: "暂无可预约场馆", icon: "none" }); return; }
     const currentBookingDate = this.data.bookingForm.expectedDate || this.data.demand.playDate;
     this.setData(
       {
@@ -346,63 +321,24 @@ Page({
     });
   },
 
-  submitBooking() {
-    const { bookingForm, demand, result, bookingVenue } = this.data;
-
-    if (!bookingForm.contactName || !bookingForm.phone) {
-      wx.showToast({
-        title: "联系人和手机号必填",
-        icon: "none",
-      });
-      return;
-    }
-
-    if (!bookingForm.timeSlot) {
-      wx.showToast({
-        title: "请选择办赛时段",
-        icon: "none",
-      });
-      return;
-    }
-
-    // A3：提交时自动带出场馆信息
-    const submitForm = Object.assign({}, bookingForm, {
-      venueName: bookingVenue ? bookingVenue.name : "",
-      venueTown: bookingVenue ? bookingVenue.town : "",
-      priceLevel: bookingVenue ? bookingVenue.priceLevel : "",
-    });
-
-    const recordId = `book_${Date.now()}`;
-
-    saveBooking({
-      id: recordId,
-      type: "booking",
-      mode: demand.mode,
-      createdAt: new Date().toISOString(),
-      summary: result.summary,
-      payload: {
-        demand,
-        result,
-        bookingForm: submitForm,
-      },
-    });
-
-    this.setData(
-      {
-        bookingVisible: false,
-      },
-      () => {
-        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
-        if (tabBar) {
-          tabBar.setData({
-            hidden: false,
-          });
-        }
-      }
-    );
-
-    wx.navigateTo({
-      url: `/pages/booking-success/booking-success?id=${recordId}`,
-    });
+  async submitBooking() {
+    if (this._bookingSubmitting || !this.data.bookingVisible) return;
+    if (this._query.shareId) throw new Error('请先重新匹配为自己的方案再预约');
+    const { bookingForm, bookingVenue, planId } = this.data;
+    if (!planId || !bookingVenue) throw new Error('暂无可预约场馆');
+    if (!(bookingForm.contactName || '').trim() || !/^1[3-9]\d{9}$/.test(bookingForm.phone || '')) throw new Error('请填写联系人和有效手机号');
+    if (!bookingForm.expectedDate || !bookingForm.timeSlot) throw new Error('请选择办赛日期和时段');
+    const form = Object.assign({}, bookingForm);
+    this._bookingSubmitting = true;
+    try {
+      const record = await api.submitOnce('booking', { planId, bookingForm: form },
+        requestId => saveBooking(planId, form, requestId));
+      if (this._dead) return;
+      if (!record || !record.id || !record.status) throw new Error('预约响应无效，请重试');
+      const recordId = api.id(record.id);
+      this.closeBooking();
+      wx.showToast({ title: record.statusLabel || '预约已提交，待确认', icon: 'none' });
+      wx.navigateTo({ url: '/pages/booking-success/booking-success?id=' + recordId });
+    } finally { this._bookingSubmitting = false; }
   },
-});
+}));

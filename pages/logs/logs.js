@@ -1,1 +1,2 @@
-Page({})
+const session = require('../../utils/session');
+Page(session.protectPage({}));

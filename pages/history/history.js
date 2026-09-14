@@ -1,5 +1,6 @@
 const { getRecommendations, getBookings, removeRecordsByType } = require("../../utils/storage");
-const { encodePayload } = require("../../utils/share");
+const api = require('../../utils/api');
+const session = require('../../utils/session');
 
 const TIME_SLOT_LABELS = {
   morning: "上午 08:00-12:00",
@@ -28,27 +29,18 @@ function buildRecommendationHighlight(result) {
 }
 
 function buildList(list = [], type) {
-  const seen = new Set();
-
   return list
-    .filter((item) => {
-      const key = `${item.mode}_${item.summary}`;
-      if (seen.has(key)) {
-        return false;
-      }
-      seen.add(key);
-      return true;
-    })
     .map((item) => {
       const payload = item.payload || {};
       const demand = payload.demand || {};
       const result = payload.result || {};
       const bookingForm = payload.bookingForm || {};
-      const date = demand.playDate || item.createdAt.slice(0, 10);
+      const date = (type === "booking" ? bookingForm.expectedDate : demand.playDate) || (item.createdAt || "").slice(0, 10);
       const town = demand.town || "东莞";
 
       return Object.assign({}, item, {
-        title: type === "booking" ? "场地预约" : getModeLabel(item.mode),
+        payload: Object.assign({}, payload, { planId: item.id }),
+        title: type === "booking" ? (item.statusLabel || "预约已提交") : getModeLabel(item.mode),
         town,
         date,
         meta: [town, date].filter(Boolean).join(" · "),
@@ -64,7 +56,7 @@ function buildList(list = [], type) {
     });
 }
 
-Page({
+Page(session.protectPage({
   data: {
     recommendations: [],
     bookings: [],
@@ -72,7 +64,7 @@ Page({
     previewBookings: [],
   },
 
-  onShow() {
+  async onShow() {
     if (typeof this.getTabBar === "function" && this.getTabBar()) {
       this.getTabBar().setData({
         active: "history",
@@ -80,12 +72,15 @@ Page({
       });
     }
 
-    this.refresh();
+    await this.refresh();
   },
 
-  refresh() {
-    const recommendations = buildList(getRecommendations(), "recommendation");
-    const bookings = buildList(getBookings(), "booking");
+  async refresh() {
+    const sequence = this._refreshSequence = (this._refreshSequence || 0) + 1;
+    const [plans, reservations] = await Promise.all([getRecommendations(), getBookings()]);
+    if (this._dead || sequence !== this._refreshSequence) return;
+    const recommendations = buildList(plans, 'recommendation');
+    const bookings = buildList(reservations, 'booking');
 
     this.setData({
       recommendations,
@@ -106,13 +101,18 @@ Page({
       title: "删除记录",
       content: "确定删除这条记录吗？删除后不可恢复",
       confirmColor: "#fa5151",
-      success: (res) => {
+      success: async (res) => {
         if (!res.confirm) {
           return;
         }
-        removeRecordsByType(type, [id]);
-        wx.showToast({ title: "已删除", icon: "success" });
-        this.refresh();
+        if (this._deleting) return;
+        this._deleting = true;
+        try {
+          await removeRecordsByType(type, [id]);
+          wx.showToast({ title: '已删除', icon: 'success' });
+          await this.refresh();
+        } catch (error) { api.notifyError(error); }
+        finally { this._deleting = false; }
       },
     });
   },
@@ -131,13 +131,12 @@ Page({
 
   reopenRecommendation(event) {
     const { payload } = event.currentTarget.dataset;
-    if (!payload || !payload.demand) {
+    if (!payload || !payload.planId) {
       return;
     }
 
-    const encoded = encodePayload(payload.demand);
     wx.navigateTo({
-      url: `/pages/result/result?payload=${encoded}`,
+      url: '/pages/result/result?id=' + api.id(payload.planId),
     });
   },
 
@@ -148,7 +147,7 @@ Page({
     }
 
     wx.navigateTo({
-      url: `/pages/booking-success/booking-success?id=${id}`,
+      url: '/pages/booking-success/booking-success?id=' + api.id(id),
     });
   },
-});
+}));

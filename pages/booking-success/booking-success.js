@@ -1,7 +1,8 @@
 // booking-success.js - 场地预约成功页（展示预约信息 + Painter 生成预约图片导出）
-const { getBookings } = require("../../utils/storage");
-const { encodePayload, decodePayload } = require("../../utils/share");
-const { createRecommendation } = require("../../utils/recommender");
+const { getBooking } = require('../../utils/storage');
+const { prepareShare, shareMessage } = require('../../utils/share');
+const api = require('../../utils/api');
+const session = require('../../utils/session');
 
 const TIME_SLOT_LABELS = {
   morning: "上午 08:00-12:00",
@@ -9,29 +10,7 @@ const TIME_SLOT_LABELS = {
   evening: "晚上 18:00-22:00",
 };
 
-// 补齐 demand 默认值（与 result 页一致），用于分享还原重建方案
-function normalizeDemand(payload) {
-  return Object.assign(
-    {
-      city: "东莞",
-      sentence: "",
-      budgetLevel: "mid",
-      venuePreference: "indoor",
-      playDate: "2026-08-01",
-      peopleCount: 20,
-      teamCount: 4,
-      town: "南城",
-      needReferee: true,
-      needMaterials: true,
-      needMedia: false,
-      needSupplier: false,
-      mode: "pro_event",
-    },
-    payload
-  );
-}
-
-Page({
+Page(session.protectPage({
   data: {
     record: null,
     demand: null,
@@ -39,58 +18,38 @@ Page({
     venue: null,
     modeLabel: "",
     summary: "",
+    statusDescription: "",
     saving: false,
     palette: null,
   },
 
-  onLoad(query) {
-    // 来源一：本地记录（query.id，历史页/预约后跳转）
-    // 来源二：分享还原（query.payload，好友点开分享卡片）
-    let demand = null;
-    let bookingForm = {};
-    let result = null;
-    let record = null;
+  async onShow() { await this.refreshRecord(); },
 
-    if (query.id) {
-      record = (getBookings() || []).find((item) => item.id === query.id) || null;
-      if (record) {
-        const payload = record.payload || {};
-        demand = payload.demand || null;
-        bookingForm = payload.bookingForm || {};
-        result = payload.result || {};
-      }
-    } else if (query.payload) {
-      const shared = decodePayload(query.payload);
-      if (shared && shared.demand) {
-        demand = shared.demand;
-        bookingForm = shared.bookingForm || {};
-        result = createRecommendation(normalizeDemand(demand));
-      }
-    }
-
-    if (!demand) {
-      wx.showToast({ title: "预约信息不存在", icon: "none" });
-      return;
-    }
-
-    const venueSection = (result.sections || []).find((section) => section.key === "venue");
-    const venueItem = venueSection && venueSection.items[0];
-
+  async refreshRecord() {
+    const sequence = this._recordSequence = (this._recordSequence || 0) + 1;
+    const record = await getBooking(this._query.id);
+    if (this._dead || sequence !== this._recordSequence) return;
+    if (!record || !record.payload || !record.payload.demand) throw new Error('预约信息不存在');
+    const { demand, bookingForm = {}, result = {} } = record.payload;
+    const venueSection = (result.sections || []).find(section => section.key === 'venue');
+    const venueItem = venueSection && venueSection.items && venueSection.items[0];
     const venue = {
-      name: bookingForm.venueName || (venueItem && venueItem.name) || "场馆待确认",
-      town: bookingForm.venueTown || demand.town || "东莞",
-      priceLevel: bookingForm.priceLevel || (venueItem && venueItem.priceLevel) || "",
-      cover: (venueItem && (venueItem.cover || venueItem.avatar || venueItem.image)) || "",
+      name: bookingForm.venueName || (venueItem && venueItem.name) || '场馆待确认',
+      town: bookingForm.venueTown || demand.town || '',
+      priceLevel: bookingForm.priceLevel || (venueItem && venueItem.priceLevel) || '',
+      cover: (venueItem && (venueItem.cover || venueItem.avatar || venueItem.image)) || '',
     };
-
-    this.setData({
-      record,
-      demand,
-      form: bookingForm,
-      venue,
-      modeLabel: demand.mode === "pro_event" ? "半专业赛事" : "野球约球",
-      summary: (record && record.summary) || result.summary || "",
-    });
+    const descriptions = {
+      PENDING: '已提交场地预约，客户经理将尽快与您联系确认档期',
+      CONFIRMED: '客户经理已确认本次预约，请按约定安排办赛',
+      CANCELLED: '本次预约已取消，如需重新安排请联系客户经理',
+      REJECTED: '本次预约未通过，请联系客户经理调整安排',
+      COMPLETED: '本次预约已完成',
+    };
+    this.setData({ record, demand, form: bookingForm, venue,
+      modeLabel: demand.mode === 'pro_event' ? '半专业赛事' : '野球约球', summary: record.summary || result.summary || '',
+      statusDescription: descriptions[record.status] || record.statusLabel || '请联系客户经理了解当前预约状态' });
+    if (record.planId) prepareShare(this, record.planId);
   },
 
   getSlotLabel(value) {
@@ -115,42 +74,25 @@ Page({
 
   // 回到该预约对应的办赛方案
   goPlan() {
-    const { demand } = this.data;
-    if (!demand) {
-      return;
-    }
-    const encoded = encodePayload(demand);
-    wx.navigateTo({
-      url: `/pages/result/result?payload=${encoded}`,
-    });
+    const record = this.data.record;
+    if (!record || !record.planId) { wx.showToast({ title: '对应方案暂不可用', icon: 'none' }); return; }
+    wx.navigateTo({ url: '/pages/result/result?id=' + api.id(record.planId) });
   },
 
-  onShareAppMessage() {
-    const { demand, form } = this.data;
-    if (!demand) {
-      return {
-        title: "我的场地预约已提交",
-        path: "/pages/index/index",
-      };
-    }
-    // 分享还原：payload 携带完整 demand + bookingForm，好友打开直达预约成功页
-    const encoded = encodePayload({ demand, bookingForm: form });
-    return {
-      title: "我的场地预约已提交，一起看看办赛方案",
-      path: `/pages/booking-success/booking-success?payload=${encoded}`,
-      imageUrl: this.data.venue && this.data.venue.cover ? this.data.venue.cover : "",
-    };
-  },
+  onShareAppMessage() { return shareMessage(this, '一起看看办赛方案'); },
 
   // —— Painter 导出：设置 palette 触发组件渲染，imgOK 回调拿图片路径 ——
-  saveImage() {
-    if (this.data.saving) {
+  async saveImage() {
+    if (this.data.saving || !this.data.record) {
       return;
     }
-    this.setData({
-      saving: true,
-      palette: this.buildPalette(),
-    });
+    this.setData({ saving: true });
+    try {
+      await session.me();
+      await this.refreshRecord();
+      if (!this.data.record || this._dead) return;
+      this.setData({ palette: this.buildPalette() });
+    } catch (error) { this.setData({ saving: false }); throw error; }
   },
 
   onImgOK(event) {
@@ -200,7 +142,7 @@ Page({
       },
     });
     views.push({ type: "text", text: "篮芯办赛", css: { left: "40rpx", top: "32rpx", fontSize: "22rpx", color: "#ffffff" } });
-    views.push({ type: "text", text: "场地预约成功", css: { left: "40rpx", top: "76rpx", fontSize: "46rpx", fontWeight: "bold", color: "#ffffff" } });
+    views.push({ type: "text", text: this.data.record.statusLabel || "预约已提交", css: { left: "40rpx", top: "76rpx", fontSize: "46rpx", fontWeight: "bold", color: "#ffffff" } });
     // 模式/镇区 与 日期/时段 分两行展示
     views.push({
       type: "text",
@@ -286,12 +228,12 @@ Page({
     });
     views.push({
       type: "text",
-      text: "场地预约已提交",
+      text: this.data.record.statusLabel || "预约已提交",
       css: { left: "50rpx", top: `${bottomTop + 28}rpx`, fontSize: "26rpx", fontWeight: "bold", color: "#ffffff" },
     });
     views.push({
       type: "text",
-      text: summary || "客户经理将尽快与您联系，确认档期与细节",
+      text: this.data.statusDescription,
       css: { left: "50rpx", top: `${bottomTop + 72}rpx`, width: "540rpx", fontSize: "20rpx", color: "rgba(255,255,255,0.9)", maxLines: 2 },
     });
 
@@ -303,4 +245,4 @@ Page({
       views,
     };
   },
-});
+}));

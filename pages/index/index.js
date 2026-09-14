@@ -1,18 +1,10 @@
-const {
-  APP_MODE,
-  MODE_OPTIONS,
-  MODE_EXAMPLES,
-  TOWN_OPTIONS,
-  BUDGET_OPTIONS,
-  VENUE_OPTIONS,
-  DATE_OPTIONS,
-} = require("../../utils/constants");
-const { parseDemand, getMissingFields } = require("../../utils/parser");
-const { createRecommendation } = require("../../utils/recommender");
-const { saveLatestDemand, saveRecommendation } = require("../../utils/storage");
-const { encodePayload } = require("../../utils/share");
+const { MODE_EXAMPLES } = require('../../utils/constants');
+const { parseDemand, getMissingFields } = require('../../utils/parser');
+const { createRecommendation } = require('../../utils/recommender');
+const api = require('../../utils/api');
+const session = require('../../utils/session');
 
-function buildMissingConfig(fields) {
+function buildMissingConfig(fields, config) {
   return fields
     .map((field) => {
       switch (field) {
@@ -21,28 +13,28 @@ function buildMissingConfig(fields) {
             key: "town",
             label: "优先在哪个镇区？",
             type: "chips",
-            options: TOWN_OPTIONS,
+            options: config.towns || [],
           };
         case "playDate":
           return {
             key: "playDate",
             label: "预计什么时候打？",
             type: "chips",
-            options: DATE_OPTIONS,
+            options: config.dateOptions || [],
           };
         case "venuePreference":
           return {
             key: "venuePreference",
             label: "更想要什么场地？",
             type: "chips",
-            options: VENUE_OPTIONS,
+            options: config.venueOptions || [],
           };
         case "budgetLevel":
           return {
             key: "budgetLevel",
             label: "预算大概在哪一档？",
             type: "chips",
-            options: BUDGET_OPTIONS,
+            options: config.budgetOptions || [],
           };
         case "peopleCount":
           return {
@@ -63,13 +55,13 @@ function buildMissingConfig(fields) {
     .filter(Boolean);
 }
 
-Page({
+Page(session.protectPage({
   data: {
     mode: "",
     city: "东莞",
     sentence: "",
     examples: [],
-    modeOptions: MODE_OPTIONS,
+    modeOptions: [],
     popupVisible: false,
     missingPrompts: [],
     pendingDemand: null,
@@ -83,15 +75,9 @@ Page({
     },
   },
 
-  onLoad(query) {
-    if (query && query.scene) {
-      try {
-        const payload = JSON.parse(decodeURIComponent(query.scene));
-        this.restoreSharedDemand(payload);
-      } catch (error) {
-        console.warn("restore scene failed", error);
-      }
-    }
+  async onLoad() {
+    this._config = await api.getConfig();
+    this.setData({ city: this._config.city || '', modeOptions: this._config.modeOptions || [] });
   },
 
   onShow() {
@@ -132,7 +118,8 @@ Page({
     });
   },
 
-  handlePrimaryAction() {
+  async handlePrimaryAction() {
+    if (this._parsing || this._generating) return;
     const sentence = (this.data.sentence || "").trim();
 
     if (!this.data.mode) {
@@ -151,38 +138,44 @@ Page({
       return;
     }
 
-    const demand = parseDemand(this.data.mode, sentence);
-    const missingFields = getMissingFields(demand);
-    saveLatestDemand(demand);
+    this._parsing = true;
+    const mode = this.data.mode;
+    try {
+      if (!this._config) this._config = await api.getConfig();
+      const parsed = await parseDemand(mode, sentence);
+      if (this._dead || mode !== this.data.mode || sentence !== this.data.sentence.trim()) return;
+      const { demand, missingFields = [] } = parsed;
+      this._requiredFields = missingFields || [];
 
-    if (missingFields.length) {
-      this.setData(
-        {
-          popupVisible: true,
-          pendingDemand: demand,
-          missingPrompts: buildMissingConfig(missingFields),
-          formValues: {
-            town: demand.town || "",
-            playDate: demand.playDate || "",
-            venuePreference: demand.venuePreference || "",
-            budgetLevel: demand.budgetLevel || "",
-            peopleCount: demand.peopleCount || "",
-            teamCount: demand.teamCount || "",
+      if (missingFields.length) {
+        this.setData(
+          {
+            popupVisible: true,
+            pendingDemand: demand,
+            missingPrompts: buildMissingConfig(missingFields, this._config),
+            formValues: {
+              town: demand.town || "",
+              playDate: demand.playDate || "",
+              venuePreference: demand.venuePreference || "",
+              budgetLevel: demand.budgetLevel || "",
+              peopleCount: demand.peopleCount || "",
+              teamCount: demand.teamCount || "",
+            },
           },
-        },
-        () => {
-          const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
-          if (tabBar) {
-            tabBar.setData({
-              hidden: true,
-            });
+          () => {
+            const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
+            if (tabBar) {
+              tabBar.setData({
+                hidden: true,
+              });
+            }
           }
-        }
-      );
-      return;
-    }
+        );
+        return;
+      }
 
-    this.generateResult(demand);
+      await this.generateResult(demand);
+    } finally { this._parsing = false; }
   },
 
   closePopup() {
@@ -215,9 +208,10 @@ Page({
     });
   },
 
-  confirmPrompt() {
+  async confirmPrompt() {
+    if (this._generating) return;
     const demand = Object.assign({}, this.data.pendingDemand, this.data.formValues);
-    const stillMissing = getMissingFields(demand);
+    const stillMissing = getMissingFields(demand, this._requiredFields);
 
     if (stillMissing.length) {
       wx.showToast({
@@ -227,53 +221,19 @@ Page({
       return;
     }
 
-    this.setData(
-      {
-        popupVisible: false,
-      },
-      () => {
-        const tabBar = typeof this.getTabBar === "function" ? this.getTabBar() : null;
-        if (tabBar) {
-          tabBar.setData({
-            hidden: false,
-          });
-        }
-      }
-    );
-
-    this.generateResult(demand);
+    await this.generateResult(demand);
   },
 
-  generateResult(demand) {
-    const result = createRecommendation(demand);
-    const record = {
-      id: `rec_${Date.now()}`,
-      type: "recommendation",
-      mode: demand.mode,
-      createdAt: new Date().toISOString(),
-      summary: result.summary,
-      payload: {
-        demand,
-        result,
-      },
-    };
-
-    saveLatestDemand(demand);
-    saveRecommendation(record);
-    getApp().setLatestSharePayload(result.sharePayload);
-
-    const encoded = encodePayload(result.sharePayload);
-    wx.navigateTo({
-      url: `/pages/result/result?payload=${encoded}`,
-    });
+  async generateResult(demand) {
+    if (this._generating) return;
+    this._generating = true;
+    try {
+      const record = await api.submitOnce('plan', demand, requestId => createRecommendation(demand, requestId));
+      if (this._dead) return;
+      const recordId = api.id(record.id);
+      this.closePopup();
+      wx.navigateTo({ url: '/pages/result/result?id=' + recordId });
+    } finally { this._generating = false; }
   },
 
-  restoreSharedDemand(payload) {
-    const mode = payload.mode || APP_MODE.PRO_EVENT;
-    this.setData({
-      mode,
-      sentence: payload.sentence || "",
-      examples: MODE_EXAMPLES[mode] || [],
-    });
-  },
-});
+}));

@@ -1,0 +1,13 @@
+page { background: #f3f7ff; color: #20304b; }
+.login-shell { padding: 112rpx 44rpx 64rpx; }
+.login-brand { color: #1d5dff; font-size: 28rpx; font-weight: 600; margin-bottom: 28rpx; }
+.login-title { font-size: 52rpx; font-weight: 700; }
+.login-subtitle { color: #7b89a7; font-size: 26rpx; margin: 18rpx 0 48rpx; }
+.login-card { background: #fff; padding: 36rpx; border-radius: 28rpx; box-shadow: 0 16rpx 48rpx rgba(29, 93, 255, .07); }
+.login-label { font-size: 26rpx; margin-bottom: 18rpx; font-weight: 600; }
+.login-input { height: 88rpx; background: #f3f7ff; border-radius: 16rpx; padding: 0 24rpx; margin-bottom: 32rpx; font-size: 28rpx; }
+.login-error { color: #d64045; font-size: 24rpx; margin-bottom: 24rpx; }
+.login-button { background: #1d5dff; color: #fff; font-size: 30rpx; border-radius: 16rpx; }
+.login-button::after { border: none; }
+.login-button[disabled] { background: #92b4ff; color: #fff; }
+.login-help { color: #7b89a7; font-size: 24rpx; line-height: 1.8; margin-top: 28rpx; }
