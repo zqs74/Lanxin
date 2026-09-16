@@ -4,6 +4,8 @@ const { createRecommendation } = require('../../utils/recommender');
 const { saveBooking } = require('../../utils/storage');
 const api = require('../../utils/api');
 const session = require('../../utils/session');
+const { isInfoOnly } = require('../../utils/resource-policy');
+const privacy = require('../../utils/privacy');
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const DEMAND_FIELDS = ['mode', 'city', 'sentence', 'town', 'playDate', 'peopleCount', 'teamCount',
@@ -73,6 +75,7 @@ Page(session.protectPage({
     townOptions: [],
     tuneVisible: false,
     bookingVisible: false,
+    infoOnly: false,
     bookingDateCalendarVisible: false,
     bookingCalendarDefaultDate: getTodayTimestamp() + DAY_IN_MS,
     bookingCalendarMinDate: getTodayTimestamp(),
@@ -96,6 +99,7 @@ Page(session.protectPage({
 
   async onLoad() {
     const config = await api.getConfig();
+    this._config = config;
     this.setData({ budgetOptions: config.budgetOptions || [], dateOptions: config.dateOptions || [],
       townOptions: config.towns || [], timeSlots: config.timeSlots || [] });
   },
@@ -114,9 +118,11 @@ Page(session.protectPage({
     this.record = record;
     const { demand, result } = record.payload;
     const venueSection = (result.sections || []).find(section => section.key === 'venue');
+    const venue = venueSection && venueSection.items && venueSection.items[0];
     const initialBookingDate = this.data.planId === record.id && this.data.bookingForm.expectedDate
       ? this.data.bookingForm.expectedDate : formatDateValue(demand.playDate);
     this.setData({ planId: record.id, mode: demand.mode, demand, result,
+      infoOnly: isInfoOnly(this._config, session.getContact(), record, result, venue),
       bookingVenue: (venueSection && venueSection.items && venueSection.items[0]) || null,
       'bookingForm.expectedDate': initialBookingDate,
       bookingCalendarDefaultDate: parseDateValue(initialBookingDate) || getTodayTimestamp() });
@@ -229,6 +235,9 @@ Page(session.protectPage({
 
   async openBooking() {
     if (this._owningPlan || this._rematching) return;
+    if (this.data.infoOnly || isInfoOnly(this._config, session.getContact(), this.data.bookingVenue)) {
+      wx.showToast({ title: '公开信息不支持代订，请自行核实', icon: 'none' }); return;
+    }
     if (this._query.shareId) {
       this._owningPlan = true;
       this._resultSequence = (this._resultSequence || 0) + 1;
@@ -241,6 +250,9 @@ Page(session.protectPage({
         this._query = { id: record.id };
         this.applyRecord(record);
       } finally { this._owningPlan = false; }
+    }
+    if (this.data.infoOnly) {
+      wx.showToast({ title: '公开信息不支持代订，请自行核实', icon: 'none' }); return;
     }
     if (!this.data.bookingVenue || !this.data.planId) { wx.showToast({ title: "暂无可预约场馆", icon: "none" }); return; }
     const currentBookingDate = this.data.bookingForm.expectedDate || this.data.demand.playDate;
@@ -323,14 +335,25 @@ Page(session.protectPage({
 
   async submitBooking() {
     if (this._bookingSubmitting || !this.data.bookingVisible) return;
+    if (this.data.infoOnly || isInfoOnly(this._config, session.getContact(), this.data.bookingVenue)) {
+      wx.showToast({ title: '公开信息不支持代订，请自行核实', icon: 'none' }); return;
+    }
     if (this._query.shareId) throw new Error('请先重新匹配为自己的方案再预约');
     const { bookingForm, bookingVenue, planId } = this.data;
     if (!planId || !bookingVenue) throw new Error('暂无可预约场馆');
     if (!(bookingForm.contactName || '').trim() || !/^1[3-9]\d{9}$/.test(bookingForm.phone || '')) throw new Error('请填写联系人和有效手机号');
     if (!bookingForm.expectedDate || !bookingForm.timeSlot) throw new Error('请选择办赛日期和时段');
     const form = Object.assign({}, bookingForm);
+    const epoch = session.getEpoch();
     this._bookingSubmitting = true;
     try {
+      try { await privacy.requirePrivacy(); }
+      catch (error) { throw new Error(error.message + '；未提交预约资料'); }
+      if (this._dead || epoch !== session.getEpoch() || !this.data.bookingVisible) return;
+      if (planId !== this.data.planId || this.data.infoOnly ||
+        isInfoOnly(this._config, session.getContact(), this.data.bookingVenue)) {
+        throw new Error('方案或资源状态已变更，请重新查看后操作');
+      }
       const record = await api.submitOnce('booking', { planId, bookingForm: form },
         requestId => saveBooking(planId, form, requestId));
       if (this._dead) return;

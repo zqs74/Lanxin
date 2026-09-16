@@ -22,5 +22,7 @@ module.exports = {
   "./pages/records/records.wxml": "2e043ac2fda911dde3f8eb12bf2a0dfd0a3cfa93a5063706853ddb96154e8894",
   "./pages/records/records.wxss": "7c58d5ce2435a29a869b72d500821106efbf00275cc44a0ff34fb9d475d074f8",
   "./pages/result/result.wxml": "59cf400597561925b948bd414dd25036fc9a62f6866b4270ee372d331f13cb5a",
-  "./pages/result/result.wxss": "43882ce419320b957d01760038709b3c3168ce301466bb79e1e3546cce2c7ee7"
+  "./pages/result/result.wxss": "43882ce419320b957d01760038709b3c3168ce301466bb79e1e3546cce2c7ee7",
+  "./pages/login/login.wxml": "5469ee78341d68ecca20b9409f77d2f5a6f3ea14f1f5118c20d2c8532dbecf31",
+  "./pages/login/login.wxss": "d12ab2c24e4a27ef59e0a9680eb1d28265ddf72e6003292c3a963e1b3207f2ff"
 };

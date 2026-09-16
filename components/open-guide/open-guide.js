@@ -22,8 +22,11 @@ Component({
     },
 
     previewQr() {
-      const { qrCode } = CONTACT;
-      if (!qrCode) return;
+      const { qrCode } = this.data.contact;
+      if (!qrCode) {
+        wx.showToast({ title: '客服二维码未配置', icon: 'none' });
+        return;
+      }
       // 包内静态图片需先经 getImageInfo 转成本地临时路径，wx.previewImage 才能放大预览
       wx.getImageInfo({
         src: qrCode,
@@ -40,7 +43,7 @@ Component({
     },
 
     copyWechat() {
-      const { wechat } = CONTACT;
+      const { wechat } = this.data.contact;
       if (!wechat) {
         wx.showToast({ title: "客服微信待配置", icon: "none" });
         return;
@@ -54,15 +57,15 @@ Component({
     },
 
     callPhone() {
-      const { phone } = CONTACT;
+      const { phone } = this.data.contact;
       if (!phone) {
-        wx.showToast({ title: "请添加客服微信联系", icon: "none" });
+        wx.showToast({ title: "客服电话未配置", icon: "none" });
         return;
       }
       wx.makePhoneCall({
         phoneNumber: phone,
         fail: () => {
-          wx.showToast({ title: "无法拨号，请直接添加微信", icon: "none" });
+          wx.showToast({ title: "拨号未完成", icon: "none" });
         },
       });
     },

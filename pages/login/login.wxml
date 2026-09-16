@@ -9,6 +9,6 @@
     <input class="login-input" value="{{password}}" password="{{true}}" placeholder="请输入密码" maxlength="128" bindinput="onPasswordInput" confirm-type="done" bindconfirm="submitLogin" disabled="{{submitting}}" />
     <view class="login-error" wx:if="{{error}}">{{error}}</view>
     <button class="login-button" bindtap="submitLogin" loading="{{submitting}}" disabled="{{submitting}}">{{submitting ? '登录中' : '登录'}}</button>
-    <view class="login-help">账号由管理员统一发放。如需开通或找回密码，请联系管理员。</view>
+    <view class="login-help">账号密码用于登录验证。<text bindtap="openPrivacyContract">查看隐私保护指引</text></view>
   </view>
 </view>

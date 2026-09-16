@@ -10,8 +10,8 @@
     <view class="og-icon-wrap">
       <image class="og-icon-img" src="/assets/contact-service.svg" mode="aspectFit"></image>
     </view>
-    <view class="og-title">查看详情需开通内部账号</view>
-    <view class="og-subtitle">资源详情、联系方式与档期仅对合作办赛方开放</view>
+    <view class="og-title">{{contact.configured ? '资源联系信息' : '客服尚未配置'}}</view>
+    <view class="og-subtitle">资源仅供参考，不代表合作或可代订</view>
 
     <view class="og-contact-card">
       <block wx:if="{{contact.qrCode}}">
@@ -21,24 +21,24 @@
       </block>
       <view wx:else class="og-qr og-qr--placeholder" bindtap="previewQr">
         <view class="og-qr-logo">篮</view>
-        <view class="og-qr-tip">客服二维码</view>
+        <view class="og-qr-tip">{{contact.qrCode ? '客服二维码' : '尚未配置'}}</view>
       </view>
 
       <view class="og-contact-info">
         <view class="og-contact-name">{{contact.name}}</view>
         <view class="og-contact-row" bindtap="copyWechat">
           <text class="og-contact-label">微信号</text>
-          <text class="og-contact-value">{{contact.wechat || '--'}}</text>
-          <text class="og-contact-copy">复制</text>
+          <text class="og-contact-value">{{contact.wechat || '未配置'}}</text>
+          <text class="og-contact-copy">{{contact.wechat ? '复制' : '未配置'}}</text>
         </view>
         <view class="og-contact-row" bindtap="callPhone">
           <text class="og-contact-label">客服电话</text>
-          <text class="og-contact-value">{{contact.phone || '暂未开通'}}</text>
-          <text class="og-contact-copy">拨打</text>
+          <text class="og-contact-value">{{contact.phone || '未配置'}}</text>
+          <text class="og-contact-copy">{{contact.phone ? '拨打' : '未配置'}}</text>
         </view>
       </view>
     </view>
 
-    <button class="og-btn" bindtap="copyWechat">联系客户经理开通</button>
+    <button class="og-btn" bindtap="copyWechat">{{contact.wechat ? '复制客服微信' : '客服微信未配置'}}</button>
   </view>
 </van-popup>

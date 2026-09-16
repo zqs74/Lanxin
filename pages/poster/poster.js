@@ -1,6 +1,7 @@
 // poster.js - 方案海报页（预览 + Painter 生成海报导出）
 const { loadPlan, prepareShare, shareMessage } = require('../../utils/share');
 const session = require('../../utils/session');
+const imageExport = require('../../utils/image-export');
 
 Page(session.protectPage({
   data: {
@@ -20,50 +21,19 @@ Page(session.protectPage({
 
   // —— Painter 导出：设置 palette 触发组件渲染，imgOK 回调拿图片路径 ——
   async savePoster() {
-    if (this.data.saving || !this.data.poster) {
-      return;
-    }
-    this.setData({ saving: true });
-    try {
+    if (this.data.saving || !this.data.poster) return;
+    return imageExport.start(this, async () => {
       await session.me();
       const record = await loadPlan(this._query);
-      if (this._dead) return;
       const poster = record.payload.result.posterPayload;
       if (!poster) throw new Error('当前方案暂无可用海报');
-      this.setData({ poster, palette: buildPosterPalette(poster) });
-    } catch (error) { this.setData({ saving: false }); throw error; }
-  },
-
-  onImgOK(event) {
-    const path = event.detail && event.detail.path;
-    if (!path) {
-      this.finishSaving("海报导出失败");
-      return;
-    }
-
-    this.setData({ saving: false });
-
-    wx.saveImageToPhotosAlbum({
-      filePath: path,
-      success: () => {
-        wx.showToast({ title: "海报已保存", icon: "success" });
-      },
-      fail: (error) => {
-        console.warn("saveImageToPhotosAlbum failed", error);
-        wx.previewImage({ urls: [path] });
-      },
+      this.setData({ poster });
+      return buildPosterPalette(poster);
     });
   },
 
-  onImgErr(event) {
-    console.warn("painter imgErr", event.detail);
-    this.finishSaving("海报导出失败");
-  },
-
-  finishSaving(title) {
-    this.setData({ saving: false });
-    wx.showToast({ title, icon: "none" });
-  },
+  onImgOK(event) { return imageExport.save(this, event, '海报已保存'); },
+  onImgErr() { imageExport.fail(this); },
 }));
 
 // 方案海报 palette（Painter JSON 布局，蓝白风格，与预约卡同源）
@@ -242,7 +212,7 @@ function buildPosterPalette(poster) {
   });
   views.push({
     type: "text",
-    text: "场馆、裁判、物料、预约入口已同步准备好",
+    text: "资源仅供参考，档期与服务需另行确认",
     css: { left: "50rpx", top: `${bottomTop + 74}rpx`, width: "540rpx", fontSize: "20rpx", color: "rgba(255,255,255,0.9)", maxLines: 1 },
   });
 

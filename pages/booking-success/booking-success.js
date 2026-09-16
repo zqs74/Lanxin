@@ -3,6 +3,7 @@ const { getBooking } = require('../../utils/storage');
 const { prepareShare, shareMessage } = require('../../utils/share');
 const api = require('../../utils/api');
 const session = require('../../utils/session');
+const imageExport = require('../../utils/image-export');
 
 const TIME_SLOT_LABELS = {
   morning: "上午 08:00-12:00",
@@ -40,15 +41,15 @@ Page(session.protectPage({
       cover: (venueItem && (venueItem.cover || venueItem.avatar || venueItem.image)) || '',
     };
     const descriptions = {
-      PENDING: '已提交场地预约，客户经理将尽快与您联系确认档期',
-      CONFIRMED: '客户经理已确认本次预约，请按约定安排办赛',
-      CANCELLED: '本次预约已取消，如需重新安排请联系客户经理',
-      REJECTED: '本次预约未通过，请联系客户经理调整安排',
+      PENDING: '仅登记预约意向，尚未确认档期或安排服务',
+      CONFIRMED: '本次预约已确认，请按确认信息安排办赛',
+      CANCELLED: '本次预约已取消',
+      REJECTED: '本次预约未通过，可调整意向后重新提交',
       COMPLETED: '本次预约已完成',
     };
     this.setData({ record, demand, form: bookingForm, venue,
       modeLabel: demand.mode === 'pro_event' ? '半专业赛事' : '野球约球', summary: record.summary || result.summary || '',
-      statusDescription: descriptions[record.status] || record.statusLabel || '请联系客户经理了解当前预约状态' });
+      statusDescription: descriptions[record.status] || record.statusLabel || '当前预约状态待核实' });
     if (record.planId) prepareShare(this, record.planId);
   },
 
@@ -60,10 +61,10 @@ Page(session.protectPage({
     const rows = [
       ["办赛日期", form.expectedDate || "待定"],
       ["办赛时段", this.getSlotLabel(form.timeSlot) || "待定"],
-      ["联系人", form.contactName || "—"],
-      ["手机号", form.phone || "—"],
-      ["微信号", form.wechat || "—"],
-      ["备注", form.remark || "—"],
+      ["联系人", form.contactName ? "已隐藏" : "—"],
+      ["手机号", form.phone ? "已隐藏" : "—"],
+      ["微信号", form.wechat ? "已隐藏" : "—"],
+      ["备注", form.remark ? "已隐藏" : "—"],
     ];
     return rows.filter((row) => row[1] && row[1] !== "—");
   },
@@ -83,48 +84,16 @@ Page(session.protectPage({
 
   // —— Painter 导出：设置 palette 触发组件渲染，imgOK 回调拿图片路径 ——
   async saveImage() {
-    if (this.data.saving || !this.data.record) {
-      return;
-    }
-    this.setData({ saving: true });
-    try {
+    if (this.data.saving || !this.data.record) return;
+    return imageExport.start(this, async () => {
       await session.me();
       await this.refreshRecord();
-      if (!this.data.record || this._dead) return;
-      this.setData({ palette: this.buildPalette() });
-    } catch (error) { this.setData({ saving: false }); throw error; }
-  },
-
-  onImgOK(event) {
-    const path = event.detail && event.detail.path;
-    if (!path) {
-      this.finishSaving("图片生成失败");
-      return;
-    }
-
-    this.setData({ saving: false });
-
-    wx.saveImageToPhotosAlbum({
-      filePath: path,
-      success: () => {
-        wx.showToast({ title: "已保存到相册", icon: "success" });
-      },
-      fail: (error) => {
-        console.warn("saveImageToPhotosAlbum failed", error);
-        wx.previewImage({ urls: [path] });
-      },
+      return this.buildPalette();
     });
   },
 
-  onImgErr(event) {
-    console.warn("painter imgErr", event.detail);
-    this.finishSaving("图片生成失败");
-  },
-
-  finishSaving(title) {
-    this.setData({ saving: false });
-    wx.showToast({ title, icon: "none" });
-  },
+  onImgOK(event) { return imageExport.save(this, event, '已保存脱敏图片'); },
+  onImgErr() { imageExport.fail(this); },
 
   // 预约卡片 palette（Painter JSON 布局）
   buildPalette() {

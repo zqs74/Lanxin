@@ -57,7 +57,7 @@
           <text wx:for="{{featuredItem.tags}}" wx:key="*this" class="library-feature-tag">{{item}}</text>
         </view>
         <view class="library-feature-cta">
-          <view class="library-feature-cta-text">详情请咨询客户经理</view>
+          <view class="library-feature-cta-text">资源仅供参考，请自行核实</view>
           <view class="library-feature-cta-arrow">›</view>
         </view>
       </view>
@@ -84,7 +84,7 @@
         </view>
         <view class="library-desc">{{item.description}}</view>
         <view class="library-card-cta">
-          <text>详情请咨询客户经理</text>
+          <text>资源仅供参考，请自行核实</text>
           <text class="library-card-cta-arrow">›</text>
         </view>
       </view>
@@ -98,8 +98,8 @@
   <view class="contact-entry" bindtap="openContact" hover-class="library-card--hover" hover-stay-time="80">
     <view class="contact-entry-icon">💬</view>
     <view class="contact-entry-body">
-      <view class="contact-entry-title">联系客户经理</view>
-      <view class="contact-entry-desc">资源详情、档期与合作开通，扫码添加客服微信</view>
+      <view class="contact-entry-title">查看联系信息</view>
+      <view class="contact-entry-desc">公开资源不代表合作或可代订，请自行核实</view>
     </view>
     <view class="contact-entry-arrow">›</view>
   </view>

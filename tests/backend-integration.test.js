@@ -23,6 +23,8 @@ function harness() {
   const storage = new Map(), writes = [], requests = [], navigation = [], toasts = [], modals = [], loaded = [];
   const cache = new Map(); let definition; const pages = [];
   const wx = {
+    getAccountInfoSync() { return { miniProgram: { appId: 'wx0000000000000001' } }; },
+    getPrivacySetting(options) { options.success({ needAuthorization: false, privacyContractName: '测试隐私保护指引' }); },
     request(options) { requests.push(options); },
     getStorageSync(key) { return storage.get(key); },
     setStorageSync(key, value) { writes.push({ key, value: clone(value) }); storage.set(key, clone(value)); },
@@ -32,7 +34,7 @@ function harness() {
     login() { throw new Error('wx.login is forbidden'); },
   };
   const context = vm.createContext({ wx, console, Date: ClockDate, setTimeout, clearTimeout, getCurrentPages: () => pages,
-    Page(value) { definition = value; }, App() {} });
+    Page(value) { definition = value; }, Component(value) { definition = value; }, App() {} });
   function load(relative) {
     const file = path.resolve(root, relative);
     if (cache.has(file)) return cache.get(file).exports;
@@ -59,15 +61,19 @@ function harness() {
   function respond(request, data, statusCode = 200) {
     request.success({ statusCode, data: statusCode >= 200 && statusCode < 300 ? { code: 0, message: 'success', data } : { code: statusCode, msg: data, data: null } });
   }
+  function component(name) {
+    load('components/' + name + '/' + name + '.js');
+    return Object.assign({ data: clone(definition.data), triggerEvent() {} }, definition.methods);
+  }
   const session = load('utils/session.js'), api = load('utils/api.js');
-  return { wx, session, api, load, page, requests, navigation, storage, writes, toasts, modals, loaded, respond,
+  return { wx, session, api, load, page, component, requests, navigation, storage, writes, toasts, modals, loaded, respond,
     advanceTime(ms) { now += ms; } };
 }
 
 test('login failure surfaces server error; password is masked and never persisted', async () => {
   const h = harness(), p = h.page('login'); p.onLoad({});
   p.setData({ username: 'someone', password: 'plaintext-secret' });
-  const pending = p.submitLogin();
+  const pending = p.submitLogin(); await tick();
   assert.equal(h.requests[0].url, 'https://api.lanxin.cyou/bansai-api/api/auth/login');
   assert.equal(h.requests[0].data.password, 'plaintext-secret');
   assert.equal(h.requests[0].header.Authorization, undefined);
@@ -82,7 +88,7 @@ test('successful login stores only session fields and returns to the shared plan
   const h = harness(), p = h.page('login');
   p.onLoad({ next: encodeURIComponent('/pages/result/result?shareId=share-123') });
   p.setData({ username: 'issued', password: 'plaintext-secret' });
-  const pending = p.submitLogin();
+  const pending = p.submitLogin(); await tick();
   h.respond(h.requests[0], Object.assign(auth('a'), { password: 'server-echo', account: Object.assign(account('a'), { password: 'echo' }) }));
   await pending;
   assert.equal(h.navigation[0].url, '/pages/result/result?shareId=share-123');
@@ -94,7 +100,7 @@ test('local session persistence failure does not claim login success', async () 
   const h = harness(), p = h.page('login'); p.onLoad({});
   h.wx.setStorageSync = () => { throw new Error('full'); };
   p.setData({ username: 'issued', password: 'secret' });
-  const pending = p.submitLogin(); h.respond(h.requests[0], auth('a')); await pending;
+  const pending = p.submitLogin(); await tick(); h.respond(h.requests[0], auth('a')); await pending;
   assert.equal(h.navigation.length, 0); assert.equal(h.session.hasSession(), false); assert.match(p.data.error, /保存登录状态/);
 });
 
@@ -284,7 +290,7 @@ test('password change and logout use server revocation then clear session', asyn
 
 test('network login failures release the submit lock without storing credentials', async () => {
   const h = harness(), p = h.page('login'); p.onLoad({}); p.setData({ username: 'issued', password: 'secret' });
-  const pending = p.submitLogin(); await p.submitLogin(); assert.equal(h.requests.length, 1);
+  const pending = p.submitLogin(); await tick(); await p.submitLogin(); assert.equal(h.requests.length, 1);
   h.requests[0].fail(); await pending;
   assert.equal(p.data.submitting, false); assert.equal(p.data.password, ''); assert.match(p.data.error, /网络/);
   assert.equal(h.writes.length, 0); assert.equal(h.navigation.length, 0);
@@ -430,10 +436,16 @@ test('poster export checks revocation and cannot render after a 401', async () =
   assert.equal(p.data.palette, null); assert.equal(p.data.poster, null); assert.equal(h.navigation.length, 1);
 });
 
-test('existing UI hashes remain unchanged except the two approved status bindings', () => {
+test('existing UI hashes allow only exact approved text and privacy entry changes', () => {
   const baseline = require('./ui-baseline');
   for (const [file, expected] of Object.entries(baseline)) {
     let content = fs.readFileSync(path.join(root, file));
+    let approved = content.toString('utf8');
+    for (const [before, after] of require('./ui-approved-changes')[file] || []) {
+      assert.ok(approved.includes(after), file + ': missing approved copy');
+      approved = approved.split(after).join(before);
+    }
+    content = Buffer.from(approved);
     if (file.replace(/\\/g, '/') === './pages/booking-success/booking-success.wxml') {
       let text = content.toString('utf8');
       // UI whitelist: title and subtitle binding only, no layout/style edits.
@@ -519,4 +531,308 @@ test('shared booking refresh with no available venue updates own plan but never 
   assert.equal(p.data.planId, 'own-empty'); assert.equal(p.data.bookingVenue, null);
   assert.equal(p.data.bookingVisible, false); assert.ok(h.toasts.some(item => item.title === '暂无可预约场馆'));
   assert.equal(h.requests.some(item => item.url.endsWith('/api/bookings')), false);
+});
+
+// Privacy/export regression cases use isolated wx mocks; no live requests or credentials.
+function exportHarness() {
+  const h = harness(); h.session.accept(auth('a'));
+  const p = h.page('booking-success'); p.onLoad({ id: 'b1' });
+  const calls = []; let authorized = false;
+  h.wx.getPrivacySetting = options => { calls.push('check'); options.success({ needAuthorization: !authorized, privacyContractName: '测试隐私保护指引' }); };
+  h.wx.requirePrivacyAuthorize = options => { calls.push('authorize'); authorized = true; options.success({}); };
+  h.wx.saveImageToPhotosAlbum = options => { calls.push('save'); options.success({}); };
+  h.wx.previewImage = () => { throw new Error('must not preview after failure'); };
+  h.wx.openSetting = () => { throw new Error('must not force settings'); };
+  return { h, p, calls, exporter: h.load('utils/image-export.js') };
+}
+
+test('export calls real wx privacy authorization and rechecks before album write; duplicate callbacks save once', async () => {
+  const { h, p, calls, exporter } = exportHarness();
+  const palette = { width: '654rpx', views: [] };
+  await exporter.start(p, async () => palette);
+  assert.deepEqual(calls, ['check', 'authorize', 'check']);
+  assert.deepEqual(p.data.palette, palette); assert.equal(p.data.saving, true);
+  const first = p.onImgOK({ detail: { path: 'safe.png' } });
+  await p.onImgOK({ detail: { path: 'duplicate.png' } }); await first;
+  assert.deepEqual(calls, ['check', 'authorize', 'check', 'check', 'save']);
+  assert.equal(p.data.saving, false); assert.equal(p.data.palette, null);
+  assert.equal(h.toasts.filter(item => item.icon === 'success').length, 1);
+  assert.equal(h.modals.length, 0);
+});
+
+test('already-authorized privacy state does not prompt again', async () => {
+  const { h, p, calls, exporter } = exportHarness();
+  h.wx.getPrivacySetting = options => options.success({ needAuthorization: false, privacyContractName: '测试隐私保护指引' });
+  await exporter.start(p, async () => ({ views: [] }));
+  await p.onImgOK({ detail: { path: 'safe.png' } });
+  assert.deepEqual(calls, ['save']);
+});
+
+for (const scenario of ['missing-api', 'check-fails', 'malformed-setting', 'authorize-cancel', 'authorize-deny', 'authorize-api-missing', 'consent-not-recorded']) {
+  test('privacy fails closed before rendering: ' + scenario, async () => {
+    const { h, p, calls, exporter } = exportHarness();
+    if (scenario === 'missing-api') delete h.wx.getPrivacySetting;
+    if (scenario === 'check-fails') h.wx.getPrivacySetting = options => options.fail({ errMsg: 'network error' });
+    if (scenario === 'malformed-setting') h.wx.getPrivacySetting = options => options.success({});
+    if (scenario === 'authorize-api-missing') delete h.wx.requirePrivacyAuthorize;
+    if (scenario === 'authorize-cancel') h.wx.requirePrivacyAuthorize = options => options.fail({ errMsg: 'requirePrivacyAuthorize:fail cancel' });
+    if (scenario === 'authorize-deny') h.wx.requirePrivacyAuthorize = options => options.fail({ errMsg: 'requirePrivacyAuthorize:fail auth deny' });
+    if (scenario === 'consent-not-recorded') h.wx.requirePrivacyAuthorize = options => options.success({});
+    await exporter.start(p, async () => ({ views: [] }));
+    await p.onImgOK({ detail: { path: 'late.png' } });
+    assert.equal(p.data.palette, null); assert.equal(p.data.saving, false);
+    assert.equal(calls.includes('save'), false); assert.equal(h.modals.length, 0);
+    assert.ok(h.toasts.every(item => item.icon !== 'success'));
+  });
+}
+
+test('revoked privacy between rendering and album callback blocks saving', async () => {
+  const { h, p, calls, exporter } = exportHarness();
+  await exporter.start(p, async () => ({ views: [] }));
+  h.wx.getPrivacySetting = options => options.success({ needAuthorization: true, privacyContractName: '测试隐私保护指引' });
+  h.wx.requirePrivacyAuthorize = options => options.fail({ errMsg: 'cancel' });
+  await p.onImgOK({ detail: { path: 'safe.png' } });
+  assert.equal(calls.includes('save'), false); assert.equal(p.data.saving, false);
+  assert.match(h.toasts.at(-1).title, /取消|未授权/);
+});
+
+for (const reason of ['cancel', 'auth deny', 'disk full']) {
+  test('album failure releases lock without preview/settings fallback: ' + reason, async () => {
+    const { h, p, exporter } = exportHarness();
+    h.wx.saveImageToPhotosAlbum = options => options.fail({ errMsg: reason });
+    await exporter.start(p, async () => ({ views: [] }));
+    await p.onImgOK({ detail: { path: 'safe.png' } });
+    assert.equal(p.data.saving, false); assert.equal(p.data.palette, null);
+    assert.ok(h.toasts.every(item => item.icon !== 'success'));
+    await exporter.start(p, async () => ({ views: [] }));
+    assert.equal(p.data.saving, true); // retry is a new explicit action
+    p.onImgErr(); assert.equal(p.data.saving, false);
+  });
+}
+
+for (const action of ['account-switch', 'unload']) {
+  test('pending privacy callback cannot export after ' + action, async () => {
+    const { h, p, calls, exporter } = exportHarness(); let pendingCheck;
+    h.wx.getPrivacySetting = options => { pendingCheck = options; };
+    const task = exporter.start(p, async () => ({ views: [] })); await tick();
+    if (action === 'account-switch') h.session.accept(auth('b')); else p.onUnload();
+    pendingCheck.success({ needAuthorization: false, privacyContractName: '测试隐私保护指引' }); await task;
+    await p.onImgOK({ detail: { path: 'late.png' } });
+    assert.equal(calls.includes('save'), false); assert.equal(p.data.palette, null);
+    assert.equal(h.toasts.length, 0);
+  });
+}
+
+test('painter errors or missing image paths fail closed and allow retry', async () => {
+  const { h, p, calls, exporter } = exportHarness();
+  await exporter.start(p, async () => ({ views: [] }));
+  await p.onImgOK({ detail: {} }); assert.equal(p.data.saving, false);
+  await exporter.start(p, async () => ({ views: [] })); p.onImgErr();
+  assert.equal(p.data.saving, false); assert.equal(calls.includes('save'), false);
+  assert.ok(h.toasts.every(item => item.icon !== 'success'));
+});
+
+test('booking export masks all contact fields and freeform remarks without altering the record', async () => {
+  const { h, p, calls } = exportHarness();
+  const form = { expectedDate: '2026-10-10', timeSlot: 'evening', contactName: '私密接收者', phone: '13800138000', wechat: 'private_recipient', remark: '包含他人联系方式13900139000' };
+  const record = { id: 'b1', status: 'PENDING', statusLabel: '预约成功', payload: { demand, bookingForm: form, result: plan('p1').payload.result } };
+  p.setData({ record, form, venue: {} });
+  const saving = p.saveImage(); h.respond(h.requests[0], account('a')); await tick();
+  h.respond(h.requests[1], record); await saving;
+  const exported = JSON.stringify(p.data.palette);
+  for (const key of ['contactName', 'phone', 'wechat', 'remark']) assert.equal(exported.includes(form[key]), false, key);
+  assert.equal((exported.match(/已隐藏/g) || []).length, 4);
+  assert.deepEqual(p.data.form, form);
+  assert.equal(p.data.record.status, 'PENDING'); assert.equal(p.data.record.statusLabel, '预约意向待确认');
+  assert.doesNotMatch(exported, /客户经理|尽快|预约成功|准备好/);
+  await p.onImgOK({ detail: { path: 'redacted.png' } }); assert.equal(calls.at(-1), 'save');
+});
+
+test('poster page uses the same privacy gate before render and album save', async () => {
+  const { h, calls } = exportHarness(); const p = h.page('poster'); p.onLoad({ id: 'p1' });
+  p.setData({ poster: { title: '海报' } });
+  const saving = p.savePoster(); h.respond(h.requests[0], account('a')); await tick();
+  h.respond(h.requests[1], plan('p1')); await saving;
+  assert.deepEqual(calls, ['check', 'authorize', 'check']);
+  assert.match(JSON.stringify(p.data.palette), /资源仅供参考/);
+  await p.onImgOK({ detail: { path: 'poster.png' } }); assert.equal(calls.at(-1), 'save');
+});
+
+test('PENDING labels stay honest in lists and submissions even with misleading server copy', async () => {
+  const h = harness(); h.session.accept(auth('a')); const storage = h.load('utils/storage.js');
+  const record = { id: 'b1', status: 'PENDING', statusLabel: '客户经理已准备好' };
+  const listing = storage.getBookings(); h.respond(h.requests[0], { items: [record], page: 1, pageSize: 50, total: 1 });
+  assert.equal((await listing)[0].statusLabel, '预约意向待确认');
+  const saving = storage.saveBooking('p1', {}, 'test-request'); h.respond(h.requests[1], record);
+  const result = await saving; assert.equal(result.status, 'PENDING'); assert.equal(result.statusLabel, '预约意向待确认');
+});
+
+for (const where of ['config', 'contact', 'venue', 'result']) {
+  test('info mode blocks booking open and direct submission: ' + where, async () => {
+    const h = harness(); h.session.accept(auth('a')); const p = h.page('result'); p.onLoad({ shareId: 's1' });
+    const source = plan('p1');
+    if (where === 'config') p._config = { resourceMode: 'info' };
+    if (where === 'contact') h.session.setContact({ mode: 'info' });
+    if (where === 'venue') source.payload.result.sections[0].items[0].bookingMode = 'info';
+    if (where === 'result') source.payload.result.mode = 'info';
+    p.applyRecord(source); assert.equal(p.data.infoOnly, true);
+    await p.openBooking(); assert.equal(p.data.bookingVisible, false);
+    p.setData({ bookingVisible: true }); await p.submitBooking();
+    assert.equal(h.requests.length, 0); assert.match(h.toasts.at(-1).title, /不支持代订/);
+  });
+}
+
+test('recipient rematch to an info-only venue does not open booking', async () => {
+  const h = harness(); h.session.accept(auth('a')); const p = h.page('result'); p.onLoad({ shareId: 's1' });
+  p.applyRecord(plan('source')); const opening = p.openBooking(); await tick();
+  const own = plan('own'); own.payload.result.sections[0].items[0].mode = 'info';
+  h.respond(h.requests[0], own); await opening;
+  assert.equal(p.data.infoOnly, true); assert.equal(p.data.bookingVisible, false);
+  assert.equal(h.requests.some(item => item.url.endsWith('/api/bookings')), false);
+});
+
+test('unconfigured and legacy sample contacts never dial, copy or preview', () => {
+  const h = harness();
+  h.session.setContact({ wechat: 'Lanxin-kefu', qrCode: '/assets/contact-qr.png' });
+  const contact = h.session.getContact(); assert.equal(contact.configured, false); assert.equal(contact.name, '客服未配置');
+  const component = h.component('open-guide'); component.copyWechat(); component.callPhone(); component.previewQr();
+  assert.equal(h.toasts.length, 3); assert.ok(h.toasts.every(item => /配置/.test(item.title)));
+  h.session.setContact({ phone: '123', wechat: 'real-service' }); component.data.contact = h.session.getContact();
+  const actions = []; h.wx.setClipboardData = options => actions.push(options.data); h.wx.makePhoneCall = options => actions.push(options.phoneNumber);
+  component.copyWechat(); component.callPhone(); assert.deepEqual(actions, ['real-service', '123']);
+});
+
+test('login privacy entry opens platform contract without login and reports unavailable API', async () => {
+  const h = harness(); const p = h.page('login'); let opened = 0;
+  h.wx.openPrivacyContract = options => { opened++; options.success({}); };
+  await p.openPrivacyContract(); assert.equal(opened, 1); assert.equal(h.requests.length, 0);
+  delete h.wx.openPrivacyContract; await p.openPrivacyContract();
+  assert.match(h.toasts.at(-1).title, /暂不可用/); assert.equal(h.session.hasSession(), false);
+});
+
+test('all share branches use a packaged public cover, never automatic screenshots of recipient PII', async () => {
+  const h = harness(); const share = h.load('utils/share.js'); const p = h.page('booking-success');
+  p.setData({ form: { contactName: '私密用户', phone: '13800138000', wechat: 'private', remark: 'secret' } });
+  const anonymous = p.onShareAppMessage(); assert.ok(fs.existsSync(path.join(root, anonymous.imageUrl)));
+  h.session.accept(auth('a'));
+  const pending = share.prepareShare(p, 'p1'); const message = p.onShareAppMessage();
+  h.respond(h.requests[0], { shareId: 's1', expiresAt: '2099-01-01T00:00:00Z' }); await pending;
+  for (const result of [anonymous, message, await message.promise, p.onShareAppMessage()]) {
+    assert.equal(result.imageUrl, anonymous.imageUrl); assert.doesNotMatch(JSON.stringify(result), /私密用户|13800138000|private|secret/);
+  }
+});
+
+test('cancelling the booking form keeps the draft and never submits a request', () => {
+  const h = harness(); h.session.accept(auth('a')); const p = h.page('result'); p.onLoad({ id: 'p1' });
+  const form = { contactName: '草稿', phone: '13800138000', wechat: 'draft', remark: 'private draft' };
+  p.setData({ bookingVisible: true, bookingDateCalendarVisible: true, bookingForm: form });
+  p.closeBooking();
+  assert.equal(p.data.bookingVisible, false); assert.equal(p.data.bookingDateCalendarVisible, false);
+  assert.deepEqual(p.data.bookingForm, form); assert.equal(h.requests.length, 0);
+});
+
+test('export completion clears a hidden auth snapshot so returning cannot restore stale saving state', async () => {
+  const { p, exporter } = exportHarness();
+  await exporter.start(p, async () => ({ views: [] }));
+  p._authSnapshot = clone(p.data);
+  await p.onImgOK({ detail: { path: 'safe.png' } });
+  assert.equal(p._authSnapshot.saving, false); assert.equal(p._authSnapshot.palette, null);
+});
+
+function sensitiveHarness(kind) {
+  const h = harness();
+  if (kind === 'booking') h.session.accept(auth('a'));
+  const p = h.page(kind === 'login' ? 'login' : 'result'); p.onLoad(kind === 'login' ? {} : { id: 'p1' });
+  if (kind === 'login') p.setData({ username: 'issued', password: 'mock-password' });
+  else p.setData({ bookingVisible: true, planId: 'p1', bookingVenue: { id: 'v1' }, bookingForm: {
+    contactName: '测试联系人', phone: '13800138000', wechat: 'test-private', remark: '测试备注', expectedDate: '2026-10-10', timeSlot: 'evening',
+  } });
+  return { h, p, submit: () => kind === 'login' ? p.submitLogin() : p.submitBooking() };
+}
+
+for (const kind of ['login', 'booking']) {
+  for (const reason of ['empty-name', 'missing-name', 'whitespace-name', 'empty-appid', 'guest-appid', 'platform-fails', 'cancel']) {
+    test(kind + ' sends no personal data when privacy is unavailable: ' + reason, async () => {
+      const { h, p, submit } = sensitiveHarness(kind);
+      if (reason === 'empty-name') h.wx.getPrivacySetting = options => options.success({ needAuthorization: false, privacyContractName: '' });
+      if (reason === 'missing-name') h.wx.getPrivacySetting = options => options.success({ needAuthorization: false });
+      if (reason === 'whitespace-name') h.wx.getPrivacySetting = options => options.success({ needAuthorization: false, privacyContractName: '  \n ' });
+      if (reason === 'empty-appid') h.wx.getAccountInfoSync = () => ({ miniProgram: { appId: '' } });
+      if (reason === 'guest-appid') h.wx.getAccountInfoSync = () => ({ miniProgram: { appId: 'touristappid' } });
+      if (reason === 'platform-fails') h.wx.getPrivacySetting = options => options.fail({ errMsg: 'getPrivacySetting:fail invalid appid' });
+      if (reason === 'cancel') {
+        h.wx.getPrivacySetting = options => options.success({ needAuthorization: true, privacyContractName: '测试隐私指引' });
+        h.wx.requirePrivacyAuthorize = options => options.fail({ errMsg: 'requirePrivacyAuthorize:fail cancel' });
+      }
+      const writeCount = h.writes.length;
+      await submit();
+      assert.equal(h.requests.length, 0); assert.equal(h.navigation.length, 0); assert.equal(h.writes.length, writeCount);
+      assert.equal(h.modals.length, 0);
+      if (kind === 'login') {
+        assert.equal(p.data.submitting, false); assert.equal(p.data.password, '');
+        assert.match(p.data.error, /未提交登录信息/);
+      } else {
+        assert.equal(p._bookingSubmitting, false); assert.equal(p.data.bookingVisible, true);
+        assert.equal(p.data.bookingForm.phone, '13800138000'); assert.match(h.toasts.at(-1).title, /未提交预约资料/);
+      }
+    });
+  }
+
+  test(kind + ' waits for platform authorization and contract recheck before sending data once', async () => {
+    const { h, p, submit } = sensitiveHarness(kind); let pendingAuthorization, agreed = false;
+    const events = [];
+    h.wx.getPrivacySetting = options => { events.push('privacy-check'); options.success({ needAuthorization: !agreed, privacyContractName: '测试隐私指引' }); };
+    h.wx.requirePrivacyAuthorize = options => { events.push('platform-authorize'); pendingAuthorization = options; };
+    const request = h.wx.request; h.wx.request = options => { events.push('send'); request(options); };
+    const task = submit(); await tick(); await submit();
+    assert.equal(h.requests.length, 0); assert.ok(pendingAuthorization);
+    agreed = true; pendingAuthorization.success({}); await tick();
+    assert.deepEqual(events, ['privacy-check', 'platform-authorize', 'privacy-check', 'send']);
+    assert.equal(h.requests.length, 1);
+    h.respond(h.requests[0], kind === 'login' ? auth('a') : { id: 'b1', status: 'PENDING' }); await task;
+    assert.equal(h.modals.length, 0);
+    assert.equal(h.writes.some(item => /privacy|consent|agreed/i.test(item.key)), false);
+  });
+}
+
+test('contract name must remain configured after platform consent, even if needAuthorization becomes false', async () => {
+  const { h, p, submit } = sensitiveHarness('login'); let count = 0;
+  h.wx.getPrivacySetting = options => options.success(++count === 1
+    ? { needAuthorization: true, privacyContractName: '测试隐私指引' }
+    : { needAuthorization: false, privacyContractName: '' });
+  h.wx.requirePrivacyAuthorize = options => options.success({});
+  await submit(); assert.equal(count, 2); assert.equal(h.requests.length, 0); assert.match(p.data.error, /隐私指引未配置/);
+});
+
+test('closing booking while privacy is pending stops the submission after consent returns', async () => {
+  const { h, p, submit } = sensitiveHarness('booking'); let pending;
+  h.wx.getPrivacySetting = options => { pending = options; };
+  const task = submit(); await tick(); p.closeBooking();
+  pending.success({ needAuthorization: false, privacyContractName: '测试隐私指引' }); await task;
+  assert.equal(h.requests.length, 0); assert.equal(p._bookingSubmitting, false);
+});
+
+test('leaving login while privacy is pending never sends the captured password', async () => {
+  const { h, p, submit } = sensitiveHarness('login'); let pending;
+  h.wx.getPrivacySetting = options => { pending = options; };
+  const task = submit(); await tick(); p.onUnload();
+  pending.success({ needAuthorization: false, privacyContractName: '测试隐私指引' }); await task;
+  assert.equal(h.requests.length, 0); assert.equal(p.data.password, '');
+});
+
+test('album rendering fails closed for missing contract name despite needAuthorization=false', async () => {
+  const { h, p, calls, exporter } = exportHarness();
+  h.wx.getPrivacySetting = options => options.success({ needAuthorization: false });
+  await exporter.start(p, async () => ({ views: [] }));
+  await p.onImgOK({ detail: { path: 'never.png' } });
+  assert.equal(p.data.palette, null); assert.equal(p.data.saving, false); assert.equal(calls.includes('save'), false);
+});
+
+test('resource becoming info-only while authorization is pending blocks personal data submission', async () => {
+  const { h, p, submit } = sensitiveHarness('booking'); let pending;
+  h.wx.getPrivacySetting = options => { pending = options; };
+  const task = submit(); await tick(); h.session.setContact({ mode: 'info' });
+  pending.success({ needAuthorization: false, privacyContractName: '测试隐私指引' }); await task;
+  assert.equal(h.requests.length, 0); assert.equal(p._bookingSubmitting, false);
+  assert.match(h.toasts.at(-1).title, /状态已变更/);
 });

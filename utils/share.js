@@ -15,14 +15,14 @@ function planPath(query = {}, page = 'result') {
   return '/pages/' + page + '/' + page + '?' + key + '=' + api.id(query[key]);
 }
 function shareMessage(page, title) {
-  const fallback = { title: title || '篮芯办赛方案', path: '/pages/index/index' };
+  const fallback = { title: title || '篮芯办赛方案', path: '/pages/index/index', imageUrl: '/assets/resources/materials/trophy-real.jpg' };
   if (!session.hasSession()) return fallback;
   if (page._share && (!page._share.expiresAt || Date.parse(page._share.expiresAt) > Date.now())) {
-    return { title: fallback.title, path: page._share.path };
+    return Object.assign({}, fallback, { path: page._share.path });
   }
   if (!page._sharePromise) return fallback;
   return Object.assign({}, fallback, { promise: page._sharePromise.then(share =>
-    share ? { title: fallback.title, path: share.path } : fallback).catch(() => fallback) });
+    share ? Object.assign({}, fallback, { path: share.path }) : fallback).catch(() => fallback) });
 }
 function prepareShare(page, planId, existingShareId) {
   page._share = null;

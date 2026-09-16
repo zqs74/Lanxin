@@ -45,7 +45,7 @@ function buildList(list = [], type) {
         date,
         meta: [town, date].filter(Boolean).join(" · "),
         brief: type === "booking"
-          ? (bookingForm.contactName ? `${bookingForm.contactName} · ${bookingForm.phone || "待回访"}` : "已提交场地预约")
+          ? (bookingForm.contactName ? `${bookingForm.contactName} · ${bookingForm.phone || "未填写"}` : "已提交场地预约")
           : (result.summaryLead || item.summary || ""),
         highlight: type === "booking"
           ? ((bookingForm.venueName && bookingForm.timeSlot)

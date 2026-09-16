@@ -13,10 +13,10 @@ const STORAGE_KEYS = {
 // 客服与开通引导配置（A1/A2）
 // 上线前请替换为真实客服信息：qrCode 指向客服微信二维码本地图片，phone/wechat 为真实联系方式
 const CONTACT = {
-  name: "篮芯办赛·客户经理",
-  qrCode: "/assets/contact-qr.png",
+  name: "客服未配置",
+  qrCode: "",
   phone: "",
-  wechat: "Lanxin-kefu",
+  wechat: "",
 };
 
 const MODE_OPTIONS = [

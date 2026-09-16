@@ -80,7 +80,7 @@
             </view>
             <view class="resource-desc">{{resource.description}}</view>
             <view class="resource-card-cta">
-              <text>详情请咨询客户经理</text>
+              <text>资源仅供参考，请自行核实</text>
               <text class="resource-card-cta-arrow">›</text>
             </view>
           </view>
@@ -104,7 +104,7 @@
 
   <view class="cta-bar">
     <button class="secondary-btn cta-btn" bindtap="openPoster">生成分享海报</button>
-    <button class="primary-btn cta-btn" bindtap="openBooking">填写信息帮忙预约</button>
+    <button class="primary-btn cta-btn" bindtap="openBooking">{{infoOnly ? '公开信息不支持代订' : '登记预约意向'}}</button>
   </view>
 
   <van-popup show="{{tuneVisible}}" round position="bottom" custom-style="height: 78vh; z-index: 5200;" bind:close="closeTunePanel">
@@ -183,7 +183,7 @@
 
   <van-popup show="{{bookingVisible}}" round position="bottom" custom-style="height: 78vh; z-index: 5200;" bind:close="closeBooking">
     <view class="popup-panel">
-      <view class="prompt-title">预约场地办赛</view>
+      <view class="prompt-title">登记意向，档期与服务待确认</view>
 
       <scroll-view scroll-y class="popup-scroll">
         <view class="booking-venue-card" wx:if="{{bookingVenue}}">
@@ -212,15 +212,15 @@
 
         <view class="form-stack">
           <van-field label="联系人" value="{{bookingForm.contactName}}" data-key="contactName" placeholder="怎么称呼你" bind:change="updateBookingField" />
-          <van-field label="手机号" type="number" value="{{bookingForm.phone}}" data-key="phone" placeholder="方便联系的手机号" bind:change="updateBookingField" />
-          <van-field label="微信号" value="{{bookingForm.wechat}}" data-key="wechat" placeholder="选填，方便后续沟通" bind:change="updateBookingField" />
+          <van-field label="手机号" type="number" value="{{bookingForm.phone}}" data-key="phone" placeholder="用于处理意向及联系" bind:change="updateBookingField" />
+          <van-field label="微信号" value="{{bookingForm.wechat}}" data-key="wechat" placeholder="选填，用于预约沟通" bind:change="updateBookingField" />
           <view class="calendar-field" bindtap="openBookingDateCalendar">
             <view class="calendar-field__label">办赛日期</view>
             <view class="calendar-field__value {{bookingForm.expectedDate ? '' : 'calendar-field__value--placeholder'}}">
               {{bookingForm.expectedDate || '请选择办赛日期'}}
             </view>
           </view>
-          <van-field label="备注" value="{{bookingForm.remark}}" data-key="remark" type="textarea" autosize placeholder="比如需要主裁边裁、电子计分、物料等" bind:change="updateBookingField" />
+          <van-field label="备注" value="{{bookingForm.remark}}" data-key="remark" type="textarea" autosize placeholder="仅填预约需求，勿填他人隐私" bind:change="updateBookingField" />
         </view>
 
         <view class="fallback-row" bindtap="toggleAcceptFallback">
@@ -235,7 +235,7 @@
 
       <view class="cta-bar popup-bottom-bar">
         <button class="secondary-btn popup-btn" bindtap="closeBooking">暂不预约</button>
-        <button class="primary-btn popup-btn" bindtap="submitBooking">提交场地预约</button>
+        <button class="primary-btn popup-btn" bindtap="submitBooking">提交意向待确认</button>
       </view>
     </view>
   </van-popup>

@@ -9,7 +9,15 @@ const routes = {
 };
 function setContact(contact) {
   Object.keys(CONTACT).forEach(key => delete CONTACT[key]);
-  Object.assign(CONTACT, { name: '篮芯办赛·客户经理', phone: '', wechat: '', qrCode: '' }, contact || {});
+  const source = contact || {};
+  const fields = {};
+  ['name', 'phone', 'wechat', 'qrCode', 'mode'].forEach(key => {
+    fields[key] = typeof source[key] === 'string' ? source[key].trim() : '';
+  });
+  if (fields.wechat === 'Lanxin-kefu') fields.wechat = '';
+  if (fields.qrCode === '/assets/contact-qr.png') fields.qrCode = '';
+  const configured = !!(fields.phone || fields.wechat || fields.qrCode);
+  Object.assign(CONTACT, fields, { configured, name: configured ? (fields.name || '联系客服') : '客服未配置' });
 }
 setContact(null);
 function init() {
@@ -148,7 +156,7 @@ function protectPage(definition) {
     this._unlisten = onClear(() => {
       this._authSnapshot = null; this._authPending = true; this.record = null;
       this._share = null; this._sharePromise = null; this._loaded = false;
-      this._config = null; this._requiredFields = [];
+      this._config = null; this._requiredFields = []; this._imageExport = null;
       this._listSequence = (this._listSequence || 0) + 1;
       this._refreshSequence = (this._refreshSequence || 0) + 1;
       this.setData(JSON.parse(JSON.stringify(initial)));
@@ -184,6 +192,7 @@ function protectPage(definition) {
   };
   definition.onUnload = function() {
     this._dead = true;
+    this._imageExport = null;
     this._authSnapshot = null;
     if (this._unlisten) this._unlisten();
     if (unload) unload.call(this);
