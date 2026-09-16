@@ -19,7 +19,7 @@ async function start(page, build) {
   try {
     const palette = await build();
     if (!active(page, job)) { finish(page, job); return; }
-    await privacy.requirePrivacy();
+    await privacy.requirePrivacy(page);
     if (!active(page, job)) { finish(page, job); return; }
     job.ready = true;
     page.setData({ palette });
@@ -37,7 +37,7 @@ async function save(page, event, title) {
     const path = event.detail && event.detail.path;
     if (!path) throw new Error('图片生成失败');
     // Re-check immediately before the protected write, including changed consent.
-    await privacy.requirePrivacy();
+    await privacy.requirePrivacy(page);
     if (!active(page, job)) return;
     // WeChat performs the separate album permission prompt. Never auto-open settings
     // or fall back to preview/long-press saving after cancellation or denial.

@@ -65,7 +65,7 @@ function formatDateValue(value) {
   return `${year}-${month}-${day}`;
 }
 
-Page(session.protectPage({
+Page(privacy.withPrivacy(session.protectPage({
   data: {
     mode: APP_MODE.PRO_EVENT,
     demand: null,
@@ -273,6 +273,7 @@ Page(session.protectPage({
   },
 
   closeBooking() {
+    privacy.cancel(this);
     this.setData(
       {
         bookingVisible: false,
@@ -347,7 +348,7 @@ Page(session.protectPage({
     const epoch = session.getEpoch();
     this._bookingSubmitting = true;
     try {
-      try { await privacy.requirePrivacy(); }
+      try { await privacy.requirePrivacy(this); }
       catch (error) { throw new Error(error.message + '；未提交预约资料'); }
       if (this._dead || epoch !== session.getEpoch() || !this.data.bookingVisible) return;
       if (planId !== this.data.planId || this.data.infoOnly ||
@@ -364,4 +365,4 @@ Page(session.protectPage({
       wx.navigateTo({ url: '/pages/booking-success/booking-success?id=' + recordId });
     } finally { this._bookingSubmitting = false; }
   },
-}));
+})));

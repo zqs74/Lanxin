@@ -1,4 +1,4 @@
-// Exact, reversible text/entry allowlist. Original layout hashes stay fixed.
+// Exact text and on-demand overlay approvals; original layout hashes remain fixed.
 module.exports = {
   "./pages/poster/poster.wxml": [
     [
@@ -45,7 +45,8 @@ module.exports = {
   "./pages/library/library.wxml": [
     [
       "详情请咨询客户经理",
-      "资源仅供参考，请自行核实"
+      "资源仅供参考，请自行核实",
+      2
     ],
     [
       "联系客户经理",
@@ -97,3 +98,7 @@ module.exports = {
     ]
   ]
 };
+const overlay = require("node:fs").readFileSync(require("node:path").join(__dirname, "privacy-overlay.txt"), "utf8");
+for (const page of ["login", "result", "poster", "booking-success"]) {
+  module.exports["./pages/" + page + "/" + page + ".wxml"].push(["", overlay]);
+}

@@ -3,6 +3,7 @@ const { getBooking } = require('../../utils/storage');
 const { prepareShare, shareMessage } = require('../../utils/share');
 const api = require('../../utils/api');
 const session = require('../../utils/session');
+const privacy = require('../../utils/privacy');
 const imageExport = require('../../utils/image-export');
 
 const TIME_SLOT_LABELS = {
@@ -11,7 +12,7 @@ const TIME_SLOT_LABELS = {
   evening: "晚上 18:00-22:00",
 };
 
-Page(session.protectPage({
+Page(privacy.withPrivacy(session.protectPage({
   data: {
     record: null,
     demand: null,
@@ -214,4 +215,4 @@ Page(session.protectPage({
       views,
     };
   },
-}));
+})));

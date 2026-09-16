@@ -22,7 +22,9 @@ function harness() {
   class ClockDate extends Date { static now() { return now; } }
   const storage = new Map(), writes = [], requests = [], navigation = [], toasts = [], modals = [], loaded = [];
   const cache = new Map(); let definition; const pages = [];
+  let privacyListener;
   const wx = {
+    onNeedPrivacyAuthorization(listener) { privacyListener = listener; },
     getAccountInfoSync() { return { miniProgram: { appId: 'wx0000000000000001' } }; },
     getPrivacySetting(options) { options.success({ needAuthorization: false, privacyContractName: '测试隐私保护指引' }); },
     request(options) { requests.push(options); },
@@ -66,7 +68,7 @@ function harness() {
     return Object.assign({ data: clone(definition.data), triggerEvent() {} }, definition.methods);
   }
   const session = load('utils/session.js'), api = load('utils/api.js');
-  return { wx, session, api, load, page, component, requests, navigation, storage, writes, toasts, modals, loaded, respond,
+  return { wx, session, api, load, page, component, activePage: () => pages[pages.length - 1], emitPrivacy(resolve) { assert.equal(typeof privacyListener, "function"); privacyListener(resolve, { referrer: "requirePrivacyAuthorize" }); }, requests, navigation, storage, writes, toasts, modals, loaded, respond,
     advanceTime(ms) { now += ms; } };
 }
 
@@ -441,9 +443,9 @@ test('existing UI hashes allow only exact approved text and privacy entry change
   for (const [file, expected] of Object.entries(baseline)) {
     let content = fs.readFileSync(path.join(root, file));
     let approved = content.toString('utf8');
-    for (const [before, after] of require('./ui-approved-changes')[file] || []) {
-      assert.ok(approved.includes(after), file + ': missing approved copy');
-      approved = approved.split(after).join(before);
+    for (const [before, after, count = 1] of require('./ui-approved-changes')[file] || []) {
+      assert.equal(approved.split(after).length - 1, count, file + ': exact approved occurrence count');
+      for (let i = 0; i < count; i++) approved = approved.replace(after, before);
     }
     content = Buffer.from(approved);
     if (file.replace(/\\/g, '/') === './pages/booking-success/booking-success.wxml') {
@@ -539,7 +541,21 @@ function exportHarness() {
   const p = h.page('booking-success'); p.onLoad({ id: 'b1' });
   const calls = []; let authorized = false;
   h.wx.getPrivacySetting = options => { calls.push('check'); options.success({ needAuthorization: !authorized, privacyContractName: '测试隐私保护指引' }); };
-  h.wx.requirePrivacyAuthorize = options => { calls.push('authorize'); authorized = true; options.success({}); };
+  h.wx.requirePrivacyAuthorize = options => {
+    calls.push('authorize');
+    h.emitPrivacy(resolution => {
+      if (resolution.event === 'agree') {
+        assert.equal(resolution.buttonId, 'bansai-privacy-agree');
+        authorized = true; options.success({ errMsg: 'requirePrivacyAuthorize:ok' });
+      } else if (resolution.event === 'disagree') options.fail({ errMsg: 'requirePrivacyAuthorize:fail privacy permission is not authorized' });
+    });
+    // Simulate the user only after the official onNeed callback shows the overlay.
+    setImmediate(() => {
+      const activePage = h.activePage();
+      assert.equal(activePage.data.privacyVisible, true);
+      activePage.agreePrivacyAuthorization({ type: 'agreeprivacyauthorization', currentTarget: { id: 'bansai-privacy-agree' } });
+    });
+  };
   h.wx.saveImageToPhotosAlbum = options => { calls.push('save'); options.success({}); };
   h.wx.previewImage = () => { throw new Error('must not preview after failure'); };
   h.wx.openSetting = () => { throw new Error('must not force settings'); };
@@ -778,19 +794,17 @@ for (const kind of ['login', 'booking']) {
     });
   }
 
-  test(kind + ' waits for platform authorization and contract recheck before sending data once', async () => {
-    const { h, p, submit } = sensitiveHarness(kind); let pendingAuthorization, agreed = false;
-    const events = [];
-    h.wx.getPrivacySetting = options => { events.push('privacy-check'); options.success({ needAuthorization: !agreed, privacyContractName: '测试隐私指引' }); };
-    h.wx.requirePrivacyAuthorize = options => { events.push('platform-authorize'); pendingAuthorization = options; };
-    const request = h.wx.request; h.wx.request = options => { events.push('send'); request(options); };
+  test(kind + ' waits for official button, platform success and contract recheck before sending once', async () => {
+    const { h, p, submit } = sensitiveHarness(kind);
+    const platform = officialPrivacy(h);
     const task = submit(); await tick(); await submit();
-    assert.equal(h.requests.length, 0); assert.ok(pendingAuthorization);
-    agreed = true; pendingAuthorization.success({}); await tick();
-    assert.deepEqual(events, ['privacy-check', 'platform-authorize', 'privacy-check', 'send']);
+    assert.equal(h.requests.length, 0); assert.equal(p.data.privacyVisible, true);
+    assert.deepEqual(platform.events, ['check', 'require', 'need']);
+    platform.agree(p); await tick();
+    assert.deepEqual(platform.events, ['check', 'require', 'need', 'agree', 'check']);
     assert.equal(h.requests.length, 1);
     h.respond(h.requests[0], kind === 'login' ? auth('a') : { id: 'b1', status: 'PENDING' }); await task;
-    assert.equal(h.modals.length, 0);
+    assert.equal(p.data.privacyVisible, false); assert.equal(h.modals.length, 0);
     assert.equal(h.writes.some(item => /privacy|consent|agreed/i.test(item.key)), false);
   });
 }
@@ -800,8 +814,12 @@ test('contract name must remain configured after platform consent, even if needA
   h.wx.getPrivacySetting = options => options.success(++count === 1
     ? { needAuthorization: true, privacyContractName: '测试隐私指引' }
     : { needAuthorization: false, privacyContractName: '' });
-  h.wx.requirePrivacyAuthorize = options => options.success({});
-  await submit(); assert.equal(count, 2); assert.equal(h.requests.length, 0); assert.match(p.data.error, /隐私指引未配置/);
+  h.wx.requirePrivacyAuthorize = options => h.emitPrivacy(resolution => {
+    if (resolution.event === 'agree') options.success({ errMsg: 'requirePrivacyAuthorize:ok' });
+  });
+  const task = submit(); await tick();
+  p.agreePrivacyAuthorization({ type: 'agreeprivacyauthorization', currentTarget: { id: 'bansai-privacy-agree' } });
+  await task; assert.equal(count, 2); assert.equal(h.requests.length, 0); assert.match(p.data.error, /隐私指引未配置/);
 });
 
 test('closing booking while privacy is pending stops the submission after consent returns', async () => {
@@ -835,4 +853,273 @@ test('resource becoming info-only while authorization is pending blocks personal
   pending.success({ needAuthorization: false, privacyContractName: '测试隐私指引' }); await task;
   assert.equal(h.requests.length, 0); assert.equal(p._bookingSubmitting, false);
   assert.match(h.toasts.at(-1).title, /状态已变更/);
+});
+
+// Platform-shaped first-use mock: require -> listener(resolve, eventInfo) ->
+// official button event -> checked resolve({event, buttonId}) -> API callback.
+// No synthetic unsubscribe API and no automatic grant before a button event.
+function officialPrivacy(h, { recordConsent = true, deferSuccess = false } = {}) {
+  const events = [], resolutions = []; let authorized = false, clicked = false, delayed;
+  h.wx.getPrivacySetting = options => {
+    events.push('check'); options.success({ needAuthorization: !authorized, privacyContractName: '《测试隐私保护指引》' });
+  };
+  const requireAuthorization = options => {
+    events.push('require');
+    if (authorized) { options.success({ errMsg: 'requirePrivacyAuthorize:ok' }); return; }
+    events.push('need');
+    h.emitPrivacy(resolution => {
+      resolutions.push(clone(resolution)); events.push(resolution.event);
+      if (resolution.event === 'agree') {
+        assert.equal(clicked, true, 'platform only accepts a clicked official button');
+        assert.equal(resolution.buttonId, 'bansai-privacy-agree');
+        authorized = recordConsent;
+        const complete = () => options.success({ errMsg: 'requirePrivacyAuthorize:ok' });
+        if (deferSuccess) delayed = complete; else complete();
+      } else if (resolution.event === 'disagree') {
+        options.fail({ errMsg: 'requirePrivacyAuthorize:fail privacy permission is not authorized' });
+      }
+    });
+  };
+  h.wx.requirePrivacyAuthorize = requireAuthorization;
+  return {
+    events, resolutions,
+    agree(page) {
+      assert.equal(page.data.privacyVisible, true);
+      clicked = true;
+      try { page.agreePrivacyAuthorization({ type: 'agreeprivacyauthorization', currentTarget: { id: 'bansai-privacy-agree' } }); }
+      finally { clicked = false; }
+    },
+    complete() { assert.equal(typeof delayed, 'function'); delayed(); },
+    reset() { authorized = false; },
+    requireAuthorization,
+  };
+}
+
+test('first authorization works with official APIs and no unsubscribe API; ordinary taps cannot grant consent', async () => {
+  const { h, p, submit } = sensitiveHarness('login'); const platform = officialPrivacy(h);
+  assert.equal(typeof h.wx.offNeedPrivacyAuthorization, 'undefined');
+  const task = submit(); await tick();
+  assert.equal(p.data.privacyVisible, true); assert.equal(p.data.privacyContractName, '《测试隐私保护指引》');
+  p.agreePrivacyAuthorization({ type: 'tap', currentTarget: { id: 'bansai-privacy-agree' } });
+  p.agreePrivacyAuthorization({ type: 'agreeprivacyauthorization', currentTarget: { id: 'wrong' } });
+  assert.equal(platform.resolutions.length, 0); assert.equal(h.requests.length, 0);
+  platform.agree(p); await tick();
+  assert.deepEqual(platform.resolutions, [{ event: 'agree', buttonId: 'bansai-privacy-agree' }]);
+  h.respond(h.requests[0], auth('a')); await task;
+  assert.ok(h.toasts.every(item => !/升级/.test(item.title)));
+});
+
+test('button event alone cannot submit until the platform success callback and state recheck', async () => {
+  const { h, p, submit } = sensitiveHarness('login'); const platform = officialPrivacy(h, { deferSuccess: true });
+  const task = submit(); await tick(); platform.agree(p); await tick();
+  assert.equal(h.requests.length, 0); assert.equal(p.data.submitting, true);
+  platform.complete(); await tick(); assert.equal(h.requests.length, 1);
+  h.respond(h.requests[0], auth('a')); await task;
+});
+
+for (const kind of ['login', 'booking']) {
+  test(kind + ' official cancel resolves disagree, releases lock, and permits a new explicit authorization attempt', async () => {
+    const { h, p, submit } = sensitiveHarness(kind); const platform = officialPrivacy(h);
+    const task = submit(); await tick(); p.cancelPrivacyAuthorization(); await task;
+    assert.deepEqual(platform.resolutions, [{ event: 'disagree' }]);
+    assert.equal(h.requests.length, 0); assert.equal(p.data.privacyVisible, false);
+    assert.equal(kind === 'login' ? p.data.submitting : p._bookingSubmitting, false);
+    if (kind === 'login') p.setData({ password: 'new-mock-password' });
+    const retry = submit(); await tick(); platform.agree(p); await tick();
+    h.respond(h.requests[0], kind === 'login' ? auth('a') : { id: 'b1', status: 'PENDING' }); await retry;
+    assert.equal(h.requests.length, 1);
+  });
+}
+
+for (const name of ['poster', 'booking-success']) {
+  test(name + ' first-use album authorization is cancellable and never saves after disagree', async () => {
+    const h = harness(); h.session.accept(auth('a')); const p = h.page(name); p.onLoad({ id: 'p1' });
+    const platform = officialPrivacy(h); let saved = 0;
+    h.wx.saveImageToPhotosAlbum = () => { saved++; };
+    const exporter = h.load('utils/image-export.js');
+    const task = exporter.start(p, async () => ({ views: [] })); await tick();
+    p.cancelPrivacyAuthorization(); await task;
+    await p.onImgOK({ detail: { path: 'late.png' } });
+    assert.equal(saved, 0); assert.equal(p.data.saving, false); assert.equal(p.data.palette, null);
+    assert.deepEqual(platform.resolutions, [{ event: 'disagree' }]);
+  });
+}
+
+test('same-page concurrent privacy callers share one platform challenge and one registered listener', async () => {
+  const { h, p } = sensitiveHarness('login'); const platform = officialPrivacy(h);
+  let registrations = 0; const register = h.wx.onNeedPrivacyAuthorization;
+  h.wx.onNeedPrivacyAuthorization = fn => { registrations++; register(fn); };
+  const privacy = h.load('utils/privacy.js');
+  const first = privacy.requirePrivacy(p), second = privacy.requirePrivacy(p);
+  assert.equal(first, second); await tick(); platform.agree(p); await Promise.all([first, second]);
+  platform.reset(); const retry = privacy.requirePrivacy(p); await tick(); platform.agree(p); await retry;
+  assert.equal(registrations, 1); assert.equal(platform.events.filter(e => e === 'require').length, 2);
+});
+
+test('concurrent platform listeners are each resolved once by the same official button event', async () => {
+  const { h, p } = sensitiveHarness('login'); const platform = officialPrivacy(h);
+  const privacy = h.load('utils/privacy.js'); const task = privacy.requirePrivacy(p); await tick();
+  let extraSuccess = 0;
+  platform.requireAuthorization({ success() { extraSuccess++; }, fail() {} });
+  platform.agree(p); await task;
+  p.agreePrivacyAuthorization({ type: 'agreeprivacyauthorization', currentTarget: { id: 'bansai-privacy-agree' } });
+  assert.equal(extraSuccess, 1); assert.equal(platform.resolutions.length, 2);
+});
+
+for (const lifecycle of ['onHide', 'onUnload']) {
+  test('pending official request disagrees on ' + lifecycle + ' without removing the listener', async () => {
+    const { h, p, submit } = sensitiveHarness('login'); const platform = officialPrivacy(h);
+    const task = submit(); await tick(); p[lifecycle](); await task;
+    assert.deepEqual(platform.resolutions, [{ event: 'disagree' }]);
+    assert.equal(h.requests.length, 0);
+    const late = []; h.emitPrivacy(resolution => late.push(clone(resolution)));
+    assert.deepEqual(late, [{ event: 'disagree' }]);
+  });
+}
+
+test('session change cancels the pending official challenge and never submits the previous booking form', async () => {
+  const { h, p, submit } = sensitiveHarness('booking'); const platform = officialPrivacy(h);
+  const task = submit(); await tick(); h.session.accept(auth('b')); await task;
+  assert.deepEqual(platform.resolutions, [{ event: 'disagree' }]);
+  assert.equal(h.requests.length, 0); assert.equal(p.data.privacyVisible, false);
+});
+
+test('viewing the official contract preserves the prompt for a subsequent official agreement on return', async () => {
+  const { h, p, submit } = sensitiveHarness('login'); const platform = officialPrivacy(h);
+  h.wx.openPrivacyContract = options => { p.onHide(); options.success({ errMsg: 'openPrivacyContract:ok' }); };
+  const task = submit(); await tick(); await p.openPrivacyContract();
+  assert.equal(platform.resolutions.length, 0); assert.equal(h.requests.length, 0);
+  p.onShow(); platform.agree(p); await tick();
+  h.respond(h.requests[0], auth('a')); await task;
+});
+
+test('official agreement without a recorded platform grant fails the post-authorization state check', async () => {
+  const { h, p, submit } = sensitiveHarness('login'); const platform = officialPrivacy(h, { recordConsent: false });
+  const task = submit(); await tick(); platform.agree(p); await task;
+  assert.equal(h.requests.length, 0); assert.match(p.data.error, /尚未完成微信隐私授权/);
+});
+
+test('missing real listener API fails closed for first authorization', async () => {
+  const { h, p, submit } = sensitiveHarness('login'); officialPrivacy(h); delete h.wx.onNeedPrivacyAuthorization;
+  await submit(); assert.equal(h.requests.length, 0); assert.equal(p.data.submitting, false);
+  assert.match(p.data.error, /不支持隐私授权/);
+});
+
+test('approved privacy overlay is exact, conditional, and uses only the official consent event', () => {
+  const overlay = fs.readFileSync(path.join(root, 'tests/privacy-overlay.txt'), 'utf8');
+  assert.match(overlay, /wx:if="\{\{privacyVisible\}\}"/);
+  assert.match(overlay, /id="bansai-privacy-agree"[^>]+open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="agreePrivacyAuthorization"/);
+  assert.doesNotMatch(overlay, /bindtap="agreePrivacyAuthorization"/);
+  for (const name of ['login', 'result', 'poster', 'booking-success']) {
+    const ui = fs.readFileSync(path.join(root, 'pages', name, name + '.wxml'), 'utf8');
+    assert.equal(ui.split(overlay).length, 2, name);
+  }
+  const runtime = fs.readFileSync(path.join(root, 'utils/privacy.js'), 'utf8');
+  assert.doesNotMatch(runtime, /offNeedPrivacyAuthorization|setStorageSync|showModal/);
+});
+
+test('idle or setting-check listener events cannot borrow another operation to bypass contract validation', async () => {
+  const { h, p } = sensitiveHarness('login'); const platform = officialPrivacy(h);
+  const privacy = h.load('utils/privacy.js');
+  const first = privacy.requirePrivacy(p); await tick(); platform.agree(p); await first;
+  platform.reset(); const getSetting = h.wx.getPrivacySetting; let check;
+  h.wx.getPrivacySetting = options => { check = options; };
+  const second = privacy.requirePrivacy(p); await tick();
+  const unrelated = []; h.emitPrivacy(resolution => unrelated.push(clone(resolution)));
+  assert.deepEqual(unrelated, [{ event: 'disagree' }]); assert.equal(p.data.privacyVisible, false);
+  h.wx.getPrivacySetting = getSetting;
+  check.success({ needAuthorization: true, privacyContractName: '《测试隐私保护指引》' }); await tick();
+  platform.agree(p); await second;
+});
+
+test('UI approval cannot absorb duplicate overlays, modified overlay styles or extra normal-page markup', () => {
+  const file = './pages/login/login.wxml';
+  const original = fs.readFileSync(path.join(root, file), 'utf8');
+  const overlay = fs.readFileSync(path.join(root, 'tests/privacy-overlay.txt'), 'utf8');
+  const undo = source => {
+    for (const [before, after, count = 1] of require('./ui-approved-changes')[file]) {
+      assert.equal(source.split(after).length - 1, count);
+      for (let i = 0; i < count; i++) source = source.replace(after, before);
+    }
+    return crypto.createHash('sha256').update(source).digest('hex');
+  };
+  assert.equal(undo(original), require('./ui-baseline')[file]);
+  assert.throws(() => undo(original + overlay));
+  assert.throws(() => undo(original.replace('width:600rpx', 'width:601rpx')));
+  assert.notEqual(undo(original + '<view>额外页面布局</view>'), require('./ui-baseline')[file]);
+});
+
+for (const terminal of ['success', 'fail', 'complete']) {
+  test('cancel before onNeed retains global ownership until old platform ' + terminal + '; old events use current listener', async () => {
+    const h = harness(); h.session.accept(auth('a'));
+    const a = h.page('poster'); a.onLoad({ id: 'a' });
+    const b = h.page('booking-success'); b.onLoad({ id: 'b' });
+    const privacy = h.load('utils/privacy.js');
+    let authorized = false;
+    h.wx.getPrivacySetting = options => options.success({ needAuthorization: !authorized, privacyContractName: '《测试隐私保护指引》' });
+    const platformRequests = [];
+    h.wx.requirePrivacyAuthorize = options => { platformRequests.push(options); }; // No onNeed yet.
+    const first = privacy.requirePrivacy(a);
+    const cancelled = assert.rejects(first, /取消|拒绝/);
+    await tick(); assert.equal(platformRequests.length, 1);
+    a.cancelPrivacyAuthorization(); await cancelled;
+    assert.equal(a.data.privacyVisible, false);
+    assert.equal(h.requests.length, 0);
+    // The page/caller is free immediately, but B must not replace the platform owner.
+    const blocked = privacy.requirePrivacy(b).then(() => null, error => error);
+    await tick();
+    const oldResolution = [];
+    // emitPrivacy dispatches through the CURRENT global listener in the harness,
+    // not a captured listener from A; the old resolver itself arrives late.
+    h.emitPrivacy(resolution => oldResolution.push(clone(resolution)));
+    b.agreePrivacyAuthorization({ type: 'agreeprivacyauthorization', currentTarget: { id: 'bansai-privacy-agree' } });
+    assert.deepEqual(oldResolution, [{ event: 'disagree' }]);
+    assert.equal(a.data.privacyVisible, false); assert.equal(b.data.privacyVisible, false);
+    assert.match((await blocked).message, /尚未结束/);
+    await assert.rejects(privacy.requirePrivacy(a), /尚未结束/);
+    assert.equal(platformRequests.length, 1);
+    // Denying a resolver is NOT itself platform termination; keep rejecting B.
+    await assert.rejects(privacy.requirePrivacy(b), /尚未结束/);
+    const old = platformRequests[0];
+    assert.equal(typeof old.complete, 'function');
+    old[terminal]({ errMsg: 'requirePrivacyAuthorize:' + (terminal === 'success' ? 'ok' : 'fail cancel') });
+    await tick();
+    const second = privacy.requirePrivacy(b); await tick();
+    assert.equal(platformRequests.length, 2);
+    const bResolutions = [];
+    h.emitPrivacy(resolution => {
+      bResolutions.push(clone(resolution));
+      if (resolution.event === 'agree') {
+        authorized = true;
+        platformRequests[1].success({ errMsg: 'requirePrivacyAuthorize:ok' });
+      }
+    });
+    assert.equal(b.data.privacyVisible, true);
+    // A's later complete/fail/success callbacks cannot release B's owner or UI.
+    old.complete({ errMsg: 'requirePrivacyAuthorize:fail cancel' });
+    old.fail({ errMsg: 'requirePrivacyAuthorize:fail cancel' });
+    old.success({ errMsg: 'requirePrivacyAuthorize:ok' });
+    await tick();
+    assert.equal(b.data.privacyVisible, true);
+    assert.equal(privacy.requirePrivacy(b), second);
+    await assert.rejects(privacy.requirePrivacy(a), /尚未结束/);
+    b.agreePrivacyAuthorization({ type: 'agreeprivacyauthorization', currentTarget: { id: 'bansai-privacy-agree' } });
+    await second;
+    assert.deepEqual(bResolutions, [{ event: 'agree', buttonId: 'bansai-privacy-agree' }]);
+    assert.deepEqual(oldResolution, [{ event: 'disagree' }]);
+    assert.equal(b.data.privacyVisible, false);
+    assert.equal(h.requests.length, 0);
+  });
+}
+
+test('complete without success or fail terminates a live platform request as failure and permits retry', async () => {
+  const { h, p } = sensitiveHarness('login'); const privacy = h.load('utils/privacy.js');
+  h.wx.getPrivacySetting = options => options.success({ needAuthorization: true, privacyContractName: '《测试隐私保护指引》' });
+  let request;
+  h.wx.requirePrivacyAuthorize = options => { request = options; };
+  const first = privacy.requirePrivacy(p); const rejected = assert.rejects(first, /未成功完成/); await tick();
+  assert.equal(typeof request.complete, 'function');
+  request.complete({ errMsg: 'requirePrivacyAuthorize:fail' }); await rejected;
+  const platform = officialPrivacy(h);
+  const second = privacy.requirePrivacy(p); await tick(); platform.agree(p); await second;
 });

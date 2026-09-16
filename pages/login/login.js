@@ -1,13 +1,12 @@
 const session = require('../../utils/session');
 const privacy = require('../../utils/privacy');
-Page({
+Page(privacy.withPrivacy({
   data: { username: '', password: '', submitting: false, error: '' },
   onLoad(query = {}) { session.enterLogin(query.next); },
   onUsernameInput(event) { this.setData({ username: event.detail.value, error: '' }); },
   onPasswordInput(event) { this.setData({ password: event.detail.value, error: '' }); },
   onHide() { this.setData({ password: '' }); },
   onUnload() { this._dead = true; this.setData({ password: '' }); },
-  openPrivacyContract() { return privacy.openPrivacyContract(); },
   async submitLogin() {
     if (this.data.submitting) return;
     const username = this.data.username.trim(), password = this.data.password;
@@ -16,7 +15,7 @@ Page({
     const epoch = session.getEpoch();
     let checkingPrivacy = true;
     try {
-      await privacy.requirePrivacy();
+      await privacy.requirePrivacy(this);
       if (this._dead || epoch !== session.getEpoch()) return;
       checkingPrivacy = false;
       await session.login(username, password);
@@ -30,4 +29,4 @@ Page({
       if (!this._dead) this.setData({ submitting: false });
     }
   },
-});
+}));

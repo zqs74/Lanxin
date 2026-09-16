@@ -154,6 +154,7 @@ function protectPage(definition) {
     const setData = this.setData.bind(this);
     this.setData = (patch, callback) => { if (!this._dead) setData(patch, callback); };
     this._unlisten = onClear(() => {
+      require('./privacy').cancel(this);
       this._authSnapshot = null; this._authPending = true; this.record = null;
       this._share = null; this._sharePromise = null; this._loaded = false;
       this._config = null; this._requiredFields = []; this._imageExport = null;

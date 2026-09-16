@@ -1,9 +1,10 @@
 // poster.js - 方案海报页（预览 + Painter 生成海报导出）
 const { loadPlan, prepareShare, shareMessage } = require('../../utils/share');
 const session = require('../../utils/session');
+const privacy = require('../../utils/privacy');
 const imageExport = require('../../utils/image-export');
 
-Page(session.protectPage({
+Page(privacy.withPrivacy(session.protectPage({
   data: {
     poster: null,
     saving: false,
@@ -34,7 +35,7 @@ Page(session.protectPage({
 
   onImgOK(event) { return imageExport.save(this, event, '海报已保存'); },
   onImgErr() { imageExport.fail(this); },
-}));
+})));
 
 // 方案海报 palette（Painter JSON 布局，蓝白风格，与预约卡同源）
 function buildPosterPalette(poster) {

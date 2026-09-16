@@ -263,3 +263,13 @@
 
   <open-guide visible="{{guideVisible}}" bind:close="closeGuide" />
 </view>
+
+<!-- On-demand WeChat privacy authorization; hidden during normal page use. -->
+<view wx:if="{{privacyVisible}}" catchtouchmove="privacyNoop" style="position:fixed;top:0;right:0;bottom:0;left:0;z-index:10000;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;">
+  <view class="section-card" style="width:600rpx;margin:0;padding:32rpx;display:flex;flex-direction:column;gap:24rpx;">
+    <view class="section-title">请阅读并同意隐私保护指引</view>
+    <button class="secondary-btn" style="width:100%;height:auto;min-height:88rpx;white-space:normal;line-height:1.5;padding:16rpx;" bindtap="openPrivacyContract">{{privacyContractName}}</button>
+    <button id="bansai-privacy-agree" class="primary-btn" style="width:100%;" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="agreePrivacyAuthorization">同意并继续</button>
+    <button class="secondary-btn" style="width:100%;" bindtap="cancelPrivacyAuthorization">取消</button>
+  </view>
+</view>
