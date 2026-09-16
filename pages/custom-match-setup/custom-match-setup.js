@@ -1,8 +1,10 @@
+const privacy = require('../../utils/privacy')
 // custom-match-setup.js - 支持双方队伍
 const app = getApp()
 const matchSync = require('../../utils/custom-match-sync')
 
 Page({
+  ...privacy.pageMethods,
   data: {
     themeClass: '',
     pageBg: '#f8f7f4',
@@ -60,6 +62,7 @@ Page({
   },
 
   onHide: function() {
+    this.cancelPrivacyAuthorization()
     this._visible = false
     this.saveDraft()
     return matchSync.sync(this.data.matchId)
@@ -230,19 +233,25 @@ Page({
     return false
   },
 
-  chooseAvatar: function(e) {
+  chooseAvatar: async function(e) {
+    const generation = this._privacyGeneration || 0
+    if (!await privacy.authorizeMedia(this)) return
     const index = parseInt(e.currentTarget.dataset.index)
     wx.chooseMedia({
       count: 1,
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
       success: (res) => {
-        const tempFilePath = res.tempFiles[0].tempFilePath
+        if (generation !== (this._privacyGeneration || 0)) return
+        const file = res.tempFiles && res.tempFiles[0]
+        if (!file || !file.tempFilePath) return
+        const tempFilePath = file.tempFilePath
         const players = this.data.players
         players[index].avatar = tempFilePath
         this.setData({ players })
         this.updateTeamPlayers()
-      }
+      },
+      fail: error => privacy.mediaFailure(error)
     })
   },
 

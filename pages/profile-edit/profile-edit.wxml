@@ -119,3 +119,13 @@
     </view>
   </view>
 </view>
+
+<!-- On-demand WeChat privacy authorization; absent from the normal page layout. -->
+<view wx:if="{{privacyVisible}}" style="position:fixed;top:0;right:0;bottom:0;left:0;z-index:9999;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;">
+  <view class="card {{themeClass}}" style="width:600rpx;box-sizing:border-box;padding:32rpx;display:flex;flex-direction:column;gap:20rpx;background:var(--bg-card,#ffffff);color:var(--text-primary,#222222);">
+    <view>继续前请阅读并同意隐私保护指引</view>
+    <button class="btn btn-ghost" bindtap="openPrivacyContract">{{privacyContractName}}</button>
+    <button id="privacy-agree" class="btn btn-primary" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="agreePrivacyAuthorization">同意并继续</button>
+    <button class="btn btn-ghost" bindtap="cancelPrivacyAuthorization">取消</button>
+  </view>
+</view>

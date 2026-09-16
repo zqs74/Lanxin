@@ -3,6 +3,7 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const vm = require('node:vm')
 const path = require('node:path')
+const { privacyWx, loadPrivacy } = require('./privacy-harness')
 const source = fs.readFileSync(path.join(__dirname, '../pages/index/index.js'), 'utf8')
 const base = '/api/comptrain/clips/projects'
 const clip = { id: '1', time: '00:02', description: '进球识别', type: '投篮', selected: false }
@@ -14,13 +15,13 @@ function harness(api = {}) {
   let timerId = 0
   const timers = new Map()
   const calls = { toast: [], album: [], loading: 0 }
-  const app = { api }
-  const wx = {
+  const app = { api: { get: async () => ({ ...rendered, saved: true }), ...api } }
+  const wx = { ...privacyWx(),
     showToast: value => calls.toast.push(value), showLoading: () => calls.loading++, hideLoading: () => { calls.loading = 0 },
     chooseVideo: options => { calls.choose = options }, showActionSheet: options => { calls.sheet = options },
     saveVideoToPhotosAlbum: options => { calls.album.push(options.filePath); options.success() }
   }
-  vm.runInNewContext(source, { Page: value => { definition = value }, getApp: () => app, wx,
+  vm.runInNewContext(source, { Page: value => { definition = value }, getApp: () => app, wx, require: () => loadPrivacy(wx),
     setTimeout: fn => { timers.set(++timerId, fn); return timerId }, clearTimeout: id => timers.delete(id), console })
   const page = { ...definition, data: JSON.parse(JSON.stringify(definition.data)), _epoch: 0, _visible: true,
     setData(value) { Object.assign(this.data, value) } }
@@ -42,7 +43,7 @@ test('chooseVideo really uploads and only displays returned clips in the origina
   const { page, calls } = harness({ upload: async (p, file) => {
     assert.equal(p, `${base}/upload`); assert.equal(file, '/tmp/source.mp4'); return project
   } })
-  page.uploadLocalVideo()
+  await page.uploadLocalVideo()
   await calls.choose.success({ tempFilePath: '/tmp/source.mp4' })
   assert.equal(page._projectId, 10)
   assert.deepEqual(Object.keys(page.data.clips[0]), ['id', 'time', 'description', 'type', 'selected'])
@@ -53,7 +54,7 @@ test('chooseVideo really uploads and only displays returned clips in the origina
 
 test('upload failure clears busy and never creates fake results', async () => {
   const { page, calls } = harness({ upload: async () => { throw new Error('上传失败') } })
-  page.uploadLocalVideo(); await calls.choose.success({ tempFilePath: '/tmp/a.mp4' })
+  await page.uploadLocalVideo(); await calls.choose.success({ tempFilePath: '/tmp/a.mp4' })
   assert.equal(page.data.isGenerating, false); assert.equal(page._busy, false)
   assert.equal(page.data.clips.length, 0); assert.equal(calls.loading, 0)
   assert.equal(calls.toast.at(-1).title, '上传失败')
@@ -106,7 +107,7 @@ test('reset cancels pending delay and unload blocks chosen-video callbacks', asy
   const work = page.runWork(epoch => page.watchProject({ ...project, status: 'QUEUED' }, epoch))
   page.resetVideo(); await work
   assert.equal(timers.size, 0); assert.equal(page._pending, null)
-  page.uploadLocalVideo(); page.onUnload(); await calls.choose.success({ tempFilePath: '/tmp/a.mp4' })
+  await page.uploadLocalVideo(); page.onUnload(); await calls.choose.success({ tempFilePath: '/tmp/a.mp4' })
   assert.equal(page.data.videoName, '')
 })
 
@@ -116,7 +117,7 @@ test('save persists own work, downloads actual URL and saves tempFilePath', asyn
   page._projectId = 10; page._render = rendered; page.setData({ videoGenerated: true })
   await page.saveVideo()
   assert.deepEqual(calls.album, ['/tmp/download.mp4']); assert.equal(page._render.saved, true)
-  assert.equal(calls.toast.at(-1).title, '已保存到我的集锦')
+  assert.equal(calls.toast.at(-1).title, '已保存集锦及相册')
 })
 
 test('download/album failure never claims saved-to-album success and permits retry', async () => {
@@ -131,7 +132,7 @@ test('cloud history restores saved render with server selection and file', async
   const { page } = harness({ get: async () => saved })
   await page.openCloudProject(project)
   assert.equal(page.data.selectedCount, 1); assert.equal(page.data.videoGenerated, true)
-  assert.equal(page._render.videoUrl, rendered.videoUrl)
+  assert.equal(page._render.videoUrl, undefined)
 })
 
 test('no success on malformed completed render without a file', async () => {
@@ -164,7 +165,7 @@ test('late upload response from previous account cannot expose its project or cl
   let user = { id: 7 }; let completeUpload
   const { page, calls } = harness({ getUser: () => user, ensureLogin: async () => user,
     upload: () => new Promise(resolve => { completeUpload = resolve }) })
-  page.uploadLocalVideo()
+  await page.uploadLocalVideo()
   const work = calls.choose.success({ tempFilePath: '/tmp/source.mp4' })
   await flush(); user = { id: 8 }; completeUpload(project); await work
   assert.equal(page.data.clips.length, 0); assert.equal(page._projectId, null)
@@ -207,4 +208,93 @@ test('late cloud history from previous user does not open the chooser', async ()
   const work = page.useCloudVideo(); await flush()
   user = { id: 8 }; finishHistory([project]); await work
   assert.equal(calls.sheet, undefined); assert.equal(page._owner, null)
+})
+
+function prepareSaved(page) { page._projectId = 10; page._render = rendered; page.setData({ videoGenerated: true }) }
+const freshUrl = rendered.videoUrl + '?exp=1789529999&sig=' + 'b'.repeat(64)
+test('save fetches owned render before saving and refreshes again immediately before download', async () => {
+  const order = []; let reads = 0
+  const { page, calls } = harness({ get: async route => { order.push('get'); reads++; assert.equal(route, `${base}/10/render/render-1`); return { ...rendered, videoUrl: freshUrl.replace('1789529999', String(1789529999 + reads)), saved: true } },
+    post: async () => { order.push('save'); return { ...rendered, saved: true } },
+    download: async url => { order.push('download'); assert.equal(url, freshUrl.replace('1789529999', '1789530001')); return '/tmp/fresh.mp4' } })
+  prepareSaved(page); await page.saveVideo()
+  assert.deepEqual(order, ['get', 'save', 'get', 'download'])
+  assert.deepEqual(calls.album, ['/tmp/fresh.mp4']); assert.equal(page._render.videoUrl, undefined)
+  assert.equal(JSON.stringify(page.data).includes('sig='), false)
+})
+test('share always refreshes owned render, never downloads stale in-memory URL', async () => {
+  const order = []; const { page, wx } = harness({ get: async route => { order.push('get'); assert.equal(route, `${base}/10/render/render-1`); return { ...rendered, videoUrl: freshUrl } },
+    download: async url => { order.push('download'); assert.equal(url, freshUrl); return '/tmp/fresh.mp4' } })
+  wx.shareVideoMessage = o => { order.push('share'); assert.equal(o.videoPath, '/tmp/fresh.mp4'); o.success() }
+  prepareSaved(page); await page.shareVideo()
+  assert.deepEqual(order, ['get', 'download', 'share']); assert.equal(page._render.videoUrl, undefined)
+})
+for (const action of ['saveVideo', 'shareVideo']) {
+  test(`${action}: owned GET failure never falls back to stale URL and gives retry guidance`, async () => {
+    const { page, wx, calls } = harness({ get: async () => { throw { code: 403, message: freshUrl } },
+      post: async () => assert.fail('must verify ownership first'), download: async () => assert.fail('stale URL fallback forbidden') })
+    wx.shareVideoMessage = () => assert.fail('failed refresh cannot share')
+    prepareSaved(page); await page[action]()
+    assert.match(calls.toast.at(-1).title, /刷新后重试/); assert.equal(JSON.stringify(calls.toast).includes('sig='), false)
+  })
+}
+test('403 download prompts refresh; retry obtains a new URL and can save', async () => {
+  let attempts = 0, reads = 0
+  const { page, calls } = harness({ get: async () => { reads++; return { ...rendered, saved: true, videoUrl: freshUrl } },
+    post: async () => ({ ...rendered, saved: true }), download: async () => { if (++attempts === 1) throw { code: 403 }; return '/tmp/renewed.mp4' } })
+  prepareSaved(page); await page.saveVideo()
+  assert.equal(calls.album.length, 0); assert.match(calls.toast.at(-1).title, /刷新后重试/)
+  await page.saveVideo(); assert.deepEqual(calls.album, ['/tmp/renewed.mp4']); assert.equal(reads, 4)
+})
+test('account changes during URL refresh prevent download and sharing', async () => {
+  let user = { id: 7 }, resolveGet, downloads = 0
+  const { page, wx } = harness({ getUser: () => user, ensureLogin: async () => user,
+    get: () => new Promise(resolve => { resolveGet = resolve }), download: async () => { downloads++ } })
+  wx.shareVideoMessage = () => assert.fail('must not share after account changes')
+  prepareSaved(page); page._owner = '7'
+  const pending = page.shareVideo(); await flush(); user = { id: 8 }; resolveGet({ ...rendered, videoUrl: freshUrl }); await pending
+  assert.equal(downloads, 0); assert.equal(page._render, null)
+})
+test('cloud signed source URL is not exposed in display name or retained render metadata', async () => {
+  const { page } = harness({ get: async () => ({ ...project, videoUrl: freshUrl, renders: [{ ...rendered, saved: true, videoUrl: freshUrl }] }) })
+  await page.openCloudProject({ ...project, videoUrl: freshUrl })
+  assert.equal(page.data.videoName, '云端视频 10')
+  assert.equal(JSON.stringify([page.data, page._render]).includes('sig='), false)
+})
+test('video picker and album save both fail closed on missing privacy configuration', async () => {
+  const { page, wx, calls } = harness({ post: async () => assert.fail('blocked save must not POST') })
+  wx.getPrivacySetting = o => o.success({ needAuthorization: false, privacyContractName: '' })
+  await page.uploadLocalVideo(); assert.equal(calls.choose, undefined)
+  prepareSaved(page); await page.saveVideo(); assert.equal(calls.album.length, 0)
+})
+test('hide during video authorization removes listener and never opens the picker', async () => {
+  const { page, wx, calls } = harness(); wx.needAuthorization()
+  const pending = page.uploadLocalVideo(); await flush()
+  assert.equal(page.data.privacyVisible, true)
+  page.onHide(); await pending
+  assert.equal(wx.listener(), null); assert.equal(calls.choose, undefined)
+})
+test('album authorization rejection happens before save POST/download', async () => {
+  const { page, wx, calls } = harness({ post: async () => assert.fail('no save before authorization'), download: async () => assert.fail('no download before authorization') })
+  prepareSaved(page); wx.needAuthorization()
+  const pending = page.saveVideo(); await flush()
+  page.cancelPrivacyAuthorization(); await pending
+  assert.equal(calls.album.length, 0); assert.equal(page._saving, false)
+})
+test('privacy guide is reachable from existing theme action sheet without changing theme', async () => {
+  const { page, wx, calls } = harness(); let opened = 0
+  wx.openPrivacyContract = o => { opened++; o.success() }
+  page.switchTheme(); assert.equal(calls.sheet.itemList[3], '隐私保护指引')
+  await calls.sheet.success({ tapIndex: 3 }); assert.equal(opened, 1)
+})
+
+test('first home display without a logged-in user does not initiate profile collection', () => {
+  // Theme values are unrelated to privacy; install them in this test's app via a dedicated loader.
+  let definition
+  const app = { api: { getUser: () => null }, getUserTheme: () => 'auto', getThemeColors: () => ({ pageBg: '#fff' }) }
+  const wx = { ...privacyWx(), hideLoading() {} }
+  vm.runInNewContext(source, { Page: value => { definition = value }, getApp: () => app, wx, require: () => loadPrivacy(wx), clearTimeout() {} })
+  const cold = { ...definition, data: {}, setData(v) { Object.assign(this.data, v) }, applyNavBarColor() {}, syncThemeLabel() {} }
+  cold.onShow()
+  assert.equal(cold.data.profile.name, '篮球爱好者'); assert.equal(cold._projectId, null)
 })

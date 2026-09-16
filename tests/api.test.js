@@ -66,7 +66,7 @@ test('uploads parse multipart JSON and downloads only allow project media withou
   h.wx.uploadFile = o => {
     assert.equal(o.name, 'file')
     assert.match(o.header.Authorization, /^Bearer /)
-    o.success({ statusCode: 200, data: JSON.stringify({ code: 0, data: { url: 'https://api.lanxin.cyou/media/video/test.mp4' } }) })
+    o.success({ statusCode: 200, data: JSON.stringify({ code: 0, data: { url: 'https://api.lanxin.cyou/media/video/test.mp4?exp=9999999999&sig=' + 'a'.repeat(64) } }) })
   }
   h.wx.downloadFile = o => { assert.equal(o.header, undefined); o.success({ statusCode: 200, tempFilePath: '/tmp/test.mp4' }) }
   const api = createApiClient(h.wx)
@@ -137,4 +137,51 @@ test('late stream 401 cannot invalidate a newer login or an already-aborted stre
   task.abort()
   headers({ statusCode: 401 })
   assert.equal(h.storage.get(AUTH_KEY).token, 'session-2')
+})
+
+const { mediaUrl } = require('../utils/api')
+const signedVideo = 'https://api.lanxin.cyou/media/video/render_1.mp4?exp=1789529999&sig=' + 'a'.repeat(64)
+test('media allowlist accepts exact exp/sig contract and unsigned image avatars', () => {
+  assert.equal(mediaUrl(signedVideo), signedVideo)
+  for (const ext of ['mov', 'webm', 'mkv']) assert.equal(mediaUrl(signedVideo.replace('.mp4', '.' + ext)), signedVideo.replace('.mp4', '.' + ext))
+  const avatar = 'https://api.lanxin.cyou/media/image/avatar-1.png'
+  assert.equal(mediaUrl(avatar), avatar)
+})
+test('media allowlist rejects query injection, duplicate or reordered params, fragments and illegal origins/paths', () => {
+  const bad = [signedVideo + '&sig=' + 'b'.repeat(64), signedVideo + '&exp=1789539999', signedVideo + '#x', signedVideo + '#',
+    signedVideo + '&redirect=https://evil.example', signedVideo.replace('?exp=1789529999&sig=', '?sig=') + '&exp=1789529999',
+    signedVideo.replace('sig=', 'signature='), signedVideo.replace('exp=1789529999', 'exp=01789529999'),
+    signedVideo.replace('exp=1789529999', 'exp=-1'), signedVideo.replace('exp=1789529999', 'exp=123456789012'),
+    signedVideo.replace('exp=1789529999', 'exp=1e9'), signedVideo.replace('sig=', 'sig=%61'),
+    signedVideo.replace('a'.repeat(64), 'A'.repeat(64)), signedVideo.replace('a'.repeat(64), 'a'.repeat(63)),
+    signedVideo.replace('render_1.mp4', '../render.mp4'), signedVideo.replace('render_1.mp4', '%2e%2e/render.mp4'),
+    signedVideo.replace('/video/', '/video/nested/'), signedVideo.replace('/video/', '/video//'),
+    signedVideo.replace('render_1.mp4', 'render.mp4.exe'), signedVideo.replace('.mp4', '.jpg'), signedVideo.replace('.mp4', '.MP4'),
+    signedVideo.replace('/video/', '/image/'), signedVideo.replace('api.lanxin.cyou', 'api.lanxin.cyou.evil.example'),
+    signedVideo.replace('api.lanxin.cyou', 'api.lanxin.cyou:443'), signedVideo.replace('api.lanxin.cyou', 'user@api.lanxin.cyou'),
+    signedVideo.replace('https:', 'http:'), signedVideo.replace('/video/', '/video\\'), signedVideo + '\n',
+    signedVideo.split('?')[0], 'https://api.lanxin.cyou/media/image/a.png?exp=1&sig=' + 'a'.repeat(64)]
+  for (const url of bad) assert.throws(() => mediaUrl(url), { code: 400 })
+})
+test('signed download passes exact URL without bearer headers, persistence or logging', async () => {
+  let calls = 0
+  const api = createApiClient({ getStorageSync() {}, setStorageSync() { assert.fail('must not persist signature') },
+    downloadFile(o) { calls++; assert.equal(o.url, signedVideo); assert.equal(o.header, undefined); o.success({ statusCode: 200, tempFilePath: '/tmp/fresh.mp4' }) } })
+  assert.equal(await api.download(signedVideo), '/tmp/fresh.mp4'); assert.equal(calls, 1)
+  await assert.rejects(api.download(signedVideo + '&x=1'), { code: 400 }); assert.equal(calls, 1)
+})
+test('expired signed download fails with refresh guidance, never returns a file', async () => {
+  for (const statusCode of [403, 404]) {
+    const api = createApiClient({ getStorageSync() {}, downloadFile(o) { o.success({ statusCode, tempFilePath: '/tmp/not-a-video' }) } })
+    await assert.rejects(api.download(signedVideo), { code: statusCode, message: '视频链接失效或不可用，请刷新后重试' })
+  }
+})
+
+test('stream refuses a changed session before any conversation body is transmitted', async () => {
+  const h = harness(o => ok(o, {})), api = createApiClient(h.wx)
+  await api.ensureLogin(); const expectedUser = api.getUser()
+  api.logout(); await api.ensureLogin()
+  const count = h.calls.length
+  await assert.rejects(api.stream('/api/comptrain/chat/completions', { messages: [{ role: 'user', content: 'OLD_ACCOUNT_PRIVATE' }] }, { expectedUser }), { code: 401 })
+  assert.equal(h.calls.length, count)
 })

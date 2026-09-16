@@ -7,7 +7,7 @@
     <!-- 页面标题 -->
     <view class="page-header">
       <view class="page-title">商城</view>
-      <view class="page-subtitle">精选篮球装备与周边</view>
+      <view class="page-subtitle">商城演示 · 下单不扣款</view>
       <view class="orders-entry" bindtap="showOrders">
         <t-icon name="time" size="30rpx" color="#D4AF37" />
         <text class="orders-entry-text">我的订单</text>
@@ -97,7 +97,7 @@
             <view class="order-name">{{ item.productName }}</view>
             <view class="order-meta">¥{{ item.price }} × {{ item.count }}</view>
           </view>
-          <view class="order-total">¥{{ item.total }}</view>
+          <view class="order-total">{{ item.status === 'UNPAID' ? '未支付' : '订单金额' }} ¥{{ item.total }}</view>
         </view>
       </scroll-view>
 

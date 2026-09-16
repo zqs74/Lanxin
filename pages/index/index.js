@@ -1,3 +1,4 @@
+const privacy = require('../../utils/privacy')
 // index.js - 昇梦体育 智能剪辑工作台（含右上角头像个人中心入口）
 const app = getApp()
 const CLIP_API = '/api/comptrain/clips/projects'
@@ -14,6 +15,7 @@ const DEFAULT_PROFILE = {
 }
 
 Page({
+  ...privacy.pageMethods,
   data: {
     navHeight: 0,
     themeClass: '',
@@ -48,9 +50,15 @@ Page({
     const { pageBg } = app.getThemeColors()
     this.setData({ themeClass: this.getThemeClass(userTheme), pageBg })
     this.applyNavBarColor()
-    this.loadProfile().then(() => {
-      if (this._visible && this._pending && !this._busy) this.resumeWork()
-    })
+    if (app.api.getUser()) {
+      this.loadProfile().then(() => {
+        if (this._visible && this._pending && !this._busy) this.resumeWork()
+      })
+    } else {
+      this.resetVideo()
+      this._owner = null
+      this.setData({ profile: DEFAULT_PROFILE })
+    }
     this.syncThemeLabel()
   },
 
@@ -148,11 +156,12 @@ Page({
   },
 
   switchTheme() {
-    const choices = ['跟随系统', '浅色模式', '深色模式']
+    const choices = ['跟随系统', '浅色模式', '深色模式', '隐私保护指引']
     const themeMap = { '跟随系统': 'auto', '浅色模式': 'light', '深色模式': 'dark' }
     wx.showActionSheet({
       itemList: choices,
       success: (res) => {
+        if (res.tapIndex === 3) { this.openPrivacyContract(); return }
         const selected = choices[res.tapIndex]
         const userTheme = themeMap[selected]
         app.setUserTheme(userTheme)
@@ -173,11 +182,15 @@ Page({
   },
 
   // ===== 智能剪辑工作台 =====
-  onHide() { this._visible = false; this._profileRequest = (this._profileRequest || 0) + 1; this.stopWork() },
+  onHide() { this.cancelPrivacyAuthorization(); this._visible = false; this._profileRequest = (this._profileRequest || 0) + 1; this.stopWork() },
   onUnload() { this.onHide(); this._pending = null },
 
   clipError(error) {
-    wx.showToast({ title: error && error.message || '请求失败，请稍后重试', icon: 'none' })
+    if (error && error.errMsg) { privacy.mediaFailure(error); return }
+    const raw = error && error.message
+    const message = [401, 403, 404].includes(error && error.code) ? '视频链接失效或不可用，请刷新后重试'
+      : (typeof raw === 'string' && !/https?:|[?&](?:sig|exp)=/i.test(raw) ? raw : '请求失败，请稍后重试')
+    wx.showToast({ title: message, icon: 'none' })
   },
 
   stopWork() {
@@ -271,7 +284,7 @@ Page({
     if (!complete || !this.active(epoch)) return
     if (!complete.videoUrl || !(complete.durationMs > 0)) throw new Error('生成文件不可用')
     this._pending = null
-    this._render = complete
+    this._render = this.renderMetadata(complete)
     this._renderRequest = null
     this.setData({ videoGenerated: true, generatedDuration: `${(complete.durationMs / 1000).toFixed(1)}秒` })
     wx.showToast({ title: '集锦生成成功！', icon: 'success' })
@@ -305,9 +318,10 @@ Page({
     })
   },
 
-  uploadLocalVideo() {
+  async uploadLocalVideo() {
     if (this._busy) return
     const epoch = this._epoch || 0
+    if (!await privacy.authorizeMedia(this) || !this.active(epoch) || this._busy) return
     wx.chooseVideo({
       sourceType: ['album', 'camera'],
       maxDuration: 60,
@@ -324,7 +338,7 @@ Page({
           await this.watchProject(project, current)
         })
       },
-      fail: error => { if (!/cancel/.test(error.errMsg || '') && this._visible !== false) this.clipError(error) }
+      fail: error => { if (this._visible !== false) privacy.mediaFailure(error) }
     })
   },
 
@@ -355,7 +369,7 @@ Page({
 
   openCloudProject(project) {
     this.resetVideo()
-    this.setData({ videoName: project.videoUrl.split('/').pop() })
+    this.setData({ videoName: `云端视频 ${project.id}` })
     return this.runWork(async epoch => {
       const latest = project.status === 'FAILED'
         ? await app.api.post(`${CLIP_API}/${project.id}/analyze`, {})
@@ -402,6 +416,20 @@ Page({
     })
   },
 
+  renderMetadata(job) {
+    // Keep identity/status only; signed media URLs live only for the current action.
+    return { id: job.id, projectId: job.projectId, status: job.status, durationMs: job.durationMs,
+      clipIds: job.clipIds, saved: job.saved }
+  },
+
+  async freshRender(epoch, jobId) {
+    const latest = await app.api.get(`${CLIP_API}/${this._projectId}/render/${jobId}`)
+    if (!this.active(epoch) || !this._render || this._render.id !== jobId) return null
+    if (!latest || latest.id !== jobId || latest.status !== 'SUCCEEDED' || !latest.videoUrl) throw new Error('视频暂不可用，请刷新后重试')
+    this._render = this.renderMetadata(latest)
+    return latest
+  },
+
   async saveVideo() {
     if (!this.data.videoGenerated || !this._render || this._saving) return
     const epoch = this._epoch
@@ -410,13 +438,18 @@ Page({
     this._saving = true
     try {
       if (!await this.loginForClip(epoch)) return
+      if (!await privacy.ensurePrivacy(this) || !this.active(epoch)) return
+      const latest = await this.freshRender(epoch, job.id)
+      if (!latest) return
       const saved = await app.api.post(`${CLIP_API}/${this._projectId}/render/${job.id}/save`, {})
-      if (!this.active(epoch)) return
-      this._render = saved
-      const filePath = await app.api.download(saved.videoUrl)
-      if (!this.active(epoch)) return
+      if (!this.active(epoch) || !this._render || this._render.id !== job.id) return
+      this._render = this.renderMetadata(saved)
+      const refreshed = await this.freshRender(epoch, job.id)
+      if (!refreshed) return
+      const filePath = await app.api.download(refreshed.videoUrl)
+      if (!this.active(epoch) || !this._render || this._render.id !== job.id) return
       await new Promise((resolve, reject) => wx.saveVideoToPhotosAlbum({ filePath, success: resolve, fail: reject }))
-      if (this.active(epoch)) wx.showToast({ title: '已保存到我的集锦', icon: 'success' })
+      if (this.active(epoch)) wx.showToast({ title: '已保存集锦及相册', icon: 'success' })
     } catch (error) { if (this.active(epoch)) this.clipError(error) }
     finally { this._saving = false }
   },
@@ -428,8 +461,10 @@ Page({
     if (!wx.shareVideoMessage) { wx.showToast({ title: '分享功能开发中', icon: 'none' }); return }
     try {
       if (!await this.loginForClip(epoch)) return
-      const videoPath = await app.api.download(this._render.videoUrl)
-      if (!this.active(epoch)) return
+      const latest = await this.freshRender(epoch, this._render.id)
+      if (!latest) return
+      const videoPath = await app.api.download(latest.videoUrl)
+      if (!this.active(epoch) || !this._render || this._render.id !== latest.id) return
       await new Promise((resolve, reject) => wx.shareVideoMessage({ videoPath, success: resolve, fail: reject }))
     } catch (error) { if (this.active(epoch)) this.clipError(error) }
   },

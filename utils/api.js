@@ -17,9 +17,11 @@ function apiUrl(path) {
 }
 
 function mediaUrl(url) {
-  if (typeof url !== 'string' || !/^https:\/\/api\.lanxin\.cyou\/media\/[A-Za-z0-9/_-]+\.[A-Za-z0-9]+$/.test(url) || url.includes('..')) {
-    throw failure(400, '媒体地址无效')
-  }
+  if (typeof url !== 'string') throw failure(400, '媒体地址无效')
+  // Only the backend's exact signed-video contract; no decoding or arbitrary query.
+  const video = /^https:\/\/api\.lanxin\.cyou\/media\/video\/[A-Za-z0-9_-]+\.(mp4|mov|webm|mkv)\?exp=[1-9][0-9]{0,10}&sig=[a-f0-9]{64}$/.test(url)
+  const image = /^https:\/\/api\.lanxin\.cyou\/media\/image\/[A-Za-z0-9_-]+\.[A-Za-z0-9]+$/.test(url)
+  if (!video && !image) throw failure(400, '媒体地址无效')
   return url
 }
 
@@ -138,7 +140,7 @@ function createApiClient(wxApi) {
     try { mediaUrl(url) } catch (error) { return Promise.reject(error) }
     return new Promise((resolve, reject) => wxApi.downloadFile({
       url, timeout: 300000,
-      success: result => result.statusCode === 200 && result.tempFilePath ? resolve(result.tempFilePath) : reject(failure(result.statusCode || 502, '下载失败')),
+      success: result => result.statusCode === 200 && result.tempFilePath ? resolve(result.tempFilePath) : reject(failure(result.statusCode || 502, [401, 403, 404].includes(result.statusCode) ? '视频链接失效或不可用，请刷新后重试' : '下载失败')),
       fail: () => reject(failure(0, '下载失败，请检查网络后重试'))
     }))
   }
@@ -146,6 +148,7 @@ function createApiClient(wxApi) {
   async function stream(path, body, handlers) {
     const url = apiUrl(path)
     await ensureLogin()
+    if (handlers && handlers.expectedUser && auth.user !== handlers.expectedUser) throw failure(401, '登录状态已改变，请重新确认发送')
     const requestToken = auth.token
     const requestGeneration = generation
     const callbacks = handlers || {}

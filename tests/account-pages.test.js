@@ -6,6 +6,7 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
 const vm = require('node:vm')
+const { privacyWx } = require('./privacy-harness')
 const root = path.resolve(__dirname, '..')
 const copy = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value))
 const deferred = () => { let resolve, reject; const promise = new Promise((a, b) => { resolve = a; reject = b }); return { promise, resolve, reject } }
@@ -19,7 +20,7 @@ function harness(overrides = {}, initial = {}) {
     upload: async () => ({ url: 'https://api.lanxin.cyou/media/image/avatar.png' }), ...overrides }
   const app = { api, globalData: { api, authReady: Promise.resolve(null) }, getUserTheme: () => 'light',
     getThemeColors: () => ({ pageBg: '#f8f7f4' }), getTheme: () => 'light', applyNavBarColor() {} }
-  const wx = { getStorageSync: key => copy(storage.get(key)), setStorageSync: (key, value) => storage.set(key, copy(value)),
+  const wx = { ...privacyWx(), getStorageSync: key => copy(storage.get(key)), setStorageSync: (key, value) => storage.set(key, copy(value)),
     removeStorageSync: key => storage.delete(key), showToast: value => toasts.push(value),
     showModal: options => options.success({ confirm: true }), nextTick: callback => callback(),
     navigateTo: options => navigation.push(options.url), navigateBack: () => navigation.push('back'), switchTab: options => navigation.push(options.url),
@@ -389,3 +390,44 @@ test('match detail maps server score/performance/shooting and preserves custom r
   page.startCustomMatch()
   assert.match(h.navigation.at(-1), /matchId=custom_resume$/)
 })
+
+const flushPrivacy = () => new Promise(resolve => setImmediate(resolve))
+for (const name of ['profile-edit', 'custom-match-setup']) {
+  const choose = page => name === 'profile-edit' ? page.uploadAvatar() : page.chooseAvatar({ currentTarget: { dataset: { index: '0' } } })
+  test(`${name}: image picker waits for platform authorization and upload disclosure`, async () => {
+    const h = harness(), page = h.page(name); let picker, notice
+    h.wx.needAuthorization(); h.wx.chooseMedia = o => { picker = o }
+    h.wx.showModal = o => { notice = o }
+    const pending = choose(page); await flushPrivacy()
+    assert.equal(picker, undefined); assert.equal(notice, undefined)
+    page.agreePrivacyAuthorization(); await flushPrivacy()
+    assert.equal(picker, undefined); assert.match(notice.content, /公共链接/)
+    notice.success({ confirm: true }); await pending
+    assert.equal(picker.count, 1); assert.deepEqual(copy(picker.mediaType), ['image'])
+  })
+  for (const lifecycle of ['onHide', 'onUnload']) {
+    test(`${name}: ${lifecycle} cancels pending platform authorization and detaches listener`, async () => {
+      const h = harness(), page = h.page(name)
+      h.wx.needAuthorization(); h.wx.chooseMedia = () => assert.fail('cannot choose after leaving')
+      const pending = choose(page); await flushPrivacy()
+      if (name === 'custom-match-setup') page.saveDraft = () => {}
+      await page[lifecycle](); await pending
+      assert.equal(h.wx.listener(), null); assert.equal(page.data.privacyVisible, false)
+    })
+  }
+  test(`${name}: missing config, denial and late picker callback do not modify avatars`, async () => {
+    const h = harness(), page = h.page(name); let chosen
+    h.wx.chooseMedia = o => { chosen = o }
+    h.wx.getPrivacySetting = o => o.success({ needAuthorization: false, privacyContractName: '' })
+    await choose(page); assert.equal(chosen, undefined)
+    h.wx.getPrivacySetting = o => o.success({ needAuthorization: false, privacyContractName: '指引' })
+    h.wx.showModal = o => o.success({ confirm: false })
+    await choose(page); assert.equal(chosen, undefined)
+    h.wx.showModal = o => o.success({ confirm: true })
+    await choose(page)
+    if (name === 'custom-match-setup') page.saveDraft = () => {}
+    await page.onUnload()
+    page.setData = () => assert.fail('late picker callback must not update hidden page')
+    chosen.success({ tempFiles: [{ tempFilePath: 'wxfile://late.png' }] })
+  })
+}

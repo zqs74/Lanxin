@@ -249,7 +249,7 @@ test('下单防双提交，不发送本地价格，完整保留服务器金额�
   assert.deepEqual(plain(h.page.data.orders), [order])
   assert.deepEqual(h.storage.get('mall_orders'), [order])
   assert.equal(h.page.data.detailVisible, false)
-  assert.deepEqual(successes(h), [{ title: '下单成功（演示）', icon: 'success' }])
+  assert.deepEqual(successes(h), [{ title: '演示订单已创建，未支付', icon: 'success' }])
   await h.page.submitOrder()
   assert.equal(posts(h).length, 1)
   prepareOrder(h); await h.page.submitOrder()

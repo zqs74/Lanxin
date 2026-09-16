@@ -131,7 +131,7 @@ Page({
       this.setData({ orders: list, detailVisible: false })
       cacheOrders(list)
       this._orderRequest = null
-      wx.showToast({ title: '下单成功（演示）', icon: 'success' })
+      wx.showToast({ title: '演示订单已创建，未支付', icon: 'success' })
     } catch (e) { showError(e) } finally { this._orderSubmitting = false }
   },
 

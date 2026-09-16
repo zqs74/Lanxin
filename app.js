@@ -21,13 +21,8 @@ App({
 
     this.api = createApiClient(wx)
     this.globalData.api = this.api
-    this.globalData.authReady = this.api.ensureLogin().then(user => {
-      this.globalData.userInfo = user
-      return user
-    }).catch(error => {
-      this.globalData.authError = { code: error.code, message: error.message }
-      return null
-    })
+    // Login is requested by a user-triggered operation, not by cold startup.
+    this.globalData.authReady = Promise.resolve(null)
 
     this.loadTheme()
     this.listenSystemTheme()

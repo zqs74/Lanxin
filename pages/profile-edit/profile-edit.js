@@ -1,3 +1,4 @@
+const privacy = require('../../utils/privacy')
 // profile-edit.js
 const app = getApp()
 
@@ -13,6 +14,7 @@ const DEFAULT_PROFILE = {
 }
 
 Page({
+  ...privacy.pageMethods,
   data: {
     themeClass: '',
     pageBg: '#f8f7f4',
@@ -25,6 +27,9 @@ Page({
     this._syncTheme()
     this.loadProfile()
   },
+
+  onHide() { this.cancelPrivacyAuthorization() },
+  onUnload() { this.cancelPrivacyAuthorization() },
 
   onShow() {
     this._syncTheme()
@@ -99,17 +104,21 @@ Page({
     })
   },
 
-  uploadAvatar() {
+  async uploadAvatar() {
+    const generation = this._privacyGeneration || 0
+    if (!await privacy.authorizeMedia(this)) return
     wx.chooseMedia({
       count: 1,
       mediaType: ['image'],
       sourceType: ['album', 'camera'],
       success: (res) => {
+        if (generation !== (this._privacyGeneration || 0)) return
         const file = res.tempFiles && res.tempFiles[0]
         if (file && file.tempFilePath) {
           this.updateProfileField('avatar', file.tempFilePath)
         }
-      }
+      },
+      fail: error => privacy.mediaFailure(error)
     })
   },
 

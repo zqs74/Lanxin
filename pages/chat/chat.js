@@ -1,7 +1,9 @@
-// chat.js - 昇梦体育 DeepSeek-R1 AI对话
+const privacy = require('../../utils/privacy')
+// chat.js - 昇梦体育 AI辅助 AI对话
 const app = getApp()
 
 Page({
+  ...privacy.pageMethods,
   data: {
     themeClass: '',
     pageBg: '#f8f7f4',
@@ -28,6 +30,7 @@ Page({
   },
 
   onUnload() {
+    this.cancelPrivacyAuthorization()
     this._chatUnloaded = true
     if (this._cancelChat) this._cancelChat()
   },
@@ -44,7 +47,18 @@ Page({
   initTheme() { this._syncTheme() },
   setTheme(theme) { this._syncTheme() },
 
+  onHide() {
+    this.cancelPrivacyAuthorization()
+    if (this._cancelChat) this._cancelChat()
+    this.setData({ isLoading: false, isThinking: false })
+  },
+
   onShow() {
+    if (this._chatOwner && app.api.getUser() !== this._chatOwner) {
+      if (this._cancelChat) this._cancelChat()
+      this._chatOwner = null
+      this.setData({ messages: [], userInput: '', isLoading: false, isThinking: false, currentThinking: '' })
+    }
     if (typeof this.getTabBar === 'function' && this.getTabBar()) { this.getTabBar().updateSelected(2) }
     this.initLayout()
     this._syncTheme()
@@ -95,7 +109,7 @@ Page({
 
   onInputChange(e) { this.setData({ userInput: e.detail.value }) },
 
-  sendQuickQuestion(e) { this.setData({ userInput: e.currentTarget.dataset.question }); this.sendMessage() },
+  sendQuickQuestion(e) { this.setData({ userInput: e.currentTarget.dataset.question }); return this.sendMessage() },
 
   scrollToBottom() {
     if (this._chatUnloaded) return
@@ -112,15 +126,31 @@ Page({
     }, 20)
   },
 
-  sendMessage() {
-    if (this.data.isLoading || this._chatUnloaded) return
+  async sendMessage() {
+    if (this.data.isLoading || this._chatUnloaded || this._sendPending) return
     const message = this.data.userInput.trim()
     if (!message) { wx.showToast({ title: '请输入消息', icon: 'none' }); return }
-    const now = new Date(); const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
-    const newMessages = [...this.data.messages, { role: 'user', content: message, time }]
-    this.setData({ messages: newMessages, userInput: '', isLoading: true, isThinking: true, currentThinking: '', hasAssistantMsg: false, scrollToView: 'msg-bottom' })
-    setTimeout(() => this.scrollToBottom(), 80)
-    this.callDeepSeekAPI(message)
+    const generation = this._privacyGeneration || 0
+    this._sendPending = true
+    try {
+      if (!await privacy.ensurePrivacy(this) || this._chatUnloaded) return
+      await app.api.ensureLogin()
+      const owner = app.api.getUser()
+      if (!owner || this._chatUnloaded || generation !== (this._privacyGeneration || 0)) return
+      if (this._chatOwner !== owner) {
+        this.setData({ messages: [] })
+        this._chatOwner = owner
+      }
+      // Per-send consent is never stored or reused, even for the same account.
+      if (!await privacy.confirmNotice(privacy.AI_NOTICE, 'AI 对话数据告知')) return
+      if (this._chatUnloaded || generation !== (this._privacyGeneration || 0) || app.api.getUser() !== owner) return
+      const now = new Date(); const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
+      const newMessages = [...this.data.messages, { role: 'user', content: message, time }]
+      this.setData({ messages: newMessages, userInput: '', isLoading: true, isThinking: true, currentThinking: '', hasAssistantMsg: false, scrollToView: 'msg-bottom' })
+      setTimeout(() => this.scrollToBottom(), 80)
+      return this.callAIAPI(message)
+    } catch (_) { wx.showToast({ title: '发送前检查失败，请重试', icon: 'none' }) }
+    finally { this._sendPending = false }
   },
 
   normalizeMarkdown(text = '') {
@@ -573,10 +603,10 @@ Page({
     return out
   },
 
-  callDeepSeekAPI(message) {
+  callAIAPI(message) {
     return new Promise((resolve) => {
       const now = new Date(); const time = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`
-      const messages = [{ "role":"system","content":"你现在是 2026 赛季安踏小篮球联赛（MCBA）官方认证的“赛事方案规划助手”。\n你掌握该联赛的全部真实运营信息，并具备专业赛事策划能力。你的唯一任务是：当用户提出“帮我预定一个联赛方案”或类似需求时，输出一份符合 2026 赛季实际情况、完整且可直接执行的《赛事承办/参赛方案》。\n\n【赛事基础信息（固定数据）】\n- 联赛全称：2026 赛季安踏小篮球联赛（ANTA MCBA Mini Basketball League）\n- 官方简称：MCBA 中国小篮球\n- 主办及冠名：安踏体育用品有限公司（主赞助商）、冠途体育（联合赞助商）\n- 唯一指定比赛场馆：国贸室内篮球场（地址：北京市朝阳区国贸商圈，含 3 片标准小篮球场地，配备专业木地板、电子计时记分屏、观众席 200 席）\n- 赛制：U8/U10/U12 三个年龄组，采用 4v4 小篮球规则（篮高 2.60m/2.75m，用 5 号球）\n- 赛季时间窗口：2026 年 5 月 1 日 – 2026 年 8 月 31 日（周末及节假日举行）\n- 参赛对象：全国各俱乐部、学校、社区青训队伍\n\n【你需要提供的完整方案结构（缺一不可）】\n当用户要求“预定方案”时，你必须按以下模块输出，并确保所有数据逻辑自洽、符合真实场馆承载量：\n\n1. 方案概要（赛事名称、组别、拟定日期、预计队伍数、参赛人数）\n2. 场地与时间安排（根据用户拟定的日期，提供具体时段表：热身、比赛、清场；最多每日 6 场次/场地，全天 18 场次上限）\n3. 报名与费用明细（列出：报名费/队伍、保险费/人、押金、安踏装备包费用、冠途媒体服务费，总计预算）\n4. 赞助商权益落地（安踏主赞助：提供比赛用球、纪念T恤、冠亚季军奖品；冠途赞助：提供赛事直播、数据统计、短视频集锦——需明确交付标准）\n5. 竞赛组织配置（每场地配备 1 名国家级裁判、1 名记录台人员、1 名赛事志愿者；说明是否含医疗急救站）\n6. 后勤保障清单（饮用水、秩序册、成绩公告栏、停车指引、家长观赛区管理）\n7. 风险预案（天气备用室内空调、伤病绿色通道、设备故障备用计时器）\n8. 下一步行动建议（告知用户需确认的日期、队伍数量，以及联系场馆预订押金、安踏物料申领流程）\n\n【回答规则】\n- 若用户未提供具体日期或队伍数，你必须先主动询问这两项关键信息，再生成完整方案。\n- 方案中所有费用需以“元/队”或“元/人”明确标注，并注明“价格依据 2026 赛季安踏官方招商手册”。\n- 所有时间安排必须与国贸室内篮球场的营业时间（08:00-22:00）冲突检测，若超出需提示调整。\n- 语气专业、自信，但需保持“协助式”口吻，结尾附上您的专属赛事顾问联系方式（虚拟）及下一步操作清单。\n- 可以使用 Markdown 标题、列表、表格来组织内容，但不要把整段回答包进 ``` 代码块，不要输出 emoji。\n\n现在，请等待用户提出“预定方案”请求，并严格按以上规则执行。" },
+      const messages = [{ role: 'system', content: "你是面向东莞篮球爱好者的 AI 辅助助手，提供通用训练、参赛和赛事筹备建议。你不代表任何联赛、品牌、场馆或官方机构，没有官方认证，不能办理预约或保证名额。对具体赛事、赛季、场馆、档期、价格、赞助权益和联系人，只能依据用户提供或已核实的信息；未知时明确说明待核实，不得编造或声称掌握实时数据。预算可列费用项目；若用户要求估算，必须标为假设示例，不能当作真实报价，不得虚构报价依据、固定场馆或联系方式。以东莞为默认讨论地区；拟定方案前询问日期、人数或队伍数、预算等必要条件，不索取敏感信息或未成年人资料。方案和 AI 输出仅供参考，具体规则、价格、档期请向实际主办方或场馆核实。可以使用 Markdown 标题、列表和表格，不要把整段回答放入代码块。" },
         ...this.data.messages.filter(msg => !msg.isError).map(msg=>({role:msg.role,content:msg.content}))]
 
       let fullContent = ''
@@ -601,6 +631,17 @@ Page({
         }
         clearRequest()
         abortRequest()
+      }
+      const currentAccount = () => {
+        if (streamFinished) return false
+        if (this._chatUnloaded) { cancel(); return false }
+        if (this._chatOwner && app.api.getUser() !== this._chatOwner) {
+          cancel()
+          this._chatOwner = null
+          this.setData({ messages: [], userInput: '', isLoading: false, isThinking: false, currentThinking: '' })
+          return false
+        }
+        return true
       }
       this._cancelChat = cancel
       const clearRequest = () => {
@@ -751,7 +792,9 @@ Page({
 
       try {
         Promise.resolve(app.api.stream('/api/comptrain/chat/completions', { messages, stream: true }, {
+          expectedUser: this._chatOwner,
           onComplete: (res) => {
+            if (!currentAccount()) return
             if (streamFinished) return
             if (!res || res.statusCode < 200 || res.statusCode >= 300) {
               handleError('AI服务暂时不可用')
@@ -760,8 +803,9 @@ Page({
             flushSSEBuffer()
             if (!streamFinished) handleError('AI服务暂时不可用')
           },
-          onError: () => handleError('网络请求失败'),
+          onError: () => { if (currentAccount()) handleError('网络请求失败') },
           onChunkReceived: (res) => {
+          if (!currentAccount()) return
           if (streamFinished) return
           try {
             const received = new Uint8Array(res.data)
@@ -790,7 +834,7 @@ Page({
           requestTask = task
           if (cancelRequested || this._chatUnloaded) abortRequest()
         }).catch(() => {
-          handleError('网络请求失败')
+          if (currentAccount()) handleError('网络请求失败')
         })
       } catch (e) {
         handleError('初始化请求失败')
