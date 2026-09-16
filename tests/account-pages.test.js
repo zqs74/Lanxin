@@ -406,13 +406,15 @@ for (const name of ['profile-edit', 'custom-match-setup']) {
     assert.equal(picker.count, 1); assert.deepEqual(copy(picker.mediaType), ['image'])
   })
   for (const lifecycle of ['onHide', 'onUnload']) {
-    test(`${name}: ${lifecycle} cancels pending platform authorization and detaches listener`, async () => {
+    test(`${name}: ${lifecycle} cancels pending authorization and replaces listener with denial`, async () => {
       const h = harness(), page = h.page(name)
       h.wx.needAuthorization(); h.wx.chooseMedia = () => assert.fail('cannot choose after leaving')
       const pending = choose(page); await flushPrivacy()
       if (name === 'custom-match-setup') page.saveDraft = () => {}
       await page[lifecycle](); await pending
-      assert.equal(h.wx.listener(), null); assert.equal(page.data.privacyVisible, false)
+      assert.equal(typeof h.wx.listener(), 'function')
+      h.wx.listener()(result => assert.equal(result.event, 'disagree'))
+      assert.equal(page.data.privacyVisible, false)
     })
   }
   test(`${name}: missing config, denial and late picker callback do not modify avatars`, async () => {

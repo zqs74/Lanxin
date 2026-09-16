@@ -267,12 +267,14 @@ test('video picker and album save both fail closed on missing privacy configurat
   await page.uploadLocalVideo(); assert.equal(calls.choose, undefined)
   prepareSaved(page); await page.saveVideo(); assert.equal(calls.album.length, 0)
 })
-test('hide during video authorization removes listener and never opens the picker', async () => {
+test('hide during video authorization installs denial listener and never opens the picker', async () => {
   const { page, wx, calls } = harness(); wx.needAuthorization()
   const pending = page.uploadLocalVideo(); await flush()
   assert.equal(page.data.privacyVisible, true)
   page.onHide(); await pending
-  assert.equal(wx.listener(), null); assert.equal(calls.choose, undefined)
+  assert.equal(typeof wx.listener(), 'function')
+  wx.listener()(result => assert.equal(result.event, 'disagree'))
+  assert.equal(calls.choose, undefined)
 })
 test('album authorization rejection happens before save POST/download', async () => {
   const { page, wx, calls } = harness({ post: async () => assert.fail('no save before authorization'), download: async () => assert.fail('no download before authorization') })

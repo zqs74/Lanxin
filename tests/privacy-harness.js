@@ -10,7 +10,6 @@ function privacyWx() {
       else listener(result => { authorized = result.event === 'agree'; authorized ? o.success() : o.fail({}) })
     },
     onNeedPrivacyAuthorization(callback) { listener = callback },
-    offNeedPrivacyAuthorization(callback) { if (listener === callback) listener = null },
     openPrivacyContract(o) { o.success() },
     showModal(o) { o.success({ confirm: true }) },
     needAuthorization() { authorized = false },
