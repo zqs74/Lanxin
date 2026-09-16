@@ -185,3 +185,32 @@ test('stream refuses a changed session before any conversation body is transmitt
   await assert.rejects(api.stream('/api/comptrain/chat/completions', { messages: [{ role: 'user', content: 'OLD_ACCOUNT_PRIVATE' }] }, { expectedUser }), { code: 401 })
   assert.equal(h.calls.length, count)
 })
+
+for (const statusCode of [400, 401, 403, 413, 502]) {
+  test(`HTML HTTP ${statusCode} keeps its status instead of becoming a JSON format error`, async () => {
+    const h = harness(o => o.success({ statusCode, data: '<html>PRIVATE_GATEWAY_BODY</html>' }))
+    const api = createApiClient(h.wx)
+    await assert.rejects(api.get('/api/comptrain/clips/projects'), error => {
+      assert.equal(error.code, statusCode)
+      assert.doesNotMatch(error.message, /格式错误|PRIVATE_GATEWAY|<html>/)
+      if (statusCode === 413) assert.match(error.message, /文件过大.*413/)
+      if (statusCode === 400) assert.match(error.message, /请求参数无效/)
+      return true
+    })
+  })
+}
+test('multipart upload 413 is recognized for HTML, empty and JSON bodies without retrying upload', async () => {
+  for (const data of ['<html>PRIVATE_413</html>', '', { code: 413, message: 'PRIVATE_413' }]) {
+    const h = harness(o => ok(o, {})); let uploads = 0
+    h.wx.uploadFile = o => { uploads++; o.success({ statusCode: 413, data }) }
+    await assert.rejects(createApiClient(h.wx).upload('/api/comptrain/clips/projects/upload', '/tmp/large.mp4'),
+      { code: 413, message: '上传文件过大（413），请减小文件后重试' })
+    assert.equal(uploads, 1); assert.equal(h.logins(), 1)
+  }
+})
+test('successful malformed JSON remains a format error and structured HTTP messages still work', async () => {
+  const malformed = harness(o => o.success({ statusCode: 200, data: '<html>not-json</html>' }))
+  await assert.rejects(createApiClient(malformed.wx).get('/api/comptrain/events'), { code: 502, message: '服务器响应格式错误' })
+  const structured = harness(o => o.success({ statusCode: 400, data: JSON.stringify({ code: 400, message: '请选择有效视频' }) }))
+  await assert.rejects(createApiClient(structured.wx).get('/api/comptrain/events'), { code: 400, message: '请选择有效视频' })
+})

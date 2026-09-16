@@ -34,12 +34,19 @@ function userSummary(user) {
 }
 
 function unwrap(response) {
+  // Gateways (notably Nginx's body-size limit) return HTML, not our JSON DTO.
+  // Preserve the HTTP failure before attempting a successful-response decode.
+  if (response.statusCode === 413) throw failure(413, '上传文件过大（413），请减小文件后重试')
   let body = response.data
+  if (response.statusCode < 200 || response.statusCode >= 300) {
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body) } catch (_) { body = null }
+    }
+    const fallback = response.statusCode === 400 ? '请求参数无效，请检查后重试' : '请求失败，请稍后重试'
+    throw failure(response.statusCode, body && typeof body.message === 'string' && body.message || fallback)
+  }
   if (typeof body === 'string') {
     try { body = JSON.parse(body) } catch (_) { throw failure(502, '服务器响应格式错误') }
-  }
-  if (response.statusCode < 200 || response.statusCode >= 300) {
-    throw failure(response.statusCode, body && body.message || '请求失败，请稍后重试')
   }
   if (!body || body.code !== 0) throw failure(body && body.code || 502, body && body.message || '服务器响应格式错误')
   return body.data

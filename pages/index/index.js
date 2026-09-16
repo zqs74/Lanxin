@@ -2,6 +2,7 @@ const privacy = require('../../utils/privacy')
 // index.js - 昇梦体育 智能剪辑工作台（含右上角头像个人中心入口）
 const app = getApp()
 const CLIP_API = '/api/comptrain/clips/projects'
+const MAX_VIDEO_BYTES = 1073741824
 
 const DEFAULT_PROFILE = {
   name: '篮球爱好者',
@@ -35,6 +36,7 @@ Page({
   },
 
   onLoad() {
+    this._clipUnloaded = false
     this._epoch = 0
     this._visible = true
     this.initTheme()
@@ -50,6 +52,12 @@ Page({
     const { pageBg } = app.getThemeColors()
     this.setData({ themeClass: this.getThemeClass(userTheme), pageBg })
     this.applyNavBarColor()
+    // Native media UI may hide/show this page before or after chooseVideo's
+    // callback. Do not let a profile refresh reset its independent ticket.
+    if (this._videoPicker) {
+      this.syncThemeLabel()
+      return this.consumeVideoPicker(this._videoPicker)
+    }
     if (app.api.getUser()) {
       this.loadProfile().then(() => {
         if (this._visible && this._pending && !this._busy) this.resumeWork()
@@ -151,6 +159,7 @@ Page({
   stopPropagation() {},
 
   editProfile() {
+    this.cancelVideoPicker()
     this.closePanel()
     wx.navigateTo({ url: '/pages/profile-edit/profile-edit' })
   },
@@ -172,18 +181,28 @@ Page({
   },
 
   goChat() {
+    this.cancelVideoPicker()
     this.closePanel()
     wx.navigateTo({ url: '/pages/chat/chat' })
   },
 
   goCreateMatch() {
+    this.cancelVideoPicker()
     this.closePanel()
     wx.navigateTo({ url: '/pages/custom-match-setup/custom-match-setup' })
   },
 
   // ===== 智能剪辑工作台 =====
-  onHide() { this.cancelPrivacyAuthorization(); this._visible = false; this._profileRequest = (this._profileRequest || 0) + 1; this.stopWork() },
-  onUnload() { this.onHide(); this._pending = null },
+  onHide() {
+    this.cancelPrivacyAuthorization()
+    this._visible = false
+    this._profileRequest = (this._profileRequest || 0) + 1
+    this.stopWork()
+    // Native pickers leave this Page at the top of the mini-program stack.
+    // A known navigation away invalidates the ticket; hide alone is ambiguous.
+    if (this._videoPicker && !this.isPickerPageTop()) this.cancelVideoPicker()
+  },
+  onUnload() { this._clipUnloaded = true; this.cancelVideoPicker(); this.onHide(); this._pending = null },
 
   clipError(error) {
     if (error && error.errMsg) { privacy.mediaFailure(error); return }
@@ -209,6 +228,7 @@ Page({
   },
 
   checkClipAccount() {
+    if (this._videoPicker && !this.validVideoPicker(this._videoPicker)) this.cancelVideoPicker()
     if (typeof app.api.getUser !== 'function' || !this._owner || String(this._owner) === this.currentClipAccount()) return true
     this.resetVideo()
     this._owner = null
@@ -290,13 +310,13 @@ Page({
     wx.showToast({ title: '集锦生成成功！', icon: 'success' })
   },
 
-  async runWork(work) {
+  async runWork(work, title = 'AI 生成中...') {
     if (this._busy) return
     const epoch = this._epoch || 0
     this._epoch = epoch
     this._busy = true
     this.setData({ isGenerating: true })
-    wx.showLoading({ title: 'AI 生成中...', mask: true })
+    wx.showLoading({ title, mask: true })
     try { if (await this.loginForClip(epoch) && this.active(epoch)) await work(epoch) }
     catch (error) { if (this.active(epoch)) this.clipError(error) }
     finally {
@@ -318,32 +338,139 @@ Page({
     })
   },
 
-  async uploadLocalVideo() {
-    if (this._busy) return
-    const epoch = this._epoch || 0
-    if (!await privacy.authorizeMedia(this) || !this.active(epoch) || this._busy) return
-    wx.chooseVideo({
-      sourceType: ['album', 'camera'],
-      maxDuration: 60,
-      camera: 'back',
-      success: (res) => {
-        if (this._visible === false || epoch !== (this._epoch || 0)) return
-        const name = (res && res.tempFilePath) ? res.tempFilePath.split('/').pop() : '比赛视频'
-        if (!res.tempFilePath) return
-        this.resetVideo()
-        this.setData({ videoName: name || '比赛视频' })
-        return this.runWork(async current => {
-          const project = await app.api.upload(`${CLIP_API}/upload`, res.tempFilePath)
-          if (!this.active(current)) return
-          await this.watchProject(project, current)
+  isPickerPageTop() {
+    const pages = getCurrentPages()
+    return pages.length > 0 && pages[pages.length - 1] === this
+  },
+
+  cancelVideoPicker() {
+    const ticket = this._videoPicker
+    this._videoPicker = null
+    if (ticket) { ticket.stage = 'cancelled'; ticket.filePath = null; ticket.error = null; wx.hideLoading() }
+  },
+
+  validVideoPicker(ticket) {
+    return !!ticket && this._videoPicker === ticket && ticket.page === this && !this._clipUnloaded &&
+      ticket.owner === this.currentClipAccount() && ticket.session === app.api.getUser()
+  },
+
+  consumeVideoPicker(ticket) {
+    if (!this.validVideoPicker(ticket) || !this.isPickerPageTop()) {
+      if (this._videoPicker === ticket) this.cancelVideoPicker()
+      return
+    }
+    // A success/failure received while native UI covers the page is parked
+    // until onShow. Never start an upload or show an error in the background.
+    if (!this._visible) return
+    if (ticket.stage === 'selecting') { wx.showLoading({ title: '视频选择处理中...', mask: true }); return }
+    if (!['ready', 'failed'].includes(ticket.stage)) return
+    const filePath = ticket.filePath
+    const selectedSize = ticket.size
+    const error = ticket.error
+    ticket.stage = 'consumed'
+    ticket.filePath = null
+    ticket.error = null
+    this._videoPicker = null
+    if (error) { wx.hideLoading(); this.clipError(error); return }
+    this.resetVideo()
+    this.setData({ videoName: filePath.split('/').pop() || '比赛视频' })
+    return this.runWork(async current => {
+      // Login may have awaited native/platform work. Recheck the exact session
+      // and Page before handing the local file to the authenticated uploader.
+      if (ticket.session !== app.api.getUser() || ticket.owner !== this.currentClipAccount() || !this.isPickerPageTop()) return
+      const size = await this.selectedVideoSize(filePath, selectedSize)
+      if (!this.active(current) || ticket.session !== app.api.getUser() || !this.isPickerPageTop()) return
+      if (size > MAX_VIDEO_BYTES) throw new Error('视频超过1GiB，请截取较短片段后重试')
+      if (size === 0) throw new Error('视频文件为空，请重新选择')
+      wx.showLoading({ title: '上传视频中...', mask: true })
+      const project = await app.api.upload(`${CLIP_API}/upload`, filePath)
+      if (!this.active(current) || ticket.session !== app.api.getUser()) return
+      wx.showLoading({ title: '视频分析中...', mask: true })
+      await this.watchProject(project, current)
+    }, '检查视频大小...')
+  },
+
+  selectedVideoSize(filePath, selectedSize) {
+    if (Number.isSafeInteger(selectedSize) && selectedSize >= 0) return Promise.resolve(selectedSize)
+    // Read only metadata for the file returned by this authorized picker.
+    // Official shape: FileSystemManager.stat({ path, recursive: false }) -> res.stats.size (bytes).
+    return new Promise((resolve, reject) => {
+      const fail = () => reject(new Error('无法确认视频大小，请重新选择后重试'))
+      try {
+        const manager = typeof wx.getFileSystemManager === 'function' && wx.getFileSystemManager()
+        if (!manager || typeof manager.stat !== 'function') { fail(); return }
+        manager.stat({
+          path: filePath, recursive: false,
+          success: result => {
+            try {
+              const stats = result && result.stats
+              if (!stats || typeof stats.isFile !== 'function' || !stats.isFile() || !Number.isSafeInteger(stats.size) || stats.size < 0) { fail(); return }
+              resolve(stats.size)
+            } catch (_) { fail() }
+          },
+          fail
         })
-      },
-      fail: error => { if (this._visible !== false) privacy.mediaFailure(error) }
+      } catch (_) { fail() }
     })
+  },
+
+  async uploadLocalVideo() {
+    if (this._busy || this._openingVideoPicker || this._videoPicker || this._clipUnloaded) return
+    const epoch = this._epoch || 0
+    this._openingVideoPicker = true
+    try {
+      if (!await privacy.authorizeMedia(this) || !this.active(epoch) || this._busy) return
+      if (!await this.loginForClip(epoch) || !this.active(epoch) || !this.isPickerPageTop()) return
+      const session = app.api.getUser()
+      const owner = this.currentClipAccount()
+      if (!session || !owner) throw new Error('登录状态未就绪，请重试')
+      const ticket = { page: this, owner, session, stage: 'selecting', filePath: null, error: null }
+      this._videoPicker = ticket
+      // Ignore profile requests started before this picker was opened.
+      this._profileRequest = (this._profileRequest || 0) + 1
+      const fail = error => {
+        if (!this.validVideoPicker(ticket)) {
+          if (this._videoPicker === ticket) this.cancelVideoPicker()
+          return
+        }
+        if (ticket.stage !== 'selecting') return
+        if (/cancel/i.test(error && error.errMsg || '')) { this.cancelVideoPicker(); return }
+        ticket.stage = 'failed'
+        ticket.error = error && error.errMsg ? { errMsg: error.errMsg } : new Error('视频选择失败，请重试')
+        return this.consumeVideoPicker(ticket)
+      }
+      try {
+        wx.chooseVideo({
+          sourceType: ['album', 'camera'],
+          maxDuration: 60,
+          camera: 'back',
+          success: res => {
+            if (!this.validVideoPicker(ticket)) {
+              if (this._videoPicker === ticket) this.cancelVideoPicker()
+              return
+            }
+            if (ticket.stage !== 'selecting') return
+            const filePath = res && res.tempFilePath
+            if (typeof filePath !== 'string' || !filePath.trim()) {
+              ticket.stage = 'failed'
+              ticket.error = new Error('未获取到视频文件，请重新选择')
+            } else {
+              ticket.stage = 'ready'
+              ticket.filePath = filePath
+              ticket.size = res.size
+            }
+            return this.consumeVideoPicker(ticket)
+          },
+          fail
+        })
+      } catch (error) { fail(error) }
+    } catch (error) { if (this.active(epoch)) this.clipError(error) }
+    finally { this._openingVideoPicker = false }
   },
 
   async useCloudVideo() {
     if (this._busy) return
+    this.cancelVideoPicker()
     const epoch = this._epoch || 0
     try {
       if (!await this.loginForClip(epoch)) return
@@ -470,6 +597,7 @@ Page({
   },
 
   resetVideo() {
+    this.cancelVideoPicker()
     this.stopWork()
     this._pending = null
     this._projectId = null
