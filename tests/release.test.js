@@ -16,8 +16,11 @@ test('all 254 UI files match the original, except exact reviewed bindings, priva
     let contents = fs.readFileSync(path.join(root, entry.path), 'utf8').replace(/\r\n/g, '\n')
     const reviewed = require('./ui-reviewed-changes.json')[entry.path] || []
     for (const [original, replacement] of reviewed) {
+      assert.ok(typeof original === 'string' && original.length > 0, 'reviewed original must be a nonempty exact anchor')
+      assert.ok(typeof replacement === 'string' && replacement.length > 0, 'reviewed replacement must be nonempty')
       assert.equal(contents.split(replacement).length, 2, entry.path + ': reviewed replacement must exist exactly once')
       contents = contents.replace(replacement, original)
+      assert.equal(contents.split(original).length, 2, entry.path + ': restored original must exist exactly once')
     }
     if (['index', 'chat', 'profile-edit', 'custom-match-setup'].some(name => entry.path === `pages/${name}/${name}.wxml`)) {
       const overlay = fs.readFileSync(path.join(__dirname, 'privacy-overlay.txt'), 'utf8').replace(/\r\n/g, '\n')

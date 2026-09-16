@@ -1,8 +1,22 @@
 const privacy = require('../../utils/privacy')
+const { mediaUrl } = require('../../utils/api')
 // index.js - 昇梦体育 智能剪辑工作台（含右上角头像个人中心入口）
 const app = getApp()
 const CLIP_API = '/api/comptrain/clips/projects'
 const MAX_VIDEO_BYTES = 1073741824
+const LIBRARY_LIMIT = 10
+const STATUS_LABELS = { QUEUED: '等待分析', RUNNING: '分析中', FAILED: '分析失败 · 仍可看原片', SUCCEEDED: '分析完成' }
+
+function videoMetadata(project) {
+  const date = new Date(Number(project.createdMs))
+  const pad = n => String(n).padStart(2, '0')
+  const dateLabel = Number(project.createdMs) > 0 && Number.isFinite(date.getTime())
+    ? `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${pad(date.getHours())}:${pad(date.getMinutes())}` : '日期待确认'
+  const seconds = Math.floor(Number(project.durationMs) / 1000)
+  return { id: project.id, dateLabel,
+    durationLabel: Number.isFinite(seconds) && seconds > 0 ? `${Math.floor(seconds / 60)}分${pad(seconds % 60)}秒` : '时长待获取',
+    statusLabel: STATUS_LABELS[project.status] || '状态待确认' }
+}
 
 const DEFAULT_PROFILE = {
   name: '篮球爱好者',
@@ -26,6 +40,18 @@ Page({
     profile: DEFAULT_PROFILE,
     // 剪辑工作台
     videoName: '',
+    playerSources: [],
+    playerLoading: false,
+    playerError: '',
+    playerCanRetry: false,
+    sourceStatus: '',
+    sourceDuration: '',
+    selectedVideoId: null,
+    libraryVisible: false,
+    libraryItems: [],
+    libraryLoading: false,
+    libraryError: '',
+    libraryMore: false,
     clips: [],
     selectedCount: 0,
     isGenerating: false,
@@ -196,6 +222,8 @@ Page({
   onHide() {
     this.cancelPrivacyAuthorization()
     this._visible = false
+    this.destroyPlayer()
+    this.closeVideoLibrary()
     this._profileRequest = (this._profileRequest || 0) + 1
     this.stopWork()
     // Native pickers leave this Page at the top of the mini-program stack.
@@ -228,6 +256,13 @@ Page({
   },
 
   checkClipAccount() {
+    if ((this._preview && this._preview.session !== app.api.getUser()) ||
+        (this._librarySession && this._librarySession !== app.api.getUser())) {
+      this.resetVideo()
+      this._owner = null
+      this.setData({ profile: DEFAULT_PROFILE })
+      return false
+    }
     if (this._videoPicker && !this.validVideoPicker(this._videoPicker)) this.cancelVideoPicker()
     if (typeof app.api.getUser !== 'function' || !this._owner || String(this._owner) === this.currentClipAccount()) return true
     this.resetVideo()
@@ -263,6 +298,10 @@ Page({
         }
       }
       if (!this.active(epoch)) return null
+      if (value && this._pending && this._pending.type === 'analysis') {
+        this.setData({ sourceStatus: STATUS_LABELS[value.status] || '状态待确认' })
+        this.syncLibraryItem(value)
+      }
       if (value && value.status === 'SUCCEEDED') return value
       if (value && value.status === 'FAILED') {
         const error = new Error(value.message || '视频处理失败，请重试')
@@ -283,7 +322,11 @@ Page({
   async watchProject(project, epoch) {
     this._projectId = project.id
     this._pending = { type: 'analysis', projectId: project.id }
-    const complete = await this.poll(`${CLIP_API}/${project.id}`, epoch, project)
+    // Analysis never blocks the native player or submits another analysis job.
+    wx.hideLoading()
+    let complete
+    try { complete = await this.poll(`${CLIP_API}/${project.id}`, epoch, project) }
+    catch (error) { if (this.active(epoch) && error.terminal) this._pending = null; throw error }
     if (!complete || !this.active(epoch)) return
     this._pending = null
     this.setData({ clips: (complete.clips || []).map(c => ({
@@ -310,13 +353,13 @@ Page({
     wx.showToast({ title: '集锦生成成功！', icon: 'success' })
   },
 
-  async runWork(work, title = 'AI 生成中...') {
+  async runWork(work, title = 'AI 生成中...', background = false) {
     if (this._busy) return
     const epoch = this._epoch || 0
     this._epoch = epoch
     this._busy = true
     this.setData({ isGenerating: true })
-    wx.showLoading({ title, mask: true })
+    if (!background) wx.showLoading({ title, mask: true })
     try { if (await this.loginForClip(epoch) && this.active(epoch)) await work(epoch) }
     catch (error) { if (this.active(epoch)) this.clipError(error) }
     finally {
@@ -335,7 +378,7 @@ Page({
         const project = await app.api.get(`${CLIP_API}/${pending.projectId}`)
         if (this.active(epoch)) await this.watchProject(project, epoch)
       }
-    })
+    }, '读取处理状态...', true)
   },
 
   isPickerPageTop() {
@@ -382,10 +425,21 @@ Page({
       if (!this.active(current) || ticket.session !== app.api.getUser() || !this.isPickerPageTop()) return
       if (size > MAX_VIDEO_BYTES) throw new Error('视频超过1GiB，请截取较短片段后重试')
       if (size === 0) throw new Error('视频文件为空，请重新选择')
+      this.startLocalPreview(filePath)
       wx.showLoading({ title: '上传视频中...', mask: true })
-      const project = await app.api.upload(`${CLIP_API}/upload`, filePath)
+      let project
+      try { project = await app.api.upload(`${CLIP_API}/upload`, filePath) }
+      catch (error) {
+        if (this.active(current)) this.setData({ sourceStatus: '上传未完成 · 可查看本地原片' })
+        throw error
+      }
       if (!this.active(current) || ticket.session !== app.api.getUser()) return
-      wx.showLoading({ title: '视频分析中...', mask: true })
+      wx.hideLoading()
+      this._projectId = project.id
+      this._preview.id = project.id
+      this.setData({ selectedVideoId: project.id, sourceStatus: STATUS_LABELS[project.status] || '状态待确认' })
+      // Fetch the owned project's signed URL independently of analysis polling.
+      this.refreshSource(this._preview)
       await this.watchProject(project, current)
     }, '检查视频大小...')
   },
@@ -468,49 +522,193 @@ Page({
     finally { this._openingVideoPicker = false }
   },
 
-  async useCloudVideo() {
-    if (this._busy) return
-    this.cancelVideoPicker()
-    const epoch = this._epoch || 0
-    try {
-      if (!await this.loginForClip(epoch)) return
-      const history = await app.api.get(`${CLIP_API}?limit=50`)
-      if (!this.active(epoch)) return
-      if (!Array.isArray(history) || !history.length) throw new Error('暂无云端视频')
-      const choose = offset => {
-        const page = history.slice(offset, offset + 5)
-        const more = offset + 5 < history.length
-        wx.showActionSheet({
-          itemList: page.map(p => `${new Date(p.createdMs).toLocaleString()} · ${p.id}`).concat(more ? ['更多'] : []),
-          success: result => {
-            if (!this.active(epoch)) return
-            if (more && result.tapIndex === page.length) { choose(offset + 5); return }
-            const project = page[result.tapIndex]
-            if (project) this.openCloudProject(project)
-          }
-        })
-      }
-      choose(0)
-    } catch (error) { if (this._visible !== false) this.clipError(error) }
+  destroyPlayer() {
+    const source = this.data.playerSources[0]
+    if (source && typeof wx.createVideoContext === 'function') {
+      try { wx.createVideoContext(`source-video-${source.key}`, this).stop() } catch (_) {}
+    }
+    this._preview = null
+    this.setData({ playerSources: [], playerLoading: false, playerError: '', playerCanRetry: false })
   },
 
-  openCloudProject(project) {
+  previewActive(ticket) {
+    return !!ticket && this._preview === ticket && this._visible !== false && !this._clipUnloaded &&
+      this.checkClipAccount() && ticket.session === app.api.getUser() && ticket.owner === this.currentClipAccount()
+  },
+
+  newPreview(id) {
+    this.destroyPlayer()
+    const ticket = { id, session: app.api.getUser(), owner: this.currentClipAccount(), retried: false, loading: false }
+    this._preview = ticket
+    return ticket
+  },
+
+  mountSource(ticket, url) {
+    if (!this.previewActive(ticket)) return
+    this._playerKey = (this._playerKey || 0) + 1
+    ticket.key = this._playerKey
+    this.setData({ playerSources: [{ key: ticket.key, url }], playerError: '', playerLoading: false, playerCanRetry: false })
+  },
+
+  startLocalPreview(filePath) {
+    const ticket = this.newPreview(null)
+    this.setData({ sourceStatus: '上传中', sourceDuration: '时长待获取' }, () => this.scrollVideoSection('.source-video-card'))
+    this.mountSource(ticket, filePath)
+  },
+
+  async refreshSource(ticket) {
+    if (!this.previewActive(ticket) || !ticket.id || ticket.loading) return null
+    ticket.loading = true
+    this.setData({ playerLoading: true, playerError: '', playerCanRetry: false })
+    try {
+      const latest = await app.api.get(`${CLIP_API}/${ticket.id}`)
+      if (!this.previewActive(ticket)) return null
+      if (!latest || String(latest.id) !== String(ticket.id)) throw new Error('视频不可用')
+      const url = mediaUrl(latest.videoUrl)
+      if (!url.includes('/media/video/')) throw new Error('视频不可用')
+      this.mountSource(ticket, url)
+      const metadata = videoMetadata(latest)
+      this.setData({ sourceStatus: metadata.statusLabel, sourceDuration: metadata.durationLabel })
+      this.syncLibraryItem(latest)
+      return latest
+    } catch (_) {
+      if (this.previewActive(ticket)) this.setData({ playerSources: [], playerError: ticket.retried ? '视频仍不可用，请稍后重新选择' : '视频暂不可用，可刷新播放链接重试', playerCanRetry: !ticket.retried })
+      return null
+    } finally {
+      ticket.loading = false
+      if (this.previewActive(ticket)) this.setData({ playerLoading: false })
+    }
+  },
+
+  onSourceError(event) {
+    const ticket = this._preview
+    if (!this.previewActive(ticket) || String(event.currentTarget.dataset.key) !== String(ticket.key) || ticket.loading) return
+    // Never expose native error text/URLs or automatically loop on errors.
+    this.setData({ playerSources: [], playerError: ticket.id ? (ticket.retried ? '视频仍不可用，请稍后重新选择' : '播放失败或链接已过期，请刷新播放链接') : '本地视频无法播放，请重新选择', playerCanRetry: !!ticket.id && !ticket.retried })
+  },
+
+  sourceEventTicket(event) {
+    const ticket = this._preview
+    const key = event && event.currentTarget && event.currentTarget.dataset && event.currentTarget.dataset.key
+    return key !== undefined && key !== null && this.previewActive(ticket) && String(key) === String(ticket.key) ? ticket : null
+  },
+
+  onSourceMetadata(event) {
+    const ticket = this.sourceEventTicket(event)
+    const duration = Number(event && event.detail && event.detail.duration)
+    if (!ticket || !Number.isFinite(duration) || duration <= 0) return
+    ticket.duration = duration
+    ticket.metadataLoaded = true
+    const seconds = Math.floor(duration)
+    this.setData({ sourceDuration: `${Math.floor(seconds / 60)}分${String(seconds % 60).padStart(2, '0')}秒` })
+  },
+
+  onSourceTimeUpdate(event) {
+    const ticket = this.sourceEventTicket(event)
+    const current = Number(event && event.detail && event.detail.currentTime)
+    if (ticket && Number.isFinite(current) && current >= 0) ticket.currentTime = current
+  },
+
+  onSourcePlay(event) { const ticket = this.sourceEventTicket(event); if (ticket) ticket.playing = true },
+  onSourcePause(event) { const ticket = this.sourceEventTicket(event); if (ticket) ticket.playing = false },
+  onSourceEnded(event) { const ticket = this.sourceEventTicket(event); if (ticket) { ticket.playing = false; ticket.ended = true } },
+
+  retrySource() {
+    const ticket = this._preview
+    if (!this.previewActive(ticket) || !ticket.id || ticket.retried || ticket.loading || !this.data.playerCanRetry) return
+    ticket.retried = true
+    return this.refreshSource(ticket)
+  },
+
+  reopenSource() {
+    if (!this._projectId || !this.checkClipAccount() || this._visible === false) return
+    return this.refreshSource(this.newPreview(this._projectId))
+  },
+
+  closeVideoLibrary() {
+    this._libraryRequest = (this._libraryRequest || 0) + 1
+    this._librarySession = null
+    this._libraryCursor = null
+    this.setData({ libraryVisible: false, libraryItems: [], libraryLoading: false, libraryError: '', libraryMore: false })
+  },
+
+  syncLibraryItem(project) {
+    if (!project || !this.data.libraryItems.some(item => String(item.id) === String(project.id))) return
+    this.setData({ libraryItems: this.data.libraryItems.map(item => String(item.id) === String(project.id) ? videoMetadata(project) : item) })
+  },
+
+  scrollVideoSection(selector) {
+    if (this._visible === false || this._clipUnloaded || !this.checkClipAccount() || !this.isPickerPageTop() || typeof wx.pageScrollTo !== 'function') return
+    if (selector === '.video-library' ? !this.data.libraryVisible : selector !== '.source-video-card' || !this.data.videoName) return
+    try { wx.pageScrollTo({ selector, offsetTop: -96, duration: 200, fail() {} }) } catch (_) {}
+  },
+
+  useCloudVideo() {
+    if (this._busy && (!this._pending || this._pending.type !== 'analysis')) return
+    this.cancelVideoPicker()
+    if (this.data.libraryVisible) { this.closeVideoLibrary(); return }
+    this.setData({ libraryVisible: true }, () => this.scrollVideoSection('.video-library'))
+    return this.loadVideoLibrary()
+  },
+
+  async loadVideoLibrary() {
+    if (!this.data.libraryVisible || this.data.libraryLoading) return
+    const request = this._libraryRequest = (this._libraryRequest || 0) + 1
+    const epoch = this._epoch || 0
+    this.setData({ libraryLoading: true, libraryError: '' })
+    let session
+    const valid = () => request === this._libraryRequest && this.data.libraryVisible && this.active(epoch) && (!session || session === app.api.getUser())
+    try {
+      if (!await this.loginForClip(epoch) || !valid()) return
+      session = this._librarySession = app.api.getUser()
+      const cursor = this._libraryCursor
+      const history = await app.api.get(`${CLIP_API}?limit=${LIBRARY_LIMIT}${cursor ? `&beforeId=${cursor}` : ''}`)
+      if (!valid()) return
+      if (!Array.isArray(history) || history.some(p => !p || !/^[1-9][0-9]*$/.test(String(p.id)))) throw new Error('Invalid history')
+      const nextCursor = history.length ? history[history.length - 1].id : null
+      if (cursor && history.length && Number(nextCursor) >= Number(cursor)) throw new Error('Invalid cursor')
+      const seen = new Set(this.data.libraryItems.map(p => String(p.id)))
+      const items = history.filter(p => !seen.has(String(p.id))).map(videoMetadata)
+      this._libraryCursor = nextCursor || cursor
+      this.setData({ libraryItems: this.data.libraryItems.concat(items), libraryMore: history.length === LIBRARY_LIMIT })
+    } catch (_) {
+      if (valid()) this.setData({ libraryError: '云端视频加载失败，请重试' })
+    } finally {
+      if (valid()) this.setData({ libraryLoading: false })
+    }
+  },
+
+  selectCloudVideo(event) {
+    if (!this.checkClipAccount()) return
+    const project = this.data.libraryItems.find(p => String(p.id) === String(event.currentTarget.dataset.id))
+    if (project) return this.openCloudProject(project)
+  },
+
+  async openCloudProject(project) {
+    if (this._visible === false || !project || !/^[1-9][0-9]*$/.test(String(project.id))) return
+    if (this._busy && (!this._pending || this._pending.type !== 'analysis')) return
     this.resetVideo()
-    this.setData({ videoName: `云端视频 ${project.id}` })
-    return this.runWork(async epoch => {
-      const latest = project.status === 'FAILED'
-        ? await app.api.post(`${CLIP_API}/${project.id}/analyze`, {})
-        : await app.api.get(`${CLIP_API}/${project.id}`)
-      if (!this.active(epoch)) return
-      const complete = await this.watchProject(latest, epoch)
-      if (!complete || !this.active(epoch)) return
-      const job = (complete.renders || []).find(r => ['QUEUED', 'RUNNING'].includes(r.status) || (r.status === 'SUCCEEDED' && r.saved))
-      if (job) {
-        const clips = this.data.clips.map(c => ({ ...c, selected: (job.clipIds || []).includes(c.id) }))
-        this.setData({ clips, selectedCount: clips.filter(c => c.selected).length })
-        await this.watchRender(project.id, job, epoch)
-      }
-    })
+    const epoch = this._epoch
+    this.setData({ videoName: `云端视频 ${project.id}`, selectedVideoId: project.id }, () => this.scrollVideoSection('.source-video-card'))
+    try {
+      if (!await this.loginForClip(epoch)) return
+      const ticket = this.newPreview(project.id)
+      this._projectId = project.id
+      const latest = await this.refreshSource(ticket)
+      if (!latest || !this.previewActive(ticket) || latest.status === 'FAILED') return
+      return this.runWork(async current => {
+        const complete = await this.watchProject(latest, current)
+        if (!complete || !this.active(current)) return
+        const job = (complete.renders || []).find(r => ['QUEUED', 'RUNNING'].includes(r.status) || (r.status === 'SUCCEEDED' && r.saved))
+        if (job) {
+          const clips = this.data.clips.map(c => ({ ...c, selected: (job.clipIds || []).includes(c.id) }))
+          this.setData({ clips, selectedCount: clips.filter(c => c.selected).length })
+          await this.watchRender(project.id, job, current)
+        }
+      }, '读取处理状态...', true)
+    } catch (_) {
+      if (this.active(epoch)) this.setData({ playerError: '视频暂不可用，请重新选择' })
+    }
   },
 
   toggleClip(e) {
@@ -598,11 +796,13 @@ Page({
 
   resetVideo() {
     this.cancelVideoPicker()
+    this.destroyPlayer()
+    this.closeVideoLibrary()
     this.stopWork()
     this._pending = null
     this._projectId = null
     this._render = null
     this._renderRequest = null
-    this.setData({ clips: [], selectedCount: 0, videoGenerated: false, generatedDuration: '', videoName: '' })
+    this.setData({ clips: [], selectedCount: 0, videoGenerated: false, generatedDuration: '', videoName: '', selectedVideoId: null, sourceStatus: '', sourceDuration: '' })
   }
 })

@@ -194,6 +194,45 @@
   font-weight: 600;
 }
 
+/* ===== 原片播放器与云端视频库 ===== */
+.source-video-card, .video-library {
+  padding: 26rpx;
+  margin-bottom: 24rpx;
+}
+.source-video {
+  display: block;
+  width: 100%;
+  height: 360rpx;
+  background: #000;
+  border-radius: 16rpx;
+}
+.video-meta {
+  color: var(--text-secondary);
+  font-size: 24rpx;
+  line-height: 1.6;
+  margin: 12rpx 0;
+}
+.video-error {
+  color: var(--text-primary);
+  font-size: 24rpx;
+  line-height: 1.6;
+  margin: 16rpx 0;
+}
+.video-library-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 14rpx;
+  border: 2rpx solid var(--border-superlight);
+  border-radius: 16rpx;
+  background: var(--bg-card-light);
+}
+.video-library-item.active { border-color: var(--gold); }
+.video-library-main { flex: 1; min-width: 0; }
+.video-date { color: var(--text-primary); font-size: 26rpx; font-weight: 600; }
+.video-preview-label { color: var(--gold); font-size: 24rpx; flex-shrink: 0; }
+
 /* ===== 片段选择卡 ===== */
 .clip-card {
   padding: 26rpx 26rpx 14rpx;

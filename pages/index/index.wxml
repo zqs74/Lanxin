@@ -38,6 +38,46 @@
         </view>
       </view>
 
+      <!-- 原片预览：单一播放器，识别状态不阻塞播放 -->
+      <view wx:if="{{ videoName }}" class="source-video-card card">
+        <view class="clip-header">
+          <view class="section-title mini">原片预览</view>
+          <button class="btn btn-ghost btn-small" bindtap="resetVideo">关闭</button>
+        </view>
+        <video wx:for="{{ playerSources }}" wx:key="key" id="source-video-{{ item.key }}"
+          class="source-video" src="{{ item.url }}" data-key="{{ item.key }}"
+          controls="{{ true }}" autoplay="{{ false }}" show-fullscreen-btn="{{ true }}"
+          show-play-btn="{{ true }}" enable-progress-gesture="{{ true }}" object-fit="contain"
+          binderror="onSourceError" bindloadedmetadata="onSourceMetadata" bindtimeupdate="onSourceTimeUpdate"
+          bindplay="onSourcePlay" bindpause="onSourcePause" bindended="onSourceEnded" />
+        <view class="video-meta">{{ sourceStatus }}{{ sourceDuration ? ' · ' + sourceDuration : '' }}</view>
+        <view class="video-meta">原片可独立播放，无需等待分析完成</view>
+        <view wx:if="{{ playerLoading }}" class="video-meta">正在获取播放链接…</view>
+        <view wx:if="{{ playerError }}" class="video-error">{{ playerError }}</view>
+        <button wx:if="{{ playerCanRetry }}" class="btn btn-ghost btn-small" bindtap="retrySource" disabled="{{ playerLoading }}">刷新播放链接（仅重试一次）</button>
+        <button wx:if="{{ selectedVideoId && !playerSources.length && !playerLoading && !playerError }}" class="btn btn-ghost btn-small" bindtap="reopenSource">查看原片</button>
+      </view>
+
+      <!-- 云端视频库：仅加载元数据，选择后获取播放链接 -->
+      <view wx:if="{{ libraryVisible }}" class="video-library card">
+        <view class="clip-header">
+          <view class="section-title mini">云端视频</view>
+          <button class="btn btn-ghost btn-small" bindtap="closeVideoLibrary">收起</button>
+        </view>
+        <view wx:for="{{ libraryItems }}" wx:key="id" class="video-library-item {{ selectedVideoId === item.id ? 'active' : '' }}"
+          data-id="{{ item.id }}" bindtap="selectCloudVideo">
+          <view class="video-library-main">
+            <view class="video-date">{{ item.dateLabel }}</view>
+            <view class="video-meta">{{ item.durationLabel }} · {{ item.statusLabel }}</view>
+          </view>
+          <text class="video-preview-label">▶ 播放原片</text>
+        </view>
+        <view wx:if="{{ !libraryLoading && !libraryError && !libraryItems.length }}" class="video-meta">暂无云端视频，上传后可在这里查看</view>
+        <view wx:if="{{ libraryLoading }}" class="video-meta">正在加载视频…</view>
+        <view wx:if="{{ libraryError }}" class="video-error">{{ libraryError }}</view>
+        <button wx:if="{{ libraryError || libraryMore }}" class="btn btn-ghost btn-small" bindtap="loadVideoLibrary" disabled="{{ libraryLoading }}">{{ libraryError ? '重试加载' : '加载更多' }}</button>
+      </view>
+
       <!-- 片段选择卡 -->
       <view class="clip-card card">
         <view class="clip-header">

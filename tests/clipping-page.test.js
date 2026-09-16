@@ -7,7 +7,7 @@ const { privacyWx, loadPrivacy } = require('./privacy-harness')
 const source = fs.readFileSync(path.join(__dirname, '../pages/index/index.js'), 'utf8')
 const base = '/api/comptrain/clips/projects'
 const clip = { id: '1', time: '00:02', description: '进球识别', type: '投篮', selected: false }
-const project = { id: 10, videoUrl: 'https://api.lanxin.cyou/media/video/source.mp4', status: 'SUCCEEDED', clips: [clip] }
+const project = { id: 10, videoUrl: 'https://api.lanxin.cyou/media/video/source.mp4?exp=1999999999&sig=' + 'a'.repeat(64), status: 'SUCCEEDED', clips: [clip] }
 const rendered = { id: 'render-1', projectId: 10, status: 'SUCCEEDED', videoUrl: 'https://api.lanxin.cyou/media/video/render.mp4', durationMs: 1234, clipIds: ['1'], saved: false }
 
 function harness(api = {}) {
@@ -17,7 +17,7 @@ function harness(api = {}) {
   const calls = { toast: [], album: [], loading: 0, loadingTitles: [], navigation: [] }
   const defaultUser = { id: 7 }
   const app = { api: { getUser: () => defaultUser, ensureLogin: async () => defaultUser,
-    get: async route => route === '/api/auth/me' ? defaultUser : ({ ...rendered, saved: true }), ...api },
+    get: async route => route === '/api/auth/me' ? defaultUser : route === `${base}/10` ? project : ({ ...rendered, saved: true }), ...api },
     getUserTheme: () => 'auto', getThemeColors: () => ({ pageBg: '#f8f7f4' }), getTheme: () => 'light', applyNavBarColor() {} }
   const wx = { ...privacyWx(),
     showToast: value => calls.toast.push(value), showLoading: o => { calls.loading++; calls.loadingTitles.push(o.title) }, hideLoading: () => { calls.loading = 0 },
@@ -27,7 +27,7 @@ function harness(api = {}) {
     saveVideoToPhotosAlbum: options => { calls.album.push(options.filePath); options.success() }
   }
   let stack = []
-  vm.runInNewContext(source, { getCurrentPages: () => stack, Page: value => { definition = value }, getApp: () => app, wx, require: () => loadPrivacy(wx),
+  vm.runInNewContext(source, { getCurrentPages: () => stack, Page: value => { definition = value }, getApp: () => app, wx, require: name => name.endsWith('/api') ? require('../utils/api') : loadPrivacy(wx),
     setTimeout: fn => { timers.set(++timerId, fn); return timerId }, clearTimeout: id => timers.delete(id), console })
   const page = { ...definition, data: JSON.parse(JSON.stringify(definition.data)), _epoch: 0, _visible: true,
     setData(value) { Object.assign(this.data, value) } }
@@ -266,7 +266,8 @@ test('cloud signed source URL is not exposed in display name or retained render 
   const { page } = harness({ get: async () => ({ ...project, videoUrl: freshUrl, renders: [{ ...rendered, saved: true, videoUrl: freshUrl }] }) })
   await page.openCloudProject({ ...project, videoUrl: freshUrl })
   assert.equal(page.data.videoName, '云端视频 10')
-  assert.equal(JSON.stringify([page.data, page._render]).includes('sig='), false)
+  assert.equal(page.data.playerSources[0].url, freshUrl)
+  assert.equal(JSON.stringify([page.data.videoName, page.data.libraryItems, page._render]).includes('sig='), false)
 })
 test('video picker and album save both fail closed on missing privacy configuration', async () => {
   const { page, wx, calls } = harness({ post: async () => assert.fail('blocked save must not POST') })
@@ -302,8 +303,8 @@ test('first home display without a logged-in user does not initiate profile coll
   let definition
   const app = { api: { getUser: () => null }, getUserTheme: () => 'auto', getThemeColors: () => ({ pageBg: '#fff' }) }
   const wx = { ...privacyWx(), hideLoading() {} }
-  vm.runInNewContext(source, { Page: value => { definition = value }, getApp: () => app, wx, require: () => loadPrivacy(wx), clearTimeout() {} })
-  const cold = { ...definition, data: {}, setData(v) { Object.assign(this.data, v) }, applyNavBarColor() {}, syncThemeLabel() {} }
+  vm.runInNewContext(source, { Page: value => { definition = value }, getApp: () => app, wx, require: name => name.endsWith('/api') ? require('../utils/api') : loadPrivacy(wx), clearTimeout() {} })
+  const cold = { ...definition, data: JSON.parse(JSON.stringify(definition.data)), setData(v) { Object.assign(this.data, v) }, applyNavBarColor() {}, syncThemeLabel() {} }
   cold.onShow()
   assert.equal(cold.data.profile.name, '篮球爱好者'); assert.equal(cold._projectId, null)
 })
@@ -526,3 +527,277 @@ for (const action of ['hide', 'reset', 'ownerchange']) {
     assert.equal(h.page._projectId, null)
   })
 }
+
+const sourceError = page => ({ currentTarget: { dataset: { key: page.data.playerSources[0].key } }, detail: { errMsg: project.videoUrl } })
+const failedSource = { ...project, status: 'FAILED', clips: [] }
+
+for (const status of ['QUEUED', 'RUNNING']) {
+  test(`${status} cloud source mounts a real signed player while analysis remains pending without a mask`, async () => {
+    const reads = []
+    const h = harness({ get: async route => { reads.push(route); return route.includes('?') ? [] : { ...project, status } },
+      post: async () => assert.fail('preview must never submit analysis'), download: async () => assert.fail('preview must stream, not download') })
+    const work = h.page.openCloudProject(project)
+    await flush()
+    assert.equal(h.page.data.playerSources.length, 1)
+    assert.equal(h.page.data.playerSources[0].url, project.videoUrl)
+    assert.equal(h.page._pending.type, 'analysis')
+    assert.equal(h.calls.loading, 0)
+    await h.page.useCloudVideo()
+    assert.equal(h.page.data.libraryVisible, true)
+    assert.ok(reads.includes(`${base}?limit=10`))
+    h.page.resetVideo(); await work
+    assert.equal(h.timers.size, 0)
+  })
+}
+
+test('upload response unlocks playback before queued analysis completes and exposes local selection first', async () => {
+  let finishUpload
+  const h = harness({ upload: () => new Promise(resolve => { finishUpload = resolve }), get: async () => ({ ...project, status: 'QUEUED' }) })
+  await h.page.uploadLocalVideo()
+  const work = h.calls.choose.success({ tempFilePath: '/tmp/selected.mp4', size: 100 })
+  await flush()
+  assert.equal(h.page.data.playerSources[0].url, '/tmp/selected.mp4')
+  await h.page.useCloudVideo(); assert.equal(h.page.data.libraryVisible, false)
+  finishUpload({ ...project, status: 'QUEUED' }); await flush()
+  assert.equal(h.calls.loading, 0)
+  assert.equal(h.page.data.playerSources[0].url, project.videoUrl)
+  assert.equal(h.page._pending.type, 'analysis')
+  h.page.onHide(); await work
+})
+
+test('FAILED preview and its explicit signed-link refresh only GET the owned project, once per retry', async () => {
+  let reads = 0
+  const h = harness({ get: async route => { assert.equal(route, `${base}/10`); reads++; return { ...failedSource, videoUrl: project.videoUrl.replace('1999999999', String(1999999999 + reads)) } },
+    post: async () => assert.fail('FAILED preview must not POST'), download: async () => assert.fail('no download') })
+  await h.page.openCloudProject(failedSource)
+  assert.equal(h.page._pending, null)
+  assert.equal(h.page.data.sourceStatus, '分析失败 · 仍可看原片')
+  const first = h.page.data.playerSources[0]
+  const oldEvent = sourceError(h.page)
+  h.page.onSourceError(oldEvent)
+  assert.equal(reads, 1); assert.equal(h.page.data.playerSources.length, 0)
+  await Promise.all([h.page.retrySource(), h.page.retrySource()])
+  assert.equal(reads, 2); assert.notEqual(h.page.data.playerSources[0].url, first.url)
+  h.page.onSourceError(oldEvent)
+  assert.equal(h.page.data.playerSources.length, 1, 'old native error cannot remove new player')
+  h.page.onSourceError(sourceError(h.page)); await h.page.retrySource()
+  assert.equal(reads, 2); assert.equal(h.page.data.playerCanRetry, false)
+  assert.doesNotMatch(h.page.data.playerError, /sig=|https:/)
+})
+
+for (const action of ['reset', 'hide', 'unload', 'ownerchange', 'logout', 'same-user-new-session']) {
+  test(`source ${action} destroys the player and isolates a delayed signed refresh`, async () => {
+    let user = { id: 7 }, finish, reads = 0
+    const h = harness({ getUser: () => user, ensureLogin: async () => user,
+      get: async () => ++reads === 1 ? failedSource : new Promise(resolve => { finish = resolve }) })
+    let stopped = 0
+    h.wx.createVideoContext = () => ({ stop() { stopped++ } })
+    await h.page.openCloudProject(failedSource)
+    // A refresh may happen while the existing source is still mounted.
+    const pending = h.page.refreshSource(h.page._preview)
+    if (action === 'reset') h.page.resetVideo()
+    if (action === 'hide') h.page.onHide()
+    if (action === 'unload') h.page.onUnload()
+    if (action === 'ownerchange') user = { id: 8 }
+    if (action === 'logout') user = null
+    if (action === 'same-user-new-session') user = { id: 7 }
+    if (action.includes('session') || action === 'ownerchange' || action === 'logout') h.page.checkClipAccount()
+    finish(failedSource); await pending
+    assert.equal(stopped, 1)
+    assert.equal(h.page.data.playerSources.length, 0)
+    assert.equal(h.page._preview, null)
+    assert.equal(h.page.data.playerError, '')
+    assert.equal(h.page.data.playerLoading, false)
+  })
+}
+
+test('slow selection A cannot overwrite newer B or surface an old error', async () => {
+  for (const rejectOld of [false, true]) {
+    let finish, reject
+    const h = harness({ get: async route => route.endsWith('/10') ? new Promise((yes, no) => { finish = yes; reject = no }) : { ...failedSource, id: 11 } })
+    const a = h.page.openCloudProject(project); await flush()
+    await h.page.openCloudProject({ id: 11 })
+    const b = h.page.data.playerSources[0].key
+    if (rejectOld) reject(new Error(project.videoUrl)); else finish(project)
+    await a
+    assert.equal(h.page._projectId, 11); assert.equal(h.page.data.playerSources[0].key, b)
+    assert.equal(h.page.data.playerError, ''); assert.equal(h.page.data.clips.length, 0)
+  }
+})
+
+test('switching project during analysis invalidates the old in-flight poll', async () => {
+  let finish, reads = 0
+  const h = harness({ get: async route => route.endsWith('/11') ? { ...failedSource, id: 11 } : ++reads === 1 ? { ...project, status: 'RUNNING' } : new Promise(resolve => { finish = resolve }) })
+  const a = h.page.openCloudProject(project); await h.tick()
+  assert.equal(typeof finish, 'function')
+  await h.page.openCloudProject({ id: 11 })
+  finish(project); await a
+  assert.equal(h.page._projectId, 11); assert.equal(h.page.data.clips.length, 0)
+  assert.equal(h.page.data.sourceStatus, '分析失败 · 仍可看原片')
+  assert.equal(h.page.data.playerSources.length, 1)
+})
+
+for (const url of ['https://api.lanxin.cyou/media/video/public.mp4', 'https://other.example/video.mp4', 'https://api.lanxin.cyou/media/image/a.png', null]) {
+  test(`source URL validation rejects ${url || 'missing URL'} without exposing it or POSTing`, async () => {
+    let reads = 0
+    const h = harness({ get: async () => { reads++; return { ...failedSource, videoUrl: url } }, post: async () => assert.fail('no POST') })
+    await h.page.openCloudProject(project)
+    assert.equal(h.page.data.playerSources.length, 0)
+    assert.equal(h.page.data.playerCanRetry, true)
+    await h.page.retrySource(); await h.page.retrySource()
+    assert.equal(reads, 2); assert.equal(h.page.data.playerCanRetry, false)
+    assert.doesNotMatch(h.page.data.playerError, /https:|sig=/)
+  })
+}
+
+test('history uses cursor pagination, Chinese metadata and no embedded media or render URL retention', async () => {
+  const routes = []
+  const rows = Array.from({ length: 10 }, (_, i) => ({ ...project, id: 30 - i, createdMs: new Date(2026, 8, 16, 9, 5).getTime(), durationMs: i ? null : 65000, status: i ? 'QUEUED' : 'FAILED', renders: [rendered] }))
+  const h = harness({ get: async route => { routes.push(route); return routes.length === 1 ? rows : [] }, download: async () => assert.fail('no eager downloads') })
+  await h.page.useCloudVideo()
+  assert.equal(h.calls.sheet, undefined); assert.equal(h.page.data.playerSources.length, 0)
+  assert.equal(h.page.data.libraryItems[0].dateLabel, '2026年9月16日 09:05')
+  assert.equal(h.page.data.libraryItems[0].durationLabel, '1分05秒')
+  assert.equal(h.page.data.libraryItems[1].durationLabel, '时长待获取')
+  assert.equal(h.page.data.libraryItems[0].statusLabel, '分析失败 · 仍可看原片')
+  assert.doesNotMatch(JSON.stringify(h.page.data.libraryItems), /videoUrl|renders|sig=|https:/)
+  await h.page.loadVideoLibrary()
+  assert.deepEqual(routes, [`${base}?limit=10`, `${base}?limit=10&beforeId=21`])
+  assert.equal(h.page.data.libraryMore, false); assert.equal(h.page.data.libraryItems.length, 10)
+})
+
+test('history empty and malformed/error responses release loading and permit explicit retry', async () => {
+  let reads = 0
+  const h = harness({ get: async () => { reads++; if (reads === 1) throw new Error(project.videoUrl); if (reads === 2) return {}; return [] } })
+  await h.page.useCloudVideo()
+  assert.equal(h.page.data.libraryLoading, false); assert.ok(h.page.data.libraryError)
+  assert.doesNotMatch(h.page.data.libraryError, /sig=|https:/)
+  await h.page.loadVideoLibrary(); assert.ok(h.page.data.libraryError)
+  await h.page.loadVideoLibrary()
+  assert.equal(h.page.data.libraryError, ''); assert.equal(h.page.data.libraryItems.length, 0)
+  assert.equal(h.page.data.libraryMore, false)
+})
+
+test('pagination errors keep metadata and retry the same cursor', async () => {
+  const routes = []
+  const rows = Array.from({ length: 10 }, (_, i) => ({ ...project, id: 30 - i }))
+  const h = harness({ get: async route => { routes.push(route); if (routes.length === 1) return rows; if (routes.length === 2) throw new Error('network'); return [{ ...project, id: 20 }] } })
+  await h.page.useCloudVideo(); await h.page.loadVideoLibrary()
+  assert.equal(h.page.data.libraryItems.length, 10); assert.ok(h.page.data.libraryError)
+  await h.page.loadVideoLibrary()
+  assert.equal(h.page.data.libraryItems.length, 11); assert.equal(routes[1], routes[2]); assert.equal(h.page.data.libraryMore, false)
+})
+
+for (const action of ['cancel', 'hide', 'reset', 'ownerchange', 'same-user-new-session']) {
+  test(`history ${action} ignores delayed rows and delayed errors`, async () => {
+    for (const fail of [false, true]) {
+      let user = { id: 7 }, finish, reject
+      const h = harness({ getUser: () => user, ensureLogin: async () => user, get: () => new Promise((yes, no) => { finish = yes; reject = no }) })
+      const pending = h.page.useCloudVideo(); await flush()
+      if (action === 'cancel') h.page.closeVideoLibrary()
+      if (action === 'hide') h.page.onHide()
+      if (action === 'reset') h.page.resetVideo()
+      if (action === 'ownerchange') user = { id: 8 }
+      if (action === 'same-user-new-session') user = { id: 7 }
+      if (fail) reject(new Error(project.videoUrl)); else finish([project])
+      await pending
+      assert.equal(h.page.data.libraryItems.length, 0); assert.equal(h.page.data.libraryError, '')
+      assert.equal(h.page.data.libraryVisible, false); assert.equal(h.page.data.libraryLoading, false)
+    }
+  })
+}
+
+test('native source widget has controls, fullscreen, seeking, one keyed node and no fabricated thumbnail', () => {
+  const markup = fs.readFileSync(path.join(__dirname, '../pages/index/index.wxml'), 'utf8')
+  assert.equal((markup.match(/<video\s/g) || []).length, 1)
+  for (const attr of ['controls', 'show-fullscreen-btn', 'enable-progress-gesture']) assert.ok(markup.includes(`${attr}="{{ true }}"`))
+  assert.match(markup, /wx:for="\{\{ playerSources \}\}" wx:key="key"/)
+  assert.doesNotMatch(markup, /\bposter=/)
+  assert.doesNotMatch(source, /toLocaleString|\/analyze/)
+})
+
+test('uploaded original remains playable when queued analysis later fails without reanalysis', async () => {
+  let reads = 0
+  const h = harness({ upload: async () => ({ ...project, status: 'QUEUED' }), get: async () => ++reads === 1 ? { ...project, status: 'QUEUED' } : failedSource,
+    post: async () => assert.fail('analysis failure must not retry POST') })
+  await h.page.uploadLocalVideo()
+  const work = h.calls.choose.success({ tempFilePath: '/tmp/a.mp4', size: 100 })
+  await h.tick(); await work
+  assert.equal(h.page.data.playerSources[0].url, project.videoUrl)
+  assert.equal(h.page.data.sourceStatus, '分析失败 · 仍可看原片')
+  assert.equal(h.calls.loading, 0); assert.equal(h.page._pending, null)
+})
+
+test('history selection fetches only the chosen owned URL and returning after hide requires a fresh URL', async () => {
+  const routes = []
+  const h = harness({ get: async route => { routes.push(route); return route.includes('?') ? [{ ...failedSource, videoUrl: 'DO_NOT_USE_HISTORY_URL' }] : { ...failedSource, videoUrl: project.videoUrl.replace('1999999999', String(1999999999 + routes.length)) } } })
+  await h.page.useCloudVideo()
+  await h.page.selectCloudVideo({ currentTarget: { dataset: { id: 10 } } })
+  const first = h.page.data.playerSources[0].url
+  assert.deepEqual(routes, [`${base}?limit=10`, `${base}/10`])
+  h.page.onHide()
+  assert.equal(h.page.data.playerSources.length, 0)
+  assert.equal(h.page.data.libraryItems.length, 0)
+  h.page._visible = true
+  await h.page.reopenSource()
+  assert.equal(routes.at(-1), `${base}/10`)
+  assert.notEqual(h.page.data.playerSources[0].url, first)
+})
+
+test('upload failure leaves an authorized local player with accurate status instead of perpetual uploading', async () => {
+  const h = harness({ upload: async () => { throw new Error('network') } })
+  await h.page.uploadLocalVideo(); await h.calls.choose.success({ tempFilePath: '/tmp/a.mp4', size: 100 })
+  assert.equal(h.page.data.playerSources[0].url, '/tmp/a.mp4')
+  assert.equal(h.page.data.sourceStatus, '上传未完成 · 可查看本地原片')
+  assert.equal(h.calls.loading, 0)
+})
+
+test('real native metadata and progress are accepted only for the current player key', () => {
+  const h = harness(), ticket = h.page.newPreview(10)
+  h.page.mountSource(ticket, project.videoUrl)
+  const event = detail => ({ currentTarget:{dataset:{key:ticket.key}}, detail })
+  h.page.onSourceMetadata(event({duration:63.8}))
+  assert.equal(h.page.data.sourceDuration, '1分03秒')
+  assert.equal(ticket.metadataLoaded, true)
+  h.page.onSourcePlay(event({})); assert.equal(ticket.playing, true)
+  h.page.onSourceTimeUpdate(event({currentTime:1.5})); assert.equal(ticket.currentTime, 1.5)
+  h.page.onSourcePause(event({})); assert.equal(ticket.playing, false)
+  h.page.onSourceEnded(event({})); assert.equal(ticket.ended, true)
+  assert.equal('currentTime' in h.page.data, false, 'progress is memory only, not repeatedly copied into view data')
+})
+
+test('late or malformed native events cannot update another video or a hidden page', () => {
+  const h = harness(), old = h.page.newPreview(10)
+  h.page.mountSource(old, project.videoUrl)
+  const oldEvent = {currentTarget:{dataset:{key:old.key}},detail:{duration:90,currentTime:55}}
+  const current = h.page.newPreview(11); h.page.mountSource(current, project.videoUrl)
+  h.page.onSourceMetadata(oldEvent); h.page.onSourceTimeUpdate(oldEvent); h.page.onSourcePlay(oldEvent)
+  assert.equal(current.metadataLoaded, undefined); assert.equal(current.currentTime, undefined); assert.equal(current.playing, undefined)
+  h.page.onSourceMetadata({currentTarget:{dataset:{key:current.key}},detail:{duration:'bad'}})
+  assert.equal(current.metadataLoaded, undefined)
+  h.page.onHide()
+  h.page.onSourceMetadata({currentTarget:{dataset:{key:current.key}},detail:{duration:90}})
+  assert.equal(h.page.data.playerSources.length, 0); assert.equal(h.page._preview, null)
+})
+
+test('cloud opening and selecting focus the requested section after rendering without background scrolling', async () => {
+  const h = harness({get:async route => route.includes('?') ? [failedSource] : failedSource}), moves=[]
+  h.wx.pageScrollTo = options => moves.push(options.selector)
+  const original = h.page.setData
+  h.page.setData = function(patch, callback){ original.call(this,patch); if(callback)callback() }
+  await h.page.useCloudVideo()
+  assert.equal(moves.at(-1), '.video-library')
+  await h.page.selectCloudVideo({currentTarget:{dataset:{id:10}}})
+  assert.equal(moves.at(-1), '.source-video-card')
+  const count = moves.length; h.page.onHide(); h.page.scrollVideoSection('.source-video-card')
+  assert.equal(moves.length, count)
+})
+
+test('analysis updates existing library metadata without copying private playback URLs', () => {
+  const h = harness()
+  h.page.setData({libraryItems:[{id:10,statusLabel:'等待分析'}]})
+  h.page.syncLibraryItem({...project,createdMs:1000,durationMs:3000,videoUrl:'SIGNED_PRIVATE',renders:[{videoUrl:'PRIVATE'}]})
+  assert.equal(h.page.data.libraryItems[0].statusLabel, '分析完成')
+  assert.equal(h.page.data.libraryItems[0].durationLabel, '0分03秒')
+  assert.equal(JSON.stringify(h.page.data.libraryItems).includes('PRIVATE'), false)
+})
