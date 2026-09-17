@@ -41,7 +41,7 @@
       <!-- 原片预览：单一播放器，识别状态不阻塞播放 -->
       <view wx:if="{{ videoName }}" class="source-video-card card">
         <view class="clip-header">
-          <view class="section-title mini">原片预览</view>
+          <view class="section-title mini">{{ playerMode === 'render' ? '集锦预览' : '原片预览' }}</view>
           <button class="btn btn-ghost btn-small" bindtap="resetVideo">关闭</button>
         </view>
         <video wx:for="{{ playerSources }}" wx:key="key" id="source-video-{{ item.key }}"
@@ -51,11 +51,12 @@
           binderror="onSourceError" bindloadedmetadata="onSourceMetadata" bindtimeupdate="onSourceTimeUpdate"
           bindplay="onSourcePlay" bindpause="onSourcePause" bindended="onSourceEnded" />
         <view class="video-meta">{{ sourceStatus }}{{ sourceDuration ? ' · ' + sourceDuration : '' }}</view>
-        <view class="video-meta">原片可独立播放，无需等待分析完成</view>
+        <view class="video-meta">{{ playerMode === 'render' ? '正在播放已生成的集锦，保存后可在相册查看' : (previewClipLabel || '原片可独立播放，无需等待分析完成') }}</view>
         <view wx:if="{{ playerLoading }}" class="video-meta">正在获取播放链接…</view>
         <view wx:if="{{ playerError }}" class="video-error">{{ playerError }}</view>
         <button wx:if="{{ playerCanRetry }}" class="btn btn-ghost btn-small" bindtap="retrySource" disabled="{{ playerLoading }}">刷新播放链接（仅重试一次）</button>
         <button wx:if="{{ selectedVideoId && !playerSources.length && !playerLoading && !playerError }}" class="btn btn-ghost btn-small" bindtap="reopenSource">查看原片</button>
+        <button wx:if="{{ playerMode === 'render' && !playerLoading }}" class="btn btn-ghost btn-small" bindtap="reopenSource">返回原片</button>
       </view>
 
       <!-- 云端视频库：仅加载元数据，选择后获取播放链接 -->
@@ -100,6 +101,7 @@
               <view class="clip-time">{{ item.time }}</view>
               <view class="clip-desc">{{ item.description }}</view>
             </view>
+            <view class="clip-preview {{ previewClipId === item.id ? 'active' : '' }}" data-index="{{ index }}" catchtap="previewClip">{{ previewClipId === item.id ? '预览中' : '▶ 预览' }}</view>
           </view>
         </view>
       </view>
@@ -117,7 +119,8 @@
         <view class="result-title">集锦生成成功！</view>
         <view class="result-meta">共 {{ selectedCount }} 个片段 · 时长 {{ generatedDuration }}</view>
         <view class="result-actions">
-          <button class="btn btn-primary btn-small" bindtap="saveVideo">保存</button>
+          <button class="btn btn-primary btn-small" bindtap="playRender">播放集锦</button>
+          <button class="btn btn-ghost btn-small" bindtap="saveVideo">保存</button>
           <button class="btn btn-ghost btn-small" bindtap="shareVideo">分享</button>
           <button class="btn btn-ghost btn-small" bindtap="resetVideo">重新剪辑</button>
         </view>

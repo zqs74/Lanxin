@@ -801,3 +801,121 @@ test('analysis updates existing library metadata without copying private playbac
   assert.equal(h.page.data.libraryItems[0].durationLabel, '0分03秒')
   assert.equal(JSON.stringify(h.page.data.libraryItems).includes('PRIVATE'), false)
 })
+
+// ===== 片段预览与集锦播放（在小程序内直接观看，不必先保存到相册） =====
+const timedClip = { ...clip, time: '00:41', startMs: 36625, endMs: 44625 }
+const timedProject = { ...project, clips: [timedClip] }
+const tapClip = index => ({ currentTarget: { dataset: { index } } })
+function recordingContexts(h) {
+  const actions = []
+  h.wx.createVideoContext = id => ({ seek: value => actions.push(['seek', id, value]), play: () => actions.push(['play', id]),
+    pause: () => actions.push(['pause', id]), stop: () => actions.push(['stop', id]) })
+  return actions
+}
+const playerEvent = (h, detail) => ({ currentTarget: { dataset: { key: h.page.data.playerSources[0].key } }, detail })
+
+test('clip preview plays only the chosen range on the owned source player without POST or download', async () => {
+  const reads = []
+  const h = harness({ get: async route => { reads.push(route); return route === '/api/auth/me' ? { id: 7 } : timedProject },
+    post: async () => assert.fail('preview must never POST'), download: async () => assert.fail('preview must stream, not download') })
+  const actions = recordingContexts(h)
+  await h.page.openCloudProject(project)
+  assert.deepEqual(JSON.parse(JSON.stringify(h.page.data.clips)), [{ ...timedClip, selected: false }])
+  await h.page.previewClip(tapClip(0))
+  const id = `source-video-${h.page.data.playerSources[0].key}`
+  assert.equal(h.page.data.previewClipId, '1'); assert.match(h.page.data.previewClipLabel, /00:41/)
+  assert.deepEqual(actions, [], 'nothing is sought before the player reports metadata')
+  h.page.onSourceMetadata(playerEvent(h, { duration: 251.25 }))
+  assert.deepEqual(actions, [['seek', id, 36.625], ['play', id]])
+  h.page.onSourceTimeUpdate(playerEvent(h, { currentTime: 40 }))
+  assert.equal(h.page.data.previewClipId, '1')
+  h.page.onSourceTimeUpdate(playerEvent(h, { currentTime: 44.7 }))
+  assert.deepEqual(actions.at(-1), ['pause', id])
+  assert.equal(h.page.data.previewClipId, null); assert.equal(h.page.data.previewClipLabel, '')
+  h.page.onSourceTimeUpdate(playerEvent(h, { currentTime: 60 }))
+  assert.equal(actions.filter(a => a[0] === 'pause').length, 1, 'normal playback after a preview is never paused again')
+  const before = reads.length
+  await h.page.previewClip(tapClip(0))
+  assert.equal(reads.length, before, 'a mounted owned player is reused without another request')
+  assert.deepEqual(actions.slice(-2), [['seek', id, 36.625], ['play', id]])
+  assert.equal(h.page.data.selectedCount, 0, 'previewing never toggles the selection')
+})
+
+test('clip preview without a usable range or project only explains itself', async () => {
+  const h = harness({ get: async route => route === '/api/auth/me' ? { id: 7 } : { ...project, clips: [clip] } })
+  const actions = recordingContexts(h)
+  await h.page.openCloudProject(project)
+  await h.page.previewClip(tapClip(0))
+  assert.equal(h.calls.toast.at(-1).title, '该片段暂时无法预览')
+  await h.page.previewClip(tapClip(5))
+  assert.deepEqual(actions, []); assert.equal(h.page.data.previewClipId, null)
+})
+
+test('clip preview remounts the source when the player was closed, and reset or account change cancels it', async () => {
+  const h = harness({ get: async route => route === '/api/auth/me' ? { id: 7 } : timedProject })
+  const actions = recordingContexts(h)
+  await h.page.openCloudProject(project)
+  h.page.destroyPlayer()
+  assert.equal(h.page.data.playerSources.length, 0)
+  await h.page.previewClip(tapClip(0))
+  assert.equal(h.page.data.playerSources[0].url, project.videoUrl)
+  h.page.onSourceMetadata(playerEvent(h, { duration: 251.25 }))
+  assert.equal(actions.filter(a => a[0] === 'seek').length, 1)
+  h.page.resetVideo()
+  assert.equal(h.page.data.previewClipId, null); assert.equal(h.page._clipPreview, null)
+})
+
+test('generated highlight plays in the same player from a fresh owned URL and can return to the source', async () => {
+  const reads = []
+  const signedRender = 'https://api.lanxin.cyou/media/video/comptrain_render.mp4?exp=1999999999&sig=' + 'b'.repeat(64)
+  const h = harness({ post: async () => rendered, download: async () => assert.fail('in-app playback must not download'),
+    get: async route => { reads.push(route); return route === '/api/auth/me' ? { id: 7 } : route.includes('/render/') ? { ...rendered, videoUrl: signedRender } : timedProject } })
+  recordingContexts(h)
+  await h.page.openCloudProject(project)
+  h.page.toggleClip(tapClip(0)); await h.page.generateWithAI()
+  assert.equal(h.page.data.videoGenerated, true)
+  await h.page.playRender()
+  assert.equal(h.page.data.playerMode, 'render')
+  assert.equal(h.page.data.playerSources[0].url, signedRender)
+  assert.equal(h.page.data.sourceStatus, '已生成的集锦')
+  assert.ok(reads.includes(`${base}/10/render/render-1`))
+  assert.equal(h.page._render.videoUrl, undefined, 'signed URLs are never retained in render metadata')
+  await h.page.reopenSource()
+  assert.equal(h.page.data.playerMode, 'source'); assert.equal(h.page.data.playerSources[0].url, project.videoUrl)
+  await h.page.playRender()
+  h.page.toggleClip(tapClip(0))
+  assert.equal(h.page.data.playerSources.length, 0, 'changing the selection discards the outdated highlight player')
+  assert.equal(h.page.data.playerMode, 'source'); assert.equal(h.page.data.videoGenerated, false)
+  await h.page.playRender()
+  assert.equal(h.page.data.playerSources.length, 0, 'no highlight, nothing to play')
+})
+
+test('highlight playback failure allows one explicit refresh and never loops', async () => {
+  let renderReads = 0
+  const signedUrl = 'https://api.lanxin.cyou/media/video/comptrain_render.mp4?exp=1999999999&sig=' + 'c'.repeat(64)
+  const h = harness({ post: async () => rendered,
+    get: async route => { if (route === '/api/auth/me') return { id: 7 }; if (!route.includes('/render/')) return timedProject
+      renderReads++; if (renderReads === 1) throw new Error('expired'); return { ...rendered, videoUrl: signedUrl } } })
+  recordingContexts(h)
+  await h.page.openCloudProject(project)
+  h.page.toggleClip(tapClip(0)); await h.page.generateWithAI()
+  const afterGenerate = renderReads
+  await h.page.playRender()
+  assert.equal(h.page.data.playerSources.length, 0)
+  assert.equal(h.page.data.playerError, '集锦暂不可用，可刷新播放链接重试'); assert.equal(h.page.data.playerCanRetry, true)
+  await h.page.retrySource()
+  assert.equal(h.page.data.playerSources[0].url, signedUrl); assert.equal(h.page.data.playerMode, 'render')
+  h.page.onSourceError(playerEvent(h, {}))
+  assert.equal(h.page.data.playerCanRetry, false, 'only one refresh per opened highlight')
+  assert.equal(renderReads, afterGenerate + 2)
+})
+
+test('an unsigned highlight address is never mounted in the player', async () => {
+  const h = harness({ post: async () => rendered, get: async route => route === '/api/auth/me' ? { id: 7 } : route.includes('/render/') ? rendered : timedProject })
+  recordingContexts(h)
+  await h.page.openCloudProject(project)
+  h.page.toggleClip(tapClip(0)); await h.page.generateWithAI()
+  await h.page.playRender()
+  assert.equal(h.page.data.playerSources.length, 0)
+  assert.equal(h.page.data.playerError, '集锦暂不可用，可刷新播放链接重试')
+})

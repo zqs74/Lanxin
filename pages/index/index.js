@@ -44,6 +44,10 @@ Page({
     playerLoading: false,
     playerError: '',
     playerCanRetry: false,
+    // 同一个播放器既看原片也看已生成的集锦；片段预览只是在原片上定位播放一段。
+    playerMode: 'source',
+    previewClipId: null,
+    previewClipLabel: '',
     sourceStatus: '',
     sourceDuration: '',
     selectedVideoId: null,
@@ -329,9 +333,12 @@ Page({
     catch (error) { if (this.active(epoch) && error.terminal) this._pending = null; throw error }
     if (!complete || !this.active(epoch)) return
     this._pending = null
-    this.setData({ clips: (complete.clips || []).map(c => ({
-      id: c.id, time: c.time, description: c.description, type: c.type, selected: false
-    })), selectedCount: 0, videoGenerated: false })
+    this.setData({ clips: (complete.clips || []).map(c => {
+      const item = { id: c.id, time: c.time, description: c.description, type: c.type, selected: false }
+      // 片段起止时间只用于在原片上预览这一段；服务端没给时保持原有字段形状。
+      if (Number.isFinite(c.startMs) && Number.isFinite(c.endMs)) { item.startMs = c.startMs; item.endMs = c.endMs }
+      return item
+    }), selectedCount: 0, videoGenerated: false })
     if (!complete.clips || !complete.clips.length) wx.showToast({ title: complete.message || '未识别到篮球精彩片段', icon: 'none' })
     return complete
   },
@@ -528,7 +535,9 @@ Page({
       try { wx.createVideoContext(`source-video-${source.key}`, this).stop() } catch (_) {}
     }
     this._preview = null
-    this.setData({ playerSources: [], playerLoading: false, playerError: '', playerCanRetry: false })
+    this._clipPreview = null
+    this.setData({ playerSources: [], playerLoading: false, playerError: '', playerCanRetry: false,
+      playerMode: 'source', previewClipId: null, previewClipLabel: '' })
   },
 
   previewActive(ticket) {
@@ -601,23 +610,115 @@ Page({
     ticket.metadataLoaded = true
     const seconds = Math.floor(duration)
     this.setData({ sourceDuration: `${Math.floor(seconds / 60)}分${String(seconds % 60).padStart(2, '0')}秒` })
+    // A clip preview requested before the player was ready starts once metadata is known.
+    this.startClipPreview(ticket)
   },
 
   onSourceTimeUpdate(event) {
     const ticket = this.sourceEventTicket(event)
     const current = Number(event && event.detail && event.detail.currentTime)
-    if (ticket && Number.isFinite(current) && current >= 0) ticket.currentTime = current
+    if (!ticket || !Number.isFinite(current) || current < 0) return
+    ticket.currentTime = current
+    const preview = this._clipPreview
+    if (preview && preview.ticket === ticket && preview.started && current >= preview.endSec) {
+      this.endClipPreview()
+      if (typeof wx.createVideoContext === 'function') {
+        try { wx.createVideoContext(`source-video-${ticket.key}`, this).pause() } catch (_) {}
+      }
+    }
   },
 
   onSourcePlay(event) { const ticket = this.sourceEventTicket(event); if (ticket) ticket.playing = true },
   onSourcePause(event) { const ticket = this.sourceEventTicket(event); if (ticket) ticket.playing = false },
-  onSourceEnded(event) { const ticket = this.sourceEventTicket(event); if (ticket) { ticket.playing = false; ticket.ended = true } },
+  onSourceEnded(event) {
+    const ticket = this.sourceEventTicket(event)
+    if (!ticket) return
+    ticket.playing = false
+    ticket.ended = true
+    if (this._clipPreview && this._clipPreview.ticket === ticket) this.endClipPreview()
+  },
+
+  // ===== 片段预览：在原片播放器里定位播放一段，不下载、不生成新文件 =====
+  endClipPreview() {
+    this._clipPreview = null
+    if (this.data.previewClipId !== null || this.data.previewClipLabel) this.setData({ previewClipId: null, previewClipLabel: '' })
+  },
+
+  startClipPreview(ticket) {
+    const preview = this._clipPreview
+    if (!preview || preview.started || preview.ticket !== ticket || !this.previewActive(ticket) ||
+      !ticket.metadataLoaded || typeof wx.createVideoContext !== 'function') return
+    preview.started = true
+    try {
+      const context = wx.createVideoContext(`source-video-${ticket.key}`, this)
+      context.seek(preview.startSec)
+      context.play()
+    } catch (_) { this.endClipPreview() }
+  },
+
+  async previewClip(e) {
+    const clip = this.data.clips[e.currentTarget.dataset.index]
+    if (!clip || !this._projectId || this._visible === false || !this.checkClipAccount()) return
+    const startSec = Number(clip.startMs) / 1000
+    const endSec = Number(clip.endMs) / 1000
+    if (!Number.isFinite(startSec) || !Number.isFinite(endSec) || startSec < 0 || endSec <= startSec) {
+      wx.showToast({ title: '该片段暂时无法预览', icon: 'none' })
+      return
+    }
+    let ticket = this._preview
+    const reusable = this.previewActive(ticket) && ticket.kind !== 'render' && ticket.id === this._projectId &&
+      this.data.playerSources.length > 0
+    if (!reusable) ticket = this.newPreview(this._projectId)
+    this._clipPreview = { id: clip.id, startSec, endSec, ticket, started: false }
+    this.setData({ previewClipId: clip.id, previewClipLabel: `正在预览 ${clip.time} 的片段` },
+      () => this.scrollVideoSection('.source-video-card'))
+    if (reusable) return this.startClipPreview(ticket)
+    const latest = await this.refreshSource(ticket)
+    if (!latest && this._clipPreview && this._clipPreview.ticket === ticket) this.endClipPreview()
+  },
+
+  // ===== 集锦预览：生成成功后直接在小程序里播放，不必先保存到相册 =====
+  async playRender() {
+    if (!this.data.videoGenerated || !this._render || !this._projectId || this._openingRender) return
+    const epoch = this._epoch
+    if (!this.active(epoch)) return
+    this._openingRender = true
+    try {
+      if (!await this.loginForClip(epoch) || !this._render) return
+      const ticket = this.newPreview(this._projectId)
+      ticket.kind = 'render'
+      ticket.renderId = this._render.id
+      this.setData({ playerMode: 'render' }, () => this.scrollVideoSection('.source-video-card'))
+      await this.refreshRender(ticket)
+    } finally { this._openingRender = false }
+  },
+
+  async refreshRender(ticket) {
+    if (!this.previewActive(ticket) || ticket.kind !== 'render' || ticket.loading) return null
+    ticket.loading = true
+    this.setData({ playerMode: 'render', playerLoading: true, playerError: '', playerCanRetry: false })
+    try {
+      const latest = await this.freshRender(this._epoch, ticket.renderId)
+      if (!latest || !this.previewActive(ticket)) return null
+      const url = mediaUrl(latest.videoUrl)
+      if (!url.includes('/media/video/')) throw new Error('视频不可用')
+      this.mountSource(ticket, url)
+      this.setData({ playerMode: 'render', sourceStatus: '已生成的集锦', sourceDuration: '' })
+      return latest
+    } catch (_) {
+      if (this.previewActive(ticket)) this.setData({ playerSources: [], playerMode: 'render', playerError: ticket.retried ? '集锦仍不可用，请稍后重试' : '集锦暂不可用，可刷新播放链接重试', playerCanRetry: !ticket.retried })
+      return null
+    } finally {
+      ticket.loading = false
+      if (this.previewActive(ticket)) this.setData({ playerLoading: false })
+    }
+  },
 
   retrySource() {
     const ticket = this._preview
     if (!this.previewActive(ticket) || !ticket.id || ticket.retried || ticket.loading || !this.data.playerCanRetry) return
     ticket.retried = true
-    return this.refreshSource(ticket)
+    return ticket.kind === 'render' ? this.refreshRender(ticket) : this.refreshSource(ticket)
   },
 
   reopenSource() {
@@ -718,6 +819,8 @@ Page({
     if (!clips[index]) return
     clips[index].selected = !clips[index].selected
     const selectedCount = clips.filter(c => c.selected).length
+    // 选择变了，旧集锦作废；正在播放它的播放器一并关闭，可再点“查看原片”。
+    if (this.data.playerMode === 'render') this.destroyPlayer()
     this.setData({ clips, selectedCount, videoGenerated: false })
     this._render = null
     this._renderRequest = null
