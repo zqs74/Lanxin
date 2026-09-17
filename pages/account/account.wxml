@@ -1,0 +1,37 @@
+<view class="account-shell">
+  <view class="account-card">
+    <view class="account-row">
+      <view class="account-row-label">当前账号</view>
+      <view class="account-row-value">{{username || '--'}}</view>
+    </view>
+    <view class="account-row" wx:if="{{displayName && displayName !== username}}">
+      <view class="account-row-label">名称</view>
+      <view class="account-row-value">{{displayName}}</view>
+    </view>
+  </view>
+
+  <view class="account-card">
+    <view class="account-title">修改密码</view>
+    <view class="account-label">当前密码</view>
+    <input class="account-input" value="{{currentPassword}}" password="{{true}}" placeholder="请输入当前密码" maxlength="128" data-field="currentPassword" bindinput="onPasswordInput" disabled="{{submitting}}" />
+    <view class="account-label">新密码</view>
+    <input class="account-input" value="{{newPassword}}" password="{{true}}" placeholder="12 至 128 位，不能是纯数字" maxlength="128" data-field="newPassword" bindinput="onPasswordInput" disabled="{{submitting}}" />
+    <view class="account-label">确认新密码</view>
+    <input class="account-input" value="{{confirmPassword}}" password="{{true}}" placeholder="请再次输入新密码" maxlength="128" data-field="confirmPassword" bindinput="onPasswordInput" confirm-type="done" bindconfirm="submitPassword" disabled="{{submitting}}" />
+    <view class="account-error" wx:if="{{error}}">{{error}}</view>
+    <button class="account-button" bindtap="submitPassword" loading="{{submitting}}" disabled="{{submitting || loggingOut}}">{{submitting ? '提交中' : '确认修改'}}</button>
+    <view class="account-help">修改成功后，该账号在所有设备上的登录都会失效，需要用新密码重新登录。忘记当前密码请联系管理员重置。<text bindtap="openPrivacyContract">查看隐私保护指引</text></view>
+  </view>
+
+  <button class="account-logout" bindtap="confirmLogout" loading="{{loggingOut}}" disabled="{{submitting || loggingOut}}">退出登录</button>
+</view>
+
+<!-- On-demand WeChat privacy authorization; hidden during normal page use. -->
+<view wx:if="{{privacyVisible}}" catchtouchmove="privacyNoop" style="position:fixed;top:0;right:0;bottom:0;left:0;z-index:10000;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;">
+  <view class="section-card" style="width:600rpx;margin:0;padding:32rpx;display:flex;flex-direction:column;gap:24rpx;">
+    <view class="section-title">请阅读并同意隐私保护指引</view>
+    <button class="secondary-btn" style="width:100%;height:auto;min-height:88rpx;white-space:normal;line-height:1.5;padding:16rpx;" bindtap="openPrivacyContract">{{privacyContractName}}</button>
+    <button id="bansai-privacy-agree" class="primary-btn" style="width:100%;" open-type="agreePrivacyAuthorization" bindagreeprivacyauthorization="agreePrivacyAuthorization">同意并继续</button>
+    <button class="secondary-btn" style="width:100%;" bindtap="cancelPrivacyAuthorization">取消</button>
+  </view>
+</view>

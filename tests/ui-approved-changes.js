@@ -102,9 +102,14 @@ module.exports = {
       "账号由管理员统一发放。如需开通或找回密码，请联系管理员。",
       "账号密码用于登录验证。<text bindtap=\"openPrivacyContract\">查看隐私保护指引</text>"
     ]
-  ]
+  ],
+  "./pages/history/history.wxml": []
 };
 const overlay = require("node:fs").readFileSync(require("node:path").join(__dirname, "privacy-overlay.txt"), "utf8");
+// Approved 2026-09-17: one entry row to the new account page (change password, log out). Kept in a
+// text file, like the overlay, so that its line endings always follow the page's.
+module.exports["./pages/history/history.wxml"].push(["",
+  require("node:fs").readFileSync(require("node:path").join(__dirname, "account-entry.txt"), "utf8")]);
 for (const page of ["login", "result", "poster", "booking-success"]) {
   module.exports["./pages/" + page + "/" + page + ".wxml"].push(["", overlay]);
 }

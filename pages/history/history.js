@@ -117,6 +117,12 @@ Page(session.protectPage({
     });
   },
 
+  openAccount() {
+    wx.navigateTo({
+      url: "/pages/account/account",
+    });
+  },
+
   openRecommendationRecords() {
     wx.navigateTo({
       url: "/pages/records/records?type=recommendation",

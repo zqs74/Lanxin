@@ -6,6 +6,7 @@ const routes = {
   '/pages/index/index': [], '/pages/library/library': [], '/pages/history/history': [],
   '/pages/records/records': ['type'], '/pages/result/result': ['id', 'shareId'],
   '/pages/poster/poster': ['id', 'shareId'], '/pages/booking-success/booking-success': ['id'],
+  '/pages/account/account': [],
 };
 function setContact(contact) {
   Object.keys(CONTACT).forEach(key => delete CONTACT[key]);
@@ -43,6 +44,8 @@ function getToken() {
 }
 function getEpoch() { return epoch; }
 function hasSession() { return !!getToken(); }
+// Display copy only (no token); mutating it cannot alter the session.
+function getAccount() { return getToken() ? Object.assign({}, current.account) : null; }
 function onClear(fn) { listeners.add(fn); return () => listeners.delete(fn); }
 function clear() {
   init(); current = null; epoch++; setContact(null);
@@ -211,6 +214,6 @@ function protectPage(definition) {
   };
   return definition;
 }
-module.exports = { init, getToken, getEpoch, hasSession, accept, clear, onClear, safeNext, pagePath,
+module.exports = { init, getToken, getEpoch, hasSession, getAccount, accept, clear, onClear, safeNext, pagePath,
   redirectToLogin, invalidate, enterLogin, finishLogin, login, me, logout, changePassword,
   setContact, getContact: () => CONTACT, protectPage };

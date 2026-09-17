@@ -1,0 +1,18 @@
+page { background: #f3f7ff; color: #20304b; }
+.account-shell { padding: 32rpx 32rpx 64rpx; }
+.account-card { background: #fff; padding: 36rpx; border-radius: 28rpx; margin-bottom: 28rpx; box-shadow: 0 16rpx 48rpx rgba(29, 93, 255, .07); }
+.account-row { display: flex; align-items: center; justify-content: space-between; font-size: 28rpx; line-height: 1.8; }
+.account-row-label { color: #7b89a7; }
+.account-row-value { font-weight: 600; max-width: 440rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-title { font-size: 32rpx; font-weight: 700; margin-bottom: 32rpx; }
+.account-label { font-size: 26rpx; margin-bottom: 18rpx; font-weight: 600; }
+.account-input { height: 88rpx; background: #f3f7ff; border-radius: 16rpx; padding: 0 24rpx; margin-bottom: 32rpx; font-size: 28rpx; }
+.account-error { color: #d64045; font-size: 24rpx; margin-bottom: 24rpx; }
+.account-card .account-button { width: 100%; height: 88rpx; line-height: 88rpx; background: #1d5dff; color: #fff; font-size: 30rpx; border-radius: 16rpx; }
+.account-button::after { border: none; }
+.account-button[disabled] { background: #92b4ff; color: #fff; }
+.account-help { color: #7b89a7; font-size: 24rpx; line-height: 1.8; margin-top: 28rpx; }
+.account-help text { color: #1d5dff; }
+.account-shell .account-logout { width: 100%; height: 88rpx; line-height: 88rpx; background: #fff; color: #d64045; font-size: 30rpx; border-radius: 16rpx; }
+.account-logout::after { border: none; }
+.account-logout[disabled] { color: #e8a3a5; background: #fff; }

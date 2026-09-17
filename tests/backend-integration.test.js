@@ -305,6 +305,115 @@ test('password change and logout use server revocation then clear session', asyn
   assert.equal(h.session.hasSession(), false); assert.doesNotMatch(JSON.stringify(h.writes), /secret/);
 });
 
+async function accountPage(h) {
+  h.session.accept(auth('a'));
+  const p = h.page('account'); p.onLoad({});
+  const showing = p.onShow(); await tick();
+  assert.match(h.requests[0].url, /\/api\/auth\/me$/); h.respond(h.requests[0], account('a')); await showing;
+  return p;
+}
+const typePassword = (p, field, value) => p.onPasswordInput({ currentTarget: { dataset: { field } }, detail: { value } });
+
+test('history offers the account page; the page shows the account and is closed to anonymous visitors', async () => {
+  const h = harness(); h.session.accept(auth('a'));
+  const history = h.page('history'); history.onLoad({}); history.openAccount();
+  assert.equal(h.navigation.at(-1).url, '/pages/account/account');
+  assert.equal(h.session.safeNext('/pages/account/account'), '/pages/account/account');
+  assert.equal(h.session.safeNext('/pages/account/account?id=1'), '');
+  assert.ok(JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8')).pages.includes('pages/account/account'));
+  const ui = fs.readFileSync(path.join(root, 'pages/account/account.wxml'), 'utf8');
+  assert.equal(ui.split('password="{{true}}"').length - 1, 3, 'all three password inputs are masked');
+  assert.equal(ui.split(fs.readFileSync(path.join(root, 'tests/privacy-overlay.txt'), 'utf8')).length, 2);
+  const anonymous = harness(), p = anonymous.page('account'); p.onLoad({}); await p.onShow();
+  assert.equal(anonymous.requests.length, 0); assert.equal(p.data.username, '');
+  assert.equal(decodeURIComponent(anonymous.navigation[0].url.split('next=')[1]), '/pages/account/account');
+  const signedIn = harness(), shown = await accountPage(signedIn);
+  assert.equal(shown.data.username, 'a'); assert.equal(signedIn.session.getAccount().token, undefined);
+});
+
+test('account page rejects weak or mismatched passwords locally and sends nothing', async () => {
+  const h = harness(), p = await accountPage(h);
+  typePassword(p, 'username', 'ignored'); assert.equal(p.data.username, 'a', 'only the three password fields are writable');
+  const cases = [
+    [['', 'new-plaintext-secret', 'new-plaintext-secret'], /请填写/],
+    [['old-plaintext-secret', 'elevenchars', 'elevenchars'], /12至128位/],
+    [['old-plaintext-secret', '123456789012345', '123456789012345'], /纯数字/],
+    [['old-plaintext-secret', '             ', '             '], /空白/],
+    [['old-plaintext-secret', 'new-plaintext-secret', 'new-plaintext-secreT'], /不一致/],
+    [['old-plaintext-secret', 'old-plaintext-secret', 'old-plaintext-secret'], /不能与当前密码相同/],
+  ];
+  for (const [[currentPassword, newPassword, confirmPassword], message] of cases) {
+    typePassword(p, 'currentPassword', currentPassword); typePassword(p, 'newPassword', newPassword);
+    typePassword(p, 'confirmPassword', confirmPassword);
+    await p.submitPassword(); assert.match(p.data.error, message);
+  }
+  assert.equal(h.requests.length, 1, 'only the initial account check reached the network');
+  assert.equal(h.session.hasSession(), true); assert.equal(p.data.submitting, false);
+});
+
+test('account page changes the password after the privacy check, then signs out without storing any password', async () => {
+  const h = harness(), p = await accountPage(h);
+  typePassword(p, 'currentPassword', 'old-plaintext-secret'); typePassword(p, 'newPassword', 'new-plaintext-secret');
+  typePassword(p, 'confirmPassword', 'new-plaintext-secret');
+  const pending = p.submitPassword(); await tick();
+  p.submitPassword(); await tick(); assert.equal(h.requests.length, 2, 'a double tap submits once');
+  const sent = h.requests[1];
+  assert.equal(sent.method, 'PUT'); assert.match(sent.url, /\/api\/auth\/password$/);
+  assert.deepEqual(clone(sent.data), { currentPassword: 'old-plaintext-secret', newPassword: 'new-plaintext-secret' });
+  assert.equal(sent.header.Authorization, 'Bearer opaque-a');
+  h.respond(sent, { reauthenticate: true }); await pending;
+  assert.equal(h.session.hasSession(), false); assert.equal(h.storage.has('lanxin_bansai_session_v1'), false);
+  assert.equal(decodeURIComponent(h.navigation.at(-1).url.split('next=')[1]), '/pages/index/index');
+  assert.match(h.toasts.at(-1).title, /请重新登录/);
+  assert.deepEqual([p.data.currentPassword, p.data.newPassword, p.data.confirmPassword, p.data.username], ['', '', '', '']);
+  assert.doesNotMatch(JSON.stringify(h.writes) + JSON.stringify(Array.from(h.storage.entries())), /plaintext-secret/);
+});
+
+test('a wrong current password keeps the session, clears the fields and allows another attempt', async () => {
+  const h = harness(), p = await accountPage(h);
+  typePassword(p, 'currentPassword', 'bad-plaintext-secret'); typePassword(p, 'newPassword', 'new-plaintext-secret');
+  typePassword(p, 'confirmPassword', 'new-plaintext-secret');
+  const pending = p.submitPassword(); await tick();
+  h.respond(h.requests[1], '当前密码错误', 400); await pending;
+  assert.equal(p.data.error, '当前密码错误'); assert.equal(p.data.submitting, false);
+  assert.deepEqual([p.data.currentPassword, p.data.newPassword, p.data.confirmPassword], ['', '', '']);
+  assert.equal(h.session.hasSession(), true); assert.equal(h.navigation.length, 0);
+  typePassword(p, 'currentPassword', 'old-plaintext-secret'); typePassword(p, 'newPassword', 'new-plaintext-secret');
+  typePassword(p, 'confirmPassword', 'new-plaintext-secret');
+  const retry = p.submitPassword(); await tick(); assert.equal(h.requests.length, 3);
+  h.respond(h.requests[2], { reauthenticate: true }); await retry; assert.equal(h.session.hasSession(), false);
+});
+
+test('a failed privacy check never sends the passwords; leaving the page forgets them', async () => {
+  const h = harness(), p = await accountPage(h);
+  h.wx.getPrivacySetting = options => options.success({ needAuthorization: false, privacyContractName: '' });
+  typePassword(p, 'currentPassword', 'old-plaintext-secret'); typePassword(p, 'newPassword', 'new-plaintext-secret');
+  typePassword(p, 'confirmPassword', 'new-plaintext-secret');
+  await p.submitPassword();
+  assert.match(p.data.error, /隐私指引未配置.*未提交密码/); assert.equal(h.requests.length, 1);
+  assert.equal(p.data.submitting, false); assert.equal(h.session.hasSession(), true);
+  typePassword(p, 'currentPassword', 'old-plaintext-secret'); p.onHide();
+  assert.equal(p.data.currentPassword, '');
+});
+
+test('logout asks first, revokes the server session and signs out locally even when offline', async () => {
+  const h = harness(), p = await accountPage(h);
+  p.confirmLogout(); assert.equal(h.modals.length, 1); assert.match(h.modals[0].content, /重新输入账号和密码/);
+  await h.modals[0].success({ confirm: false });
+  assert.equal(h.requests.length, 1); assert.equal(h.session.hasSession(), true);
+  p.confirmLogout(); const leaving = h.modals[1].success({ confirm: true }); await tick();
+  p.confirmLogout(); assert.equal(h.modals.length, 2, 'no second dialog while signing out');
+  const sent = h.requests[1];
+  assert.equal(sent.method, 'POST'); assert.match(sent.url, /\/api\/auth\/logout$/);
+  h.respond(sent, true); await leaving;
+  assert.equal(h.session.hasSession(), false); assert.equal(h.storage.has('lanxin_bansai_session_v1'), false);
+  assert.match(h.navigation.at(-1).url, /^\/pages\/login\/login\?next=/);
+  const offline = harness(), q = await accountPage(offline);
+  q.confirmLogout(); const out = offline.modals[0].success({ confirm: true }); await tick();
+  offline.requests[1].fail({ errMsg: 'request:fail' }); await out;
+  assert.equal(offline.session.hasSession(), false); assert.equal(offline.navigation.length, 1);
+});
+
 test('network login failures release the submit lock without storing credentials', async () => {
   const h = harness(), p = h.page('login'); p.onLoad({}); p.setData({ username: 'issued', password: 'secret' });
   const pending = p.submitLogin(); await tick(); await p.submitLogin(); assert.equal(h.requests.length, 1);

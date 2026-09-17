@@ -7,7 +7,8 @@
     "pages/records/records",
     "pages/poster/poster",
     "pages/booking-success/booking-success",
-    "pages/login/login"
+    "pages/login/login",
+    "pages/account/account"
   ],
   "tabBar": {
     "custom": true,
