@@ -1,5 +1,5 @@
 // poster.js - 方案海报页（预览 + Painter 生成海报导出）
-const { loadPlan, prepareShare, shareMessage } = require('../../utils/share');
+const { loadPlan, planPath, prepareShare, shareMessage } = require('../../utils/share');
 const session = require('../../utils/session');
 const privacy = require('../../utils/privacy');
 const imageExport = require('../../utils/image-export');
@@ -14,7 +14,16 @@ Page(privacy.withPrivacy(session.protectPage({
   async onShow() {
     const record = await loadPlan(this._query);
     if (this._dead) return;
-    this.setData({ poster: record.payload.result.posterPayload || null });
+    const poster = record.payload.result.posterPayload || null;
+    this.setData({ poster });
+    if (!poster) {
+      // Reached directly (old link, share card) for a plan without matched resources: explain and
+      // return to the plan instead of leaving a blank page. No share is created for it.
+      wx.showToast({ title: '当前方案暂无可用海报', icon: 'none' });
+      const target = planPath(this._query, 'result');
+      wx.navigateBack({ fail() { wx.redirectTo({ url: target }); } });
+      return;
+    }
     prepareShare(this, record.id, this._query.shareId);
   },
 

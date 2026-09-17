@@ -196,6 +196,10 @@ Page(privacy.withPrivacy(session.protectPage({
 
   openPoster() {
     if (!this.data.result) return;
+    // A plan without matched resources has no poster content; opening the poster page would show a blank screen.
+    if (!this.data.result.posterPayload) {
+      wx.showToast({ title: '当前方案暂无可分享的海报，请调整需求后再试', icon: 'none' }); return;
+    }
     wx.navigateTo({ url: planPath(this._query, 'poster') });
   },
 

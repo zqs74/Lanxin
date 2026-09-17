@@ -453,6 +453,32 @@ test('poster export checks revocation and cannot render after a 401', async () =
   assert.equal(p.data.palette, null); assert.equal(p.data.poster, null); assert.equal(h.navigation.length, 1);
 });
 
+test('a plan without matched resources never leads to a blank poster page', async () => {
+  const emptyResult = { summary: '暂时没有完全匹配的方案', sections: [], alternatives: [], matchScore: 0, posterPayload: null };
+  const h = harness(); h.session.accept(auth('a'));
+  const r = h.page('result'); r.onLoad({ id: 'p0' }); r.setData({ result: emptyResult });
+  r.openPoster();
+  assert.equal(h.navigation.length, 0); assert.match(h.toasts.at(-1).title, /暂无可分享的海报/);
+  r.setData({ result: plan('p0').payload.result }); r.openPoster();
+  assert.equal(h.navigation.length, 1); assert.equal(h.navigation[0].url, '/pages/poster/poster?id=p0');
+
+  for (const hasHistory of [true, false]) {
+    const d = harness(); d.session.accept(auth('a'));
+    const back = []; d.wx.navigateBack = options => { back.push(options); if (!hasHistory) options.fail(); };
+    d.wx.redirectTo = options => d.navigation.push(options);
+    const empty = plan('p0'); empty.payload.result = emptyResult;
+    const p = d.page('poster'); p.onLoad({ id: 'p0' });
+    const showing = p.onShow(); await tick();
+    assert.match(d.requests[0].url, /\/api\/auth\/me$/); d.respond(d.requests[0], account('a')); await tick();
+    assert.match(d.requests[1].url, /\/api\/plans\/p0$/); d.respond(d.requests[1], empty); await showing;
+    assert.equal(p.data.poster, null); assert.match(d.toasts.at(-1).title, /暂无可用海报/);
+    assert.equal(back.length, 1);
+    assert.deepEqual(d.navigation.map(n => n.url), hasHistory ? [] : ['/pages/result/result?id=p0']);
+    assert.equal(d.requests.length, 2, 'no share is created for a plan without a poster');
+    await p.savePoster(); assert.equal(d.requests.length, 2); assert.equal(p.data.palette, null);
+  }
+});
+
 test('existing UI hashes allow only exact approved text and privacy entry changes', () => {
   const baseline = require('./ui-baseline');
   for (const [file, expected] of Object.entries(baseline)) {
