@@ -8,8 +8,8 @@ const plain = value => JSON.parse(JSON.stringify(value))
 const tap = id => ({ currentTarget: { dataset: { id } } })
 const input = (field, value) => ({ currentTarget: { dataset: { field } }, detail: { value } })
 const event = { id: 17, name: '服务器赛事', group: 'U12', date: '2099-09-10', time: '09:00', venue: '服务器球馆', fee: '300 元/队', slots: 2, status: '即将截止' }
-const news = { id: 31, title: '服务器资讯', date: '2026-09-09', tag: '公告', content: '完整正文' }
-const product = { id: 23, name: '服务器篮球', category: 'ball', price: 89, emoji: '🏀', tag: '热卖', desc: '服务器商品描述' }
+const news = { id: 31, title: '服务器资讯', date: '2026-09-09', tag: '公告', content: '完整正文', imageUrl: 'https://api.lanxin.cyou/media/image/catalog/news-31.jpg' }
+const product = { id: 23, name: '服务器篮球', category: 'ball', price: 89, emoji: '🏀', tag: '热卖', desc: '服务器商品描述', imageUrl: 'https://api.lanxin.cyou/media/image/catalog/product-23.jpg' }
 const registration = { id: 71, eventId: event.id, eventName: event.name, eventDate: event.date, name: '张三', phone: '13800138000', group: 'U12', team: '测试队', remark: '10号', createdAt: '2026-09-09T01:00:00Z' }
 const order = { id: 'server-order', productId: product.id, productName: product.name, emoji: product.emoji, price: 80, count: 2, total: 150, status: 'UNPAID', createdAt: '2026-09-09T01:00:00Z' }
 const form = { name: ' 张三 ', phone: ' 13800138000 ', group: 'U12', team: ' 测试队 ', remark: ' 10号 ' }

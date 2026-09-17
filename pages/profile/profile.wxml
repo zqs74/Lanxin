@@ -37,7 +37,8 @@
         bindtap="openDetail"
       >
         <view class="product-emoji">
-          <text class="product-emoji-text">{{ item.emoji }}</text>
+          <image wx:if="{{ item.imageUrl }}" class="product-image" src="{{ item.imageUrl }}" mode="aspectFit" lazy-load="{{ true }}" />
+          <text wx:else class="product-emoji-text">{{ item.emoji }}</text>
           <view wx:if="{{ item.tag }}" class="product-tag">{{ item.tag }}</view>
         </view>
         <view class="product-name">{{ item.name }}</view>
@@ -57,7 +58,8 @@
   <view wx:if="{{ detailVisible }}" class="modal-mask" bindtap="closeDetail">
     <view class="modal-panel {{ themeClass }}" catchtap="stopPropagation">
       <view class="detail-emoji">
-        <text class="detail-emoji-text">{{ currentProduct.emoji }}</text>
+        <image wx:if="{{ currentProduct.imageUrl }}" class="detail-image" src="{{ currentProduct.imageUrl }}" mode="aspectFit" />
+        <text wx:else class="detail-emoji-text">{{ currentProduct.emoji }}</text>
       </view>
       <view class="detail-header">
         <view class="detail-name">{{ currentProduct.name }}</view>

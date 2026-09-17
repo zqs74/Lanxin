@@ -26,6 +26,7 @@
       </view>
       <view class="news-list">
         <view class="news-card card" wx:for="{{ newsList }}" wx:key="id" data-id="{{ item.id }}" bindtap="openNews">
+          <image wx:if="{{ item.imageUrl }}" class="news-image" src="{{ item.imageUrl }}" mode="aspectFill" lazy-load="{{ true }}" />
           <view class="news-tag">{{ item.tag }}</view>
           <view class="news-title">{{ item.title }}</view>
           <view class="news-date">{{ item.date }}</view>
@@ -76,6 +77,7 @@
         <view class="modal-title">{{ newsDetail.title }}</view>
         <view class="modal-close" bindtap="closeNews"><t-icon name="close" size="30rpx" color="var(--text-tertiary)" /></view>
       </view>
+      <image wx:if="{{ newsDetail.imageUrl }}" class="news-detail-image" src="{{ newsDetail.imageUrl }}" mode="widthFix" />
       <view class="modal-meta">{{ newsDetail.tag }} · {{ newsDetail.date }}</view>
       <scroll-view scroll-y class="modal-body">
         <text class="modal-content">{{ newsDetail.content }}</text>
