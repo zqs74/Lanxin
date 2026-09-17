@@ -7,7 +7,7 @@ page { background: #f3f7ff; color: #20304b; }
 .login-label { font-size: 26rpx; margin-bottom: 18rpx; font-weight: 600; }
 .login-input { height: 88rpx; background: #f3f7ff; border-radius: 16rpx; padding: 0 24rpx; margin-bottom: 32rpx; font-size: 28rpx; }
 .login-error { color: #d64045; font-size: 24rpx; margin-bottom: 24rpx; }
-.login-button { background: #1d5dff; color: #fff; font-size: 30rpx; border-radius: 16rpx; }
+.login-card .login-button { width: 100%; height: 88rpx; line-height: 88rpx; background: #1d5dff; color: #fff; font-size: 30rpx; border-radius: 16rpx; }
 .login-button::after { border: none; }
 .login-button[disabled] { background: #92b4ff; color: #fff; }
 .login-help { color: #7b89a7; font-size: 24rpx; line-height: 1.8; margin-top: 28rpx; }

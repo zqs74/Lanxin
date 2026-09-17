@@ -138,6 +138,21 @@ test('old account responses cannot revoke or populate a new account', async () =
   assert.equal(h.session.getToken(), 'opaque-b'); assert.equal(h.navigation.length, 0);
 });
 
+test('anonymous entry while the login page is open still leads to login, and the open login page is never reloaded', async () => {
+  const h = harness();
+  const home = h.page('index'); home.onLoad({}); await home.onShow();            // cold start without a session
+  assert.equal(h.navigation.length, 1);
+  assert.match(h.navigation[0].url, /^\/pages\/login\/login\?next=/);
+  const login = h.page('login'); login.onLoad({ next: encodeURIComponent('/pages/index/index') });
+  h.session.redirectToLogin('/pages/history/history');                         // late callback from a closed page
+  assert.equal(h.navigation.length, 1, 'the login page being typed into is not reloaded');
+  const shared = h.page('result'); shared.options = { shareId: 'share-9' };      // WeChat opens a shared plan card while the app is alive
+  shared.onLoad(shared.options); await shared.onShow();
+  assert.equal(h.navigation.length, 2, 'the anonymous visitor is taken to login instead of an empty plan page');
+  assert.equal(decodeURIComponent(h.navigation[1].url.split('next=')[1]), '/pages/result/result?shareId=share-9');
+  assert.equal(h.requests.length, 0); assert.equal(shared.data.result, null);
+});
+
 test('legacy history is preserved and all non-login pages reject anonymous entry', async () => {
   const h = harness();
   for (const key of ['lx_recommendations', 'lx_bookings', 'lx_latest_demand', 'lx_latest_result', 'latest_share_payload']) h.storage.set(key, [{ secret: true }]);

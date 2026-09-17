@@ -91,6 +91,12 @@ module.exports = {
       "{{contact.wechat ? '复制客服微信' : '客服微信未配置'}}"
     ]
   ],
+  "./pages/login/login.wxss": [
+    [
+      ".login-button { background: #1d5dff; color: #fff; font-size: 30rpx; border-radius: 16rpx; }",
+      ".login-card .login-button { width: 100%; height: 88rpx; line-height: 88rpx; background: #1d5dff; color: #fff; font-size: 30rpx; border-radius: 16rpx; }"
+    ]
+  ],
   "./pages/login/login.wxml": [
     [
       "账号由管理员统一发放。如需开通或找回密码，请联系管理员。",

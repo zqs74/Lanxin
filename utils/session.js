@@ -88,7 +88,14 @@ function activePath() {
   const page = pages[pages.length - 1];
   return page ? pagePath(page.route || '', page._query || page.options || {}) : '/pages/index/index';
 }
+function onLoginPage() {
+  const pages = typeof getCurrentPages === 'function' ? getCurrentPages() : [];
+  const page = pages[pages.length - 1];
+  return !!page && page.route === 'pages/login/login';
+}
 function redirectToLogin(path) {
+  // Late callbacks from closed pages must not reload the login page while the user is typing.
+  if (onLoginPage()) return;
   const valid = safeNext(path || activePath());
   if (valid && !redirecting) nextPath = valid;
   if (redirecting) return;
@@ -101,6 +108,10 @@ function invalidate(token) {
   const path = activePath(); clear(); redirectToLogin(path);
 }
 function enterLogin(next) {
+  // The login page is showing, so the redirect that led here is finished. Without this reset an
+  // anonymous entry while it is open (a shared plan opened from a chat, for instance) stayed on an
+  // empty protected page with no way to sign in, because the flag was only cleared after a login.
+  redirecting = false;
   if (hasSession()) clear();
   let decoded = next || '';
   try { decoded = decodeURIComponent(decoded); } catch (_) { decoded = ''; }
