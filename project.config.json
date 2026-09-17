@@ -10,6 +10,66 @@
       {
         "value": "node_modules",
         "type": "folder"
+      },
+      {
+        "value": "tests",
+        "type": "folder"
+      },
+      {
+        "value": "minitest",
+        "type": "folder"
+      },
+      {
+        "value": ".md",
+        "type": "suffix"
+      },
+      {
+        "value": "assets/resources/media",
+        "type": "folder"
+      },
+      {
+        "value": "assets/resources/suppliers",
+        "type": "folder"
+      },
+      {
+        "value": "assets/contact-qr.png",
+        "type": "file"
+      },
+      {
+        "value": "assets/resources/materials/adfence-real.jpg",
+        "type": "file"
+      },
+      {
+        "value": "assets/resources/materials/banner-real.jpg",
+        "type": "file"
+      },
+      {
+        "value": "assets/resources/materials/fouldisplay-real.jpg",
+        "type": "file"
+      },
+      {
+        "value": "assets/resources/materials/jersey.jpg",
+        "type": "file"
+      },
+      {
+        "value": "assets/resources/materials/medal-real.jpg",
+        "type": "file"
+      },
+      {
+        "value": "assets/resources/materials/scoreboard.jpg",
+        "type": "file"
+      },
+      {
+        "value": "assets/resources/materials/shotclock-real.jpg",
+        "type": "file"
+      },
+      {
+        "value": "assets/resources/materials/tactics-real.jpg",
+        "type": "file"
+      },
+      {
+        "value": "assets/resources/materials/whistle.jpg",
+        "type": "file"
       }
     ],
     "include": []
