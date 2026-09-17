@@ -14,6 +14,7 @@ Page({
     pageBg: '#f8f7f4',
     searchKeyword: '',
     newsList: [],
+    filteredNews: [],
     eventList: [],
     filteredEvents: [],
     selectedDate: '',
@@ -70,17 +71,24 @@ Page({
     this.applyFilters()
   },
 
+  // 搜索按钮和键盘“搜索”键：结果已随输入实时更新，这里只需再次应用并收起键盘。
+  onSearchConfirm() {
+    this.applyFilters()
+    if (typeof wx.hideKeyboard === 'function') wx.hideKeyboard({ fail() {} })
+  },
+
   applyFilters() {
-    const keyword = (this.data.searchKeyword || '').trim()
+    // 忽略空白和大小写：输入法常在中英文之间自动插入空格（例如“粤 BA”）。
+    const normalize = value => String(value == null ? '' : value).replace(/\s+/g, '').toLowerCase()
+    const keyword = normalize(this.data.searchKeyword)
     const date = this.data.selectedDate
-    let filtered = this.data.eventList
-    if (keyword) {
-      filtered = filtered.filter(ev => ev.name.indexOf(keyword) !== -1 || ev.venue.indexOf(keyword) !== -1)
-    }
+    const matches = fields => !keyword || fields.some(field => normalize(field).indexOf(keyword) !== -1)
+    let filtered = this.data.eventList.filter(ev => matches([ev.name, ev.venue, ev.group]))
     if (date) {
       filtered = filtered.filter(ev => ev.date >= date)
     }
-    this.setData({ filteredEvents: filtered })
+    const filteredNews = this.data.newsList.filter(news => matches([news.title, news.tag, news.content]))
+    this.setData({ filteredEvents: filtered, filteredNews })
   },
 
   async loadNews() {
@@ -88,7 +96,8 @@ Page({
       const list = await api().get('/api/comptrain/news')
       if (!Array.isArray(list)) throw new Error('请求失败，请重试')
       this.setData({ newsList: list })
-    } catch (e) { this.setData({ newsList: [] }); showError(e) }
+      this.applyFilters()
+    } catch (e) { this.setData({ newsList: [], filteredNews: [] }); showError(e) }
   },
 
   async loadEvents() {

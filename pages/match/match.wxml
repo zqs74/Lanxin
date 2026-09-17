@@ -14,7 +14,8 @@
     <view class="search-section">
       <view class="search-box card">
         <view class="search-icon"><t-icon name="search" size="30rpx" color="#D4AF37" /></view>
-        <input placeholder="搜索赛事名称或地点..." class="search-input" placeholder-class="search-placeholder" value="{{ searchKeyword }}" bindinput="onSearchInput"></input>
+        <input placeholder="搜索资讯、赛事名称或地点" class="search-input" placeholder-class="search-placeholder" value="{{ searchKeyword }}" confirm-type="search" bindinput="onSearchInput" bindconfirm="onSearchConfirm"></input>
+        <view class="search-btn" bindtap="onSearchConfirm">搜索</view>
       </view>
     </view>
 
@@ -22,10 +23,11 @@
     <view class="section">
       <view class="section-header">
         <view class="section-title">赛事资讯</view>
-        <view class="section-count">{{ newsList.length }} 条</view>
+        <view class="section-count">{{ filteredNews.length }} 条</view>
       </view>
+      <view wx:if="{{ newsList.length > 0 && filteredNews.length === 0 }}" class="no-data">没有匹配的资讯，换个关键词试试</view>
       <view class="news-list">
-        <view class="news-card card" wx:for="{{ newsList }}" wx:key="id" data-id="{{ item.id }}" bindtap="openNews">
+        <view class="news-card card" wx:for="{{ filteredNews }}" wx:key="id" data-id="{{ item.id }}" bindtap="openNews">
           <image wx:if="{{ item.imageUrl }}" class="news-image" src="{{ item.imageUrl }}" mode="aspectFill" lazy-load="{{ true }}" />
           <view class="news-tag">{{ item.tag }}</view>
           <view class="news-title">{{ item.title }}</view>

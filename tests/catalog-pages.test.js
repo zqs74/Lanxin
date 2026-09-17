@@ -22,7 +22,7 @@ function deferred() {
 
 function harness(name, options = {}) {
   let page
-  const calls = [], toasts = [], modals = [], writes = [], removals = []
+  const calls = [], toasts = [], modals = [], writes = [], removals = [], keyboards = []
   const storage = new Map(Object.entries(options.storage || {}))
   const client = {}
   for (const method of ['get', 'post', 'delete']) {
@@ -47,7 +47,8 @@ function harness(name, options = {}) {
     },
     removeStorageSync(key) { storage.delete(key); removals.push(key) },
     showToast(value) { toasts.push(plain(value)) },
-    showModal(value) { modals.push(value) }
+    showModal(value) { modals.push(value) },
+    hideKeyboard(value) { keyboards.push(value) }
   }
   const filename = path.join(__dirname, '..', 'pages', name, `${name}.js`)
   vm.runInNewContext(fs.readFileSync(filename, 'utf8'), {
@@ -63,7 +64,7 @@ function harness(name, options = {}) {
       target[parts.at(-1)] = value
     }
   }
-  return { page, calls, toasts, modals, storage, writes, removals }
+  return { page, calls, toasts, modals, storage, writes, removals, keyboards }
 }
 
 function prepareRegistration(h, selected = event) {
@@ -103,6 +104,61 @@ test('赛事、资讯、本人报名读取服务器，保留全部字段并支�
   assert.equal(h.page.data.filteredEvents.length, 0)
 })
 
+test('搜索同时过滤资讯和赛事，忽略输入法空格与大小写；搜索键和按钮只收起键盘', async () => {
+  const items = [
+    { id: 1, title: '粤BA全明星赛在东莞长安落幕', date: '2026-09-13', tag: '粤BA', content: '决赛75:73' },
+    { id: 2, title: '镇BA甲级第四轮', date: '2026-09-03', tag: '镇BA', content: '麻涌古梅体育馆开赛' },
+    { id: 3, title: '广东宏远热身赛两连胜', date: '2026-09-14', tag: 'CBA', content: '佛山岭南明珠体育馆' }
+  ]
+  const h = harness('match', { globalOnly: true, get: async url => ({
+    '/api/comptrain/news': items, '/api/comptrain/events': [event], '/api/comptrain/registrations': []
+  })[url] })
+  await Promise.all([h.page.onLoad(), h.page.onShow()])
+  const ids = () => plain(h.page.data.filteredNews).map(item => item.id)
+  assert.deepEqual(ids(), [1, 2, 3])
+  h.page.onSearchInput({ detail: { value: '粤 BA' } })        // 输入法在中英文之间插入的空格
+  assert.deepEqual(ids(), [1])
+  assert.equal(h.page.data.filteredEvents.length, 0)
+  h.page.onSearchInput({ detail: { value: ' cba ' } })        // 大小写与首尾空白
+  assert.deepEqual(ids(), [3])
+  h.page.onSearchInput({ detail: { value: '古梅' } })          // 正文内容
+  assert.deepEqual(ids(), [2])
+  h.page.onSearchInput({ detail: { value: '不存在的关键词' } })
+  assert.deepEqual(ids(), [])
+  assert.deepEqual(plain(h.page.data.newsList), items)         // 原列表保留，详情仍可打开
+  h.page.onSearchInput({ detail: { value: '服务器球馆' } })    // 只命中赛事地点
+  assert.deepEqual(ids(), [])
+  assert.equal(h.page.data.filteredEvents.length, 1)
+  h.page.onSearchInput({ detail: { value: 'u12' } })           // 组别，忽略大小写
+  assert.equal(h.page.data.filteredEvents.length, 1)
+  h.page.onSearchInput({ detail: { value: '' } })
+  assert.deepEqual(ids(), [1, 2, 3])
+  assert.equal(h.page.data.filteredEvents.length, 1)
+  h.page.onSearchInput({ detail: { value: '镇ba' } })
+  h.page.onSearchConfirm()
+  assert.deepEqual(ids(), [2])
+  assert.equal(h.keyboards.length, 1)
+  h.page.openNews(tap(1))
+  assert.equal(h.page.data.newsDetail.id, 1)
+  const calls = h.calls.length
+  h.page.onSearchConfirm()
+  assert.equal(h.calls.length, calls, '搜索不发起网络请求')
+})
+
+test('缺少字段的资讯或赛事不会让搜索抛错，键盘接口缺失时搜索键仍可用', async () => {
+  const h = harness('match', { globalOnly: true, get: async url => ({
+    '/api/comptrain/news': [{ id: 9, title: null, tag: undefined }], '/api/comptrain/events': [{ id: 8, date: '2099-01-01' }],
+    '/api/comptrain/registrations': []
+  })[url] })
+  await Promise.all([h.page.onLoad(), h.page.onShow()])
+  h.page.onSearchInput({ detail: { value: '篮球' } })
+  assert.deepEqual(plain(h.page.data.filteredNews), [])
+  assert.deepEqual(plain(h.page.data.filteredEvents), [])
+  h.page.onSearchInput({ detail: { value: '   ' } })
+  assert.equal(h.page.data.filteredNews.length, 1)
+  assert.equal(h.page.data.filteredEvents.length, 1)
+})
+
 test('商城请求 all 分类，保留商品、服务端订单金额和状态，原详情分类可用', async () => {
   const h = harness('profile', { get: async url => url.endsWith('/products') ? [product] : [order] })
   await Promise.all([h.page.onLoad(), h.page.onShow()])
@@ -122,7 +178,7 @@ for (const name of ['match', 'profile']) {
   test(`${name}: 服务器空数组覆盖旧缓存，不显示演示数据`, async () => {
     const h = harness(name, { storage: { mall_orders: [order], event_registrations: [registration] } })
     await Promise.all([h.page.onLoad(), h.page.onShow()])
-    for (const field of name === 'match' ? ['newsList', 'eventList', 'filteredEvents'] : ['products', 'filteredProducts', 'orders']) {
+    for (const field of name === 'match' ? ['newsList', 'filteredNews', 'eventList', 'filteredEvents'] : ['products', 'filteredProducts', 'orders']) {
       assert.deepEqual(plain(h.page.data[field]), [])
     }
     if (name === 'match') assert.deepEqual(plain(h.page.data.registeredMap), {})

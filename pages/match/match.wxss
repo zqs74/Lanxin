@@ -51,6 +51,20 @@
   color: var(--text-content);
 }
 
+.search-btn {
+  flex-shrink: 0;
+  padding: 10rpx 28rpx;
+  border-radius: 999rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #0a0a0a;
+  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);
+}
+
+.search-btn:active {
+  opacity: 0.8;
+}
+
 .search-placeholder {
   color: var(--text-tertiary);
 }

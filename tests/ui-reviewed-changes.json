@@ -77,12 +77,28 @@
     [
       "      <view class=\"modal-meta\">{{ newsDetail.tag }} · {{ newsDetail.date }}</view>",
       "      <image wx:if=\"{{ newsDetail.imageUrl }}\" class=\"news-detail-image\" src=\"{{ newsDetail.imageUrl }}\" mode=\"widthFix\" />\n      <view class=\"modal-meta\">{{ newsDetail.tag }} · {{ newsDetail.date }}</view>"
+    ],
+    [
+      "        <input placeholder=\"搜索赛事名称或地点...\" class=\"search-input\" placeholder-class=\"search-placeholder\" value=\"{{ searchKeyword }}\" bindinput=\"onSearchInput\"></input>",
+      "        <input placeholder=\"搜索资讯、赛事名称或地点\" class=\"search-input\" placeholder-class=\"search-placeholder\" value=\"{{ searchKeyword }}\" confirm-type=\"search\" bindinput=\"onSearchInput\" bindconfirm=\"onSearchConfirm\"></input>\n        <view class=\"search-btn\" bindtap=\"onSearchConfirm\">搜索</view>"
+    ],
+    [
+      "        <view class=\"section-count\">{{ newsList.length }} 条</view>",
+      "        <view class=\"section-count\">{{ filteredNews.length }} 条</view>"
+    ],
+    [
+      "      <view class=\"news-list\">\n        <view class=\"news-card card\" wx:for=\"{{ newsList }}\" wx:key=\"id\"",
+      "      <view wx:if=\"{{ newsList.length > 0 && filteredNews.length === 0 }}\" class=\"no-data\">没有匹配的资讯，换个关键词试试</view>\n      <view class=\"news-list\">\n        <view class=\"news-card card\" wx:for=\"{{ filteredNews }}\" wx:key=\"id\""
     ]
   ],
   "pages/match/match.wxss": [
     [
       ".news-tag {",
       ".news-image {\n  display: block;\n  width: 100%;\n  height: 320rpx;\n  border-radius: 16rpx;\n  margin-bottom: 16rpx;\n  background: var(--bg-tag);\n}\n\n.news-detail-image {\n  display: block;\n  width: 100%;\n  border-radius: 16rpx;\n  margin-bottom: 16rpx;\n  background: var(--bg-tag);\n}\n\n.news-tag {"
+    ],
+    [
+      ".search-placeholder {",
+      ".search-btn {\n  flex-shrink: 0;\n  padding: 10rpx 28rpx;\n  border-radius: 999rpx;\n  font-size: 26rpx;\n  font-weight: 700;\n  color: #0a0a0a;\n  background: linear-gradient(135deg, #D4AF37 0%, #FFD700 100%);\n}\n\n.search-btn:active {\n  opacity: 0.8;\n}\n\n.search-placeholder {"
     ]
   ],
   "pages/profile/profile.wxss": [
