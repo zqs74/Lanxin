@@ -211,6 +211,16 @@ Page(privacy.withPrivacy(session.protectPage({
     this.showGuide();
   },
 
+  // 悬浮球：配置了企业微信客服就直接打开会话，否则显示联系信息弹层（未配置时如实显示“客服尚未配置”）。
+  openAdvisor() {
+    const contact = session.getContact();
+    if (contact.wecomCorpId && contact.wecomKfUrl && typeof wx.openCustomerServiceChat === 'function') {
+      wx.openCustomerServiceChat({ extInfo: { url: contact.wecomKfUrl }, corpId: contact.wecomCorpId, fail: () => this.showGuide() });
+      return;
+    }
+    this.showGuide();
+  },
+
   showGuide() {
     api.applyContact(this);
     this.setData(

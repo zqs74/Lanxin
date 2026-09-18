@@ -116,14 +116,13 @@ test('only safe app routes and opaque IDs survive login next', () => {
   assert.equal(h.session.safeNext('/pages/result/result?shareId=share-1'), '/pages/result/result?shareId=share-1');
 });
 
-test('concurrent 401s revoke this session and redirect once, preserving share next', async () => {
+test('a rejected leftover token ends its session quietly: nothing navigates and the page is cleared', async () => {
   const h = harness(); h.session.accept(auth('a'));
   const p = h.page('result'); p.options = { shareId: 's1' }; p.onLoad(p.options);
   const first = h.api.request('/api/plans'), second = h.api.request('/api/bookings');
   const settled = Promise.allSettled([first, second]);
   h.respond(h.requests[0], '会话已失效', 401); h.respond(h.requests[1], '会话已失效', 401); await settled;
-  assert.equal(h.session.hasSession(), false); assert.equal(h.navigation.length, 1);
-  assert.equal(decodeURIComponent(h.navigation[0].url.split('next=')[1]), '/pages/result/result?shareId=s1');
+  assert.equal(h.session.hasSession(), false); assert.equal(h.navigation.length, 0, 'there is no login page to go to');
   assert.equal(h.storage.size, 0); assert.equal(p.data.result, null);
 });
 
@@ -138,35 +137,41 @@ test('old account responses cannot revoke or populate a new account', async () =
   assert.equal(h.session.getToken(), 'opaque-b'); assert.equal(h.navigation.length, 0);
 });
 
-test('anonymous entry while the login page is open still leads to login, and the open login page is never reloaded', async () => {
+test('visitors use the app without logging in: pages load, requests carry no Authorization, nothing redirects', async () => {
   const h = harness();
-  const home = h.page('index'); home.onLoad({}); await home.onShow();            // cold start without a session
-  assert.equal(h.navigation.length, 1);
-  assert.match(h.navigation[0].url, /^\/pages\/login\/login\?next=/);
-  const login = h.page('login'); login.onLoad({ next: encodeURIComponent('/pages/index/index') });
-  h.session.redirectToLogin('/pages/history/history');                         // late callback from a closed page
-  assert.equal(h.navigation.length, 1, 'the login page being typed into is not reloaded');
-  const shared = h.page('result'); shared.options = { shareId: 'share-9' };      // WeChat opens a shared plan card while the app is alive
-  shared.onLoad(shared.options); await shared.onShow();
-  assert.equal(h.navigation.length, 2, 'the anonymous visitor is taken to login instead of an empty plan page');
-  assert.equal(decodeURIComponent(h.navigation[1].url.split('next=')[1]), '/pages/result/result?shareId=share-9');
-  assert.equal(h.requests.length, 0); assert.equal(shared.data.result, null);
+  const shared = h.page('result'); shared.options = { shareId: 'share-9' };      // WeChat opens a shared plan card, cold
+  shared.onLoad(shared.options); const showing = shared.onShow(); await tick();
+  assert.match(h.requests[0].url, /\/api\/catalog\/config$/); assert.equal(h.requests[0].header.Authorization, undefined);
+  h.respond(h.requests[0], config); await tick();
+  assert.match(h.requests[1].url, /\/api\/shares\/share-9$/); assert.equal(h.requests[1].header.Authorization, undefined);
+  h.respond(h.requests[1], plan('shared')); await showing;
+  assert.equal(shared.data.planId, 'shared'); assert.equal(h.navigation.length, 0);
+  assert.equal(h.requests.some(item => /\/api\/auth\//.test(item.url)), false, 'no account check for a visitor');
+  const pages = JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8')).pages;
+  assert.deepEqual(pages.filter(name => /login|account|booking/.test(name)), [], 'login, account and booking pages are not part of the app');
+  const packed = JSON.parse(fs.readFileSync(path.join(root, 'project.config.json'), 'utf8')).packOptions.ignore.map(item => item.value);
+  for (const folder of ['pages/login', 'pages/account', 'pages/booking-success']) assert.ok(packed.includes(folder), folder + ' stays out of the upload');
 });
 
-test('legacy history is preserved and all non-login pages reject anonymous entry', async () => {
+test('a session stored by an earlier version is dropped at start, so the device continues as a visitor', () => {
+  const h = harness(); h.storage.set('lanxin_bansai_session_v1', auth('old-admin'));
+  h.session.init();
+  assert.equal(h.session.hasSession(), false); assert.equal(h.storage.has('lanxin_bansai_session_v1'), false);
+  h.api.request('/api/resources'); assert.equal(h.requests[0].header.Authorization, undefined);
+});
+
+test('legacy demo records are left alone when a visitor uses the app', async () => {
   const h = harness();
   for (const key of ['lx_recommendations', 'lx_bookings', 'lx_latest_demand', 'lx_latest_result', 'latest_share_payload']) h.storage.set(key, [{ secret: true }]);
   const legacy = Array.from(h.storage.entries());
   h.session.init(); assert.deepEqual(Array.from(h.storage.entries()), legacy);
-  for (const name of ['index', 'library', 'history', 'records', 'result', 'poster', 'booking-success', 'logs']) {
-    const p = h.page(name); p.onLoad({ shareId: 's1' }); await p.onShow();
-  }
-  assert.equal(h.requests.length, 0); assert.equal(h.navigation.length, 1);
+  for (const name of ['history', 'records']) { const p = h.page(name); p.onLoad({ type: 'recommendation' }); await p.onShow(); }
+  assert.equal(h.requests.length, 0, 'the history of this device needs no network'); assert.equal(h.navigation.length, 0);
   assert.deepEqual(Array.from(h.storage.entries()), legacy);
   assert.ok(h.loaded.every(name => !name.replace(/\\/g, '/').includes('utils/data/resources')));
 });
 
-test('legacy business records are never read, migrated or shown in new history', async () => {
+test('history lists only the plans made on this device; legacy demo records are never read or shown', async () => {
   const h = harness();
   const legacy = new Map([
     ['lx_recommendations', [plan('legacy-plan')]],
@@ -179,45 +184,48 @@ test('legacy business records are never read, migrated or shown in new history',
   const read = h.wx.getStorageSync, remove = h.wx.removeStorageSync;
   h.wx.getStorageSync = key => { reads.push(key); return read(key); };
   h.wx.removeStorageSync = key => { removals.push(key); remove(key); };
-  h.session.init(); h.session.accept(auth('a'));
-  const p = h.page('history'); p.onLoad({});
-  const pending = p.onShow(); h.respond(h.requests[0], account('a')); await tick();
-  h.respond(h.requests[1], { items: [plan('server-plan')], total: 1, page: 1, pageSize: 50 });
-  h.respond(h.requests[2], { items: [], total: 0, page: 1, pageSize: 50 }); await pending;
-  assert.deepEqual(clone(p.data.recommendations.map(item => item.id)), ['server-plan']);
-  assert.equal(p.data.bookings.length, 0);
+  const saving = h.load('utils/storage.js').saveRecommendation(demand, 'request-1'); await tick();
+  assert.equal(h.requests[0].header.Authorization, undefined); h.respond(h.requests[0], plan('made-here')); await saving;
+  const p = h.page('history'); p.onLoad({}); await p.onShow();
+  assert.deepEqual(clone(p.data.recommendations.map(item => item.id)), ['made-here']);
+  assert.equal(p.data.bookings.length, 0); assert.equal(h.requests.length, 1, 'listing needs no request');
   assert.doesNotMatch(JSON.stringify(p.data), /legacy-|13800138000/);
-  h.session.clear(); h.session.accept(auth('b')); h.session.clear();
   for (const [key, value] of legacy) assert.deepEqual(h.storage.get(key), value);
-  assert.ok(reads.every(key => key === 'lanxin_bansai_session_v1'));
-  assert.ok(removals.every(key => key === 'lanxin_bansai_session_v1'));
-  assert.ok(h.writes.every(item => item.key === 'lanxin_bansai_session_v1'));
+  const own = ['lanxin_bansai_session_v1', 'lanxin_bansai_history_v1'];
+  assert.ok(reads.every(key => own.includes(key))); assert.ok(removals.every(key => own.includes(key)));
+  assert.ok(h.writes.every(item => item.key === 'lanxin_bansai_history_v1'));
+  const kept = h.storage.get('lanxin_bansai_history_v1')[0];
+  const allowed = ['budgetFocus', 'planTone', 'strategyLine', 'summaryLead'];
+  assert.ok(Object.keys(kept.payload.result).every(key => allowed.includes(key)), 'only what the card shows is kept');
+  assert.doesNotMatch(JSON.stringify(kept), /sections|posterPayload|真实场馆/, 'the full plan stays on the server');
+  const ui = fs.readFileSync(path.join(root, 'pages/history/history.wxml'), 'utf8');
+  assert.doesNotMatch(ui, /预约记录|openAccount|账号与安全/);
 });
 
-test('onShow validates account revocation before loading protected records', async () => {
+test('a leftover session that the server rejects is cleared before any record is shown', async () => {
   const h = harness(); h.session.accept(auth('a')); const p = h.page('records'); p.onLoad({ type: 'booking' });
   p.setData({ list: [{ id: 'old' }], filteredList: [{ id: 'old' }] });
   const pending = p.onShow(); assert.match(h.requests[0].url, /\/api\/auth\/me$/);
   h.respond(h.requests[0], '账号已停用', 401); await pending;
-  assert.equal(h.requests.length, 1); assert.equal(p.data.list.length, 0); assert.equal(h.navigation.length, 1);
+  assert.equal(h.requests.length, 1); assert.equal(p.data.list.length, 0); assert.equal(h.navigation.length, 0);
 });
 
-test('history loads every page and keeps distinct IDs even when summaries match', async () => {
-  const h = harness(); h.session.accept(auth('a')); const p = h.page('records'); p.onLoad({ type: 'recommendation' });
-  const pending = p.onShow(); h.respond(h.requests[0], account('a')); await tick();
-  for (let n = 1; n <= 3; n++) {
-    const request = h.requests[n]; assert.equal(request.data.page, n); assert.equal(request.data.pageSize, 50);
-    h.respond(request, { items: Array.from({ length: n === 3 ? 21 : 50 }, (_, i) => plan('p-' + ((n - 1) * 50 + i))), total: 121, page: n, pageSize: 50 });
-    await tick();
+test('the records page lists the plans of this device, keeps distinct IDs for equal summaries and caps the list', async () => {
+  const h = harness(); const storage = h.load('utils/storage.js');
+  for (let n = 0; n < 53; n++) {
+    const saving = storage.saveRecommendation(demand, 'request-' + n); await tick();
+    h.respond(h.requests[n], plan('p-' + n)); await saving;
   }
-  await pending; assert.equal(p.data.list.length, 121);
-  p.reopenItem({ currentTarget: { dataset: { type: 'recommendation', id: 'p-120' } } });
-  assert.equal(h.navigation[0].url, '/pages/result/result?id=p-120');
+  const p = h.page('records'); p.onLoad({ type: 'recommendation' }); await p.onShow();
+  assert.equal(p.data.list.length, 50, 'the oldest entries fall off'); assert.equal(p.data.list[0].id, 'p-52');
+  assert.equal(new Set(p.data.list.map(item => item.id)).size, 50);
+  p.reopenItem({ currentTarget: { dataset: { type: 'recommendation', id: 'p-52' } } });
+  assert.equal(h.navigation[0].url, '/pages/result/result?id=p-52');
 });
 
 test('list pagination failure never returns a truncated success', async () => {
-  const h = harness(); h.session.accept(auth('a'));
-  const pending = h.load('utils/storage.js').getRecommendations();
+  const h = harness();
+  const pending = h.api.listAll('/api/resources', { category: 'venues' });
   const rejected = assert.rejects(pending, /网络连接失败/);
   h.respond(h.requests[0], { items: Array.from({ length: 50 }, (_, i) => plan('p-' + i)), total: 80, page: 1, pageSize: 50 }); await tick();
   h.requests[1].fail(); await rejected;
@@ -248,13 +256,15 @@ test('booking failures keep the form, retry ID is stable and double taps submit 
   assert.doesNotMatch(JSON.stringify(h.writes), /13800138000/);
 });
 
-test('failed async delete cannot report success or remove local list', async () => {
+test('deleting a plan only forgets it on this device and sends nothing', async () => {
   for (const name of ['history', 'records']) {
-    const h = harness(); h.session.accept(auth('a')); const p = h.page(name); p.onLoad({});
+    const h = harness(); const storage = h.load('utils/storage.js');
+    for (const id of ['p1', 'p2']) { const saving = storage.saveRecommendation(demand, 'request-' + id); await tick(); h.respond(h.requests.at(-1), plan(id)); await saving; }
+    const p = h.page(name); p.onLoad({ type: 'recommendation' }); await p.onShow();
     if (name === 'history') p.deleteItem({ currentTarget: { dataset: { type: 'recommendation', id: 'p1' } } });
     else { p.setData({ selectedIds: ['p1'] }); p.deleteSelected(); }
-    const pending = h.modals[0].success({ confirm: true }); h.respond(h.requests[0], '保存失败', 500); await pending;
-    assert.equal(h.toasts.some(item => item.icon === 'success'), false);
+    await h.modals[0].success({ confirm: true });
+    assert.equal(h.requests.length, 2, 'no delete request'); assert.deepEqual(h.storage.get('lanxin_bansai_history_v1').map(item => item.id), ['p2']);
   }
 });
 
@@ -316,115 +326,6 @@ test('password change and logout use server revocation then clear session', asyn
   h.session.accept(auth('b')); const out = h.session.logout();
   assert.match(h.requests[1].url, /\/api\/auth\/logout$/); h.respond(h.requests[1], null); await out;
   assert.equal(h.session.hasSession(), false); assert.doesNotMatch(JSON.stringify(h.writes), /secret/);
-});
-
-async function accountPage(h) {
-  h.session.accept(auth('a'));
-  const p = h.page('account'); p.onLoad({});
-  const showing = p.onShow(); await tick();
-  assert.match(h.requests[0].url, /\/api\/auth\/me$/); h.respond(h.requests[0], account('a')); await showing;
-  return p;
-}
-const typePassword = (p, field, value) => p.onPasswordInput({ currentTarget: { dataset: { field } }, detail: { value } });
-
-test('history offers the account page; the page shows the account and is closed to anonymous visitors', async () => {
-  const h = harness(); h.session.accept(auth('a'));
-  const history = h.page('history'); history.onLoad({}); history.openAccount();
-  assert.equal(h.navigation.at(-1).url, '/pages/account/account');
-  assert.equal(h.session.safeNext('/pages/account/account'), '/pages/account/account');
-  assert.equal(h.session.safeNext('/pages/account/account?id=1'), '');
-  assert.ok(JSON.parse(fs.readFileSync(path.join(root, 'app.json'), 'utf8')).pages.includes('pages/account/account'));
-  const ui = fs.readFileSync(path.join(root, 'pages/account/account.wxml'), 'utf8');
-  assert.equal(ui.split('password="{{true}}"').length - 1, 3, 'all three password inputs are masked');
-  assert.equal(ui.split(fs.readFileSync(path.join(root, 'tests/privacy-overlay.txt'), 'utf8')).length, 2);
-  const anonymous = harness(), p = anonymous.page('account'); p.onLoad({}); await p.onShow();
-  assert.equal(anonymous.requests.length, 0); assert.equal(p.data.username, '');
-  assert.equal(decodeURIComponent(anonymous.navigation[0].url.split('next=')[1]), '/pages/account/account');
-  const signedIn = harness(), shown = await accountPage(signedIn);
-  assert.equal(shown.data.username, 'a'); assert.equal(signedIn.session.getAccount().token, undefined);
-});
-
-test('account page rejects weak or mismatched passwords locally and sends nothing', async () => {
-  const h = harness(), p = await accountPage(h);
-  typePassword(p, 'username', 'ignored'); assert.equal(p.data.username, 'a', 'only the three password fields are writable');
-  const cases = [
-    [['', 'new-plaintext-secret', 'new-plaintext-secret'], /请填写/],
-    [['old-plaintext-secret', 'elevenchars', 'elevenchars'], /12至128位/],
-    [['old-plaintext-secret', '123456789012345', '123456789012345'], /纯数字/],
-    [['old-plaintext-secret', '             ', '             '], /空白/],
-    [['old-plaintext-secret', 'new-plaintext-secret', 'new-plaintext-secreT'], /不一致/],
-    [['old-plaintext-secret', 'old-plaintext-secret', 'old-plaintext-secret'], /不能与当前密码相同/],
-  ];
-  for (const [[currentPassword, newPassword, confirmPassword], message] of cases) {
-    typePassword(p, 'currentPassword', currentPassword); typePassword(p, 'newPassword', newPassword);
-    typePassword(p, 'confirmPassword', confirmPassword);
-    await p.submitPassword(); assert.match(p.data.error, message);
-  }
-  assert.equal(h.requests.length, 1, 'only the initial account check reached the network');
-  assert.equal(h.session.hasSession(), true); assert.equal(p.data.submitting, false);
-});
-
-test('account page changes the password after the privacy check, then signs out without storing any password', async () => {
-  const h = harness(), p = await accountPage(h);
-  typePassword(p, 'currentPassword', 'old-plaintext-secret'); typePassword(p, 'newPassword', 'new-plaintext-secret');
-  typePassword(p, 'confirmPassword', 'new-plaintext-secret');
-  const pending = p.submitPassword(); await tick();
-  p.submitPassword(); await tick(); assert.equal(h.requests.length, 2, 'a double tap submits once');
-  const sent = h.requests[1];
-  assert.equal(sent.method, 'PUT'); assert.match(sent.url, /\/api\/auth\/password$/);
-  assert.deepEqual(clone(sent.data), { currentPassword: 'old-plaintext-secret', newPassword: 'new-plaintext-secret' });
-  assert.equal(sent.header.Authorization, 'Bearer opaque-a');
-  h.respond(sent, { reauthenticate: true }); await pending;
-  assert.equal(h.session.hasSession(), false); assert.equal(h.storage.has('lanxin_bansai_session_v1'), false);
-  assert.equal(decodeURIComponent(h.navigation.at(-1).url.split('next=')[1]), '/pages/index/index');
-  assert.match(h.toasts.at(-1).title, /请重新登录/);
-  assert.deepEqual([p.data.currentPassword, p.data.newPassword, p.data.confirmPassword, p.data.username], ['', '', '', '']);
-  assert.doesNotMatch(JSON.stringify(h.writes) + JSON.stringify(Array.from(h.storage.entries())), /plaintext-secret/);
-});
-
-test('a wrong current password keeps the session, clears the fields and allows another attempt', async () => {
-  const h = harness(), p = await accountPage(h);
-  typePassword(p, 'currentPassword', 'bad-plaintext-secret'); typePassword(p, 'newPassword', 'new-plaintext-secret');
-  typePassword(p, 'confirmPassword', 'new-plaintext-secret');
-  const pending = p.submitPassword(); await tick();
-  h.respond(h.requests[1], '当前密码错误', 400); await pending;
-  assert.equal(p.data.error, '当前密码错误'); assert.equal(p.data.submitting, false);
-  assert.deepEqual([p.data.currentPassword, p.data.newPassword, p.data.confirmPassword], ['', '', '']);
-  assert.equal(h.session.hasSession(), true); assert.equal(h.navigation.length, 0);
-  typePassword(p, 'currentPassword', 'old-plaintext-secret'); typePassword(p, 'newPassword', 'new-plaintext-secret');
-  typePassword(p, 'confirmPassword', 'new-plaintext-secret');
-  const retry = p.submitPassword(); await tick(); assert.equal(h.requests.length, 3);
-  h.respond(h.requests[2], { reauthenticate: true }); await retry; assert.equal(h.session.hasSession(), false);
-});
-
-test('a failed privacy check never sends the passwords; leaving the page forgets them', async () => {
-  const h = harness(), p = await accountPage(h);
-  h.wx.getPrivacySetting = options => options.success({ needAuthorization: false, privacyContractName: '' });
-  typePassword(p, 'currentPassword', 'old-plaintext-secret'); typePassword(p, 'newPassword', 'new-plaintext-secret');
-  typePassword(p, 'confirmPassword', 'new-plaintext-secret');
-  await p.submitPassword();
-  assert.match(p.data.error, /隐私指引未配置.*未提交密码/); assert.equal(h.requests.length, 1);
-  assert.equal(p.data.submitting, false); assert.equal(h.session.hasSession(), true);
-  typePassword(p, 'currentPassword', 'old-plaintext-secret'); p.onHide();
-  assert.equal(p.data.currentPassword, '');
-});
-
-test('logout asks first, revokes the server session and signs out locally even when offline', async () => {
-  const h = harness(), p = await accountPage(h);
-  p.confirmLogout(); assert.equal(h.modals.length, 1); assert.match(h.modals[0].content, /重新输入账号和密码/);
-  await h.modals[0].success({ confirm: false });
-  assert.equal(h.requests.length, 1); assert.equal(h.session.hasSession(), true);
-  p.confirmLogout(); const leaving = h.modals[1].success({ confirm: true }); await tick();
-  p.confirmLogout(); assert.equal(h.modals.length, 2, 'no second dialog while signing out');
-  const sent = h.requests[1];
-  assert.equal(sent.method, 'POST'); assert.match(sent.url, /\/api\/auth\/logout$/);
-  h.respond(sent, true); await leaving;
-  assert.equal(h.session.hasSession(), false); assert.equal(h.storage.has('lanxin_bansai_session_v1'), false);
-  assert.match(h.navigation.at(-1).url, /^\/pages\/login\/login\?next=/);
-  const offline = harness(), q = await accountPage(offline);
-  q.confirmLogout(); const out = offline.modals[0].success({ confirm: true }); await tick();
-  offline.requests[1].fail({ errMsg: 'request:fail' }); await out;
-  assert.equal(offline.session.hasSession(), false); assert.equal(offline.navigation.length, 1);
 });
 
 test('network login failures release the submit lock without storing credentials', async () => {
@@ -572,7 +473,7 @@ test('poster export checks revocation and cannot render after a 401', async () =
   const h = harness(); h.session.accept(auth('a')); const p = h.page('poster'); p.onLoad({ id: 'p1' });
   p.setData({ poster: { title: '旧海报' } });
   const saving = p.savePoster(); h.respond(h.requests[0], '账号已停用', 401); await saving;
-  assert.equal(p.data.palette, null); assert.equal(p.data.poster, null); assert.equal(h.navigation.length, 1);
+  assert.equal(p.data.palette, null); assert.equal(p.data.poster, null); assert.equal(h.navigation.length, 0);
 });
 
 test('a plan without matched resources never leads to a blank poster page', async () => {
@@ -624,7 +525,7 @@ test('existing UI hashes allow only exact approved text and privacy entry change
   }
 });
 
-test('reading an expired runtime token clears PII and redirects once without network access', () => {
+test('reading an expired leftover token clears PII without network access or navigation', () => {
   const h = harness();
   h.session.accept(Object.assign(auth('a'), { expiresAt: new Date(Date.now() + 1000).toISOString() }));
   const p = h.page('booking-success'); p.onLoad({ id: 'b1' });
@@ -632,7 +533,7 @@ test('reading an expired runtime token clears PII and redirects once without net
   h.advanceTime(2000);
   assert.equal(h.session.getToken(), ''); assert.equal(h.session.hasSession(), false);
   assert.equal(p.data.record, null); assert.equal(p.data.form, null);
-  assert.equal(h.navigation.length, 1); assert.equal(h.requests.length, 0);
+  assert.equal(h.navigation.length, 0); assert.equal(h.requests.length, 0);
   assert.equal(h.storage.has('lanxin_bansai_session_v1'), false);
 });
 
@@ -646,7 +547,7 @@ test('onShow hides PII immediately and network failure after expiry clears hidde
   h.advanceTime(2000); h.requests[0].fail(); await pending;
   assert.equal(h.storage.has('lanxin_bansai_session_v1'), false);
   assert.equal(p._authSnapshot, null); assert.equal(p.data.form, null);
-  assert.equal(h.session.hasSession(), false); assert.equal(h.navigation.length, 1);
+  assert.equal(h.session.hasSession(), false); assert.equal(h.navigation.length, 0);
 });
 
 test('same-session ordinary drafts survive failed revalidation and return only after successful me', async () => {
@@ -837,12 +738,11 @@ test('poster page uses the same privacy gate before render and album save', asyn
   await p.onImgOK({ detail: { path: 'poster.png' } }); assert.equal(calls.at(-1), 'save');
 });
 
-test('PENDING labels stay honest in lists and submissions even with misleading server copy', async () => {
+test('PENDING labels stay honest in submissions even with misleading server copy; bookings are never listed', async () => {
   const h = harness(); h.session.accept(auth('a')); const storage = h.load('utils/storage.js');
   const record = { id: 'b1', status: 'PENDING', statusLabel: '客户经理已准备好' };
-  const listing = storage.getBookings(); h.respond(h.requests[0], { items: [record], page: 1, pageSize: 50, total: 1 });
-  assert.equal((await listing)[0].statusLabel, '预约意向待确认');
-  const saving = storage.saveBooking('p1', {}, 'test-request'); h.respond(h.requests[1], record);
+  assert.equal((await storage.getBookings()).length, 0); assert.equal(h.requests.length, 0);
+  const saving = storage.saveBooking('p1', {}, 'test-request'); h.respond(h.requests[0], record);
   const result = await saving; assert.equal(result.status, 'PENDING'); assert.equal(result.statusLabel, '预约意向待确认');
 });
 
@@ -882,6 +782,25 @@ test('a plan that recommends a public listing shows it but never opens the booki
   const partner = h.page('result'); partner.onLoad({ id: 'own' });
   const bookable = plan('own'); bookable.payload.result.sections[0].items[0].tags = ['合作场馆'];
   partner.applyRecord(bookable); assert.equal(partner.data.infoOnly, false, 'ordinary tags do not block booking');
+});
+
+test('the floating ball opens WeCom customer service when configured and the honest contact popup otherwise', () => {
+  const h = harness(); const p = h.page('result'); p.onLoad({ id: 'p1' }); p.applyRecord(plan('p1'));
+  const chats = []; h.wx.openCustomerServiceChat = options => chats.push(options);
+  p.openAdvisor(); assert.equal(chats.length, 0); assert.equal(p.data.guideVisible, true, 'nothing configured: the popup says so');
+  p.closeGuide();
+  h.session.setContact({ wecomCorpId: 'ww1234567890abcdef', wecomKfUrl: 'https://work.weixin.qq.com/kfid/kfc1234567890abcdef' });
+  p.openAdvisor();
+  assert.equal(chats.length, 1); assert.equal(chats[0].corpId, 'ww1234567890abcdef');
+  assert.equal(chats[0].extInfo.url, 'https://work.weixin.qq.com/kfid/kfc1234567890abcdef'); assert.equal(p.data.guideVisible, false);
+  chats[0].fail({ errMsg: 'openCustomerServiceChat:fail' }); assert.equal(p.data.guideVisible, true, 'a failed jump falls back to the popup');
+  for (const bad of [{ wecomCorpId: 'ww1234567890abcdef' }, { wecomCorpId: 'ww1234567890abcdef', wecomKfUrl: 'https://evil.example/kfid/kfc1234567890abcdef' },
+    { wecomCorpId: 'not-a-corp', wecomKfUrl: 'https://work.weixin.qq.com/kfid/kfc1234567890abcdef' }]) {
+    h.session.setContact(bad); assert.equal(h.session.getContact().wecomKfUrl, ''); assert.equal(h.session.getContact().wecomCorpId, '');
+  }
+  const ui = fs.readFileSync(path.join(root, 'pages/result/result.wxml'), 'utf8');
+  assert.match(ui, /class="advisor-ball" bindtap="openAdvisor"/);
+  assert.doesNotMatch(ui, /bindtap="openBooking"/, 'the plan page offers no booking any more');
 });
 
 test('plan cards show a short description that fits the card; the record keeps the full text', () => {

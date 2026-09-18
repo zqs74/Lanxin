@@ -70,6 +70,18 @@
       {
         "value": "assets/resources/materials/whistle.jpg",
         "type": "file"
+      },
+      {
+        "value": "pages/login",
+        "type": "folder"
+      },
+      {
+        "value": "pages/account",
+        "type": "folder"
+      },
+      {
+        "value": "pages/booking-success",
+        "type": "folder"
       }
     ],
     "include": []

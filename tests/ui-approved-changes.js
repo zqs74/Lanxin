@@ -13,6 +13,17 @@ module.exports = {
     ]
   ],
   "./pages/result/result.wxml": [
+    // Approved 2026-09-18: the mini program has no login or booking any more. The booking button gives way to a
+    // note, and a floating "咨询" ball (WeCom customer service) follows the contact popup. Undone first, because
+    // the removed button carried the text counted by an entry below.
+    [
+      "    <button class=\"primary-btn cta-btn\" bindtap=\"openBooking\">{{infoOnly ? '公开信息不支持代订' : '登记预约意向'}}</button>",
+      "    <!-- 2026-09-18：不再提供预约入口；需要进一步对接时点右下角悬浮球，转到企业微信里沟通。 -->"
+    ],
+    [
+      "  <open-guide visible=\"{{guideVisible}}\" bind:close=\"closeGuide\" />",
+      "  <open-guide visible=\"{{guideVisible}}\" bind:close=\"closeGuide\" /><view class=\"advisor-ball\" bindtap=\"openAdvisor\" hover-class=\"advisor-ball--hover\" hover-stay-time=\"80\"><text class=\"advisor-ball-icon\">💬</text><text class=\"advisor-ball-text\">咨询</text></view>"
+    ],
     // Approved 2026-09-18: no empty cover block; city-wide organisations are not labelled with the requested town.
     [
       "<image class=\"resource-cover\" src=\"{{resource.cover || resource.avatar || resource.image}}\" mode=\"aspectFill\"></image>",
@@ -120,10 +131,11 @@ module.exports = {
   "./pages/history/history.wxml": []
 };
 const overlay = require("node:fs").readFileSync(require("node:path").join(__dirname, "privacy-overlay.txt"), "utf8");
-// Approved 2026-09-17: one entry row to the new account page (change password, log out). Kept in a
-// text file, like the overlay, so that its line endings always follow the page's.
-module.exports["./pages/history/history.wxml"].push(["",
-  require("node:fs").readFileSync(require("node:path").join(__dirname, "account-entry.txt"), "utf8")]);
+// Approved 2026-09-18: without login and booking the history tab lists only the plans made on this device;
+// the booking section is gone (its markup is kept in a text file so its line endings follow the page's).
+module.exports["./pages/history/history.wxml"].push([
+  require("node:fs").readFileSync(require("node:path").join(__dirname, "history-bookings-section.txt"), "utf8"),
+  "  <!-- 2026-09-18：小程序不再有登录和预约，这里只保留本机生成过的方案。 -->"]);
 // Approved 2026-09-18: the "主推资源" feature card is gone. Public listings have no featured entry, and its
 // bottom-anchored body pushed the name out of view for long descriptions. The removed markup is kept in a
 // text file so its line endings follow the page's. It is restored first because the card contained one of
@@ -143,5 +155,6 @@ for (const page of ["login", "result", "poster", "booking-success"]) {
   module.exports["./pages/result/result.wxss"] = [
     [body.replace(/  min-width: 0;\r?\n/, ""), body],
     ["", read("result-desc-clamp.txt")],
+    ["", read("result-advisor-ball.txt")],
   ];
 }

@@ -1,4 +1,4 @@
-const { getRecommendations, getBookings, removeRecordsByType } = require("../../utils/storage");
+const { getRecommendations, removeRecordsByType } = require("../../utils/storage");
 const api = require('../../utils/api');
 const session = require('../../utils/session');
 
@@ -77,10 +77,11 @@ Page(session.protectPage({
 
   async refresh() {
     const sequence = this._refreshSequence = (this._refreshSequence || 0) + 1;
-    const [plans, reservations] = await Promise.all([getRecommendations(), getBookings()]);
+    // Plans made on this device; there are no bookings any more.
+    const plans = await getRecommendations();
     if (this._dead || sequence !== this._refreshSequence) return;
     const recommendations = buildList(plans, 'recommendation');
-    const bookings = buildList(reservations, 'booking');
+    const bookings = [];
 
     this.setData({
       recommendations,
@@ -117,21 +118,9 @@ Page(session.protectPage({
     });
   },
 
-  openAccount() {
-    wx.navigateTo({
-      url: "/pages/account/account",
-    });
-  },
-
   openRecommendationRecords() {
     wx.navigateTo({
       url: "/pages/records/records?type=recommendation",
-    });
-  },
-
-  openBookingRecords() {
-    wx.navigateTo({
-      url: "/pages/records/records?type=booking",
     });
   },
 
@@ -143,17 +132,6 @@ Page(session.protectPage({
 
     wx.navigateTo({
       url: '/pages/result/result?id=' + api.id(payload.planId),
-    });
-  },
-
-  reopenBooking(event) {
-    const { id } = event.currentTarget.dataset;
-    if (!id) {
-      return;
-    }
-
-    wx.navigateTo({
-      url: '/pages/booking-success/booking-success?id=' + api.id(id),
     });
   },
 }));

@@ -13,15 +13,12 @@ function request(path, options = {}) {
   if (typeof path !== 'string' || !API_PATH.test(path) || /[\s\\%?#]/.test(path)) {
     return Promise.reject(new Error('请求路径无效'));
   }
+  // The mini program has no login: a request without a token is an ordinary visitor request.
   const token = session.getToken(), epoch = session.getEpoch();
-  if (!options.public && !token) {
-    session.redirectToLogin();
-    return Promise.reject(Object.assign(new Error('请先登录'), { status: 401 }));
-  }
   return new Promise((resolve, reject) => {
     wx.request({
       url: API_BASE + path, method: options.method || 'GET', data: options.data || {}, timeout: 20000,
-      header: Object.assign({ 'Content-Type': 'application/json' }, !options.public ? { Authorization: 'Bearer ' + token } : {}),
+      header: Object.assign({ 'Content-Type': 'application/json' }, !options.public && token ? { Authorization: 'Bearer ' + token } : {}),
       success(response) {
         if (epoch !== session.getEpoch() || (!options.public && token !== session.getToken())) {
           reject(Object.assign(new Error('会话已变更'), { stale: true })); return;

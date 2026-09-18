@@ -5,10 +5,7 @@
     "pages/library/library",
     "pages/history/history",
     "pages/records/records",
-    "pages/poster/poster",
-    "pages/booking-success/booking-success",
-    "pages/login/login",
-    "pages/account/account"
+    "pages/poster/poster"
   ],
   "tabBar": {
     "custom": true,

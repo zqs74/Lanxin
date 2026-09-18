@@ -16,7 +16,6 @@ function planPath(query = {}, page = 'result') {
 }
 function shareMessage(page, title) {
   const fallback = { title: title || '篮芯办赛方案', path: '/pages/index/index', imageUrl: '/assets/resources/materials/trophy-real.jpg' };
-  if (!session.hasSession()) return fallback;
   if (page._share && (!page._share.expiresAt || Date.parse(page._share.expiresAt) > Date.now())) {
     return Object.assign({}, fallback, { path: page._share.path });
   }

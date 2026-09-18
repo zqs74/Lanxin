@@ -104,7 +104,7 @@
 
   <view class="cta-bar">
     <button class="secondary-btn cta-btn" bindtap="openPoster">生成分享海报</button>
-    <button class="primary-btn cta-btn" bindtap="openBooking">{{infoOnly ? '公开信息不支持代订' : '登记预约意向'}}</button>
+    <!-- 2026-09-18：不再提供预约入口；需要进一步对接时点右下角悬浮球，转到企业微信里沟通。 -->
   </view>
 
   <van-popup show="{{tuneVisible}}" round position="bottom" custom-style="height: 78vh; z-index: 5200;" bind:close="closeTunePanel">
@@ -261,7 +261,7 @@
     />
   </van-popup>
 
-  <open-guide visible="{{guideVisible}}" bind:close="closeGuide" />
+  <open-guide visible="{{guideVisible}}" bind:close="closeGuide" /><view class="advisor-ball" bindtap="openAdvisor" hover-class="advisor-ball--hover" hover-stay-time="80"><text class="advisor-ball-icon">💬</text><text class="advisor-ball-text">咨询</text></view>
 </view>
 
 <!-- On-demand WeChat privacy authorization; hidden during normal page use. -->

@@ -12,12 +12,16 @@ function setContact(contact) {
   Object.keys(CONTACT).forEach(key => delete CONTACT[key]);
   const source = contact || {};
   const fields = {};
-  ['name', 'phone', 'wechat', 'qrCode', 'mode'].forEach(key => {
+  ['name', 'phone', 'wechat', 'qrCode', 'mode', 'wecomCorpId', 'wecomKfUrl'].forEach(key => {
     fields[key] = typeof source[key] === 'string' ? source[key].trim() : '';
   });
+  // WeCom customer service needs both ids, in the exact shape WeChat expects; otherwise neither is kept.
+  if (!/^w[wx][0-9A-Za-z]{16}$/.test(fields.wecomCorpId) || !/^https:\/\/work\.weixin\.qq\.com\/kfid\/kfc[0-9A-Za-z]{10,40}$/.test(fields.wecomKfUrl)) {
+    fields.wecomCorpId = ''; fields.wecomKfUrl = '';
+  }
   if (fields.wechat === 'Lanxin-kefu') fields.wechat = '';
   if (fields.qrCode === '/assets/contact-qr.png') fields.qrCode = '';
-  const configured = !!(fields.phone || fields.wechat || fields.qrCode);
+  const configured = !!(fields.phone || fields.wechat || fields.qrCode || fields.wecomKfUrl);
   Object.assign(CONTACT, fields, { configured, name: configured ? (fields.name || '联系客服') : '客服未配置' });
 }
 setContact(null);
@@ -25,13 +29,10 @@ function init() {
   if (initialized) return;
   initialized = true;
   // Legacy demo business records belong to the user: leave them untouched.
-  // Only this independent auth namespace is read or cleared; no history migration.
-  try {
-    const saved = wx.getStorageSync(KEY);
-    if (saved && saved.token && saved.account && saved.account.id && Date.parse(saved.expiresAt) > Date.now()) {
-      current = { token: saved.token, expiresAt: saved.expiresAt, account: saved.account };
-    } else wx.removeStorageSync(KEY);
-  } catch (_) { current = null; }
+  // The mini program no longer has a login. A session stored by an earlier version is dropped, so the
+  // device continues as an ordinary visitor instead of mixing an old account's plans with its own.
+  try { if (wx.getStorageSync(KEY)) wx.removeStorageSync(KEY); } catch (_) {}
+  current = null;
 }
 function getToken() {
   init();
@@ -96,16 +97,9 @@ function onLoginPage() {
   const page = pages[pages.length - 1];
   return !!page && page.route === 'pages/login/login';
 }
-function redirectToLogin(path) {
-  // Late callbacks from closed pages must not reload the login page while the user is typing.
-  if (onLoginPage()) return;
-  const valid = safeNext(path || activePath());
-  if (valid && !redirecting) nextPath = valid;
-  if (redirecting) return;
-  redirecting = true;
-  wx.reLaunch({ url: '/pages/login/login?next=' + encodeURIComponent(nextPath || '/pages/index/index'),
-    fail() { redirecting = false; } });
-}
+// There is no login page any more. Callers that used to send the visitor there simply continue as a
+// visitor; the function stays so that an expired legacy session ends quietly.
+function redirectToLogin() {}
 function invalidate(token) {
   if (token && token !== getToken()) return;
   const path = activePath(); clear(); redirectToLogin(path);
@@ -155,7 +149,6 @@ function protectPage(definition) {
       ['onLoad', 'onShow', 'onUnload', 'applyRecord', 'buildPalette', 'buildInfoRows', 'getSlotLabel', 'refreshRecord', 'refreshRecords'].includes(key)) return;
     const fn = definition[key];
     definition[key] = function(...args) {
-      if (!hasSession()) { redirectToLogin(); return; }
       if (this._authPending) return;
       try {
         const result = fn.apply(this, args);
@@ -178,7 +171,6 @@ function protectPage(definition) {
       const components = this.selectAllComponents ? this.selectAllComponents('open-guide') : [];
       components.forEach(component => component.setData({ contact: CONTACT }));
     });
-    if (!hasSession()) redirectToLogin(pagePath(this.route || '', query));
   };
   definition.onShow = async function() {
     if (this._showBusy) return;
@@ -187,11 +179,11 @@ function protectPage(definition) {
     if (!this._authSnapshot) this._authSnapshot = JSON.parse(JSON.stringify(this.data));
     this._authPending = true;
     this.setData(JSON.parse(JSON.stringify(initial)));
-    if (!hasSession()) { redirectToLogin(pagePath(this.route || '', this._query)); return; }
     this._showBusy = true;
     const generation = getEpoch();
     try {
-      await me();
+      // Visitors need no check; a session only exists for an issued account and is still validated.
+      if (hasSession()) await me();
       if (this._dead || generation !== getEpoch()) return;
       if (this._authSnapshot) this.setData(this._authSnapshot);
       this._authSnapshot = null;
