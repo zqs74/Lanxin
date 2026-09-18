@@ -71,10 +71,10 @@
           hover-class="resource-card--hover"
           hover-stay-time="80"
         >
-          <image class="resource-cover" src="{{resource.cover || resource.avatar || resource.image}}" mode="aspectFill"></image>
+          <image wx:if="{{resource.cover || resource.avatar || resource.image}}" class="resource-cover" src="{{resource.cover || resource.avatar || resource.image}}" mode="aspectFill"></image>
           <view class="resource-body">
             <view class="resource-name">{{resource.name}}</view>
-            <view class="resource-meta">{{resource.town || demand.town || '东莞'}} · {{resource.level || resource.capacity || '推荐配置'}}</view>
+            <view class="resource-meta">{{resource.town || '东莞'}} · {{resource.level || resource.capacity || '推荐配置'}}</view>
             <view class="resource-tags">
               <text wx:for="{{resource.tags}}" wx:key="*this" class="resource-tag">{{item}}</text>
             </view>

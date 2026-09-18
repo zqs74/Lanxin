@@ -13,6 +13,15 @@ module.exports = {
     ]
   ],
   "./pages/result/result.wxml": [
+    // Approved 2026-09-18: no empty cover block; city-wide organisations are not labelled with the requested town.
+    [
+      "<image class=\"resource-cover\" src=\"{{resource.cover || resource.avatar || resource.image}}\" mode=\"aspectFill\"></image>",
+      "<image wx:if=\"{{resource.cover || resource.avatar || resource.image}}\" class=\"resource-cover\" src=\"{{resource.cover || resource.avatar || resource.image}}\" mode=\"aspectFill\"></image>"
+    ],
+    [
+      "{{resource.town || demand.town || '东莞'}} · ",
+      "{{resource.town || '东莞'}} · "
+    ],
     [
       "详情请咨询客户经理",
       "资源仅供参考，请自行核实"
@@ -124,4 +133,15 @@ module.exports["./pages/library/library.wxml"].unshift([
   "  <!-- 2026-09-18：取消“主推资源”大卡片。公开资料没有主推之分，所有资源统一用下方卡片展示。 -->"]);
 for (const page of ["login", "result", "poster", "booking-success"]) {
   module.exports["./pages/" + page + "/" + page + ".wxml"].push(["", overlay]);
+}
+// Approved 2026-09-18: resource cards on the plan page wrap long URLs inside the card (the flex body may
+// shrink) and cap the description at six lines. The snippets are kept in text files so their line endings
+// follow the stylesheet's; the original body rule is the same block without its min-width line.
+{
+  const read = name => require("node:fs").readFileSync(require("node:path").join(__dirname, name), "utf8");
+  const body = read("result-card-wrap.txt");
+  module.exports["./pages/result/result.wxss"] = [
+    [body.replace(/  min-width: 0;\r?\n/, ""), body],
+    ["", read("result-desc-clamp.txt")],
+  ];
 }

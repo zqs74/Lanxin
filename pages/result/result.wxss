@@ -214,6 +214,7 @@
 
 .resource-body {
   flex: 1;
+  min-width: 0;
 }
 
 .resource-name {
@@ -248,6 +249,11 @@
   font-size: 22rpx;
   line-height: 1.7;
   color: #7282a4;
+  word-break: break-all;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 6;
+  overflow: hidden;
 }
 
 .alt-card {

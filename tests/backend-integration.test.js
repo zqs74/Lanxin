@@ -884,6 +884,21 @@ test('a plan that recommends a public listing shows it but never opens the booki
   partner.applyRecord(bookable); assert.equal(partner.data.infoOnly, false, 'ordinary tags do not block booking');
 });
 
+test('plan cards show a short description that fits the card; the record keeps the full text', () => {
+  const h = harness(); h.session.accept(auth('a')); const p = h.page('result'); p.onLoad({ id: 'pub' });
+  const full = '【公开资料・未合作・不可直接预约】公开场馆资料，暂无本平台合作或代订授权。 公开地址：东莞市南城街道体育路3号。网页核验日期2026-09-16；未电话或现场核实。 来源：广东省体育局官网 https://tyj.gd.gov.cn/ssjygk_security/content/post_1953805.html 【方案匹配说明】2026-09-18 起，本条目会出现在方案推荐里。';
+  const listed = plan('pub'); listed.payload.result.sections[0].items[0].description = full;
+  p.applyRecord(listed);
+  assert.equal(p.data.result.sections[0].items[0].description, '公开场馆资料，暂无本平台合作或代订授权。 公开地址：东莞市南城街道体育路3号。');
+  assert.equal(p.record.payload.result.sections[0].items[0].description, full, 'the stored record is not rewritten');
+  const { briefDescription } = h.load('utils/resource-policy.js');
+  assert.equal(briefDescription('普通描述，没有标记。'), '普通描述，没有标记。'); assert.equal(briefDescription(undefined), '');
+  const ui = fs.readFileSync(path.join(root, 'pages/result/result.wxml'), 'utf8'), css = fs.readFileSync(path.join(root, 'pages/result/result.wxss'), 'utf8');
+  assert.match(ui, /<image wx:if="\{\{resource\.cover \|\| resource\.avatar \|\| resource\.image\}\}" class="resource-cover"/);
+  assert.doesNotMatch(ui, /resource\.town \|\| demand\.town/, 'a city-wide organisation is not labelled with the requested town');
+  assert.match(css, /\.resource-body \{\s+flex: 1;\s+min-width: 0;/); assert.match(css, /\.resource-desc \{[^}]*word-break: break-all;[^}]*-webkit-line-clamp: 6;/);
+});
+
 test('saved poster stacks its cards by content: nothing overlaps, overflows or leaves the old fixed gaps', () => {
   const h = harness(); const { buildPosterPalette, textLines } = h.load('utils/poster-palette.js');
   const px = value => parseFloat(value);

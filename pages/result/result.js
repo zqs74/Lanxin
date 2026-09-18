@@ -4,7 +4,7 @@ const { createRecommendation } = require('../../utils/recommender');
 const { saveBooking } = require('../../utils/storage');
 const api = require('../../utils/api');
 const session = require('../../utils/session');
-const { isInfoOnly } = require('../../utils/resource-policy');
+const { isInfoOnly, briefDescription } = require('../../utils/resource-policy');
 const privacy = require('../../utils/privacy');
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -121,7 +121,10 @@ Page(privacy.withPrivacy(session.protectPage({
     const venue = venueSection && venueSection.items && venueSection.items[0];
     const initialBookingDate = this.data.planId === record.id && this.data.bookingForm.expectedDate
       ? this.data.bookingForm.expectedDate : formatDateValue(demand.playDate);
-    this.setData({ planId: record.id, mode: demand.mode, demand, result,
+    // Display copy only: the stored record keeps the full descriptions.
+    const shown = Object.assign({}, result, { sections: (result.sections || []).map(section => Object.assign({}, section, {
+      items: (section.items || []).map(item => Object.assign({}, item, { description: briefDescription(item.description) })) })) });
+    this.setData({ planId: record.id, mode: demand.mode, demand, result: shown,
       infoOnly: isInfoOnly(this._config, session.getContact(), record, result, venue),
       bookingVenue: (venueSection && venueSection.items && venueSection.items[0]) || null,
       'bookingForm.expectedDate': initialBookingDate,
