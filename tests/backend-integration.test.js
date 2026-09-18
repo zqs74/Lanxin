@@ -263,7 +263,20 @@ test('resource filter races only show the last response and empty resources stay
   const first = p.refreshList(); p.setData({ townFilter: '南城' }); const last = p.refreshList();
   h.respond(h.requests[1], { items: [], total: 0, page: 1, pageSize: 50 }); await last;
   h.respond(h.requests[0], { items: [{ id: 'old', name: 'old venue' }], total: 1, page: 1, pageSize: 50 }); await first;
-  assert.equal(p.data.featuredItem, null); assert.equal(p.data.list.length, 0); assert.match(p.data.emptyText, /暂无资源/);
+  assert.equal(p.data.featuredItem, undefined); assert.equal(p.data.list.length, 0); assert.match(p.data.emptyText, /暂无资源/);
+});
+
+test('every listed resource uses the same card; covers render only when a picture exists', async () => {
+  const h = harness(); h.session.accept(auth('a')); const p = h.page('library'); p.onLoad({});
+  const pending = p.refreshList();
+  h.respond(h.requests[0], { items: [{ id: 'v1', name: '有图场馆', cover: 'https://api.lanxin.cyou/media/image/bansai/venues/v1.jpg' },
+    { id: 'v2', name: '无图场馆' }], total: 2, page: 1, pageSize: 50 });
+  await pending;
+  assert.deepEqual(p.data.list.map(item => item.id), ['v1', 'v2'], 'the first item is not split off as a featured card');
+  assert.equal(p.data.resourceCount, 2); assert.equal('featuredItem' in p.data, false);
+  const ui = fs.readFileSync(path.join(root, 'pages/library/library.wxml'), 'utf8');
+  assert.doesNotMatch(ui, /featuredItem|library-feature-card|library-feature-badge/);
+  assert.match(ui, /<image wx:if="\{\{item\.cover \|\| item\.avatar \|\| item\.image\}\}" class="library-cover"/);
 });
 
 test('server contact replaces placeholder globally and clears on account switch', async () => {

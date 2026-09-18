@@ -1,0 +1,26 @@
+  <block wx:if="{{featuredItem}}">
+    <view
+      class="library-feature-card"
+      bindtap="onResourceTap"
+      hover-class="library-card--hover"
+      hover-stay-time="80"
+    >
+      <image class="library-feature-cover" src="{{featuredItem.cover || featuredItem.avatar || featuredItem.image}}" mode="aspectFill"></image>
+      <view class="library-feature-mask"></view>
+      <view class="library-feature-body">
+        <view class="library-feature-top">
+          <view class="library-feature-badge">主推资源</view>
+          <view class="library-feature-town">{{featuredItem.town || '东莞'}}</view>
+        </view>
+        <view class="library-feature-name">{{featuredItem.name}}</view>
+        <view class="library-feature-desc">{{featuredItem.description}}</view>
+        <view class="library-feature-tags">
+          <text wx:for="{{featuredItem.tags}}" wx:key="*this" class="library-feature-tag">{{item}}</text>
+        </view>
+        <view class="library-feature-cta">
+          <view class="library-feature-cta-text">资源仅供参考，请自行核实</view>
+          <view class="library-feature-cta-arrow">›</view>
+        </view>
+      </view>
+    </view>
+  </block>

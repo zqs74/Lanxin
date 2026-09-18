@@ -43,6 +43,11 @@ module.exports = {
     ]
   ],
   "./pages/library/library.wxml": [
+    // Approved 2026-09-18: no card without a picture keeps an empty cover area.
+    [
+      "<image class=\"library-cover\" src=\"{{item.cover || item.avatar || item.image}}\" mode=\"aspectFill\"></image>",
+      "<image wx:if=\"{{item.cover || item.avatar || item.image}}\" class=\"library-cover\" src=\"{{item.cover || item.avatar || item.image}}\" mode=\"aspectFill\"></image>"
+    ],
     [
       "详情请咨询客户经理",
       "资源仅供参考，请自行核实",
@@ -110,6 +115,13 @@ const overlay = require("node:fs").readFileSync(require("node:path").join(__dirn
 // text file, like the overlay, so that its line endings always follow the page's.
 module.exports["./pages/history/history.wxml"].push(["",
   require("node:fs").readFileSync(require("node:path").join(__dirname, "account-entry.txt"), "utf8")]);
+// Approved 2026-09-18: the "主推资源" feature card is gone. Public listings have no featured entry, and its
+// bottom-anchored body pushed the name out of view for long descriptions. The removed markup is kept in a
+// text file so its line endings follow the page's. It is restored first because the card contained one of
+// the "资源仅供参考，请自行核实" occurrences counted by the entry above.
+module.exports["./pages/library/library.wxml"].unshift([
+  require("node:fs").readFileSync(require("node:path").join(__dirname, "library-feature-card.txt"), "utf8"),
+  "  <!-- 2026-09-18：取消“主推资源”大卡片。公开资料没有主推之分，所有资源统一用下方卡片展示。 -->"]);
 for (const page of ["login", "result", "poster", "booking-success"]) {
   module.exports["./pages/" + page + "/" + page + ".wxml"].push(["", overlay]);
 }
