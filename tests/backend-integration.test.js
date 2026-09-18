@@ -870,6 +870,56 @@ test('recipient rematch to an info-only venue does not open booking', async () =
   assert.equal(h.requests.some(item => item.url.endsWith('/api/bookings')), false);
 });
 
+test('a plan that recommends a public listing shows it but never opens the booking form', async () => {
+  const h = harness(); h.session.accept(auth('a')); const p = h.page('result'); p.onLoad({ id: 'pub' });
+  const listed = plan('pub');
+  listed.payload.result.sections[0].items[0].tags = ['公开资料', '未合作', '不可直接预约'];
+  p.applyRecord(listed);
+  assert.equal(p.data.infoOnly, true); assert.equal(p.data.bookingVenue.name, '真实场馆');
+  await p.openBooking();
+  assert.match(h.toasts.at(-1).title, /公开信息不支持代订/); assert.equal(p.data.bookingVisible, false);
+  assert.equal(h.requests.some(item => item.url.endsWith('/api/bookings')), false);
+  const partner = h.page('result'); partner.onLoad({ id: 'own' });
+  const bookable = plan('own'); bookable.payload.result.sections[0].items[0].tags = ['合作场馆'];
+  partner.applyRecord(bookable); assert.equal(partner.data.infoOnly, false, 'ordinary tags do not block booking');
+});
+
+test('saved poster stacks its cards by content: nothing overlaps, overflows or leaves the old fixed gaps', () => {
+  const h = harness(); const { buildPosterPalette, textLines } = h.load('utils/poster-palette.js');
+  const px = value => parseFloat(value);
+  const base = { title: '东莞赛事方案已生成', modeLabel: '半专业赛事', town: '南城', date: '2026-09-19', matchScore: 98,
+    venue: '演示场馆（虚构，仅供测试）', venueCover: '', planTone: '室内馆 + 正式赛事链路', tags: ['演示数据', '虚构场馆', '仅供测试'],
+    summaryLead: '演示场馆（虚构，仅供测试）', summaryTail: '更适合这次赛事落地。', summaryNote: '缺少可用资源：主裁与边裁、租赁建议、媒体建议',
+    highlightPoints: [{ label: '主场馆', value: '南城 · 演示场馆（虚构，仅供测试）' }, { label: '预算落点', value: '标准预算' }],
+    budgetHint: '已标价资源参考值合计 1500 元。仅汇总所选资源记录的数值参考价；不是成交报价。' };
+  const long = Object.assign({}, base, { venue: '东莞市某某镇文化体育活动中心综合体育馆（公开资料・名称特别长的情况）', venueCover: 'https://img.example/v.jpg',
+    highlightPoints: base.highlightPoints.concat([{ label: '裁判配置', value: '甲 / 乙' }]),
+    refereeLine: '东莞市篮球协会 / 东莞市篮球协会裁判员委员会', materialLine: '东莞市凯力克展示制品有限公司 / 东莞合乐礼品有限公司',
+    rentalLine: '东莞市宏创演出器材有限公司 / 东莞市明歌文化发展有限公司', supplierLine: '东莞市鸿宇体育设施工程有限公司', mediaLine: '东莞发布（视频号、抖音号）' });
+  for (const poster of [base, long, Object.assign({}, base, { tags: [], highlightPoints: [], budgetHint: '', summaryNote: '' })]) {
+    const palette = buildPosterPalette(poster);
+    const cards = palette.views.filter(v => v.type === 'rect' && v.css.left === '30rpx' && v.css.width === '594rpx')
+      .map(v => ({ top: px(v.css.top), bottom: px(v.css.top) + px(v.css.height) }));
+    assert.ok(cards.length >= 3);
+    cards.forEach((card, index) => {
+      assert.ok(card.bottom - card.top >= 100, 'every card has a real height');
+      if (index) assert.equal(card.top, cards[index - 1].bottom + 24, 'cards follow each other with one fixed gap');
+    });
+    assert.equal(cards[0].top, 294); assert.equal(px(palette.height), cards.at(-1).bottom + 24);
+    for (const view of palette.views.filter(v => v.type === 'text' && px(v.css.top) >= 294)) {
+      const top = px(view.css.top), card = cards.find(c => top >= c.top && top < c.bottom);
+      assert.ok(card, 'text sits inside a card: ' + view.text);
+      const height = textLines(view.text, px(view.css.fontSize), px(view.css.width), view.css.maxLines) * px(view.css.lineHeight);
+      assert.ok(top + height <= card.bottom - 10, 'text ends above its card edge: ' + view.text);
+      assert.ok(px(view.css.left) + px(view.css.width) <= 30 + 594, 'text stays inside the card width: ' + view.text);
+    }
+  }
+  const texts = buildPosterPalette(long).views.filter(v => v.type === 'text').map(v => v.text);
+  assert.ok(texts.includes('已标价资源参考值合计 1500 元。'), 'only the first sentence of the budget note is printed');
+  assert.equal(texts.filter(value => value === '裁判配置').length, 1, 'referees are listed once');
+  assert.equal(px(buildPosterPalette(base).views.find(v => v.text === base.venue).css.width), 554, 'no cover: the name uses the full card width');
+});
+
 test('unconfigured and legacy sample contacts never dial, copy or preview', () => {
   const h = harness();
   h.session.setContact({ wechat: 'Lanxin-kefu', qrCode: '/assets/contact-qr.png' });
