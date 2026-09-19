@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function HomePage() {
+export default function HomePage({ hideActions = false }) {
   const canvasRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
   const navigate = useNavigate();
@@ -163,6 +163,7 @@ export default function HomePage() {
               </p>
             </div>
 
+            {hideActions ? null : (
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 pt-6 sm:pt-8 px-2">
               <button
                 onClick={() => navigate('/web')}
@@ -215,6 +216,7 @@ export default function HomePage() {
                 </span>
               </button>
             </div>
+            )}
 
             <div className="pt-12 sm:pt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 max-w-3xl mx-auto px-2">
               {[

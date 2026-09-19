@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Video, Trophy, Package, ShieldAlert, CalendarPlus, Megaphone, PanelsTopLeft, Wand2, Smartphone } from 'lucide-react';
+import { Video, Trophy, Package, ShieldAlert, CalendarPlus, Megaphone, PanelsTopLeft, Wand2, Smartphone, Handshake, Database, Table2, Medal, Coins, Sparkles, MapPin } from 'lucide-react';
 
 /**
  * 仪表盘功能入口卡片
@@ -60,6 +60,48 @@ export default function FeatureCard({ variant, onClick }) {
     roster: {
       Icon: Smartphone,
       title: '人才匹配清单',
+      summary: '',
+      isNew: true,
+    },
+    linkage: {
+      Icon: Handshake,
+      title: '联动商家图谱',
+      summary: '',
+      isNew: true,
+    },
+    data: {
+      Icon: Database,
+      title: '赛事数据服务',
+      summary: '',
+      isNew: true,
+    },
+    tables: {
+      Icon: Table2,
+      title: '赛事数据表',
+      summary: '',
+      isNew: true,
+    },
+    poster: {
+      Icon: Medal,
+      title: '球员交付海报',
+      summary: '',
+      isNew: true,
+    },
+    cost: {
+      Icon: Coins,
+      title: '办赛成本统计',
+      summary: '',
+      isNew: true,
+    },
+    tech: {
+      Icon: Sparkles,
+      title: '技术优势配图',
+      summary: '',
+      isNew: true,
+    },
+    region: {
+      Icon: MapPin,
+      title: '基层赛事数据积累',
       summary: '',
       isNew: true,
     },
@@ -374,6 +416,173 @@ export default function FeatureCard({ variant, onClick }) {
               </div>
             </div>
           </div>
+        );
+
+      case 'linkage': {
+        const nodes = [
+          [14, 11],
+          [86, 11],
+          [50, 5],
+          [50, 51],
+          [14, 45],
+          [86, 45],
+        ];
+        return (
+          <svg viewBox="0 0 100 56" className="w-full h-full">
+            <g stroke="var(--brand)" strokeOpacity="0.45" strokeWidth="0.8">
+              {nodes.map(([x, y], i) => (
+                <line key={`l-${i}`} x1="50" y1="28" x2={x} y2={y} />
+              ))}
+            </g>
+            <circle cx="50" cy="28" r="9" fill="var(--brand)" />
+            <text x="50" y="31" textAnchor="middle" fontSize="7" fontWeight="700" fill="var(--surface)">
+              52
+            </text>
+            {nodes.map(([x, y], i) => (
+              <rect
+                key={`n-${i}`}
+                x={x - 6}
+                y={y - 3.5}
+                width="12"
+                height="7"
+                rx="1.5"
+                fill="var(--surface)"
+                stroke="var(--brand)"
+                strokeWidth="0.8"
+              />
+            ))}
+          </svg>
+        );
+      }
+
+      case 'data':
+        return (
+          <svg viewBox="0 0 100 56" className="w-full h-full">
+            <rect x="0" y="0" width="100" height="8" rx="2" fill="var(--brand)" fillOpacity="0.35" />
+            {[0, 1, 2, 3].map((i) => (
+              <rect
+                key={`k-${i}`}
+                x={i * 26}
+                y="12"
+                width="22"
+                height="12"
+                rx="2"
+                fill="var(--brand)"
+                fillOpacity={0.18 + i * 0.12}
+              />
+            ))}
+            {[0, 1, 2, 3, 4].map((i) => (
+              <rect key={`r-${i}`} x="0" y={28 + i * 6} width="62" height="3.5" rx="1" fill="var(--text-muted)" fillOpacity={0.28} />
+            ))}
+            <polyline
+              points="66,50 74,42 82,45 90,32 98,26"
+              fill="none"
+              stroke="var(--brand)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        );
+
+      case 'tables':
+        return (
+          <svg viewBox="0 0 100 56" className="w-full h-full">
+            <rect x="0" y="0" width="100" height="10" rx="2" fill="var(--text-muted)" fillOpacity="0.28" />
+            {[0, 1, 2, 3].map((row) =>
+              [0, 1, 2, 3].map((col) => (
+                <rect
+                  key={`c-${row}-${col}`}
+                  x={col * 26}
+                  y={14 + row * 11}
+                  width="22"
+                  height="7"
+                  rx="1.5"
+                  fill={col === 1 ? 'var(--brand)' : 'var(--text-muted)'}
+                  fillOpacity={col === 1 ? 0.7 : 0.22}
+                />
+              ))
+            )}
+          </svg>
+        );
+
+      case 'poster':
+        return (
+          <svg viewBox="0 0 100 56" className="w-full h-full">
+            <rect x="28" y="0" width="44" height="56" rx="3" fill="var(--brand)" fillOpacity="0.12" stroke="var(--brand)" strokeWidth="0.8" />
+            <circle cx="50" cy="16" r="6" fill="var(--brand)" fillOpacity="0.55" />
+            <rect x="38" y="26" width="24" height="9" rx="4.5" fill="var(--brand)" fillOpacity="0.35" />
+            <rect x="33" y="40" width="10" height="9" rx="2" fill="var(--brand)" />
+            <rect x="45" y="40" width="10" height="9" rx="2" fill="var(--brand)" fillOpacity="0.6" />
+            <rect x="57" y="40" width="10" height="9" rx="2" fill="var(--brand)" fillOpacity="0.35" />
+          </svg>
+        );
+
+      case 'cost':
+        return (
+          <svg viewBox="0 0 100 56" className="w-full h-full">
+            <rect x="0" y="4" width="46" height="10" rx="2" fill="var(--brand)" fillOpacity="0.85" />
+            <rect x="0" y="18" width="34" height="10" rx="2" fill="var(--brand)" fillOpacity="0.6" />
+            <rect x="0" y="32" width="40" height="10" rx="2" fill="var(--brand)" fillOpacity="0.4" />
+            <rect x="0" y="46" width="26" height="8" rx="2" fill="var(--text-muted)" fillOpacity="0.3" />
+            {[0, 1, 2, 3, 4].map((i) => (
+              <rect
+                key={i}
+                x="56"
+                y={4 + i * 11}
+                width={i % 2 === 0 ? 40 : 30}
+                height="7"
+                rx="1.5"
+                fill="var(--text-muted)"
+                fillOpacity={0.22}
+              />
+            ))}
+          </svg>
+        );
+
+      case 'tech':
+        return (
+          <svg viewBox="0 0 100 56" className="w-full h-full">
+            {[0, 1, 2, 3].map((i) => (
+              <g key={i}>
+                <rect
+                  x={i * 25}
+                  y="12"
+                  width="20"
+                  height="32"
+                  rx="3"
+                  fill="var(--brand)"
+                  fillOpacity={0.18 + i * 0.16}
+                />
+                {i < 3 ? (
+                  <path
+                    d={`M${i * 25 + 21},28 L${i * 25 + 24},28`}
+                    stroke="var(--text-muted)"
+                    strokeWidth="1.5"
+                    strokeOpacity="0.5"
+                  />
+                ) : null}
+              </g>
+            ))}
+            <rect x="0" y="48" width="46" height="6" rx="3" fill="var(--text-muted)" fillOpacity="0.25" />
+            <rect x="54" y="48" width="46" height="6" rx="3" fill="var(--text-muted)" fillOpacity="0.25" />
+          </svg>
+        );
+
+      case 'region':
+        return (
+          <svg viewBox="0 0 100 56" className="w-full h-full">
+            <rect x="0" y="0" width="30" height="12" rx="2" fill="var(--brand)" fillOpacity="0.8" />
+            <rect x="35" y="0" width="30" height="12" rx="2" fill="var(--brand)" fillOpacity="0.5" />
+            <rect x="70" y="0" width="30" height="12" rx="2" fill="var(--brand)" fillOpacity="0.3" />
+            {[0, 1, 2, 3, 4].map((i) => (
+              <g key={i}>
+                <rect x="0" y={20 + i * 7} width="4" height="4" rx="1" fill="var(--brand)" fillOpacity={0.8 - i * 0.12} />
+                <rect x="9" y={20 + i * 7} width="58" height="4" rx="1" fill="var(--text-muted)" fillOpacity="0.25" />
+                <rect x="72" y={20 + i * 7} width="20" height="4" rx="1" fill="var(--brand)" fillOpacity={0.6 - i * 0.08} />
+              </g>
+            ))}
+          </svg>
         );
 
       default:

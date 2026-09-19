@@ -11,8 +11,15 @@ import VideoMarketing from './modules/VideoMarketing.jsx';
 import PptCanvasStudio from './modules/PptCanvasStudio.jsx';
 import ResourceMatching from './modules/ResourceMatching.jsx';
 import TalentMatchRoster from './modules/TalentMatchRoster.jsx';
+import BrandLinkageStudio from './modules/BrandLinkageStudio.jsx';
+import DataServiceStudio from './modules/DataServiceStudio.jsx';
+import DataTableStudio from './modules/DataTableStudio.jsx';
+import PosterStudio from './modules/PosterStudio.jsx';
+import CostChartStudio from './modules/CostChartStudio.jsx';
+import TechChartStudio from './modules/TechChartStudio.jsx';
+import RegionChartStudio from './modules/RegionChartStudio.jsx';
 
-const VALID_VIEWS = ['dashboard', 'ai', 'schedule', 'resource', 'emergency', 'visual', 'timeline', 'ppt', 'matching', 'roster'];
+const VALID_VIEWS = ['dashboard', 'ai', 'schedule', 'resource', 'emergency', 'visual', 'timeline', 'ppt', 'matching', 'roster', 'linkage', 'data', 'tables', 'poster', 'cost', 'tech', 'region'];
 
 const VIEW_NAME = {
   dashboard: '总览',
@@ -24,7 +31,14 @@ const VIEW_NAME = {
   timeline: '智能视频营销中台',
   ppt: 'PPT 内容绘制区',
   matching: '资源智能匹配',
-  roster: '人才匹配清单'
+  roster: '人才匹配清单',
+  linkage: '联动商家图谱',
+  data: '赛事数据服务',
+  tables: '赛事数据表',
+  poster: '球员交付海报',
+  cost: '办赛成本统计',
+  tech: '技术优势配图',
+  region: '基层赛事数据积累'
 };
 
 /**
@@ -91,6 +105,20 @@ export default function WebApp() {
         return <ResourceMatching />;
       case 'roster':
         return <TalentMatchRoster />;
+      case 'linkage':
+        return <BrandLinkageStudio />;
+      case 'data':
+        return <DataServiceStudio />;
+      case 'tables':
+        return <DataTableStudio />;
+      case 'poster':
+        return <PosterStudio />;
+      case 'cost':
+        return <CostChartStudio />;
+      case 'tech':
+        return <TechChartStudio />;
+      case 'region':
+        return <RegionChartStudio />;
       default:
         return <Dashboard onNavigate={handleNavigate} />;
     }

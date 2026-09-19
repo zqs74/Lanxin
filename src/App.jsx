@@ -27,6 +27,7 @@ function AppContent() {
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/home-clean" element={<HomePage hideActions />} />
         <Route path="/showcase" element={<ShowcaseHomePage />} />
         <Route path="/players" element={<PlayersPage />} />
         <Route path="/matches" element={<MatchesPage />} />

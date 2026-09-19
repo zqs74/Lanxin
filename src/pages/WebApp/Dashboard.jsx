@@ -32,7 +32,7 @@ export default function Dashboard({ onNavigate }) {
       <div>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-base font-semibold text-[var(--text-primary)]">功能导航</h2>
-          <span className="text-xs text-[var(--text-muted)]">共 9 项 · 7 项新增</span>
+          <span className="text-xs text-[var(--text-muted)]">共 16 项 · 15 项新增</span>
         </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
           {['ai', 'schedule', 'resource', 'emergency', 'visual', 'timeline', 'matching', 'roster'].map((v) => (
@@ -40,7 +40,7 @@ export default function Dashboard({ onNavigate }) {
           ))}
         </div>
         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
-          {['ppt'].map((v) => (
+          {['ppt', 'linkage', 'data', 'tables', 'poster', 'cost', 'tech', 'region'].map((v) => (
             <FeatureCard key={v} variant={v} onClick={() => onNavigate(v)} />
           ))}
         </div>
