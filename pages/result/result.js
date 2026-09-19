@@ -6,7 +6,6 @@ const api = require('../../utils/api');
 const session = require('../../utils/session');
 const { isInfoOnly, briefDescription } = require('../../utils/resource-policy');
 const privacy = require('../../utils/privacy');
-const advisor = require('../../utils/advisor');
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const DEMAND_FIELDS = ['mode', 'city', 'sentence', 'town', 'playDate', 'peopleCount', 'teamCount',
@@ -207,13 +206,9 @@ Page(privacy.withPrivacy(session.protectPage({
     wx.navigateTo({ url: planPath(this._query, 'poster') });
   },
 
-  // 资源详情与悬浮球都通向企业微信客服；没配置或跳转失败时回到联系信息弹层。
+  // 进一步对接统一走右下角“咨询”（小程序客服按钮，由微信客服接待）。
   onResourceTap() {
-    this.openAdvisor();
-  },
-
-  openAdvisor() {
-    advisor.openAdvisor(() => this.showGuide());
+    wx.showToast({ title: '如需进一步对接，请点右下角“咨询”', icon: 'none' });
   },
 
   showGuide() {

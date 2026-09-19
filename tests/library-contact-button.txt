@@ -1,0 +1,15 @@
+
+/* —— 联系客服入口（小程序客服按钮，客服由“微信客服”接管） —— */
+
+.page-shell .contact-entry {
+  width: 100%;
+  margin: 24rpx 0 0;
+  border: none;
+  text-align: left;
+  line-height: 1.4;
+  font-size: 28rpx;
+}
+
+.contact-entry::after {
+  border: none;
+}

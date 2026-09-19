@@ -261,7 +261,7 @@
     />
   </van-popup>
 
-  <open-guide visible="{{guideVisible}}" bind:close="closeGuide" /><view class="advisor-ball" bindtap="openAdvisor" hover-class="advisor-ball--hover" hover-stay-time="80"><text class="advisor-ball-icon">💬</text><text class="advisor-ball-text">咨询</text></view>
+  <open-guide visible="{{guideVisible}}" bind:close="closeGuide" /><button class="advisor-ball" open-type="contact" show-message-card="{{true}}" send-message-title="咨询办赛方案" send-message-img="/assets/resources/materials/trophy-real.jpg" hover-class="advisor-ball--hover"><text class="advisor-ball-icon">💬</text><text class="advisor-ball-text">咨询</text></button>
 </view>
 
 <!-- On-demand WeChat privacy authorization; hidden during normal page use. -->

@@ -70,14 +70,14 @@
     <van-empty image="search" description="{{emptyText}}" />
   </view>
 
-  <view class="contact-entry" bindtap="openContact" hover-class="library-card--hover" hover-stay-time="80">
+  <button class="contact-entry" open-type="contact" show-message-card="{{true}}" send-message-title="咨询东莞篮球资源" send-message-img="/assets/resources/materials/trophy-real.jpg" hover-class="library-card--hover">
     <view class="contact-entry-icon">💬</view>
     <view class="contact-entry-body">
-      <view class="contact-entry-title">查看联系信息</view>
+      <view class="contact-entry-title">联系客服</view>
       <view class="contact-entry-desc">公开资源不代表合作或可代订，请自行核实</view>
     </view>
     <view class="contact-entry-arrow">›</view>
-  </view>
+  </button>
 
   <open-guide visible="{{guideVisible}}" bind:close="closeGuide" />
 </view>

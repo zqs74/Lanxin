@@ -784,46 +784,41 @@ test('a plan that recommends a public listing shows it but never opens the booki
   partner.applyRecord(bookable); assert.equal(partner.data.infoOnly, false, 'ordinary tags do not block booking');
 });
 
-test('the ball and every contact entry open WeCom customer service, and say why when they cannot', () => {
-  const h = harness(); const p = h.page('result'); p.onLoad({ id: 'p1' }); p.applyRecord(plan('p1'));
+test('customer service goes through the mini program contact button; resource taps point to it', () => {
+  const h = harness();
+  const result = fs.readFileSync(path.join(root, 'pages/result/result.wxml'), 'utf8');
+  const library = fs.readFileSync(path.join(root, 'pages/library/library.wxml'), 'utf8');
+  const card = /send-message-img="\/assets\/resources\/materials\/trophy-real\.jpg"/;
+  assert.match(result, /<button class="advisor-ball" open-type="contact" show-message-card="\{\{true\}\}"/);
+  assert.match(library, /<button class="contact-entry" open-type="contact" show-message-card="\{\{true\}\}"/);
+  assert.match(result, card); assert.match(library, card, 'the message card uses a packaged public image, not a screenshot');
+  assert.match(library, /<view class="contact-entry-title">联系客服<\/view>/);
+  assert.doesNotMatch(result, /bindtap="openAdvisor"|bindtap="openBooking"/); assert.doesNotMatch(library, /bindtap="openContact"/);
+  assert.ok(fs.existsSync(path.join(root, 'assets/resources/materials/trophy-real.jpg')));
+  const ignored = JSON.parse(fs.readFileSync(path.join(root, 'project.config.json'), 'utf8')).packOptions.ignore.map(item => item.value);
+  assert.ok(!ignored.some(value => 'assets/resources/materials/trophy-real.jpg'.startsWith(value)), 'the card image is uploaded');
+
+  // Buttons carry default size, margin and border in style v2; both entries override them with stronger selectors.
+  const resultCss = fs.readFileSync(path.join(root, 'pages/result/result.wxss'), 'utf8');
+  const libraryCss = fs.readFileSync(path.join(root, 'pages/library/library.wxss'), 'utf8');
+  assert.match(resultCss, /\.app-shell \.advisor-ball \{[^}]*width: 108rpx;[^}]*margin: 0;[^}]*padding: 0;[^}]*border: none;/);
+  assert.match(resultCss, /\.advisor-ball::after \{\s*border: none;/);
+  assert.match(libraryCss, /\.page-shell \.contact-entry \{[^}]*width: 100%;[^}]*border: none;/);
+  assert.match(libraryCss, /\.contact-entry::after \{\s*border: none;/);
+  assert.match(libraryCss, /\.page-shell \.library-desc \{\s*word-break: break-all;/, 'long URLs wrap inside library cards');
+
+  // The direct-open API needs both accounts verified under one entity ("not bind" otherwise); it is not used.
+  for (const file of ['pages/result/result.js', 'pages/library/library.js', 'utils/session.js']) {
+    assert.doesNotMatch(fs.readFileSync(path.join(root, file), 'utf8'), /openCustomerServiceChat|utils\/advisor/, file);
+  }
+  assert.equal(fs.existsSync(path.join(root, 'utils/advisor.js')), false);
+
   const chats = []; h.wx.openCustomerServiceChat = options => chats.push(options);
-  h.wx.getAccountInfoSync = () => ({ miniProgram: { appId: 'wx0000000000000001', envVersion: 'trial', version: '1.0.0' } });
-  const wecom = { wecomCorpId: 'ww1234567890abcdef', wecomKfUrl: 'https://work.weixin.qq.com/kfid/kfc1234567890abcdef' };
-
-  p.openAdvisor();
-  assert.equal(chats.length, 0); assert.equal(p.data.guideVisible, false);
-  assert.match(h.modals.at(-1).content, /还没加载出来/, 'before any config arrives, say so instead of claiming nothing is configured');
-
-  h.session.setContact({});                                    // config loaded, operator configured nothing
-  p.openAdvisor(); assert.equal(chats.length, 0);
-  assert.equal(p.data.guideVisible, true, 'only a genuinely unconfigured deployment shows the popup');
-  assert.equal(h.session.getContact().configured, false); p.closeGuide();
-
-  h.session.setContact(wecom);
-  for (const open of [() => p.openAdvisor(), () => p.onResourceTap()]) {
-    chats.length = 0; open();
-    assert.equal(chats.length, 1); assert.equal(chats[0].corpId, wecom.wecomCorpId);
-    assert.equal(chats[0].extInfo.url, wecom.wecomKfUrl); assert.equal(p.data.guideVisible, false);
-    chats[0].fail({ errMsg: 'openCustomerServiceChat:fail no permission' });
-    assert.match(h.modals.at(-1).content, /no permission/, 'the real reason reaches the user');
-    assert.match(h.modals.at(-1).content, /trial 1\.0\.0/, 'and which package is running');
-    assert.equal(p.data.guideVisible, false, 'a failure is not dressed up as "客服尚未配置"');
-  }
-
-  const library = h.page('library'); library.onLoad({});
-  for (const open of [() => library.onResourceTap(), () => library.openContact()]) {
-    chats.length = 0; open(); assert.equal(chats.length, 1); assert.equal(library.data.guideVisible, false);
-  }
-  delete h.wx.openCustomerServiceChat;
-  library.onResourceTap(); assert.match(h.modals.at(-1).content, /升级微信/); assert.equal(library.data.guideVisible, false);
-
-  for (const bad of [{ wecomCorpId: wecom.wecomCorpId }, { wecomCorpId: wecom.wecomCorpId, wecomKfUrl: 'https://evil.example/kfid/kfc1234567890abcdef' },
-    { wecomCorpId: 'not-a-corp', wecomKfUrl: wecom.wecomKfUrl }]) {
-    h.session.setContact(bad); assert.equal(h.session.getContact().wecomKfUrl, ''); assert.equal(h.session.getContact().wecomCorpId, '');
-  }
-  const ui = fs.readFileSync(path.join(root, 'pages/result/result.wxml'), 'utf8');
-  assert.match(ui, /class="advisor-ball" bindtap="openAdvisor"/);
-  assert.doesNotMatch(ui, /bindtap="openBooking"/, 'the plan page offers no booking any more');
+  const p = h.page('result'); p.onLoad({ id: 'p1' }); p.applyRecord(plan('p1'));
+  p.onResourceTap(); assert.match(h.toasts.at(-1).title, /右下角“咨询”/); assert.equal(p.data.guideVisible, false);
+  const lib = h.page('library'); lib.onLoad({});
+  lib.onResourceTap(); assert.match(h.toasts.at(-1).title, /底部“联系客服”/); assert.equal(lib.data.guideVisible, false);
+  assert.equal(chats.length, 0);
 });
 
 test('plan cards show a short description that fits the card; the record keeps the full text', () => {

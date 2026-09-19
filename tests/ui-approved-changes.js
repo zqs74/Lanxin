@@ -14,7 +14,9 @@ module.exports = {
   ],
   "./pages/result/result.wxml": [
     // Approved 2026-09-18: the mini program has no login or booking any more. The booking button gives way to a
-    // note, and a floating "咨询" ball (WeCom customer service) follows the contact popup. Undone first, because
+    // note, and a floating "咨询" ball follows the contact popup. Since 2026-09-19 the ball is the mini program's
+    // own contact button (customer service handed to WeCom "微信客服"): the direct-open API needs both accounts
+    // verified under one entity and failed with "not bind". Undone first, because
     // the removed button carried the text counted by an entry below.
     [
       "    <button class=\"primary-btn cta-btn\" bindtap=\"openBooking\">{{infoOnly ? '公开信息不支持代订' : '登记预约意向'}}</button>",
@@ -22,7 +24,7 @@ module.exports = {
     ],
     [
       "  <open-guide visible=\"{{guideVisible}}\" bind:close=\"closeGuide\" />",
-      "  <open-guide visible=\"{{guideVisible}}\" bind:close=\"closeGuide\" /><view class=\"advisor-ball\" bindtap=\"openAdvisor\" hover-class=\"advisor-ball--hover\" hover-stay-time=\"80\"><text class=\"advisor-ball-icon\">💬</text><text class=\"advisor-ball-text\">咨询</text></view>"
+      "  <open-guide visible=\"{{guideVisible}}\" bind:close=\"closeGuide\" /><button class=\"advisor-ball\" open-type=\"contact\" show-message-card=\"{{true}}\" send-message-title=\"咨询办赛方案\" send-message-img=\"/assets/resources/materials/trophy-real.jpg\" hover-class=\"advisor-ball--hover\"><text class=\"advisor-ball-icon\">💬</text><text class=\"advisor-ball-text\">咨询</text></button>"
     ],
     // Approved 2026-09-18: no empty cover block; city-wide organisations are not labelled with the requested town.
     [
@@ -157,4 +159,28 @@ for (const page of ["login", "result", "poster", "booking-success"]) {
     ["", read("result-desc-clamp.txt")],
     ["", read("result-advisor-ball.txt")],
   ];
+}
+// Approved 2026-09-19: the library's contact entry becomes the mini program's own contact button, titled
+// "联系客服", with the button resets appended to the stylesheet. Built with the page's own line endings.
+{
+  const fs = require("node:fs"), path = require("node:path");
+  const page = fs.readFileSync(path.join(__dirname, "..", "pages", "library", "library.wxml"), "utf8");
+  const eol = page.includes("\r\n") ? "\r\n" : "\n";
+  const inner = [
+    '    <view class="contact-entry-icon">💬</view>',
+    '    <view class="contact-entry-body">',
+    '      <view class="contact-entry-title">TITLE</view>',
+    '      <view class="contact-entry-desc">公开资源不代表合作或可代订，请自行核实</view>',
+    '    </view>',
+    '    <view class="contact-entry-arrow">›</view>',
+  ];
+  const block = (open, title, close) => [open].concat(inner.map(line => line.replace("TITLE", title)), [close]).join(eol);
+  module.exports["./pages/library/library.wxml"].unshift([
+    block('  <view class="contact-entry" bindtap="openContact" hover-class="library-card--hover" hover-stay-time="80">', "查看联系信息", "  </view>"),
+    block('  <button class="contact-entry" open-type="contact" show-message-card="{{true}}" send-message-title="咨询东莞篮球资源" ' +
+      'send-message-img="/assets/resources/materials/trophy-real.jpg" hover-class="library-card--hover">', "联系客服", "  </button>"),
+  ]);
+  module.exports["./pages/library/library.wxss"] = [["", fs.readFileSync(path.join(__dirname, "library-contact-button.txt"), "utf8")],
+    // Approved 2026-09-19: long source URLs in library descriptions wrap inside the card instead of being clipped.
+    ["", fs.readFileSync(path.join(__dirname, "library-desc-wrap.txt"), "utf8")]];
 }

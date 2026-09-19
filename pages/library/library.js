@@ -1,6 +1,5 @@
 const api = require('../../utils/api');
 const session = require('../../utils/session');
-const advisor = require('../../utils/advisor');
 const CATEGORY_LABELS = { venues: '场馆', referees: '裁判', materials: '物料', rentals: '租赁', suppliers: '供应商', media: '媒体' };
 
 Page(session.protectPage({
@@ -81,10 +80,10 @@ Page(session.protectPage({
     }
   },
 
-  // —— A1：详情访问控制（点击详情 → 企业微信客服；未配置时回到联系信息弹层）——
+  // —— A1：资源详情不对外展示；进一步对接请用页面底部“联系客服”（小程序客服按钮，由微信客服接待）——
 
   onResourceTap() {
-    advisor.openAdvisor(() => this.showGuide());
+    wx.showToast({ title: '如需进一步对接，请点底部“联系客服”', icon: 'none' });
   },
 
   showGuide() {
@@ -116,8 +115,4 @@ Page(session.protectPage({
     );
   },
 
-  // —— A2：联系客服入口 ——
-  openContact() {
-    advisor.openAdvisor(() => this.showGuide());
-  },
 }));
