@@ -1,4 +1,15 @@
 // app.js - 昇梦体育 主题系统（auto/light/dark 三模式 + wx.onThemeChange）
+
+// 个人成长分析页的默认生涯数据（演示档案：17 岁高中校队小前锋，生涯累计）
+// 22 场 / 场均 12.0 分 6.0 篮板 3.0 助攻 / 投篮命中率 46.2%
+const DEFAULT_CAREER_STATS = {
+  points: 264,
+  rebounds: 132,
+  assists: 66,
+  shootingPercentage: 46.2,
+  totalGames: 22
+}
+
 App({
   onLaunch() {
     wx.cloud.init({
@@ -12,17 +23,24 @@ App({
       tabBarSelected: -1,
       tabBarInstances: [],
       floatAIButtonInstances: [],
-      careerStats: {
-        points: 128,
-        rebounds: 86,
-        assists: 42,
-        shootingPercentage: 38.7,
-        totalGames: 24
-      }
+      careerStats: DEFAULT_CAREER_STATS
     }
 
+    this.seedCareerStats()
     this.loadTheme()
     this.listenSystemTheme()
+  },
+
+  // 首次启动把默认生涯数据写入本地缓存，避免个人成长分析页读到空值显示 0
+  seedCareerStats() {
+    try {
+      const stored = wx.getStorageSync('careerStats')
+      if (!stored || !stored.totalGames) {
+        wx.setStorageSync('careerStats', this.globalData.careerStats)
+      }
+    } catch (e) {
+      console.error('初始化生涯数据失败', e)
+    }
   },
 
   onShow() {
@@ -40,13 +58,7 @@ App({
     tabBarSelected: -1,
     tabBarInstances: [],
     floatAIButtonInstances: [],
-    careerStats: {
-      points: 128,
-      rebounds: 86,
-      assists: 42,
-      shootingPercentage: 38.7,
-      totalGames: 24
-    }
+    careerStats: DEFAULT_CAREER_STATS
   },
 
   normalizeTabBarIndex(index) {

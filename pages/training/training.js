@@ -1,6 +1,69 @@
 // training.js - 昇梦体育 个人成长分析
 const app = getApp()
 
+// 演示档案：17 岁高中校队小前锋（186cm / 75kg，区高中生联赛）
+// 生涯累计：22 场 / 264 分 / 132 篮板 / 66 助攻 / 命中率 46.2%
+const DEFAULT_CAREER_STATS = (app.globalData && app.globalData.careerStats) || {
+  points: 264,
+  rebounds: 132,
+  assists: 66,
+  shootingPercentage: 46.2,
+  totalGames: 22
+}
+
+// 今日训练概览（当天队内对抗课：热身 / 投篮 / 战术 / 对抗 / 拉伸）
+const TODAY_SUMMARY = { minutes: 90, items: 5, intensity: '高强度' }
+
+// 一周训练课表（周一至周六，周日恢复休息）
+const WEEK_PLANS = [
+  { id: 1, title: '投篮专项训练', description: '中距离跳投 ×200 + 定点三分 ×100' },
+  { id: 2, title: '力量训练', description: '核心 + 下肢力量，深蹲 5×8 @60kg' },
+  { id: 3, title: '技术综合训练', description: '运球变向 + 三人传切 + 上篮终结' },
+  { id: 4, title: '体能训练', description: '全场折返跑 17 趟 + 变速跑 2000m' },
+  { id: 5, title: '战术跑位训练', description: '挡拆顺下 + 底角拉开 + 快攻二打一' },
+  { id: 6, title: '队内对抗赛', description: '5v5 全场对抗，四节 ×10 分钟' }
+]
+
+const DAY_NAMES = ['周一', '周二', '周三', '周四', '周五', '周六']
+
+function pad2(n) { return String(n).padStart(2, '0') }
+
+// 按当前日期推算本周课表：已过为已完成、当天为今日、其余为待进行
+function buildWeeklyPlans() {
+  const now = new Date()
+  const offset = (now.getDay() + 6) % 7 // 周一 = 0
+  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - offset)
+
+  return WEEK_PLANS.map((plan, i) => {
+    const d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i)
+    const status = i < offset ? 'completed' : (i === offset ? 'today' : 'upcoming')
+    return {
+      id: plan.id,
+      day: DAY_NAMES[i],
+      date: `${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`,
+      title: plan.title,
+      description: plan.description,
+      status,
+      statusText: status === 'completed' ? '已完成' : (status === 'today' ? '今日' : '待进行')
+    }
+  })
+}
+
+// 最近三次训练（相对当天：今天 / 昨天 / 前天）
+function buildRecentRecords() {
+  const now = new Date()
+  const at = (back) => {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - back)
+    return { day: pad2(d.getDate()), month: `${pad2(d.getMonth() + 1)}月` }
+  }
+
+  return [
+    { id: 1, ...at(0), title: '队内对抗赛', duration: 90, intensity: '高强度', highlights: ['中距离 8 投 5 中', '抢下 7 个篮板', '3 次助攻'] },
+    { id: 2, ...at(1), title: '投篮专项训练', duration: 60, intensity: '中等强度', highlights: ['定点三分 100 投 34 中', '罚球 50 投 41 中'] },
+    { id: 3, ...at(2), title: '力量 + 体能训练', duration: 45, intensity: '中等强度', highlights: ['深蹲 5×8 @60kg', '折返跑 17 趟 1 分 02 秒'] }
+  ]
+}
+
 Page({
   data: {
     navHeight: 0,
@@ -8,7 +71,14 @@ Page({
     pageBg: '#f8f7f4',
     todayDate: '',
     overallScore: 80,
-    careerStats: { points: 0, rebounds: 0, assists: 0, shootingPercentage: '0%', totalGames: 0 },
+    careerStats: {
+      points: DEFAULT_CAREER_STATS.points,
+      rebounds: DEFAULT_CAREER_STATS.rebounds,
+      assists: DEFAULT_CAREER_STATS.assists,
+      shootingPercentage: `${DEFAULT_CAREER_STATS.shootingPercentage}%`,
+      totalGames: DEFAULT_CAREER_STATS.totalGames
+    },
+    todaySummary: TODAY_SUMMARY,
     showAddModal: false,
     newRecord: { title: '', duration: '', intensity: '中等强度', highlightsText: '' },
     radarData: {
@@ -16,17 +86,8 @@ Page({
       values: [78, 85, 82, 72, 80, 83],
       colors: ['rgba(212,175,55,0.9)','rgba(255,215,0,0.9)','rgba(244,196,48,0.9)','rgba(218,165,32,0.9)','rgba(184,134,11,0.85)','rgba(255,193,37,0.9)']
     },
-    weeklyPlans: [
-      { id: 1, day: '周一', date: '03-24', title: '投篮专项训练', description: '中距离跳投 × 200次', status: 'completed', statusText: '已完成' },
-      { id: 2, day: '周二', date: '03-25', title: '力量训练', description: '核心肌群强化', status: 'completed', statusText: '已完成' },
-      { id: 3, day: '周三', date: '03-26', title: '技术综合训练', description: '运球 + 传球练习', status: 'today', statusText: '今日' },
-      { id: 4, day: '周四', date: '03-27', title: '体能训练', description: '耐力跑 + 变速跑', status: 'upcoming', statusText: '待进行' }
-    ],
-    recentRecords: [
-      { id: 1, day: '26', month: '03月', title: '投篮专项训练', duration: 60, intensity: '高强度', highlights: ['三分命中率提升','手感火热'] },
-      { id: 2, day: '25', month: '03月', title: '团队对抗训练', duration: 90, intensity: '中等强度', highlights: ['5次助攻','防守积极'] },
-      { id: 3, day: '24', month: '03月', title: '个人技术训练', duration: 45, intensity: '低强度', highlights: ['运球熟练'] }
-    ],
+    weeklyPlans: buildWeeklyPlans(),
+    recentRecords: buildRecentRecords(),
     quickTrain: [
       { id: 1, iconName: 'pen-ball', title: '投篮练习', duration: '30分钟', bgColor: 'linear-gradient(135deg, #D4AF37 0%, #FFD700 100%)' },
       { id: 2, iconName: 'activity', title: '力量训练', duration: '20分钟', bgColor: 'linear-gradient(135deg, #52c41a 0%, #73d13d 100%)' },
@@ -75,20 +136,23 @@ Page({
 
   // 生涯数据（从原首页迁入）
   loadCareerStats() {
+    let stats = null
     try {
-      const stats = wx.getStorageSync('careerStats')
-      if (stats) {
-        this.setData({
-          careerStats: {
-            points: stats.points || 0,
-            rebounds: stats.rebounds || 0,
-            assists: stats.assists || 0,
-            shootingPercentage: (stats.shootingPercentage || 0) + '%',
-            totalGames: stats.totalGames || 0
-          }
-        })
+      stats = wx.getStorageSync('careerStats')
+    } catch (e) {
+      console.error('加载生涯数据失败', e)
+    }
+    if (!stats || !stats.totalGames) stats = DEFAULT_CAREER_STATS
+
+    this.setData({
+      careerStats: {
+        points: stats.points || 0,
+        rebounds: stats.rebounds || 0,
+        assists: stats.assists || 0,
+        shootingPercentage: (stats.shootingPercentage || 0) + '%',
+        totalGames: stats.totalGames || 0
       }
-    } catch (e) { console.error('加载生涯数据失败', e) }
+    })
   },
 
   drawRadarChart() {
