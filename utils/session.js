@@ -1,6 +1,8 @@
 const KEY = 'lanxin_bansai_session_v1';
 const { CONTACT } = require('./constants');
 const listeners = new Set();
+// Whether a catalog config has ever been applied; an empty contact then means "really not configured".
+let contactLoaded = false;
 let current = null, initialized = false, epoch = 0, redirecting = false, nextPath = '';
 const routes = {
   '/pages/index/index': [], '/pages/library/library': [], '/pages/history/history': [],
@@ -23,6 +25,7 @@ function setContact(contact) {
   if (fields.qrCode === '/assets/contact-qr.png') fields.qrCode = '';
   const configured = !!(fields.phone || fields.wechat || fields.qrCode);
   Object.assign(CONTACT, fields, { configured, name: configured ? (fields.name || '联系客服') : '客服未配置' });
+  contactLoaded = !!contact;
 }
 setContact(null);
 function init() {
@@ -208,4 +211,4 @@ function protectPage(definition) {
 }
 module.exports = { init, getToken, getEpoch, hasSession, getAccount, accept, clear, onClear, safeNext, pagePath,
   redirectToLogin, invalidate, enterLogin, finishLogin, login, me, logout, changePassword,
-  setContact, getContact: () => CONTACT, protectPage };
+  setContact, getContact: () => CONTACT, isContactLoaded: () => contactLoaded, protectPage };

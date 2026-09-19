@@ -784,22 +784,30 @@ test('a plan that recommends a public listing shows it but never opens the booki
   partner.applyRecord(bookable); assert.equal(partner.data.infoOnly, false, 'ordinary tags do not block booking');
 });
 
-test('the ball and every contact entry open WeCom customer service; without it the popup stays honest', () => {
+test('the ball and every contact entry open WeCom customer service, and say why when they cannot', () => {
   const h = harness(); const p = h.page('result'); p.onLoad({ id: 'p1' }); p.applyRecord(plan('p1'));
   const chats = []; h.wx.openCustomerServiceChat = options => chats.push(options);
+  h.wx.getAccountInfoSync = () => ({ miniProgram: { appId: 'wx0000000000000001', envVersion: 'trial', version: '1.0.0' } });
   const wecom = { wecomCorpId: 'ww1234567890abcdef', wecomKfUrl: 'https://work.weixin.qq.com/kfid/kfc1234567890abcdef' };
 
-  p.openAdvisor(); assert.equal(chats.length, 0); assert.equal(p.data.guideVisible, true, 'nothing configured: the popup says so');
-  assert.equal(h.session.getContact().configured, false, 'WeCom alone never claims a contact the popup cannot show');
-  p.closeGuide();
+  p.openAdvisor();
+  assert.equal(chats.length, 0); assert.equal(p.data.guideVisible, false);
+  assert.match(h.modals.at(-1).content, /还没加载出来/, 'before any config arrives, say so instead of claiming nothing is configured');
+
+  h.session.setContact({});                                    // config loaded, operator configured nothing
+  p.openAdvisor(); assert.equal(chats.length, 0);
+  assert.equal(p.data.guideVisible, true, 'only a genuinely unconfigured deployment shows the popup');
+  assert.equal(h.session.getContact().configured, false); p.closeGuide();
 
   h.session.setContact(wecom);
   for (const open of [() => p.openAdvisor(), () => p.onResourceTap()]) {
     chats.length = 0; open();
     assert.equal(chats.length, 1); assert.equal(chats[0].corpId, wecom.wecomCorpId);
     assert.equal(chats[0].extInfo.url, wecom.wecomKfUrl); assert.equal(p.data.guideVisible, false);
-    chats[0].fail({ errMsg: 'openCustomerServiceChat:fail' });
-    assert.equal(p.data.guideVisible, true, 'a failed jump falls back to the popup'); p.closeGuide();
+    chats[0].fail({ errMsg: 'openCustomerServiceChat:fail no permission' });
+    assert.match(h.modals.at(-1).content, /no permission/, 'the real reason reaches the user');
+    assert.match(h.modals.at(-1).content, /trial 1\.0\.0/, 'and which package is running');
+    assert.equal(p.data.guideVisible, false, 'a failure is not dressed up as "客服尚未配置"');
   }
 
   const library = h.page('library'); library.onLoad({});
@@ -807,7 +815,7 @@ test('the ball and every contact entry open WeCom customer service; without it t
     chats.length = 0; open(); assert.equal(chats.length, 1); assert.equal(library.data.guideVisible, false);
   }
   delete h.wx.openCustomerServiceChat;
-  library.onResourceTap(); assert.equal(library.data.guideVisible, true, 'an old WeChat without the API still gets the popup');
+  library.onResourceTap(); assert.match(h.modals.at(-1).content, /升级微信/); assert.equal(library.data.guideVisible, false);
 
   for (const bad of [{ wecomCorpId: wecom.wecomCorpId }, { wecomCorpId: wecom.wecomCorpId, wecomKfUrl: 'https://evil.example/kfid/kfc1234567890abcdef' },
     { wecomCorpId: 'not-a-corp', wecomKfUrl: wecom.wecomKfUrl }]) {
