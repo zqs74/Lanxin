@@ -21,7 +21,7 @@ function setContact(contact) {
   }
   if (fields.wechat === 'Lanxin-kefu') fields.wechat = '';
   if (fields.qrCode === '/assets/contact-qr.png') fields.qrCode = '';
-  const configured = !!(fields.phone || fields.wechat || fields.qrCode || fields.wecomKfUrl);
+  const configured = !!(fields.phone || fields.wechat || fields.qrCode);
   Object.assign(CONTACT, fields, { configured, name: configured ? (fields.name || '联系客服') : '客服未配置' });
 }
 setContact(null);

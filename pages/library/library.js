@@ -1,5 +1,6 @@
 const api = require('../../utils/api');
 const session = require('../../utils/session');
+const advisor = require('../../utils/advisor');
 const CATEGORY_LABELS = { venues: '场馆', referees: '裁判', materials: '物料', rentals: '租赁', suppliers: '供应商', media: '媒体' };
 
 Page(session.protectPage({
@@ -80,10 +81,10 @@ Page(session.protectPage({
     }
   },
 
-  // —— A1：详情访问控制（点击详情 → 居中弹窗展示客服二维码，详情不对外展示）——
+  // —— A1：详情访问控制（点击详情 → 企业微信客服；未配置时回到联系信息弹层）——
 
   onResourceTap() {
-    this.showGuide();
+    advisor.openAdvisor(() => this.showGuide());
   },
 
   showGuide() {
@@ -115,8 +116,8 @@ Page(session.protectPage({
     );
   },
 
-  // —— A2：联系客服入口（独立打开开通引导弹窗）——
+  // —— A2：联系客服入口 ——
   openContact() {
-    this.showGuide();
+    advisor.openAdvisor(() => this.showGuide());
   },
 }));

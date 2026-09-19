@@ -6,6 +6,7 @@ const api = require('../../utils/api');
 const session = require('../../utils/session');
 const { isInfoOnly, briefDescription } = require('../../utils/resource-policy');
 const privacy = require('../../utils/privacy');
+const advisor = require('../../utils/advisor');
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 const DEMAND_FIELDS = ['mode', 'city', 'sentence', 'town', 'playDate', 'peopleCount', 'teamCount',
@@ -206,19 +207,13 @@ Page(privacy.withPrivacy(session.protectPage({
     wx.navigateTo({ url: planPath(this._query, 'poster') });
   },
 
-  // —— A1：方案资源卡详情守卫（点击 → 居中弹窗展示客服二维码，详情不对外展示）——
+  // 资源详情与悬浮球都通向企业微信客服；没配置或跳转失败时回到联系信息弹层。
   onResourceTap() {
-    this.showGuide();
+    this.openAdvisor();
   },
 
-  // 悬浮球：配置了企业微信客服就直接打开会话，否则显示联系信息弹层（未配置时如实显示“客服尚未配置”）。
   openAdvisor() {
-    const contact = session.getContact();
-    if (contact.wecomCorpId && contact.wecomKfUrl && typeof wx.openCustomerServiceChat === 'function') {
-      wx.openCustomerServiceChat({ extInfo: { url: contact.wecomKfUrl }, corpId: contact.wecomCorpId, fail: () => this.showGuide() });
-      return;
-    }
-    this.showGuide();
+    advisor.openAdvisor(() => this.showGuide());
   },
 
   showGuide() {

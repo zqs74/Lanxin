@@ -784,18 +784,33 @@ test('a plan that recommends a public listing shows it but never opens the booki
   partner.applyRecord(bookable); assert.equal(partner.data.infoOnly, false, 'ordinary tags do not block booking');
 });
 
-test('the floating ball opens WeCom customer service when configured and the honest contact popup otherwise', () => {
+test('the ball and every contact entry open WeCom customer service; without it the popup stays honest', () => {
   const h = harness(); const p = h.page('result'); p.onLoad({ id: 'p1' }); p.applyRecord(plan('p1'));
   const chats = []; h.wx.openCustomerServiceChat = options => chats.push(options);
+  const wecom = { wecomCorpId: 'ww1234567890abcdef', wecomKfUrl: 'https://work.weixin.qq.com/kfid/kfc1234567890abcdef' };
+
   p.openAdvisor(); assert.equal(chats.length, 0); assert.equal(p.data.guideVisible, true, 'nothing configured: the popup says so');
+  assert.equal(h.session.getContact().configured, false, 'WeCom alone never claims a contact the popup cannot show');
   p.closeGuide();
-  h.session.setContact({ wecomCorpId: 'ww1234567890abcdef', wecomKfUrl: 'https://work.weixin.qq.com/kfid/kfc1234567890abcdef' });
-  p.openAdvisor();
-  assert.equal(chats.length, 1); assert.equal(chats[0].corpId, 'ww1234567890abcdef');
-  assert.equal(chats[0].extInfo.url, 'https://work.weixin.qq.com/kfid/kfc1234567890abcdef'); assert.equal(p.data.guideVisible, false);
-  chats[0].fail({ errMsg: 'openCustomerServiceChat:fail' }); assert.equal(p.data.guideVisible, true, 'a failed jump falls back to the popup');
-  for (const bad of [{ wecomCorpId: 'ww1234567890abcdef' }, { wecomCorpId: 'ww1234567890abcdef', wecomKfUrl: 'https://evil.example/kfid/kfc1234567890abcdef' },
-    { wecomCorpId: 'not-a-corp', wecomKfUrl: 'https://work.weixin.qq.com/kfid/kfc1234567890abcdef' }]) {
+
+  h.session.setContact(wecom);
+  for (const open of [() => p.openAdvisor(), () => p.onResourceTap()]) {
+    chats.length = 0; open();
+    assert.equal(chats.length, 1); assert.equal(chats[0].corpId, wecom.wecomCorpId);
+    assert.equal(chats[0].extInfo.url, wecom.wecomKfUrl); assert.equal(p.data.guideVisible, false);
+    chats[0].fail({ errMsg: 'openCustomerServiceChat:fail' });
+    assert.equal(p.data.guideVisible, true, 'a failed jump falls back to the popup'); p.closeGuide();
+  }
+
+  const library = h.page('library'); library.onLoad({});
+  for (const open of [() => library.onResourceTap(), () => library.openContact()]) {
+    chats.length = 0; open(); assert.equal(chats.length, 1); assert.equal(library.data.guideVisible, false);
+  }
+  delete h.wx.openCustomerServiceChat;
+  library.onResourceTap(); assert.equal(library.data.guideVisible, true, 'an old WeChat without the API still gets the popup');
+
+  for (const bad of [{ wecomCorpId: wecom.wecomCorpId }, { wecomCorpId: wecom.wecomCorpId, wecomKfUrl: 'https://evil.example/kfid/kfc1234567890abcdef' },
+    { wecomCorpId: 'not-a-corp', wecomKfUrl: wecom.wecomKfUrl }]) {
     h.session.setContact(bad); assert.equal(h.session.getContact().wecomKfUrl, ''); assert.equal(h.session.getContact().wecomCorpId, '');
   }
   const ui = fs.readFileSync(path.join(root, 'pages/result/result.wxml'), 'utf8');
