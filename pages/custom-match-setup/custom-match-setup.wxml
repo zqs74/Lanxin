@@ -13,6 +13,14 @@
         <view class="nav-title">球员配置</view>
         <view class="nav-placeholder"></view>
       </view>
+
+      <!-- 一键示例赛果：直接查看一场数据完整的赛果报告（避开右上角胶囊，放在导航栏下方右对齐） -->
+      <view class="demo-entry">
+        <view class="demo-entry-btn" bindtap="viewDemoResult">
+          <t-icon name="chart-bar" size="26rpx" color="#D4AF37" />
+          <text class="demo-entry-text">一键示例赛果</text>
+        </view>
+      </view>
     </view>
 
     <!-- 页面说明卡片 -->

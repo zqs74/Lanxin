@@ -7,6 +7,12 @@
 .nav-title { font-size: 36rpx; font-weight: 800; color: var(--text-primary); }
 .nav-placeholder { width: 72rpx; }
 
+/* 一键示例赛果入口 */
+.demo-entry { display: flex; justify-content: flex-end; }
+.demo-entry-btn { display: inline-flex; align-items: center; gap: 8rpx; padding: 12rpx 24rpx; border-radius: 18rpx; background: linear-gradient(135deg, rgba(212,175,55,0.16) 0%, rgba(255,215,0,0.08) 100%); border: 2rpx solid rgba(212,175,55,0.45); transition: all 0.3s ease; }
+.demo-entry-btn:active { transform: scale(0.97); background: rgba(212,175,55,0.26); }
+.demo-entry-text { font-size: 24rpx; font-weight: 800; color: var(--gold); }
+
 .info-card { padding: 20rpx 26rpx; border-radius: 22rpx; display: flex; align-items: center; gap: 18rpx; margin-bottom: 20rpx; }
 .info-icon { display: flex; align-items: center; justify-content: center; }
 .info-content { flex: 1; }
