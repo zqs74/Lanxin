@@ -289,13 +289,24 @@ test('every listed resource uses the same card, always with a picture, and never
   assert.equal(p.data.list[1].coverSrc, '/assets/resources/placeholders/venues.jpg', 'otherwise the category illustration');
   assert.ok(fs.existsSync(path.join(root, 'assets/resources/placeholders/venues.jpg')));
 
-  const { ART, coverSrc } = h.load('utils/resource-art.js');
+  const { ART, PHOTO, coverSrc } = h.load('utils/resource-art.js');
   for (const [key, file] of Object.entries(ART)) {
     assert.ok(fs.existsSync(path.join(root, file.slice(1))), file);
     assert.equal(coverSrc({}, key), file);
   }
   assert.equal(coverSrc({}, 'venue'), ART.venues, 'the plan page calls its venue section "venue"');
   assert.equal(coverSrc({ avatar: own }, 'referees'), own);
+  // Reviewed photos are keyed by listing id, so they also show on plan cards, whose snapshot strips covers.
+  for (const [id, file] of Object.entries(PHOTO)) {
+    assert.ok(fs.existsSync(path.join(root, file.slice(1))), file);
+    assert.equal(coverSrc({ id }, 'events'), file, id);
+  }
+  assert.ok(Object.keys(PHOTO).length >= 17);
+  const record = JSON.parse(fs.readFileSync(path.join(root, '..', '..', 'lanxin-bansai-backend', 'data', 'listing-images', 'sources.json'), 'utf8'));
+  for (const id of Object.keys(record.items)) {
+    assert.ok(PHOTO[id], id);
+    assert.ok(record.items[id].shows && record.items[id].page, id + ' says what it shows and where it came from');
+  }
 
   const ui = fs.readFileSync(path.join(root, 'pages/library/library.wxml'), 'utf8');
   assert.doesNotMatch(ui, /featuredItem|library-feature-card|library-feature-badge/);
