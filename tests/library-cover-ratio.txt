@@ -1,0 +1,3 @@
+.library-cover {
+  width: 100%;
+  height: 395rpx;

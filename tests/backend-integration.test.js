@@ -276,6 +276,25 @@ test('resource filter races only show the last response and empty resources stay
   assert.equal(p.data.featuredItem, undefined); assert.equal(p.data.list.length, 0); assert.match(p.data.emptyText, /暂无资源/);
 });
 
+test('the library offers only the categories that actually hold listings', async () => {
+  const h = harness(); const p = h.page('library'); p.onLoad({});
+  const taxonomy = ['venues', 'referees', 'materials', 'media'].map(key => ({ key, label: key }));
+  const showing = p.onShow(); await tick();                     // protectPage runs onLoad from onShow
+  h.respond(h.requests[0], Object.assign({}, config, { taxonomy })); await tick();
+  const counts = { venues: 5, referees: 0, materials: 2, media: 1 };
+  for (const item of taxonomy) {
+    const request = h.requests.find(entry => entry.data && entry.data.category === item.key && entry.data.pageSize === 1);
+    assert.ok(request, item.key + ' is counted');
+    h.respond(request, { items: [], total: counts[item.key], page: 1, pageSize: 1 });
+  }
+  await tick();
+  assert.deepEqual(p.data.categories.map(item => item.key), ['venues', 'materials', 'media'], 'the empty one is not offered');
+  assert.equal(p.data.activeCategory, 'venues');
+  const listing = h.requests.find(entry => entry.data && entry.data.pageSize === 50);
+  h.respond(listing, { items: [], total: 0, page: 1, pageSize: 50 });
+  await showing;
+});
+
 test('every listed resource uses the same card, always with a picture, and never prints the long description', async () => {
   const h = harness(); const p = h.page('library'); p.onLoad({});
   const own = 'https://api.lanxin.cyou/media/image/bansai/venues/v1.jpg';

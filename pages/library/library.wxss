@@ -152,7 +152,7 @@
 
 .library-cover {
   width: 100%;
-  height: 340rpx;
+  height: 395rpx;
   background: #dfe8f8;
 }
 

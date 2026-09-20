@@ -26,8 +26,15 @@ Page(session.protectPage({
       .map(key => ({ key, label: (raw && typeof raw[key] === 'string' && raw[key]) || CATEGORY_LABELS[key] || key }));
     const categories = source.map(item => typeof item === 'string' ? { key: item, label: CATEGORY_LABELS[item] || item } :
       Object.assign({}, item, { key: item.key || item.value }));
-    this.setData({ categories, activeCategory: categories.some(item => item.key === this.data.activeCategory)
-      ? this.data.activeCategory : (categories[0] && categories[0].key) || 'venues', towns: ['全部'].concat(config.towns || []) });
+    // A category with nothing in it would only offer an empty state, so it is not offered at all.
+    const counted = await Promise.all(categories.map(async item => {
+      const page = await api.request('/api/resources', { data: { category: item.key, page: 1, pageSize: 1 } });
+      return page && Number.isInteger(page.total) && page.total > 0 ? item : null;
+    }));
+    if (this._dead) return;
+    const available = counted.filter(Boolean);
+    this.setData({ categories: available, activeCategory: available.some(item => item.key === this.data.activeCategory)
+      ? this.data.activeCategory : (available[0] && available[0].key) || 'venues', towns: ['全部'].concat(config.towns || []) });
   },
 
   async onShow() {

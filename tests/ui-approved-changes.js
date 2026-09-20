@@ -185,5 +185,10 @@ for (const page of ["login", "result", "poster", "booking-success"]) {
     block('  <button class="contact-entry" open-type="contact" show-message-card="{{true}}" send-message-title="咨询东莞篮球资源" ' +
       'send-message-img="/assets/resources/materials/trophy-real.jpg" hover-class="library-card--hover">', "联系客服", "  </button>"),
   ]);
-  module.exports["./pages/library/library.wxss"] = [["", fs.readFileSync(path.join(__dirname, "library-contact-button.txt"), "utf8")]];
+  const ratio = fs.readFileSync(path.join(__dirname, "library-cover-ratio.txt"), "utf8");
+  module.exports["./pages/library/library.wxss"] = [
+    ["", fs.readFileSync(path.join(__dirname, "library-contact-button.txt"), "utf8")],
+    // Approved 2026-09-20: all listing photos are cut to 16:9, so the cover is 16:9 of the card width.
+    [ratio.replace("395rpx", "340rpx"), ratio],
+  ];
 }
