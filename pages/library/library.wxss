@@ -312,9 +312,3 @@
 .contact-entry::after {
   border: none;
 }
-
-/* —— 资源描述里的长网址在卡片内换行 —— */
-
-.page-shell .library-desc {
-  word-break: break-all;
-}

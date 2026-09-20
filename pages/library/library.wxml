@@ -48,7 +48,7 @@
       hover-class="library-card--hover"
       hover-stay-time="80"
     >
-      <image wx:if="{{item.cover || item.avatar || item.image}}" class="library-cover" src="{{item.cover || item.avatar || item.image}}" mode="aspectFill"></image>
+      <image class="library-cover" src="{{item.coverSrc}}" mode="aspectFill"></image>
       <view class="library-body">
         <view class="library-head">
           <view class="library-name">{{item.name}}</view>
@@ -57,7 +57,7 @@
         <view class="library-tags">
           <text wx:for="{{item.tags}}" wx:key="*this" class="library-tag">{{item}}</text>
         </view>
-        <view class="library-desc">{{item.description}}</view>
+        <!-- 2026-09-20：卡片不再展示长描述；出处与核验信息仍保存在后台数据里。 -->
         <view class="library-card-cta">
           <text>资源仅供参考，请自行核实</text>
           <text class="library-card-cta-arrow">›</text>

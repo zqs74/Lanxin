@@ -276,17 +276,33 @@ test('resource filter races only show the last response and empty resources stay
   assert.equal(p.data.featuredItem, undefined); assert.equal(p.data.list.length, 0); assert.match(p.data.emptyText, /暂无资源/);
 });
 
-test('every listed resource uses the same card; covers render only when a picture exists', async () => {
-  const h = harness(); h.session.accept(auth('a')); const p = h.page('library'); p.onLoad({});
+test('every listed resource uses the same card, always with a picture, and never prints the long description', async () => {
+  const h = harness(); const p = h.page('library'); p.onLoad({});
+  const own = 'https://api.lanxin.cyou/media/image/bansai/venues/v1.jpg';
   const pending = p.refreshList();
-  h.respond(h.requests[0], { items: [{ id: 'v1', name: '有图场馆', cover: 'https://api.lanxin.cyou/media/image/bansai/venues/v1.jpg' },
-    { id: 'v2', name: '无图场馆' }], total: 2, page: 1, pageSize: 50 });
+  h.respond(h.requests.at(-1), { items: [{ id: 'v1', name: '有图场馆', cover: own, description: '很长的公开资料描述…' },
+    { id: 'v2', name: '无图场馆', description: '很长的公开资料描述…' }], total: 2, page: 1, pageSize: 50 });
   await pending;
   assert.deepEqual(p.data.list.map(item => item.id), ['v1', 'v2'], 'the first item is not split off as a featured card');
   assert.equal(p.data.resourceCount, 2); assert.equal('featuredItem' in p.data, false);
+  assert.equal(p.data.list[0].coverSrc, own, 'a real photo wins');
+  assert.equal(p.data.list[1].coverSrc, '/assets/resources/placeholders/venues.jpg', 'otherwise the category illustration');
+  assert.ok(fs.existsSync(path.join(root, 'assets/resources/placeholders/venues.jpg')));
+
+  const { ART, coverSrc } = h.load('utils/resource-art.js');
+  for (const [key, file] of Object.entries(ART)) {
+    assert.ok(fs.existsSync(path.join(root, file.slice(1))), file);
+    assert.equal(coverSrc({}, key), file);
+  }
+  assert.equal(coverSrc({}, 'venue'), ART.venues, 'the plan page calls its venue section "venue"');
+  assert.equal(coverSrc({ avatar: own }, 'referees'), own);
+
   const ui = fs.readFileSync(path.join(root, 'pages/library/library.wxml'), 'utf8');
   assert.doesNotMatch(ui, /featuredItem|library-feature-card|library-feature-badge/);
-  assert.match(ui, /<image wx:if="\{\{item\.cover \|\| item\.avatar \|\| item\.image\}\}" class="library-cover"/);
+  assert.match(ui, /<image class="library-cover" src="\{\{item\.coverSrc\}\}"/);
+  assert.doesNotMatch(ui, /item\.description/, 'the long description, sources and dates stay out of the card');
+  assert.match(ui, /library-tag/, 'the 公开资料 / 未合作 / 不可直接预约 chips stay');
+  assert.match(ui, /资源仅供参考，请自行核实/);
 });
 
 test('server contact replaces placeholder globally and clears on account switch', async () => {
@@ -805,7 +821,6 @@ test('customer service goes through the mini program contact button; resource ta
   assert.match(resultCss, /\.advisor-ball::after \{\s*border: none;/);
   assert.match(libraryCss, /\.page-shell \.contact-entry \{[^}]*width: 100%;[^}]*border: none;/);
   assert.match(libraryCss, /\.contact-entry::after \{\s*border: none;/);
-  assert.match(libraryCss, /\.page-shell \.library-desc \{\s*word-break: break-all;/, 'long URLs wrap inside library cards');
 
   // The direct-open API needs both accounts verified under one entity ("not bind" otherwise); it is not used.
   for (const file of ['pages/result/result.js', 'pages/library/library.js', 'utils/session.js']) {
@@ -831,7 +846,7 @@ test('plan cards show a short description that fits the card; the record keeps t
   const { briefDescription } = h.load('utils/resource-policy.js');
   assert.equal(briefDescription('普通描述，没有标记。'), '普通描述，没有标记。'); assert.equal(briefDescription(undefined), '');
   const ui = fs.readFileSync(path.join(root, 'pages/result/result.wxml'), 'utf8'), css = fs.readFileSync(path.join(root, 'pages/result/result.wxss'), 'utf8');
-  assert.match(ui, /<image wx:if="\{\{resource\.cover \|\| resource\.avatar \|\| resource\.image\}\}" class="resource-cover"/);
+  assert.match(ui, /<image class="resource-cover" src="\{\{resource\.coverSrc\}\}"/);
   assert.doesNotMatch(ui, /resource\.town \|\| demand\.town/, 'a city-wide organisation is not labelled with the requested town');
   assert.match(css, /\.resource-body \{\s+flex: 1;\s+min-width: 0;/); assert.match(css, /\.resource-desc \{[^}]*word-break: break-all;[^}]*-webkit-line-clamp: 6;/);
 });

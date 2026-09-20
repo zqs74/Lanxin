@@ -71,7 +71,7 @@
           hover-class="resource-card--hover"
           hover-stay-time="80"
         >
-          <image wx:if="{{resource.cover || resource.avatar || resource.image}}" class="resource-cover" src="{{resource.cover || resource.avatar || resource.image}}" mode="aspectFill"></image>
+          <image class="resource-cover" src="{{resource.coverSrc}}" mode="aspectFill"></image>
           <view class="resource-body">
             <view class="resource-name">{{resource.name}}</view>
             <view class="resource-meta">{{resource.town || '东莞'}} · {{resource.level || resource.capacity || '推荐配置'}}</view>

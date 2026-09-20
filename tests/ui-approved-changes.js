@@ -29,7 +29,7 @@ module.exports = {
     // Approved 2026-09-18: no empty cover block; city-wide organisations are not labelled with the requested town.
     [
       "<image class=\"resource-cover\" src=\"{{resource.cover || resource.avatar || resource.image}}\" mode=\"aspectFill\"></image>",
-      "<image wx:if=\"{{resource.cover || resource.avatar || resource.image}}\" class=\"resource-cover\" src=\"{{resource.cover || resource.avatar || resource.image}}\" mode=\"aspectFill\"></image>"
+      "<image class=\"resource-cover\" src=\"{{resource.coverSrc}}\" mode=\"aspectFill\"></image>"
     ],
     [
       "{{resource.town || demand.town || '东莞'}} · ",
@@ -65,10 +65,15 @@ module.exports = {
     ]
   ],
   "./pages/library/library.wxml": [
-    // Approved 2026-09-18: no card without a picture keeps an empty cover area.
+    // Approved 2026-09-20: every resource shows a picture (its own photo, otherwise the category illustration),
+    // and the card no longer prints the long description; sources stay in the stored data.
+    [
+      "        <view class=\"library-desc\">{{item.description}}</view>",
+      "        <!-- 2026-09-20：卡片不再展示长描述；出处与核验信息仍保存在后台数据里。 -->"
+    ],
     [
       "<image class=\"library-cover\" src=\"{{item.cover || item.avatar || item.image}}\" mode=\"aspectFill\"></image>",
-      "<image wx:if=\"{{item.cover || item.avatar || item.image}}\" class=\"library-cover\" src=\"{{item.cover || item.avatar || item.image}}\" mode=\"aspectFill\"></image>"
+      "<image class=\"library-cover\" src=\"{{item.coverSrc}}\" mode=\"aspectFill\"></image>"
     ],
     [
       "详情请咨询客户经理",
@@ -180,7 +185,5 @@ for (const page of ["login", "result", "poster", "booking-success"]) {
     block('  <button class="contact-entry" open-type="contact" show-message-card="{{true}}" send-message-title="咨询东莞篮球资源" ' +
       'send-message-img="/assets/resources/materials/trophy-real.jpg" hover-class="library-card--hover">', "联系客服", "  </button>"),
   ]);
-  module.exports["./pages/library/library.wxss"] = [["", fs.readFileSync(path.join(__dirname, "library-contact-button.txt"), "utf8")],
-    // Approved 2026-09-19: long source URLs in library descriptions wrap inside the card instead of being clipped.
-    ["", fs.readFileSync(path.join(__dirname, "library-desc-wrap.txt"), "utf8")]];
+  module.exports["./pages/library/library.wxss"] = [["", fs.readFileSync(path.join(__dirname, "library-contact-button.txt"), "utf8")]];
 }

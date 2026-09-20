@@ -1,4 +1,5 @@
 const api = require('../../utils/api');
+const { coverSrc } = require('../../utils/resource-art');
 const session = require('../../utils/session');
 const CATEGORY_LABELS = { venues: '场馆', referees: '裁判', materials: '物料', rentals: '租赁', suppliers: '供应商', media: '媒体' };
 
@@ -71,8 +72,9 @@ Page(session.protectPage({
       const items = await api.listAll('/api/resources', { category: activeCategory, town: townFilter === '全部' ? '' : townFilter });
       if (this._dead || sequence !== this._listSequence) return;
       const category = this.data.categories.find(item => item.key === activeCategory || item.value === activeCategory);
-      // Public listings have no featured entry: every item uses the same card.
-      this.setData({ list: items, resourceCount: items.length,
+      // Public listings have no featured entry: every item uses the same card, always with a picture.
+      const list = items.map(item => Object.assign({}, item, { coverSrc: coverSrc(item, activeCategory) }));
+      this.setData({ list, resourceCount: items.length,
         activeCategoryLabel: category ? category.label : '资源', emptyText: items.length ? '' : '当前筛选暂无资源，可以换个筛选试试' });
     } catch (error) {
       if (sequence === this._listSequence && !this._dead) this.setData({ list: [], resourceCount: 0, emptyText: '资源加载失败，请稍后重试' });

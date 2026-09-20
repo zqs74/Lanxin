@@ -5,6 +5,7 @@ const { saveBooking } = require('../../utils/storage');
 const api = require('../../utils/api');
 const session = require('../../utils/session');
 const { isInfoOnly, briefDescription } = require('../../utils/resource-policy');
+const { coverSrc } = require('../../utils/resource-art');
 const privacy = require('../../utils/privacy');
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -123,7 +124,8 @@ Page(privacy.withPrivacy(session.protectPage({
       ? this.data.bookingForm.expectedDate : formatDateValue(demand.playDate);
     // Display copy only: the stored record keeps the full descriptions.
     const shown = Object.assign({}, result, { sections: (result.sections || []).map(section => Object.assign({}, section, {
-      items: (section.items || []).map(item => Object.assign({}, item, { description: briefDescription(item.description) })) })) });
+      items: (section.items || []).map(item => Object.assign({}, item,
+        { description: briefDescription(item.description), coverSrc: coverSrc(item, section.key) })) })) });
     this.setData({ planId: record.id, mode: demand.mode, demand, result: shown,
       infoOnly: isInfoOnly(this._config, session.getContact(), record, result, venue),
       bookingVenue: (venueSection && venueSection.items && venueSection.items[0]) || null,
