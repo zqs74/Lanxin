@@ -35,7 +35,10 @@ Page({
     videoGenerated: false,
     generatedDuration: '',
     // 个人中心弹层
-    panelVisible: false
+    panelVisible: false,
+    // 微信头像/昵称快捷区
+    wxAvatarUrl: '',
+    wxNickname: ''
   },
 
   onLoad() {
@@ -136,7 +139,13 @@ Page({
     this.setData({ themeLabel: labelMap[userTheme] || '跟随系统' })
   },
 
-  openPanel() { this.setData({ panelVisible: true }) },
+  openPanel() {
+    this.setData({
+      panelVisible: true,
+      wxAvatarUrl: this.data.profile.avatar || '',
+      wxNickname: this.data.profile.name || ''
+    })
+  },
   closePanel() { this.setData({ panelVisible: false }) },
   stopPropagation() {},
 
@@ -168,6 +177,80 @@ Page({
   goCreateMatch() {
     this.closePanel()
     wx.navigateTo({ url: '/pages/custom-match-setup/custom-match-setup' })
+  },
+
+  // ===== 微信头像 / 昵称快捷区 =====
+  // 微信官方「头像昵称填写能力」：头像来自 open-type="chooseAvatar" 的 chooseavatar 回调，
+  // 昵称来自 input type="nickname" 的 bindnickname 回调，都必须由用户本人点击一次才能拿到。
+  onWxChooseAvatar(e) {
+    const avatarUrl = e.detail && e.detail.avatarUrl
+    if (!avatarUrl) return
+    this.persistAvatar(avatarUrl, (path) => {
+      this.setData({ wxAvatarUrl: path })
+      this.saveWxProfile({ avatar: path }, '微信头像已更新')
+    })
+  },
+
+  onWxAlbumAvatar() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const file = res.tempFiles && res.tempFiles[0]
+        if (!file || !file.tempFilePath) return
+        this.persistAvatar(file.tempFilePath, (path) => {
+          this.setData({ wxAvatarUrl: path })
+          this.saveWxProfile({ avatar: path }, '头像已更新')
+        })
+      }
+    })
+  },
+
+  onWxNicknameChange(e) {
+    this.setData({ wxNickname: (e.detail && e.detail.value) || '' })
+  },
+
+  saveWxNickname() {
+    const nickname = String(this.data.wxNickname || '').trim()
+    if (!nickname) {
+      wx.showToast({ title: '请先填写微信昵称', icon: 'none' })
+      return
+    }
+    if (nickname.length > 20) {
+      wx.showToast({ title: '昵称最多 20 个字', icon: 'none' })
+      return
+    }
+    this.saveWxProfile({ name: nickname }, '昵称已更新')
+  },
+
+  // 头像落盘到本地用户目录，拿到持久路径（失败退回临时路径）
+  persistAvatar(tempFilePath, done) {
+    try {
+      wx.getFileSystemManager().saveFile({
+        tempFilePath,
+        success: (res) => done(res.savedFilePath || tempFilePath),
+        fail: () => done(tempFilePath)
+      })
+    } catch (e) {
+      done(tempFilePath)
+    }
+  },
+
+  // 写入本地 profile，并同步弹层与首页问候语
+  saveWxProfile(patch, toast) {
+    try {
+      const stored = wx.getStorageSync('profile') || {}
+      const profile = { ...stored, ...patch }
+      wx.setStorageSync('profile', profile)
+      const normalized = this.normalizeProfile(profile)
+      this.setData({ profile: normalized })
+      this.syncGreeting(normalized.name)
+      if (toast) wx.showToast({ title: toast, icon: 'success', duration: 1200 })
+    } catch (e) {
+      console.error('保存头像/昵称失败', e)
+      wx.showToast({ title: '保存失败，请重试', icon: 'none' })
+    }
   },
 
   // ===== 智能剪辑工作台 =====

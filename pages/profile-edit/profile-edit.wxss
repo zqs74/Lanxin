@@ -63,6 +63,27 @@
   gap: 22rpx;
 }
 
+/* 微信头像选择器按钮：方形本体，内部只放头像图 */
+.avatar-pick-btn {
+  width: 112rpx;
+  height: 112rpx;
+  min-width: 112rpx;
+  margin: 0;
+  padding: 0;
+  border-radius: 26rpx;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e9c766 0%, #d4af37 55%, #b8952c 100%);
+  box-shadow: var(--shadow-avatar);
+  line-height: 1;
+}
+
+.avatar-pick-btn::after {
+  border: none;
+}
+
 .avatar {
   width: 112rpx;
   height: 112rpx;

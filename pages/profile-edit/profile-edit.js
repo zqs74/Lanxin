@@ -80,6 +80,12 @@ Page({
     })
   },
 
+  // 微信官方头像选择（open-type="chooseAvatar"）
+  onChooseAvatar(e) {
+    const avatarUrl = e.detail && e.detail.avatarUrl
+    if (avatarUrl) this.persistAvatar(avatarUrl)
+  },
+
   uploadAvatar() {
     wx.chooseMedia({
       count: 1,

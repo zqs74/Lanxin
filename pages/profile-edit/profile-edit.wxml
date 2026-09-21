@@ -13,16 +13,16 @@
     </view>
 
     <view class="profile-editor-card card">
-      <view class="avatar-upload" bindtap="uploadAvatar">
-        <view class="avatar gradient-bg">
+      <view class="avatar-upload">
+        <button class="avatar-pick-btn" open-type="chooseAvatar" bind:chooseavatar="onChooseAvatar">
           <image wx:if="{{profile.avatar}}" class="avatar-image" src="{{profile.avatar}}" mode="aspectFill"></image>
           <t-icon wx:else name="user" size="56rpx" color="#0a0a0a" />
-        </view>
-        <view class="avatar-copy">
+        </button>
+        <view class="avatar-copy" bindtap="uploadAvatar">
           <view class="avatar-title">个人头像</view>
-          <view class="avatar-subtitle">点击更换头像</view>
+          <view class="avatar-subtitle">点左侧用微信头像 · 点这里从相册选</view>
         </view>
-        <t-icon name="camera" size="34rpx" color="#D4AF37" />
+        <t-icon name="camera" size="34rpx" color="#D4AF37" bindtap="uploadAvatar" />
       </view>
     </view>
 
@@ -34,7 +34,7 @@
             <t-icon name="user" size="28rpx" color="#D4AF37" />
             <text>姓名</text>
           </view>
-          <input placeholder="请输入姓名" class="input" value="{{ profile.name }}" bindinput="onNameChange" placeholder-class="input-placeholder"></input>
+          <input placeholder="请输入姓名" class="input" value="{{ profile.name }}" bindinput="onNameChange" bindnickname="onNameChange" placeholder-class="input-placeholder"></input>
         </view>
 
         <view class="form-row">

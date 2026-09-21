@@ -99,6 +99,39 @@
           <view class="panel-position">{{ profile.position }} · {{ profile.height }} · {{ profile.weight }}</view>
         </view>
       </view>
+
+      <!-- 微信头像 / 昵称快捷区 -->
+      <view class="wx-profile card">
+        <view class="wx-profile-title">微信头像 / 昵称</view>
+        <view class="wx-profile-row">
+          <text class="wx-profile-label">头像</text>
+          <view class="wx-avatar-actions">
+            <button class="wx-avatar-btn" open-type="chooseAvatar" bind:chooseavatar="onWxChooseAvatar">
+              <image wx:if="{{ wxAvatarUrl }}" class="wx-avatar-img" src="{{ wxAvatarUrl }}" mode="aspectFill" />
+              <t-icon wx:else name="user" size="34rpx" color="#D4AF37" />
+              <text class="wx-avatar-text">微信头像</text>
+            </button>
+            <view class="wx-album-btn" bindtap="onWxAlbumAvatar">
+              <t-icon name="camera" size="28rpx" color="#D4AF37" />
+              <text class="wx-album-text">相册</text>
+            </view>
+          </view>
+        </view>
+        <view class="wx-profile-row">
+          <text class="wx-profile-label">昵称</text>
+          <input
+            class="wx-nickname-input"
+            type="nickname"
+            value="{{ wxNickname }}"
+            placeholder="点击使用微信昵称"
+            placeholder-class="wx-nickname-placeholder"
+            bindnickname="onWxNicknameChange"
+            bindinput="onWxNicknameChange"
+          />
+          <view class="wx-nickname-save" bindtap="saveWxNickname">保存</view>
+        </view>
+      </view>
+
       <view class="menu-list">
         <view class="menu-item" bindtap="editProfile">
           <view class="menu-icon gold"><t-icon name="edit-1" size="36rpx" color="#D4AF37" /></view>

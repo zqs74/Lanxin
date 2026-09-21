@@ -411,6 +411,131 @@
   color: var(--text-secondary);
 }
 
+/* ===== 微信头像 / 昵称快捷区 ===== */
+.wx-profile {
+  padding: 24rpx 26rpx;
+  margin-bottom: 20rpx;
+}
+
+.wx-profile-title {
+  font-size: 26rpx;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin-bottom: 18rpx;
+}
+
+.wx-profile-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.wx-profile-row + .wx-profile-row {
+  margin-top: 18rpx;
+}
+
+.wx-profile-label {
+  font-size: 26rpx;
+  color: var(--text-secondary);
+  font-weight: 700;
+  width: 76rpx;
+  flex-shrink: 0;
+}
+
+.wx-avatar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.wx-avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin: 0;
+  padding: 0 22rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--bg-card-light);
+  border: 1.5rpx solid var(--border-input);
+  border-radius: 999rpx;
+}
+
+.wx-avatar-btn::after {
+  border: none;
+}
+
+.wx-avatar-img {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.wx-avatar-text {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.wx-album-btn {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  height: 72rpx;
+  padding: 0 22rpx;
+  border-radius: 999rpx;
+  background: var(--bg-card-light);
+  border: 1.5rpx solid var(--border-input);
+}
+
+.wx-album-btn:active {
+  transform: scale(0.97);
+}
+
+.wx-album-text {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.wx-nickname-input {
+  flex: 1;
+  min-height: 72rpx;
+  padding: 0 22rpx;
+  box-sizing: border-box;
+  background: var(--bg-input-form);
+  border: 1.5rpx solid var(--border-input);
+  border-radius: 18rpx;
+  font-size: 26rpx;
+  color: var(--text-content);
+}
+
+.wx-nickname-placeholder {
+  color: var(--text-placeholder);
+  font-size: 26rpx;
+}
+
+.wx-nickname-save {
+  flex-shrink: 0;
+  height: 72rpx;
+  padding: 0 26rpx;
+  display: flex;
+  align-items: center;
+  border-radius: 18rpx;
+  background: var(--gold);
+  color: #0a0a0a;
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.wx-nickname-save:active {
+  transform: scale(0.97);
+}
+
 .menu-list {
   display: flex;
   flex-direction: column;
