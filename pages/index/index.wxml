@@ -7,7 +7,7 @@
     <!-- 顶部导航区：左问候，右头像 -->
     <view class="top-nav">
       <view class="user-greeting">
-        <view class="greeting-text">你好！</view>
+        <view class="greeting-text">{{ greetingText }}</view>
         <view class="date-text">{{ currentDate }}</view>
       </view>
       <view class="avatar-btn" bindtap="openPanel">

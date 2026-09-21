@@ -30,6 +30,10 @@
   color: var(--text-primary);
   margin-bottom: 10rpx;
   letter-spacing: 0;
+  max-width: 460rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .date-text {

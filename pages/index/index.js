@@ -18,6 +18,7 @@ Page({
     themeClass: '',
     pageBg: '#f8f7f4',
     currentDate: '',
+    greetingText: '你好！',
     themeLabel: '跟随系统',
     profile: DEFAULT_PROFILE,
     // 剪辑工作台
@@ -41,6 +42,7 @@ Page({
     this.initTheme()
     this.setNavHeight()
     this.setCurrentDate()
+    this.syncGreeting(this.data.profile.name)
   },
 
   onShow() {
@@ -97,10 +99,24 @@ Page({
 
   // ===== 个人中心（头像弹层） =====
   loadProfile() {
+    let name = DEFAULT_PROFILE.name
     try {
       const profile = wx.getStorageSync('profile')
-      this.setData({ profile: this.normalizeProfile(profile || DEFAULT_PROFILE) })
+      const normalized = this.normalizeProfile(profile || DEFAULT_PROFILE)
+      this.setData({ profile: normalized })
+      name = normalized.name
     } catch (e) { console.error('加载个人资料失败', e) }
+    this.syncGreeting(name)
+  },
+
+  // 按当前时段生成问候语，姓名接在问候语后面：早上好，XXX
+  syncGreeting(name) {
+    const userName = String(name || '').trim() || DEFAULT_PROFILE.name
+    const hour = new Date().getHours()
+    let period = '晚上好'
+    if (hour >= 5 && hour < 12) period = '早上好'
+    else if (hour >= 12 && hour < 18) period = '下午好'
+    this.setData({ greetingText: `${period}，${userName}` })
   },
 
   normalizeProfile(profile = {}) {

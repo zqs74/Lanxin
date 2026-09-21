@@ -1,6 +1,6 @@
 {
   "name": "comptrain",
-  "version": "4.0.0",
+  "version": "4.3.0",
   "description": "昇梦体育参赛方小程序（智能剪辑 / 赛事资讯报名 / 个人成长分析 / 商城）",
   "main": "app.js",
   "scripts": {

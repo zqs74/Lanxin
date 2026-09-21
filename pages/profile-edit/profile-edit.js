@@ -88,10 +88,23 @@ Page({
       success: (res) => {
         const file = res.tempFiles && res.tempFiles[0]
         if (file && file.tempFilePath) {
-          this.setData({ 'profile.avatar': file.tempFilePath })
+          this.persistAvatar(file.tempFilePath)
         }
       }
     })
+  },
+
+  // 首次保存到本地用户目录，拿到持久路径；失败时退回临时路径
+  persistAvatar(tempFilePath) {
+    try {
+      wx.getFileSystemManager().saveFile({
+        tempFilePath,
+        success: (saveRes) => { this.setData({ 'profile.avatar': saveRes.savedFilePath }) },
+        fail: () => { this.setData({ 'profile.avatar': tempFilePath }) }
+      })
+    } catch (e) {
+      this.setData({ 'profile.avatar': tempFilePath })
+    }
   },
 
   saveProfile() {
