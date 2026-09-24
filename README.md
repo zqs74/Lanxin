@@ -4,6 +4,14 @@
 
 源分支：zqs74/Lanxin 的 comptrain（基线 75ea0b1）。此工作分支仅增加真实数据接入，WXML/WXSS 布局、样式与页面入口保持不变；训练模板的三处演示数字/强度仅改为真实数据绑定。
 
+## 2026-09-24 补齐页面转发与朋友圈分享
+
+- 参赛方端 10 个页面此前都没有实现 `onShareAppMessage`，微信对这类页面直接置灰右上角菜单并提示「当前页面不可转发」；缺 `onShareTimeline` 则「分享到朋友圈」同样置灰，提示「当前页面不可分享」。本次给全部 10 个页面补上这两个生命周期。
+- 首页 / 赛事资讯报名 / 个人成长分析 / 我的：转发打开页面自身。
+- 比赛详情、AI 对话、资料编辑、自定义比赛设置/进行中/结果：页面依赖 `matchId`，转发统一落到 `/pages/index/index`，避免对方打开时无参数空数据。
+- 朋友圈分享只能打开当前页，上述需要参数的页面从朋友圈入口进入时为无数据状态；且朋友圈入口只有 Android 微信提供，iOS 微信不显示该项。
+- **版本号同步**：`package.json` 4.0.1 → 4.0.2。
+
 ## 2026-09-24 提交审核前整改
 
 - **打包排除未使用的 tdesign 组件**（`project.config.json` 的 `packOptions.ignore`）：`upload`、`chat-sender`、`qrcode`。页面实际只引用 `t-icon`、`t-tab-bar`、`t-tab-bar-item`、`t-pull-down-refresh` 及其依赖树；这三个组件无人引用，却含 `wx.chooseMedia`、`wx.chooseMessageFile`、`wx.previewMedia`、`wx.saveImageToPhotosAlbum` 调用，会被微信扫包算进小程序的信息类型，使隐私保护指引里出现并未提供的功能。

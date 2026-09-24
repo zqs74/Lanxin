@@ -3,6 +3,17 @@ const app = getApp()
 const matchSync = require('../../utils/custom-match-sync')
 
 Page({
+  // 微信要求页面实现 onShareAppMessage 才允许转发，否则右上角菜单置灰并提示「当前页面不可转发」
+  // 本页依赖 matchId，转发统一落到首页，避免对方打开空数据
+  onShareAppMessage() {
+    return { title: '昇梦体育 · AI 篮球赛训助手', path: '/pages/index/index' }
+  },
+
+  // 「分享到朋友圈」由 onShareTimeline 提供（仅 Android 微信支持该入口）
+  onShareTimeline() {
+    return { title: '昇梦体育 · AI 篮球赛训助手' }
+  },
+
   data: {
     themeClass: '',
     pageBg: '#f8f7f4',

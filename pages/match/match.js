@@ -9,6 +9,16 @@ const cacheRegistrations = list => {
 }
 
 Page({
+  // 微信要求页面实现 onShareAppMessage 才允许转发，否则右上角菜单置灰并提示「当前页面不可转发」
+  onShareAppMessage() {
+    return { title: '昇梦体育 · AI 篮球赛训助手', path: '/pages/match/match' }
+  },
+
+  // 「分享到朋友圈」由 onShareTimeline 提供（仅 Android 微信支持该入口）
+  onShareTimeline() {
+    return { title: '昇梦体育 · AI 篮球赛训助手' }
+  },
+
   data: {
     themeClass: '',
     pageBg: '#f8f7f4',
