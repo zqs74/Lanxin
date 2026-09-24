@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "一句话篮球约战",
+  "navigationBarTitleText": "昇梦一句话办赛",
   "usingComponents": {
     "van-search": "/miniprogram_npm/@vant/weapp/search/index",
     "van-field": "/miniprogram_npm/@vant/weapp/field/index",
