@@ -10,6 +10,11 @@ module.exports = {
     [
       "'保存预约图片'",
       "'保存脱敏图片'"
+    ],
+    // Approved 2026-09-23: the mini program is renamed to 昇梦一句话办赛.
+    [
+      "篮芯办赛",
+      "昇梦一句话办赛"
     ]
   ],
   "./pages/result/result.wxml": [
@@ -133,6 +138,11 @@ module.exports = {
     [
       "账号由管理员统一发放。如需开通或找回密码，请联系管理员。",
       "账号密码用于登录验证。<text bindtap=\"openPrivacyContract\">查看隐私保护指引</text>"
+    ],
+    // Approved 2026-09-23: the mini program is renamed to 昇梦一句话办赛.
+    [
+      "篮芯办赛",
+      "昇梦一句话办赛"
     ]
   ],
   "./pages/history/history.wxml": []

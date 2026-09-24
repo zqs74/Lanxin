@@ -111,7 +111,7 @@ Page(privacy.withPrivacy(session.protectPage({
         color: "linear-gradient(135deg, #115cff 0%, #5b9cff 100%)",
       },
     });
-    views.push({ type: "text", text: "篮芯办赛", css: { left: "40rpx", top: "32rpx", fontSize: "22rpx", color: "#ffffff" } });
+    views.push({ type: "text", text: "昇梦一句话办赛", css: { left: "40rpx", top: "32rpx", fontSize: "22rpx", color: "#ffffff" } });
     views.push({ type: "text", text: this.data.record.statusLabel || "预约已提交", css: { left: "40rpx", top: "76rpx", fontSize: "46rpx", fontWeight: "bold", color: "#ffffff" } });
     // 模式/镇区 与 日期/时段 分两行展示
     views.push({

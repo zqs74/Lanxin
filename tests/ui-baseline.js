@@ -24,5 +24,5 @@ module.exports = {
   "./pages/result/result.wxml": "59cf400597561925b948bd414dd25036fc9a62f6866b4270ee372d331f13cb5a",
   "./pages/result/result.wxss": "43882ce419320b957d01760038709b3c3168ce301466bb79e1e3546cce2c7ee7",
   "./pages/login/login.wxml": "5469ee78341d68ecca20b9409f77d2f5a6f3ea14f1f5118c20d2c8532dbecf31",
-  "./pages/login/login.wxss": "d12ab2c24e4a27ef59e0a9680eb1d28265ddf72e6003292c3a963e1b3207f2ff"
+  "./pages/login/login.wxss": "769caaf9d581bc9f73638c888fbb7d32baf8e0f6b1374c006677896d584e73a7"
 };

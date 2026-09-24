@@ -27,7 +27,7 @@ function buildPosterPalette(poster) {
   // —— hero 渐变区 ——
   views.push({ type: "rect", css: { left: "0rpx", top: "0rpx", width: "654rpx", height: "270rpx",
     color: "linear-gradient(135deg, #115cff 0%, #5b9cff 100%)" } });
-  text("篮芯办赛", 34, { left: "40rpx", fontSize: "22rpx", color: "#ffffff", width: "574rpx" }, 30);
+  text("昇梦一句话办赛", 34, { left: "40rpx", fontSize: "22rpx", color: "#ffffff", width: "574rpx" }, 30);
   text(poster.title, 78, { left: "40rpx", width: "574rpx", fontSize: "44rpx", fontWeight: "bold", color: "#ffffff" }, 58);
   text(`${poster.modeLabel} · ${poster.town} · ${poster.date}`, 156,
     { left: "40rpx", width: "574rpx", fontSize: "24rpx", color: "rgba(255,255,255,0.92)" }, 32);

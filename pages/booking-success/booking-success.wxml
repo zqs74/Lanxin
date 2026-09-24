@@ -3,7 +3,7 @@
     <view class="bs-hero-badge">
       <view class="bs-hero-check"></view>
     </view>
-    <view class="bs-hero-kicker">篮芯办赛</view>
+    <view class="bs-hero-kicker">昇梦一句话办赛</view>
     <view class="bs-hero-title">{{record.statusLabel || '预约已提交'}}</view>
     <view class="bs-hero-sub">{{statusDescription}}</view>
   </view>

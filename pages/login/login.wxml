@@ -1,5 +1,5 @@
 <view class="login-shell">
-  <view class="login-brand">篮芯办赛</view>
+  <view class="login-brand">昇梦一句话办赛</view>
   <view class="login-title">账号登录</view>
   <view class="login-subtitle">使用管理员发放的账号开始办赛</view>
   <view class="login-card">
