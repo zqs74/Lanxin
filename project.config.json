@@ -82,6 +82,14 @@
       {
         "value": "pages/booking-success",
         "type": "folder"
+      },
+      {
+        "value": "miniprogram_npm/@vant/weapp/uploader",
+        "type": "folder"
+      },
+      {
+        "value": "miniprogram_npm/@vant/weapp/action-sheet",
+        "type": "folder"
       }
     ],
     "include": []
