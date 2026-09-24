@@ -4,6 +4,15 @@
 
 源分支：zqs74/Lanxin 的 comptrain（基线 75ea0b1）。此工作分支仅增加真实数据接入，WXML/WXSS 布局、样式与页面入口保持不变；训练模板的三处演示数字/强度仅改为真实数据绑定。
 
+## 2026-09-24 提交审核前整改
+
+- **打包排除未使用的 tdesign 组件**（`project.config.json` 的 `packOptions.ignore`）：`upload`、`chat-sender`、`qrcode`。页面实际只引用 `t-icon`、`t-tab-bar`、`t-tab-bar-item`、`t-pull-down-refresh` 及其依赖树；这三个组件无人引用，却含 `wx.chooseMedia`、`wx.chooseMessageFile`、`wx.previewMedia`、`wx.saveImageToPhotosAlbum` 调用，会被微信扫包算进小程序的信息类型，使隐私保护指引里出现并未提供的功能。
+- **移除 `app.json` 中未使用的位置权限声明**：`permission.scope.userLocation` 是模板残留，全项目没有任何 `wx.getLocation` / `chooseLocation` 调用，但微信据此在隐私保护指引里推荐「收集你的位置信息」，逼迫声明一个并不存在的信息类型。删除后不影响任何功能。
+- **版本号同步**：`package.json` 4.0.0 → 4.0.1。
+- 隐私保护指引与提交审核的填写文本在本地工作区 `审核材料/`（未纳入仓库）。
+
+改完前两项后**必须重新上传代码**，微信才会重新扫描代码包；只改本地文件不会影响审核侧的推荐项。
+
 ## 运行
 
 使用微信开发者工具打开本目录，使用此小程序自己的 AppID。请求、上传、下载合法域名均为 https://api.lanxin.cyou。不要关闭真机的域名或 TLS 校验。服务端配置微信 AppID/AppSecret 和 ZeoAPI 凭据；这些秘密不得写入小程序包。
