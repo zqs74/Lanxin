@@ -27,6 +27,14 @@
     [
       "国贸室内篮球场单日最多能安排多少场比赛？",
       "在东莞筹备篮球赛事，应如何核实场馆容量和档期？"
+    ],
+    [
+      "<text class=\"nav-main\">昇梦</text>",
+      "<text class=\"nav-main\">AI</text>"
+    ],
+    [
+      "<text class=\"nav-highlight\">AI</text>",
+      "<text class=\"nav-highlight\">篮球赛训助手</text>"
     ]
   ],
   "pages/profile/profile.wxml": [

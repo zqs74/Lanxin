@@ -11,8 +11,8 @@
       </view>
       <view class="nav-center">
         <view class="nav-title-row">
-          <text class="nav-main">昇梦</text>
-          <text class="nav-highlight">AI</text>
+          <text class="nav-main">AI</text>
+          <text class="nav-highlight">篮球赛训助手</text>
         </view>
         <text class="nav-sub">东莞篮球 AI 辅助助手</text>
       </view>
