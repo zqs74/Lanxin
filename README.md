@@ -314,5 +314,6 @@ npm install
   - 资源库 32 条资源全部配审核过的图片，卡片不再展示长描述；公开资料标注未合作、不可直接预约
   - 合规：官方隐私授权生命周期、个人数据门禁、域名校验、导出的预约图片脱敏
   - 品牌：对外名称改为「昇梦一句话办赛」（页面文案、海报与图片水印、分享标题、原生导航栏标题）
+  - 提交审核整改（2026-09-24）：打包排除未使用的 Vant `uploader` 与 `action-sheet`，两者含 `wx.chooseMedia` / `wx.chooseMessageFile` / `wx.getUserProfile` 调用，会被微信扫包算进信息类型。`wx.getUserProfile` 另存在于 Vant 的 `button` 与 `common/version.js`，二者分别是 `calendar`/`toast` 的依赖与全部组件的公共依赖，无法排除
 - V1.1（2026-08-19）：办赛方端改造——新增开通引导与客服（A1/A2），资源详情访问控制
 - V1
