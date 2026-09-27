@@ -118,8 +118,9 @@ export default function CostChartStudio() {
           <div>
             <h1 className="text-[20px] font-black text-[var(--text-primary)]">办赛成本统计</h1>
             <p className="mt-2 max-w-[820px] text-[13px] leading-6 text-[var(--text-secondary)]">
-              PPT「技术优势一」配图，{COST.width}×{COST.height}。左边四类成本卡片（人员 / 场馆 / 球衣等物料 / 媒体），
-              右边成本明细表；数据全部取自项目里的赛事资源调度清单（粤BA 半决赛 12 场），没有另编。
+              PPT「技术优势一」配图，{COST.width}×{COST.height}。最顶是「昇梦一句话办赛」小程序式顶栏（右侧注册商标），
+              往下依次是场馆实景图、左边三位裁判 + 右边环形图（中心写物料成本）、底部四类成本表；
+              四类金额按赛事资源报价表的单场用量 × 12 场算，场馆一项沿用资源调度清单，没有另编。
             </p>
           </div>
           <div className="flex flex-wrap gap-2">{actionButtons}</div>

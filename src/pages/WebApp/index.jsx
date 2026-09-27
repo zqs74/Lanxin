@@ -18,8 +18,12 @@ import PosterStudio from './modules/PosterStudio.jsx';
 import CostChartStudio from './modules/CostChartStudio.jsx';
 import TechChartStudio from './modules/TechChartStudio.jsx';
 import RegionChartStudio from './modules/RegionChartStudio.jsx';
+import FutureChartStudio from './modules/FutureChartStudio.jsx';
+import MultimodalStudio from './modules/MultimodalStudio.jsx';
+import PromoStudio from './modules/PromoStudio.jsx';
+import VideoLibraryStudio from './modules/VideoLibraryStudio.jsx';
 
-const VALID_VIEWS = ['dashboard', 'ai', 'schedule', 'resource', 'emergency', 'visual', 'timeline', 'ppt', 'matching', 'roster', 'linkage', 'data', 'tables', 'poster', 'cost', 'tech', 'region'];
+const VALID_VIEWS = ['dashboard', 'ai', 'schedule', 'resource', 'emergency', 'visual', 'timeline', 'ppt', 'matching', 'roster', 'linkage', 'data', 'tables', 'poster', 'cost', 'tech', 'region', 'future', 'multimodal', 'promo', 'library'];
 
 const VIEW_NAME = {
   dashboard: '总览',
@@ -38,7 +42,11 @@ const VIEW_NAME = {
   poster: '球员交付海报',
   cost: '办赛成本统计',
   tech: '技术优势配图',
-  region: '基层赛事数据积累'
+  region: '基层赛事数据积累',
+  future: '数字化数据积累',
+  multimodal: '多模态场景识别',
+  promo: '多平台宣发',
+  library: '视频素材库'
 };
 
 /**
@@ -119,6 +127,14 @@ export default function WebApp() {
         return <TechChartStudio />;
       case 'region':
         return <RegionChartStudio />;
+      case 'future':
+        return <FutureChartStudio />;
+      case 'multimodal':
+        return <MultimodalStudio />;
+      case 'promo':
+        return <PromoStudio />;
+      case 'library':
+        return <VideoLibraryStudio />;
       default:
         return <Dashboard onNavigate={handleNavigate} />;
     }

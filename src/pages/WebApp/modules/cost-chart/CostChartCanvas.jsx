@@ -1,12 +1,14 @@
 /**
- * 办赛成本统计 · 画布（竖版 760×1180）
+ * 办赛成本统计 · 画布（竖版 760×1268）
  *
  * 版式按用户要求：
- *   顶部   场馆实景图（全宽）
- *   照片下 左：裁判照 + 人员成本 ｜ 右：环形图（成本构成）
- *   底部   成本表
+ *   最顶   小程序式顶栏：居中「昇梦一句话办赛」+ 右侧注册商标（高 88）
+ *   往下   标题（左上）+ 场馆实景图（全宽）
+ *   照片下 左：三位裁判 + 裁判组成本 ｜ 右：环形图（成本构成，中心写物料成本）
+ *   底部   四类成本表（人才 / 场馆 / 物料 / 媒体 + 合计）
  *
- * 字号整体放大一档，画布相应加高，保证贴进 PPT 也看得清。
+ * 顶栏以下的内容整体包在一个 translate(0, TOP_BAR) 里，
+ * 所以下面所有坐标都还是「顶栏之下那块 760×1180 画布」的坐标。
  * 全部内联属性 SVG，导出 PNG 时照片会自动内联成 data URI。
  */
 import React from 'react'
@@ -14,6 +16,11 @@ import { COST, FONT, PALETTE as P } from './costChartData.js'
 
 const W = COST.width
 const H = COST.height
+
+/** 小程序式顶栏高度 */
+const TOP_BAR = 96
+/** 内容块再从顶栏底往上提这么多，收紧顶栏与标题之间的空白 */
+const CONTENT_LIFT = 12
 
 const PHOTO_TOP = 108
 const PHOTO_H = 306
@@ -25,10 +32,17 @@ const LEFT_W = 348
 const RIGHT_X = 388
 const RIGHT_W = 348
 
+/** 底部四类成本表几何 */
 const TABLE_TOP = 806
 const TABLE_HEAD = 50
 const TABLE_ROW = 62
 const TABLE_TOTAL = 56
+
+/** 左卡三位裁判的圆头像几何 */
+const REF_R = 46
+const REF_CY = MID_TOP + 82
+const REF_COL_W = LEFT_W / 3
+const refCx = (index) => LEFT_X + REF_COL_W * index + REF_COL_W / 2
 
 const fmt = (n) => `¥${n.toLocaleString('en-US')}`
 
@@ -51,14 +65,16 @@ export function CostChartCanvas() {
   const rowsTop = TABLE_TOP + TABLE_HEAD
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" role="img" aria-label="办赛成本统计">
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" role="img" aria-label={COST.title}>
       <defs>
         <clipPath id="cc-photo">
           <rect x="0" y={PHOTO_TOP} width={W} height={PHOTO_H} />
         </clipPath>
-        <clipPath id="cc-referee">
-          <circle cx={LEFT_X + LEFT_W / 2} cy={MID_TOP + 108} r="68" />
-        </clipPath>
+        {COST.referees.map((referee, index) => (
+          <clipPath id={`cc-referee-${index}`} key={referee.name}>
+            <circle cx={refCx(index)} cy={REF_CY} r={REF_R} />
+          </clipPath>
+        ))}
         <linearGradient id="cc-photo-shade" x1="0%" y1="45%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#0B1A2E" stopOpacity="0" />
           <stop offset="100%" stopColor="#0B1A2E" stopOpacity="0.88" />
@@ -67,13 +83,38 @@ export function CostChartCanvas() {
 
       <rect x="0" y="0" width={W} height={H} fill={P.pageBg} />
 
-      {/* 标题 */}
-      <text x="32" y="56" fontFamily={FONT} fontSize="34" fontWeight="800" fill={P.text}>
-        {COST.title}
+      {/* 最顶：小程序式顶栏 —— 居中品牌语 + 右侧注册商标 */}
+      <rect x="0" y="0" width={W} height={TOP_BAR} fill={P.card} />
+      <line x1="0" y1={TOP_BAR} x2={W} y2={TOP_BAR} stroke={P.cardBorder} strokeWidth="1" />
+      <text
+        x={W / 2}
+        y={TOP_BAR / 2 + 12}
+        textAnchor="middle"
+        fontFamily={FONT}
+        fontSize="34"
+        fontWeight="800"
+        fill={P.text}
+      >
+        {COST.topBar.title}
       </text>
-      <text x="32" y="92" fontFamily={FONT} fontSize="17" fill={P.muted}>
-        {COST.subtitle}
-      </text>
+      <image
+        href={COST.brand.logo}
+        x={W - 32 - COST.topBar.logoW}
+        y={(TOP_BAR - COST.topBar.logoH) / 2}
+        width={COST.topBar.logoW}
+        height={COST.topBar.logoH}
+        preserveAspectRatio="xMidYMid meet"
+      />
+
+      {/* 顶栏以下：整块内容 */}
+      <g transform={`translate(0, ${TOP_BAR - CONTENT_LIFT})`}>
+        {/* 标题 */}
+        <text x="32" y="56" fontFamily={FONT} fontSize="34" fontWeight="800" fill={P.text}>
+          {COST.title}
+        </text>
+        <text x="32" y="92" fontFamily={FONT} fontSize="17" fill={P.muted}>
+          {COST.subtitle}
+        </text>
 
       {/* 顶部：场馆实景图 */}
       <image
@@ -97,68 +138,72 @@ export function CostChartCanvas() {
         {COST.photoLabel}
       </text>
 
-      {/* 中排左：裁判照 + 人员成本 */}
+      {/* 中排左：三位裁判 + 人员成本 */}
       <rect x={LEFT_X} y={MID_TOP} width={LEFT_W} height={MID_H} rx="14" fill={P.card} stroke={P.cardBorder} strokeWidth="1" />
-      <circle cx={LEFT_X + LEFT_W / 2} cy={MID_TOP + 108} r="68" fill={P.track} />
-      <image
-        href={COST.referee.photo}
-        x={LEFT_X + LEFT_W / 2 - 68}
-        y={MID_TOP + 40}
-        width="136"
-        height="136"
-        preserveAspectRatio="xMidYMin slice"
-        clipPath="url(#cc-referee)"
-      />
-      <circle
-        cx={LEFT_X + LEFT_W / 2}
-        cy={MID_TOP + 108}
-        r="68"
-        fill="none"
-        stroke={COST.categories[0].color}
-        strokeWidth="3.5"
-      />
-      <text
-        x={LEFT_X + LEFT_W / 2}
-        y={MID_TOP + 214}
-        textAnchor="middle"
-        fontFamily={FONT}
-        fontSize="24"
-        fontWeight="800"
-        fill={P.text}
-      >
-        {COST.referee.name}
-      </text>
-      <text
-        x={LEFT_X + LEFT_W / 2}
-        y={MID_TOP + 244}
-        textAnchor="middle"
-        fontFamily={FONT}
-        fontSize="17"
-        fill={P.muted}
-      >
-        {`${COST.referee.level} · 执裁 ${COST.referee.experience} 场`}
-      </text>
+      {COST.referees.map((referee, index) => (
+        <g key={referee.name}>
+          <circle cx={refCx(index)} cy={REF_CY} r={REF_R} fill={P.track} />
+          <image
+            href={referee.photo}
+            x={refCx(index) - REF_R}
+            y={REF_CY - REF_R}
+            width={REF_R * 2}
+            height={REF_R * 2}
+            preserveAspectRatio="xMidYMin slice"
+            clipPath={`url(#cc-referee-${index})`}
+          />
+          <circle
+            cx={refCx(index)}
+            cy={REF_CY}
+            r={REF_R}
+            fill="none"
+            stroke={COST.categories[0].color}
+            strokeWidth="3"
+          />
+          <text
+            x={refCx(index)}
+            y={MID_TOP + 166}
+            textAnchor="middle"
+            fontFamily={FONT}
+            fontSize="19"
+            fontWeight="800"
+            fill={P.text}
+          >
+            {referee.name}
+          </text>
+          <text
+            x={refCx(index)}
+            y={MID_TOP + 192}
+            textAnchor="middle"
+            fontFamily={FONT}
+            fontSize="13"
+            fill={P.muted}
+          >
+            {referee.level}
+          </text>
+        </g>
+      ))}
       <line
         x1={LEFT_X + 32}
-        y1={MID_TOP + 266}
+        y1={MID_TOP + 240}
         x2={LEFT_X + LEFT_W - 32}
-        y2={MID_TOP + 266}
+        y2={MID_TOP + 240}
         stroke={P.line}
         strokeWidth="1"
       />
-      <text x={LEFT_X + 32} y={MID_TOP + 308} fontFamily={FONT} fontSize="18" fill={P.muted}>
-        {`裁判组 · ${COST.referee.count} 人次`}
+      <text x={LEFT_X + 32} y={MID_TOP + 296} fontFamily={FONT} fontSize="18" fill={P.muted}>
+        {`裁判组 · ${COST.refereeGroup.count} 人次`}
       </text>
       <text
         x={LEFT_X + LEFT_W - 32}
-        y={MID_TOP + 308}
+        y={MID_TOP + 296}
         textAnchor="end"
         fontFamily={FONT}
         fontSize="24"
         fontWeight="800"
         fill={COST.categories[0].color}
       >
-        {fmt(COST.referee.amount)}
+        {fmt(COST.refereeGroup.amount)}
       </text>
 
       {/* 中排右：环形图 */}
@@ -179,10 +224,10 @@ export function CostChartCanvas() {
         />
       ))}
       <text x={DONUT_CX} y={DONUT_CY - 8} textAnchor="middle" fontFamily={FONT} fontSize="15" fill={P.muted}>
-        赛事总成本
+        {COST.center.label}
       </text>
       <text x={DONUT_CX} y={DONUT_CY + 26} textAnchor="middle" fontFamily={FONT} fontSize="28" fontWeight="800" fill={P.total}>
-        {fmt(COST.total)}
+        {fmt(COST.center.amount)}
       </text>
 
       {COST.categories.map((category, index) => {
@@ -203,7 +248,7 @@ export function CostChartCanvas() {
         )
       })}
 
-      {/* 底部：成本表 */}
+      {/* 底部：四类成本表 */}
       <rect x="24" y={TABLE_TOP} width={W - 48} height={TABLE_HEAD} rx="10" fill={P.headBg} />
       {[
         { label: '成本类别', x: 52, anchor: 'start' },
@@ -279,10 +324,7 @@ export function CostChartCanvas() {
       >
         {`${fmt(COST.total)}   100%`}
       </text>
-
-      <text x="32" y={H - 14} fontFamily={FONT} fontSize="14" fill={P.dim}>
-        {COST.note}
-      </text>
+      </g>
     </svg>
   )
 }

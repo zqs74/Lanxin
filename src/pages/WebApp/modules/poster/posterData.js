@@ -7,10 +7,10 @@
 export const POSTER = {
   width: 700,
   height: 1000,
-  photo: '/images/showcase/case-brand-zhang.png',
+  photo: '/images/poster/player-luopeiru.jpg',
   logo: '/images/poster/logo-shenmeng.png',
   league: '东莞市篮球联赛 · 2026 赛季',
-  player: { name: '张宇辰', number: '8', team: '大朗' },
+  player: { name: '罗佩茹', number: '7', team: '大朗' },
   badge: 'MVP',
   main: [
     { value: '36', label: '得分' },

@@ -66,7 +66,7 @@ export function MvpPosterCanvas() {
         y="0"
         width={W}
         height={PHOTO_H}
-        preserveAspectRatio="xMidYMid slice"
+        preserveAspectRatio="xMidYMin slice"
       />
       <rect x="0" y="0" width={W} height={PHOTO_H} fill="url(#mp-vignette)" />
       <rect x="0" y="0" width={W} height="150" fill="url(#mp-photo-top)" />

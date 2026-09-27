@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Video, Trophy, Package, ShieldAlert, CalendarPlus, Megaphone, PanelsTopLeft, Wand2, Smartphone, Handshake, Database, Table2, Medal, Coins, Sparkles, MapPin } from 'lucide-react';
+import { Video, Trophy, Package, ShieldAlert, CalendarPlus, Megaphone, PanelsTopLeft, Wand2, Smartphone, Handshake, Database, Table2, Medal, Coins, Sparkles, MapPin, TrendingUp, Scan, Send, Film } from 'lucide-react';
 
 /**
  * 仪表盘功能入口卡片
@@ -102,6 +102,30 @@ export default function FeatureCard({ variant, onClick }) {
     region: {
       Icon: MapPin,
       title: '基层赛事数据积累',
+      summary: '',
+      isNew: true,
+    },
+    future: {
+      Icon: TrendingUp,
+      title: '数字化数据积累',
+      summary: '',
+      isNew: true,
+    },
+    multimodal: {
+      Icon: Scan,
+      title: '多模态场景识别',
+      summary: '',
+      isNew: true,
+    },
+    promo: {
+      Icon: Send,
+      title: '多平台宣发',
+      summary: '',
+      isNew: true,
+    },
+    library: {
+      Icon: Film,
+      title: '视频素材库',
       summary: '',
       isNew: true,
     },
@@ -583,6 +607,103 @@ export default function FeatureCard({ variant, onClick }) {
               </g>
             ))}
           </svg>
+        );
+
+      case 'future':
+        return (
+          <svg viewBox="0 0 100 56" className="w-full h-full">
+            {[
+              { color: '#3B82F6' },
+              { color: '#8B5CF6' },
+              { color: '#10B981' },
+              { color: '#F59E0B' },
+            ].map((item, i) => (
+              <g key={i}>
+                <rect x={i * 25} y="8" width="21" height="40" rx="4" fill={item.color} fillOpacity="0.16" stroke={item.color} strokeOpacity="0.5" />
+                <rect x={i * 25 + 8} y="18" width="9" height="5" rx="1.5" fill={item.color} />
+                <rect x={i * 25 + 5} y="29" width="11" height="4" rx="1.5" fill="var(--text-muted)" fillOpacity="0.35" />
+                <rect x={i * 25 + 7} y="37" width="9" height="4" rx="1.5" fill="var(--text-muted)" fillOpacity="0.25" />
+              </g>
+            ))}
+          </svg>
+        );
+
+      case 'multimodal':
+        return (
+          <svg viewBox="0 0 100 56" className="w-full h-full">
+            <rect x="0" y="6" width="60" height="44" rx="4" fill="var(--brand)" fillOpacity="0.14" stroke="var(--brand)" strokeOpacity="0.4" />
+            <rect x="22" y="14" width="14" height="26" rx="2" fill="none" stroke="#34D399" strokeWidth="1.5" />
+            <rect x="40" y="20" width="12" height="20" rx="2" fill="none" stroke="#34D399" strokeWidth="1.5" />
+            <circle cx="30" cy="10" r="3" fill="none" stroke="#F59E0B" strokeWidth="1.5" />
+            {[0, 1, 2, 3, 4].map((i) => (
+              <rect
+                key={i}
+                x={66 + i * 6.5}
+                y={28 - (i % 3) * 7}
+                width="4"
+                height={12 + (i % 3) * 7}
+                rx="2"
+                fill="var(--text-muted)"
+                fillOpacity="0.35"
+              />
+            ))}
+          </svg>
+        );
+
+      case 'promo':
+        return (
+          <div className="w-full h-full rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-2 flex flex-col gap-1.5">
+            {[
+              { name: '抖音', w: '72%', ok: true },
+              { name: '视频号', w: '58%', ok: true },
+              { name: '小红书', w: '41%', ok: true },
+              { name: '快手', w: '22%', ok: false },
+            ].map((platform) => (
+              <div key={platform.name} className="flex items-center gap-2">
+                <span className="text-[8px] text-[var(--text-muted)] w-10 shrink-0">{platform.name}</span>
+                <div className="h-2 flex-1 rounded-full bg-[var(--text-muted)]/15 overflow-hidden">
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: platform.w,
+                      background: platform.ok ? 'var(--brand)' : 'var(--text-muted)',
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+            <div className="mt-auto flex items-center justify-between">
+              <span className="text-[8px] text-[var(--text-muted)]">8 个渠道</span>
+              <span className="text-[8px] font-bold text-[var(--brand)]">分发中 5/8</span>
+            </div>
+          </div>
+        );
+
+      case 'library':
+        return (
+          <div className="w-full h-full flex gap-1.5">
+            <div className="w-12 shrink-0 flex flex-col gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-1">
+              <div className="h-1.5 rounded-full bg-[var(--brand)]/50" />
+              <div className="h-1.5 rounded-full bg-[var(--text-muted)]/25" />
+              <div className="h-1.5 rounded-full bg-[var(--text-muted)]/25" />
+              <div className="h-1.5 rounded-full bg-[var(--text-muted)]/25" />
+            </div>
+            <div className="flex-1 grid grid-cols-3 gap-1.5">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="rounded-md border"
+                  style={{
+                    borderColor: i === 0 ? 'var(--brand)' : 'var(--border)',
+                    background:
+                      i === 0
+                        ? 'color-mix(in srgb, var(--brand) 16%, var(--surface))'
+                        : 'var(--surface-muted)',
+                  }}
+                />
+              ))}
+            </div>
+          </div>
         );
 
       default:
